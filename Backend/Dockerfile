@@ -7,16 +7,11 @@ COPY gradle gradle
 COPY gradlew .
 RUN ./gradlew --version
 
-# Download and cache dependency
-COPY build.gradle settings.gradle ./
-# Run gradlew in no daemon mode 
-# because I can't get daemon caching to work
-RUN ./gradlew dependencies --no-daemon
-
 # Copy project files
+COPY build.gradle settings.gradle ./
 COPY src src
 # Build the JAR file (skipping tests for speed)
-RUN ./gradlew bootJar --no-daemon
+RUN --mount=type=cache,target=/home/gradle/.gradle ./gradlew bootJar --no-daemon
 
 # Stage 2: Runtime stage
 FROM eclipse-temurin:17-jdk-jammy 
