@@ -27,8 +27,10 @@ public class User {
     @ManyToOne
     private Role role;
 
+    @Column
     private boolean status;
 
+    @Column
     private Timestamp createdAt;
 
     @OneToMany(mappedBy = "creatorID")
