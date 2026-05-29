@@ -18,6 +18,7 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.security:spring-security-crypto'
 	implementation 'com.auth0:java-jwt:4.5.1'
 	implementation 'org.postgresql:postgresql:42.7.10'
