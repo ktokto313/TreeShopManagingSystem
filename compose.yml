@@ -1,7 +1,6 @@
 # Use postgres/example user/password credentials
 
 services:
-
   db:
     image: postgres
     restart: unless-stopped
@@ -38,6 +37,8 @@ services:
     image: treeshopmanagingsystem:latest
     restart: unless-stopped
     env_file: ".env"
+    depends_on: 
+      - db
     networks:
       - frontend
       - backend
