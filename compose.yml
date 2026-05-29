@@ -35,7 +35,7 @@ services:
     build: 
       context: ./Backend
       dockerfile: ./Dockerfile
-    image: treeshopmanagingsystem:lastest
+    image: treeshopmanagingsystem:latest
     restart: unless-stopped
     env_file: ".env"
     networks:
