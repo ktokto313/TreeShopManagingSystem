@@ -1,17 +1,18 @@
-#Initialize image and install deps
-FROM node:24-alpine
-WORKDIR /usr/src
-RUN adduser -D frontend && adduser frontend frontend 
-COPY --chown=frontend:frontend ./package.json ./
-RUN npm install -g serve
+# 1. Use a stable Alpine Node image, uses Node 22 for a stable version
+FROM node:22-alpine
+
+# 2. Set the working directory to match your docker-compose volume
+WORKDIR /app
+
+# 3. Copy package files and install dependencies
+COPY package*.json ./
 RUN npm install
 
-#Copy the code in
-COPY --chown=frontend:frontend ./*.* ./
-COPY --chown=frontend:frontend ./src/. ./src/
-RUN chown frontend:frontend ./
-USER frontend:frontend
-RUN npm run build
-EXPOSE 3000
-CMD ["serve", "-s", "build"]
+# 4. Copy the rest of the code
+COPY . .
 
+# 5. Expose the exact port Vite is configured to use
+EXPOSE 3000
+
+# 6. Run the active Vite development server
+CMD ["npm", "run", "dev"]
