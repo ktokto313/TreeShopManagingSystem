@@ -53,6 +53,11 @@ services:
       - frontend
     ports: 
       - 3000:3000
+    # volumes for vite's HMR to work, for better development experience
+    # only remove when in production
+    volumes:
+      - ./Frontend:/app
+      - /app/node_modules
 
 networks:
   frontend:
