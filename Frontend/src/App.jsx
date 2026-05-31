@@ -1,14 +1,14 @@
-import { useState } from 'react'
+import { BrowserRouter, Routes, Route } from "react-router";
+import Home from "./pages/home";
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>If you're seeing this, App.tsx works.</div>
-      <button onClick={() => setCount(prev => prev + 1)}>{count}</button>
-    </>
-  )
+	return (
+		<BrowserRouter>
+			<Routes>
+				<Route path="/" element={<Home />} />
+			</Routes>
+		</BrowserRouter>
+	);
 }
 
-export default App
+export default App;
