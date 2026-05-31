@@ -1,4 +1,4 @@
-package swp391.group6.entity;
+package swp391.group6.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,9 +19,6 @@ public class Category {
 
     @Column
     private String description;
-
-    @Column(name = "parent_id")
-    private Long parentId;
 
     public long getId() {
         return id;
@@ -45,13 +42,5 @@ public class Category {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Long getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
     }
 }

@@ -1,4 +1,4 @@
-package swp391.group6.entity;
+package swp391.group6.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -4,17 +4,26 @@ import jakarta.persistence.*;
 
 import java.sql.Timestamp;
 
+// Fixed: table name was "Reviews" — actual DB table is "reviews"
+// Fixed: was @OneToOne on order — DB allows multiple reviews per order so @ManyToOne is correct
+// Fixed: added missing product and customer FK fields that exist in the DB schema
 @Entity
-@Table(name = "Reviews")
+@Table(name = "reviews")
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
     @ManyToOne
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id", nullable = false)
     private User user;
 
     @Column(nullable = false)
@@ -40,6 +49,14 @@ public class Review {
 
     public void setOrder(Order order) {
         this.order = order;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
     public User getUser() {

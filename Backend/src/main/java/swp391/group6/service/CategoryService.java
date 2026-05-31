@@ -1,15 +1,14 @@
 package swp391.group6.service;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import swp391.group6.dto.CategoryRequest;
 import swp391.group6.dto.CategoryResponse;
-import swp391.group6.entity.Category;
+import swp391.group6.model.Category;
 import swp391.group6.repository.CategoryRepository;
 import swp391.group6.repository.ProductRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -28,66 +27,61 @@ public class CategoryService {
                 .toList();
     }
 
-    public CategoryResponse getCategory(Long id) {
-        return toResponse(findCategory(id));
+    public Optional<CategoryResponse> getCategory(Long id) {
+        return categoryRepository.findById(id).map(this::toResponse);
     }
 
-    public CategoryResponse createCategory(CategoryRequest request) {
+    /**
+     * Returns the created category, or empty if the name already exists.
+     */
+    public Optional<CategoryResponse> createCategory(CategoryRequest request) {
         String name = normalizeName(request.getName());
-        Long parentId = request.getParentId();
-        validateParent(parentId, null);
-        if (categoryRepository.existsByNameIgnoreCase(name)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Category name already exists");
+        if (name == null) {
+            return Optional.empty();
         }
-
+        if (categoryRepository.existsByNameIgnoreCase(name)) {
+            return Optional.empty();
+        }
         Category category = new Category();
         category.setName(name);
         category.setDescription(trimToNull(request.getDescription()));
-        category.setParentId(parentId);
-        return toResponse(categoryRepository.save(category));
+        return Optional.of(toResponse(categoryRepository.save(category)));
     }
 
-    public CategoryResponse updateCategory(Long id, CategoryRequest request) {
-        Category category = findCategory(id);
-        String name = normalizeName(request.getName());
-        Long parentId = request.getParentId();
-        validateParent(parentId, id);
-        if (categoryRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Category name already exists");
+    /**
+     * Returns the updated category, or empty if not found or name conflict.
+     */
+    public Optional<CategoryResponse> updateCategory(Long id, CategoryRequest request) {
+        Optional<Category> existing = categoryRepository.findById(id);
+        if (existing.isEmpty()) {
+            return Optional.empty();
         }
-
+        String name = normalizeName(request.getName());
+        if (name == null) {
+            return Optional.empty();
+        }
+        if (categoryRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {
+            return Optional.empty();
+        }
+        Category category = existing.get();
         category.setName(name);
         category.setDescription(trimToNull(request.getDescription()));
-        category.setParentId(parentId);
-        return toResponse(categoryRepository.save(category));
+        return Optional.of(toResponse(categoryRepository.save(category)));
     }
 
-    public void deleteCategory(Long id) {
-        Category category = findCategory(id);
+    /**
+     * Returns true if deleted, false if not found, null if it has products.
+     */
+    public Boolean deleteCategory(Long id) {
+        Optional<Category> existing = categoryRepository.findById(id);
+        if (existing.isEmpty()) {
+            return false;
+        }
         if (productRepository.existsByCategoryId(id)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Category has products");
+            return null;
         }
-        if (categoryRepository.existsByParentId(id)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Category has child categories");
-        }
-        categoryRepository.delete(category);
-    }
-
-    private Category findCategory(Long id) {
-        return categoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
-    }
-
-    private void validateParent(Long parentId, Long currentCategoryId) {
-        if (parentId == null) {
-            return;
-        }
-        if (parentId.equals(currentCategoryId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category cannot be its own parent");
-        }
-        if (!categoryRepository.existsById(parentId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Parent category not found");
-        }
+        categoryRepository.delete(existing.get());
+        return true;
     }
 
     private CategoryResponse toResponse(Category category) {
@@ -95,16 +89,11 @@ public class CategoryService {
         response.setId(category.getId());
         response.setName(category.getName());
         response.setDescription(category.getDescription());
-        response.setParentId(category.getParentId());
         return response;
     }
 
     private String normalizeName(String name) {
-        String normalized = trimToNull(name);
-        if (normalized == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category name is required");
-        }
-        return normalized;
+        return trimToNull(name);
     }
 
     private String trimToNull(String value) {

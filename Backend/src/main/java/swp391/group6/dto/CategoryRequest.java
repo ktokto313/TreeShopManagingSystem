@@ -3,7 +3,6 @@ package swp391.group6.dto;
 public class CategoryRequest {
     private String name;
     private String description;
-    private Long parentId;
 
     public String getName() {
         return name;
@@ -19,13 +18,5 @@ public class CategoryRequest {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Long getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
     }
 }

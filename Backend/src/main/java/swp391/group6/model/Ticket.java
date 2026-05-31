@@ -4,8 +4,11 @@ import jakarta.persistence.*;
 
 import java.sql.Timestamp;
 
+// Fixed: table name was "Tickets" — actual DB table is "tickets"
+// Fixed: DB column is "state" not "ticketState"; added @Column(name = "state")
+// Fixed: DB has assignee_id FK; renamed field from "user" to "assignee" with explicit @JoinColumn
 @Entity
-@Table(name = "Tickets")
+@Table(name = "tickets")
 public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,27 +21,33 @@ public class Ticket {
     private String detail;
 
     @ManyToOne
+    @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
 
+    @ManyToOne
+    @JoinColumn(name = "assignee_id")
+    private User assignee;
+
+    // DB column name is "state", not "ticketState"
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "state", nullable = false)
     private TicketState ticketState;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Priority priority;
 
-    @Column(nullable = false)
+    // DB column name is "ticket_type"
+    @Column(name = "ticket_type", nullable = false)
     private String ticketType;
 
-    @Column(nullable = false)
+    // DB column name is "time_created"
+    @Column(name = "time_created", nullable = false)
     private Timestamp timeCreated;
 
-    @Column
+    // DB column name is "time_resolved"
+    @Column(name = "time_resolved")
     private Timestamp timeResolved;
-
-    @ManyToOne
-    private User user;
 
     public long getId() {
         return id;
@@ -70,6 +79,14 @@ public class Ticket {
 
     public void setCreator(User creator) {
         this.creator = creator;
+    }
+
+    public User getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(User assignee) {
+        this.assignee = assignee;
     }
 
     public TicketState getState() {
@@ -110,13 +127,5 @@ public class Ticket {
 
     public void setTimeResolved(Timestamp timeResolved) {
         this.timeResolved = timeResolved;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 }

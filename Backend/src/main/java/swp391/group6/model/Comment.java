@@ -4,26 +4,29 @@ import jakarta.persistence.*;
 
 import java.sql.Timestamp;
 
+// Fixed: table name was "Comment" — actual DB table is "comments"
+// Fixed: removed stale @ManyToOne on primitive long ticketID field (was causing startup failure)
+// Fixed: added explicit @JoinColumn names to match DB columns (creator_id, ticket_id, time_created)
 @Entity
-@Table(name = "Comment")
+@Table(name = "comments")
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne
-    private long ticketID;
-
     @Column(nullable = false)
     private String detail;
 
-    @Column
+    // DB column name is "time_created"
+    @Column(name = "time_created")
     private Timestamp timeCreated;
 
     @ManyToOne
+    @JoinColumn(name = "creator_id", nullable = false)
     private User creatorID;
 
     @ManyToOne
+    @JoinColumn(name = "ticket_id", nullable = false)
     private Ticket ticket;
 
     public long getId() {
@@ -32,14 +35,6 @@ public class Comment {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public long getTicketID() {
-        return ticketID;
-    }
-
-    public void setTicketID(long ticketID) {
-        this.ticketID = ticketID;
     }
 
     public String getDetail() {

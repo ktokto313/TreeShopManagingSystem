@@ -5,15 +5,23 @@ import jakarta.persistence.*;
 import java.sql.Timestamp;
 import java.util.List;
 
+// Fixed: table name was "Orders" — actual DB table is "orders"
 @Entity
-@Table(name = "Orders")
+@Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    // DB column is customer_id; @ManyToOne maps via the FK automatically
     @ManyToOne
+    @JoinColumn(name = "customer_id")
     private User user;
+
+    // DB has shipper_id as a nullable FK to users
+    @ManyToOne
+    @JoinColumn(name = "shipper_id")
+    private User shipper;
 
     @Column
     private String shippingAddress;
@@ -31,10 +39,12 @@ public class Order {
     @Column(nullable = false)
     private OrderStatus status;
 
-    @OneToMany(mappedBy = "orderId")
+    // Fixed: mappedBy matches OrderDetail field name "order"
+    @OneToMany(mappedBy = "order")
     private List<OrderDetail> orderDetailList;
 
-    @OneToMany(mappedBy = "orderId")
+    // Fixed: mappedBy matches Review field name "order"
+    @OneToMany(mappedBy = "order")
     private List<Review> reviewList;
 
     public long getId() {
@@ -51,6 +61,14 @@ public class Order {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public User getShipper() {
+        return shipper;
+    }
+
+    public void setShipper(User shipper) {
+        this.shipper = shipper;
     }
 
     public String getShippingAddress() {

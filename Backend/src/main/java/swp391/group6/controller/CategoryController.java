@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import swp391.group6.dto.CategoryRequest;
 import swp391.group6.dto.CategoryResponse;
@@ -32,24 +31,35 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public CategoryResponse getCategory(@PathVariable Long id) {
-        return categoryService.getCategory(id);
+    public ResponseEntity<CategoryResponse> getCategory(@PathVariable Long id) {
+        return categoryService.getCategory(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CategoryResponse createCategory(@RequestBody CategoryRequest request) {
-        return categoryService.createCategory(request);
+    public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryRequest request) {
+        return categoryService.createCategory(request)
+                .map(category -> ResponseEntity.status(HttpStatus.CREATED).body(category))
+                .orElse(ResponseEntity.badRequest().build());
     }
 
     @PutMapping("/{id}")
-    public CategoryResponse updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request) {
-        return categoryService.updateCategory(id, request);
+    public ResponseEntity<CategoryResponse> updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request) {
+        return categoryService.updateCategory(id, request)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
-        categoryService.deleteCategory(id);
+        Boolean result = categoryService.deleteCategory(id);
+        if (result == null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+        if (!result) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.noContent().build();
     }
 }

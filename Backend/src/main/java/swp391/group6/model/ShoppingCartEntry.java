@@ -1,17 +1,22 @@
 package swp391.group6.model;
 
 import jakarta.persistence.*;
-import swp391.group6.entity.Product;
 
+// Fixed: table name was "ShoppingCartEntry" — actual DB table is "shopping_cart_entry"
+// Fixed: added @IdClass to support composite PK (cart_id + product_id)
+// Fixed: FK column names aligned to DB (cart_id, product_id)
 @Entity
-@Table(name = "ShoppingCartEntry")
+@IdClass(ShoppingCartEntryId.class)
+@Table(name = "shopping_cart_entry")
 public class ShoppingCartEntry {
     @Id
     @ManyToOne
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @Id
     @ManyToOne
+    @JoinColumn(name = "cart_id")
     private ShoppingCart shoppingCart;
 
     @Column(nullable = false)

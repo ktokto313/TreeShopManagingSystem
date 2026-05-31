@@ -1,17 +1,15 @@
 package swp391.group6.service;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import swp391.group6.dto.ProductRequest;
 import swp391.group6.dto.ProductResponse;
-import swp391.group6.entity.Category;
-import swp391.group6.entity.Product;
+import swp391.group6.model.Product;
 import swp391.group6.repository.CategoryRepository;
 import swp391.group6.repository.ProductRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -36,57 +34,82 @@ public class ProductService {
                 .toList();
     }
 
-    public ProductResponse getProduct(Long id) {
-        return toResponse(findProduct(id));
+    public Optional<ProductResponse> getProduct(Long id) {
+        return productRepository.findById(id).map(this::toResponse);
     }
 
-    public ProductResponse createProduct(ProductRequest request) {
+    /**
+     * Returns the created product, or empty if validation fails or SKU already exists.
+     */
+    public Optional<ProductResponse> createProduct(ProductRequest request) {
+        String name = normalizeName(request.getName());
+        String sku = normalizeSku(request.getSku());
+        BigDecimal price = request.getPrice();
+
+        if (name == null || sku == null || price == null || price.compareTo(BigDecimal.ZERO) < 0) {
+            return Optional.empty();
+        }
+        if (request.getCategoryId() != null && !categoryRepository.existsById(request.getCategoryId())) {
+            return Optional.empty();
+        }
+        if (productRepository.existsBySkuIgnoreCase(sku)) {
+            return Optional.empty();
+        }
+
         Product product = new Product();
-        applyRequest(product, request);
-        if (productRepository.existsBySkuIgnoreCase(product.getSku())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Product SKU already exists");
-        }
-        return toResponse(productRepository.save(product));
+        applyRequest(product, request, name, sku, price);
+        return Optional.of(toResponse(productRepository.save(product)));
     }
 
-    public ProductResponse updateProduct(Long id, ProductRequest request) {
-        Product product = findProduct(id);
-        String normalizedSku = normalizeSku(request.getSku());
-        if (productRepository.existsBySkuIgnoreCaseAndIdNot(normalizedSku, id)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Product SKU already exists");
+    /**
+     * Returns the updated product, or empty if not found, validation fails, or SKU conflict.
+     */
+    public Optional<ProductResponse> updateProduct(Long id, ProductRequest request) {
+        Optional<Product> existing = productRepository.findById(id);
+        if (existing.isEmpty()) {
+            return Optional.empty();
         }
-        applyRequest(product, request);
-        return toResponse(productRepository.save(product));
+
+        String name = normalizeName(request.getName());
+        String sku = normalizeSku(request.getSku());
+        BigDecimal price = request.getPrice();
+
+        if (name == null || sku == null || price == null || price.compareTo(BigDecimal.ZERO) < 0) {
+            return Optional.empty();
+        }
+        if (request.getCategoryId() != null && !categoryRepository.existsById(request.getCategoryId())) {
+            return Optional.empty();
+        }
+        if (productRepository.existsBySkuIgnoreCaseAndIdNot(sku, id)) {
+            return Optional.empty();
+        }
+
+        Product product = existing.get();
+        applyRequest(product, request, name, sku, price);
+        return Optional.of(toResponse(productRepository.save(product)));
     }
 
-    public void deactivateProduct(Long id) {
-        Product product = findProduct(id);
+    /**
+     * Returns true if deactivated, false if not found.
+     */
+    public boolean deactivateProduct(Long id) {
+        Optional<Product> existing = productRepository.findById(id);
+        if (existing.isEmpty()) {
+            return false;
+        }
+        Product product = existing.get();
         product.setStatus(false);
         productRepository.save(product);
+        return true;
     }
 
-    private void applyRequest(Product product, ProductRequest request) {
+    private void applyRequest(Product product, ProductRequest request, String name, String sku, BigDecimal price) {
         product.setCategoryId(request.getCategoryId());
-        validateCategory(product.getCategoryId());
-        product.setName(normalizeName(request.getName()));
-        product.setPrice(normalizePrice(request.getPrice()));
-        product.setStock(normalizeStock(request.getStock()));
+        product.setName(name);
+        product.setPrice(price);
+        product.setStock(request.getStock() == null ? 0 : request.getStock());
         product.setStatus(request.getStatus() == null || request.getStatus());
-        product.setSku(normalizeSku(request.getSku()));
-    }
-
-    private Product findProduct(Long id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
-    }
-
-    private void validateCategory(Long categoryId) {
-        if (categoryId == null) {
-            return;
-        }
-        if (!categoryRepository.existsById(categoryId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category not found");
-        }
+        product.setSku(sku);
     }
 
     private ProductResponse toResponse(Product product) {
@@ -102,37 +125,11 @@ public class ProductService {
     }
 
     private String normalizeName(String name) {
-        String normalized = trimToNull(name);
-        if (normalized == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product name is required");
-        }
-        return normalized;
+        return trimToNull(name);
     }
 
     private String normalizeSku(String sku) {
-        String normalized = trimToNull(sku);
-        if (normalized == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product SKU is required");
-        }
-        return normalized;
-    }
-
-    private BigDecimal normalizePrice(BigDecimal price) {
-        if (price == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product price is required");
-        }
-        if (price.compareTo(BigDecimal.ZERO) < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product price cannot be negative");
-        }
-        return price;
-    }
-
-    private int normalizeStock(Integer stock) {
-        int normalizedStock = stock == null ? 0 : stock;
-        if (normalizedStock < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product stock cannot be negative");
-        }
-        return normalizedStock;
+        return trimToNull(sku);
     }
 
     private String trimToNull(String value) {

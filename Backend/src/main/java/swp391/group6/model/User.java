@@ -5,8 +5,10 @@ import jakarta.persistence.*;
 import java.sql.Timestamp;
 import java.util.List;
 
+// Fixed: all @OneToMany mappedBy values updated to match actual field names in target entities
+// Fixed: shoppingCart changed to mappedBy = "customer" since ShoppingCart now owns the FK
 @Entity
-@Table(name = "Users")
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,30 +27,37 @@ public class User {
     private String phone;
 
     @ManyToOne
+    @JoinColumn(name = "role_id")
     private Role role;
 
     @Column
     private boolean status;
 
-    @Column
+    @Column(name = "created_at")
     private Timestamp createdAt;
 
+    // mappedBy matches Comment.creatorID field name
     @OneToMany(mappedBy = "creatorID")
     private List<Comment> commentList;
 
-    @OneToMany(mappedBy = "creatorId")
+    // Fixed: mappedBy was "creatorId" — Ticket field is "creator"
+    @OneToMany(mappedBy = "creator")
     private List<Ticket> createdTicketList;
 
-    @OneToMany(mappedBy = "assigneeId")
+    // Fixed: mappedBy was "assigneeId" — Ticket field is "assignee"
+    @OneToMany(mappedBy = "assignee")
     private List<Ticket> assignedTicketList;
 
-    @OneToMany(mappedBy = "customerId")
+    // Fixed: mappedBy was "customerId" — Review field is "user"
+    @OneToMany(mappedBy = "user")
     private List<Review> reviewList;
 
-    @OneToMany(mappedBy = "customer_id")
+    // Fixed: mappedBy was "customer_id" — Order field is "user"
+    @OneToMany(mappedBy = "user")
     private List<Order> orderList;
 
-    @OneToOne(mappedBy = "customerId")
+    // Fixed: ShoppingCart owns the FK (customer_id on shopping_carts table), so use mappedBy = "customer"
+    @OneToOne(mappedBy = "customer")
     private ShoppingCart shoppingCart;
 
     public long getId() {
