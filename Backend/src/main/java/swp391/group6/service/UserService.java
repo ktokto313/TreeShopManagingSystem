@@ -1,8 +1,10 @@
 package swp391.group6.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import swp391.group6.dto.UserDTO;
+import swp391.group6.model.Role;
 import swp391.group6.model.User;
 import swp391.group6.repository.UserRepository;
 
@@ -26,16 +28,14 @@ public class UserService {
         return userRepository.findById(id)
                 .map(this::convertToDTO);
     }
-    //debuging, marked for deletion later
+
     public UserDTO createUser(UserDTO userDTO) {
-    try {
+        //hashed password before saving
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         User user = convertToEntity(userDTO);
+        user.setPassword(encoder.encode(userDTO.getPassword()));
         User savedUser = userRepository.save(user);
         return convertToDTO(savedUser);
-    } catch (Exception e) {
-        e.printStackTrace();  
-        throw e;
-    }
     }
     
     public UserDTO updateUser(long id, UserDTO userDTO) {
@@ -72,7 +72,7 @@ public class UserService {
         return userRepository.findByEmail(email)
                 .map(this::convertToDTO);
     }
-    
+
     private UserDTO convertToDTO(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
@@ -89,18 +89,19 @@ public class UserService {
         }
         return dto;
     }
-    
-private User convertToEntity(UserDTO dto) {
-    User user = new User();
-    if (dto.getId() != null) 
-     {
-        user.setId(dto.getId());
-     } 
-    user.setEmail(dto.getEmail());
-    user.setPassword(dto.getPassword());
-    user.setFullName(dto.getFullName());
-    user.setPhone(dto.getPhone());
-    user.setStatus(dto.isStatus());
-    return user;
-}
+
+    private User convertToEntity(UserDTO dto) {
+        User user = new User();
+        if (dto.getId() != null) user.setId(dto.getId());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword());
+        user.setFullName(dto.getFullName());
+        user.setPhone(dto.getPhone());
+        user.setStatus(dto.isStatus());
+        user.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
+        Role role = new Role();
+        role.setId(1L);
+        user.setRole(role);
+        return user;
+    }
 }
