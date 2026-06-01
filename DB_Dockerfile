@@ -1,0 +1,2 @@
+FROM postgres
+COPY greenshop_2.sql /docker-entrypoint-initdb.d/

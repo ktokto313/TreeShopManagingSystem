@@ -25,7 +25,8 @@ public class AuthController {
         LoginResponse loginResponse = authService.login(request);
 
         if (loginResponse == null)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body
+                    (new LoginResponse("Invalid email or password"));
 
         Cookie cookie = new Cookie("jwt", loginResponse.getToken());
         cookie.setHttpOnly(true);
