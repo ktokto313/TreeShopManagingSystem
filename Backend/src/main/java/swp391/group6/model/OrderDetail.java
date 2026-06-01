@@ -2,6 +2,8 @@ package swp391.group6.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "order_detail")
 public class OrderDetail {
@@ -23,7 +25,7 @@ public class OrderDetail {
     private int quantity;
 
     @Column(name = "price_paid", nullable = false)
-    private double pricePaid;
+    private BigDecimal pricePaid;
 
     public OrderDetailId getId() { return id; }
     public void setId(OrderDetailId id) { this.id = id; }
@@ -37,6 +39,6 @@ public class OrderDetail {
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
 
-    public double getPricePaid() { return pricePaid; }
-    public void setPricePaid(double pricePaid) { this.pricePaid = pricePaid; }
+    public BigDecimal getPricePaid() { return pricePaid; }
+    public void setPricePaid(BigDecimal pricePaid) { this.pricePaid = pricePaid; }
 }

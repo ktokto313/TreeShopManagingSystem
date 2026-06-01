@@ -3,6 +3,7 @@ package swp391.group6.model;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "product_details")
 public class ProductDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -11,11 +12,17 @@ public class ProductDetail {
     @Column
     private String description;
 
-    @Column
+    //TODO map variant here, same with below
+    @Transient
     private String variants;
 
-    @Column
+    //TODO map image here, the database return type JSON #Other and can't convert to String
+    @Transient
     private String images;
+
+    @OneToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
 
     public long getId() {
         return id;
@@ -47,5 +54,13 @@ public class ProductDetail {
 
     public void setImages(String images) {
         this.images = images;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
     }
 }

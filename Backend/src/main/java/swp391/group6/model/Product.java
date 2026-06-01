@@ -6,7 +6,7 @@ import java.util.List;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "Products")
+@Table(name = "products")
 public class Product {
 
     @Id
@@ -32,8 +32,7 @@ public class Product {
     @Column(nullable = false, unique = true)
     private String sku;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "product_detail_id")
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
     private ProductDetail productDetail;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
