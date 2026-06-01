@@ -40,6 +40,11 @@ out/
 ### VS Code ###
 .vscode/
 
+### Kiro / Cursor / JetBrains AI IDE ###
+.kiro/
+.cursor/
+.aiassistant/
+
 #### React JS gitignore ####
 
 # Logs
