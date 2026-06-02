@@ -2,12 +2,16 @@ package swp391.group6.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import swp391.group6.dto.LoginRequest;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import swp391.group6.util.CookieUtil;
+import swp391.group6.util.JWTUtil;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -28,18 +32,10 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body
                     (new LoginResponse("Invalid email or password"));
 
-        Cookie cookie = new Cookie("jwt", loginResponse.getToken());
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(7 * 24 * 60 * 60);
-        response.addCookie(cookie);
-
-        return ResponseEntity.ok(new LoginResponse(
-                null,
-                loginResponse.getEmail(),
-                loginResponse.getFullName(),
-                loginResponse.getRole()
-        ));
+        String jwt = JWTUtil.createToken(loginResponse);
+        ResponseCookie cookie = CookieUtil.makeCookieFromJWT(jwt);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(loginResponse);
     }
 }
