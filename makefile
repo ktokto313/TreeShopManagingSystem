@@ -1,8 +1,10 @@
 build:
-	cd ./ErrorTicketManager && \
+	cd ./Backend && \
 	rm -f ./build/libs/*.jar && \
-	./gradlew bootJar
+	./gradlew bootJar --configuration-cache
 
-# run: build
+dev: build
+	docker compose -f compose_dev.yml up --build -d
+
 run:
 	docker compose up --build -d

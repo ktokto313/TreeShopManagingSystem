@@ -1,0 +1,9 @@
+#Initialize image
+FROM eclipse-temurin:17
+RUN adduser spring && adduser spring spring
+USER spring:spring
+ARG JAR_FILE=build/libs/*.jar
+
+#Copy the jar in
+COPY ${JAR_FILE} app.jar
+ENTRYPOINT ["java","-jar","/app.jar"]
