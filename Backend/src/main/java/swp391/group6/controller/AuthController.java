@@ -48,6 +48,6 @@ public class AuthController {
                     .body("Email already exists");
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("Register successful");
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

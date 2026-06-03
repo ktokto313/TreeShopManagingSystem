@@ -5,6 +5,7 @@ import swp391.group6.dto.LoginResponse;
 import swp391.group6.dto.RegisterRequest;
 import swp391.group6.model.Role;
 import swp391.group6.model.User;
+import swp391.group6.repository.RoleRepository;
 import swp391.group6.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,10 +15,13 @@ import java.sql.Timestamp;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public AuthService(UserRepository userRepository) {
+    public AuthService(UserRepository userRepository,
+                       RoleRepository roleRepository) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -34,6 +38,7 @@ public class AuthService {
         return new LoginResponse(user.getEmail(), user.getFullName(), role);
     }
     public User register(RegisterRequest request) {
+
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             return null;
         }
@@ -44,8 +49,13 @@ public class AuthService {
         user.setFullName(request.getFullName());
         user.setStatus(true);
 
-        Role role = new Role();
-        role.setId(1L);
+        Role role = roleRepository.findByName("CUSTOMER")
+                .orElse(null);
+
+        if (role == null) {
+            return null;
+        }
+
         user.setRole(role);
 
         user.setCreatedAt(new Timestamp(System.currentTimeMillis()));
