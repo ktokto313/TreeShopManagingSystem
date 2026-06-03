@@ -2,11 +2,12 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 import Footer from './components/global/Footer'
 import Header from './components/global/Header'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import CatalogPage from './pages/CatalogPage'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import ManagementPage from './pages/ManagementPage'
 
-function RequireAuth({ children }) {
+function RequireAuth({ children, managerOnly = false }) {
   const { isAuthenticated, canManage } = useAuth()
   const location = useLocation()
 
@@ -14,8 +15,8 @@ function RequireAuth({ children }) {
     return <Navigate to="/login" replace state={{ from: location }} />
   }
 
-  if (!canManage) {
-    return <Navigate to="/" replace />
+  if (managerOnly && !canManage) {
+    return <Navigate to="/catalog" replace />
   }
 
   return children
@@ -29,7 +30,7 @@ function PublicOnlyRoute({ children }) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />
+    return <Navigate to="/catalog" replace />
   }
 
   return children
@@ -48,9 +49,17 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/manage"
+        path="/catalog"
         element={
           <RequireAuth>
+            <CatalogPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/manage"
+        element={
+          <RequireAuth managerOnly>
             <ManagementPage />
           </RequireAuth>
         }
