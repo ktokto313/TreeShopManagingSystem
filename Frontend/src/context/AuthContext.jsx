@@ -1,58 +1,69 @@
-import { createContext, useState } from "react";
-import { loginApi, logoutApi, registerApi } from "../data/authApi";
+import { createContext, useContext, useMemo, useState } from 'react'
+import { login as loginRequest } from '../features/auth/authApi'
 
-const AuthContext = createContext();
+const STORAGE_KEY = 'treeshop-auth-user'
 
-const AuthProvider = ({ children }) => {
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
-    
-    const [user, setUser] = useState(() => {
-        const savedUser = localStorage.getItem("currentUser");
-        return savedUser ? JSON.parse(savedUser) : null;
-    });
+const AuthContext = createContext(null)
 
-    const executeAuth = async (authOption = "login") => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            let userData;
+function readStoredUser() {
+  if (typeof window === 'undefined') {
+    return null
+  }
 
-            if (authOption === "login") {
-                console.log("1. Sending login request to backend...");
-                userData = await loginApi();
-                console.log("2. Backend responded with:", userData);
-            } else if (authOption === "register") {
-                userData = await registerApi();
-            }
+  try {
+    const storedValue = window.localStorage.getItem(STORAGE_KEY)
+    return storedValue ? JSON.parse(storedValue) : null
+  } catch {
+    return null
+  }
+}
 
-            // Update React State
-            setUser(userData);
-            
-            // SAVE TO HARD DRIVE! (This is what keeps you logged in)
-            console.log("3. Saving user to LocalStorage...");
-            localStorage.setItem("currentUser", JSON.stringify(userData));
-            console.log("4. Save complete!");
+function canManageRole(role) {
+  return role === 'MANAGER' || role === 'SYSTEM_ADMIN'
+}
 
-        } catch (err) {
-            console.error("Login crashed:", err);
-            setError(err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(readStoredUser)
 
-    const logout = async () => {
-        console.log("1. Logging out...");
-        const logoutResponse = await logoutApi();
-        console.log("Backend responded with: " + logoutResponse);
-    };
+  async function login(email, password) {
+    const loggedInUser = await loginRequest(email, password)
+    setUser(loggedInUser)
 
-    return (
-        <AuthContext.Provider value={{ user, isLoading, error, executeAuth, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
-};
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(loggedInUser))
+    }
 
-export { AuthContext, AuthProvider };
+    return loggedInUser
+  }
+
+  function logout() {
+    setUser(null)
+
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(STORAGE_KEY)
+    }
+  }
+
+  const value = useMemo(
+    () => ({
+      user,
+      login,
+      logout,
+      isAuthenticated: Boolean(user),
+      canManage: canManageRole(user?.role),
+    }),
+    [user],
+  )
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext)
+
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+
+  return context
+}
