@@ -1,122 +1,53 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { Button } from "./components/ui/Button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./components/ui/Card";
+import { Form } from "./components/ui/Form";
+import { Input } from "./components/ui/Input";
+import { TicketCard } from "./features/tickets/TicketCard";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+	const singleTicket = {
+		id: "TK-8092",
+		title: "Cannot access the billing dashboard",
+		status: "urgent",
+		description:
+			"Hello, I tried to update my credit card information this morning but the billing page keeps throwing a 500 Internal Server Error. I need this fixed before my subscription pauses.",
+		customerName: "Eleanor Shellstrop",
+		timeAgo: "15 mins ago",
+	};
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+	return (
+		<div>
+			<Button>Hello</Button>
 
-      <div className="ticks"></div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+			<Form>
+				<Input type="text"></Input>
+			</Form>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
-}
+      {/* TicketCard Example */}
+			<TicketCard ticket={singleTicket}></TicketCard>
 
-export default App
+      {/* Normal Card Example */}
+			<Card className="max-w-md">
+				<CardHeader>
+					<CardTitle>Standard Card Title</CardTitle>
+				</CardHeader>
+
+				<CardContent>
+					<p className="text-sm text-black opacity-80">
+						This is a normal card. You can drop text, images, or even entire
+						forms inside this content block. It will expand to fit whatever you
+						put in here.
+					</p>
+				</CardContent>
+
+				<CardFooter className="justify-end gap-3 border-t border-border mt-4 pt-4">
+					<Button variant="secondary">Cancel</Button>
+					<Button variant="primary">Confirm</Button>
+				</CardFooter>
+			</Card>
+		</div>
+	);
+};
+
+export default App;
