@@ -38,6 +38,23 @@ const emptyProductForm = {
 }
 const emptyFilters = { keyword: '', categoryId: '', status: '' }
 
+function parseImageList(value) {
+  if (!value) {
+    return []
+  }
+
+  if (Array.isArray(value)) {
+    return value
+  }
+
+  try {
+    const parsed = JSON.parse(value)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return [String(value)]
+  }
+}
+
 export default function ManagementPage() {
   const navigate = useNavigate()
   const { logout } = useAuth()
@@ -75,6 +92,7 @@ export default function ManagementPage() {
 
   useEffect(() => {
     void loadInitialData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function loadInitialData() {
@@ -97,6 +115,7 @@ export default function ManagementPage() {
 
   async function loadCategories() {
     setLoading(true)
+
     try {
       const categoryData = await getCategories()
       setCategories(Array.isArray(categoryData) ? categoryData : [])
@@ -112,6 +131,7 @@ export default function ManagementPage() {
 
   async function loadProducts(nextFilters = filters) {
     setLoading(true)
+
     try {
       const productData = await getProducts(nextFilters)
       setProducts(Array.isArray(productData) ? productData : [])
@@ -200,10 +220,10 @@ export default function ManagementPage() {
 
       if (categoryForm.id) {
         await updateCategory(categoryForm.id, payload)
-        setNotice('Category updated.')
+        setNotice('Đã cập nhật danh mục.')
       } else {
         await createCategory(payload)
-        setNotice('Category created.')
+        setNotice('Đã tạo danh mục.')
       }
 
       resetCategoryForm()
@@ -214,7 +234,7 @@ export default function ManagementPage() {
       if (handleAuthError(error)) {
         return
       }
-      setNotice(`Category save failed: ${error.message}`)
+      setNotice(`Lưu danh mục thất bại: ${error.message}`)
     }
   }
 
@@ -237,10 +257,10 @@ export default function ManagementPage() {
 
       if (productForm.id) {
         await updateProduct(productForm.id, payload)
-        setNotice('Product updated.')
+        setNotice('Đã cập nhật sản phẩm.')
       } else {
         await createProduct(payload)
-        setNotice('Product created.')
+        setNotice('Đã tạo sản phẩm.')
       }
 
       resetProductForm()
@@ -251,7 +271,7 @@ export default function ManagementPage() {
       if (handleAuthError(error)) {
         return
       }
-      setNotice(`Product save failed: ${error.message}`)
+      setNotice(`Lưu sản phẩm thất bại: ${error.message}`)
     }
   }
 
@@ -264,14 +284,14 @@ export default function ManagementPage() {
         resetCategoryForm()
         closeCategoryModal()
       }
-      setNotice('Category deleted.')
+      setNotice('Đã xóa danh mục.')
       await loadCategories()
       await loadProducts()
     } catch (error) {
       if (handleAuthError(error)) {
         return
       }
-      setNotice(`Category delete failed: ${error.message}`)
+      setNotice(`Xóa danh mục thất bại: ${error.message}`)
     }
   }
 
@@ -284,13 +304,13 @@ export default function ManagementPage() {
         resetProductForm()
         closeProductModal()
       }
-      setNotice('Product deactivated.')
+      setNotice('Đã ẩn sản phẩm.')
       await loadProducts()
     } catch (error) {
       if (handleAuthError(error)) {
         return
       }
-      setNotice(`Product deactivate failed: ${error.message}`)
+      setNotice(`Ẩn sản phẩm thất bại: ${error.message}`)
     }
   }
 
@@ -305,49 +325,32 @@ export default function ManagementPage() {
     void loadProducts(nextFilters)
   }
 
-  function parseImageList(value) {
-    if (!value) {
-      return []
-    }
-
-    if (Array.isArray(value)) {
-      return value
-    }
-
-    try {
-      const parsed = JSON.parse(value)
-      return Array.isArray(parsed) ? parsed : []
-    } catch {
-      return [String(value)]
-    }
-  }
-
   return (
     <main className="bg-[var(--social-bg)]/70">
       <Container className="py-10">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-2">
             <Badge status="active" className="bg-emerald-100 text-emerald-700">
-              Manager workspace
+              Khu vực quản lý
             </Badge>
             <h1 className="text-3xl font-semibold text-[var(--text-h)]">
-              Category and Product CRUD
+              Quản lý danh mục và sản phẩm
             </h1>
             <p className="max-w-3xl text-sm text-[var(--text)]">
-              Trang quản lý tách riêng khỏi trang chủ. Nếu thấy 401, backend auth/session vẫn
-              cần được đồng bộ trước khi test CRUD đầy đủ.
+              Khu vực này tách riêng khỏi trang chủ. Nếu thấy lỗi 401, hãy kiểm tra lại đăng nhập
+              và phiên xác thực trước khi thử CRUD.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <Badge status={loading ? 'inactive' : 'active'}>
-              {loading ? 'Loading' : 'Ready'}
+              {loading ? 'Đang tải' : 'Sẵn sàng'}
             </Badge>
             <Button variant="secondary" onClick={() => void loadCategories()}>
-              Refresh categories
+              Tải lại danh mục
             </Button>
             <Button variant="secondary" onClick={() => void loadProducts()}>
-              Refresh products
+              Tải lại sản phẩm
             </Button>
           </div>
         </div>
@@ -363,13 +366,13 @@ export default function ManagementPage() {
             variant={activeTab === 'categories' ? 'primary' : 'secondary'}
             onClick={() => setActiveTab('categories')}
           >
-            Categories
+            Danh mục
           </Button>
           <Button
             variant={activeTab === 'products' ? 'primary' : 'secondary'}
             onClick={() => setActiveTab('products')}
           >
-            Products
+            Sản phẩm
           </Button>
         </div>
 
@@ -378,14 +381,11 @@ export default function ManagementPage() {
             <Card className="space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <h2 className="text-xl font-semibold text-[var(--text-h)]">Category table</h2>
-                  <p className="text-sm text-[var(--text)]">
-                    Use the modal to create or edit a category.
-                  </p>
+                  <h2 className="text-xl font-semibold text-[var(--text-h)]">Bảng danh mục</h2>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Button onClick={openCreateCategoryModal}>New category</Button>
-                  <span className="text-sm text-[var(--text)]">{categories.length} rows</span>
+                  <Button onClick={openCreateCategoryModal}>Thêm danh mục</Button>
+                  <span className="text-sm text-[var(--text)]">{categories.length} hàng</span>
                 </div>
               </div>
               <CategoryTable
@@ -402,18 +402,15 @@ export default function ManagementPage() {
             <Card className="space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <h2 className="text-xl font-semibold text-[var(--text-h)]">Product filters</h2>
-                  <p className="text-sm text-[var(--text)]">
-                    Filter the list, then open the modal to edit product details.
-                  </p>
+                  <h2 className="text-xl font-semibold text-[var(--text-h)]">Bộ lọc sản phẩm</h2>
                 </div>
-                <span className="text-sm text-[var(--text)]">{products.length} rows</span>
+                <span className="text-sm text-[var(--text)]">{products.length} hàng</span>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Button onClick={openCreateProductModal}>New product</Button>
+                <Button onClick={openCreateProductModal}>Thêm sản phẩm</Button>
                 <Button variant="secondary" onClick={() => void loadProducts()}>
-                  Refresh products
+                  Tải lại sản phẩm
                 </Button>
               </div>
 
@@ -426,7 +423,7 @@ export default function ManagementPage() {
                   onChange={(event) =>
                     setFilters((current) => ({ ...current, keyword: event.target.value }))
                   }
-                  placeholder="Search keyword"
+                  placeholder="Tìm theo từ khóa"
                   className="h-10 w-full rounded-md border border-[var(--border)] bg-white px-3 text-sm text-[var(--text-h)] outline-none"
                 />
                 <select
@@ -436,7 +433,7 @@ export default function ManagementPage() {
                   }
                   className="h-10 w-full rounded-md border border-[var(--border)] bg-white px-3 text-sm text-[var(--text-h)] outline-none"
                 >
-                  <option value="">All categories</option>
+                  <option value="">Tất cả danh mục</option>
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
                       {category.name}
@@ -450,14 +447,14 @@ export default function ManagementPage() {
                   }
                   className="h-10 w-full rounded-md border border-[var(--border)] bg-white px-3 text-sm text-[var(--text-h)] outline-none"
                 >
-                  <option value="">All statuses</option>
-                  <option value="true">Active only</option>
-                  <option value="false">Inactive only</option>
+                  <option value="">Tất cả trạng thái</option>
+                  <option value="true">Chỉ đang hoạt động</option>
+                  <option value="false">Chỉ đã ẩn</option>
                 </select>
                 <div className="flex gap-2">
-                  <Button type="submit">Apply</Button>
+                  <Button type="submit">Áp dụng</Button>
                   <Button type="button" variant="secondary" onClick={clearFilters}>
-                    Clear
+                    Xóa lọc
                   </Button>
                 </div>
               </form>
@@ -466,12 +463,9 @@ export default function ManagementPage() {
             <Card className="space-y-5">
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <h2 className="text-xl font-semibold text-[var(--text-h)]">Product table</h2>
-                  <p className="text-sm text-[var(--text)]">
-                    Detail fields are shown in the modal and summarized in the table.
-                  </p>
+                  <h2 className="text-xl font-semibold text-[var(--text-h)]">Bảng sản phẩm</h2>
                 </div>
-                <span className="text-sm text-[var(--text)]">{products.length} rows</span>
+                <span className="text-sm text-[var(--text)]">{products.length} hàng</span>
               </div>
 
               <ProductTable
@@ -494,10 +488,10 @@ export default function ManagementPage() {
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <h2 className="text-2xl font-semibold text-[var(--text-h)]">
-                {categoryForm.id ? 'Edit category' : 'Create category'}
+                {categoryForm.id ? 'Sửa danh mục' : 'Tạo danh mục'}
               </h2>
               <p className="text-sm text-[var(--text)]">
-                Update the category name and description in one focused view.
+                Cập nhật tên và mô tả danh mục trong một cửa sổ riêng gọn gàng.
               </p>
             </div>
             {categoryForm.id ? (
@@ -520,7 +514,7 @@ export default function ManagementPage() {
 
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" onClick={resetCategoryForm}>
-              Clear
+              Xóa
             </Button>
             <Button
               variant="secondary"
@@ -529,7 +523,7 @@ export default function ManagementPage() {
                 closeCategoryModal()
               }}
             >
-              Close
+              Đóng
             </Button>
           </div>
         </div>
@@ -545,10 +539,10 @@ export default function ManagementPage() {
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <h2 className="text-2xl font-semibold text-[var(--text-h)]">
-                {productForm.id ? 'Edit product' : 'Create product'}
+                {productForm.id ? 'Sửa sản phẩm' : 'Tạo sản phẩm'}
               </h2>
               <p className="text-sm text-[var(--text)]">
-                Update the product and its details in one focused view.
+                Cập nhật sản phẩm và chi tiết của nó trong một cửa sổ riêng gọn gàng.
               </p>
             </div>
             {productForm.id ? (
@@ -561,7 +555,7 @@ export default function ManagementPage() {
           <ProductForm
             values={productForm}
             categoryOptions={[
-              { value: '', label: 'Select a category' },
+              { value: '', label: 'Chọn danh mục' },
               ...categories.map((category) => ({
                 value: String(category.id),
                 label: category.name,
@@ -578,7 +572,7 @@ export default function ManagementPage() {
 
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" onClick={resetProductForm}>
-              Clear
+              Xóa
             </Button>
             <Button
               variant="secondary"
@@ -587,7 +581,7 @@ export default function ManagementPage() {
                 closeProductModal()
               }}
             >
-              Close
+              Đóng
             </Button>
           </div>
         </div>
