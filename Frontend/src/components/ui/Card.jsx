@@ -1,3 +1,4 @@
+// Card can contain CardHeader/CardTitle/... inside of it (children props) for more choices
 export function Card({ children, className = '', ...props }) {
   return (
     <div 

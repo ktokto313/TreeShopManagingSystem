@@ -1,4 +1,4 @@
-import { Container } from './Container'; // Adjust import path as needed
+import { Container } from './Container'; 
 
 export function Header({ className = '', ...props }) {
   return (

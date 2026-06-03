@@ -1,3 +1,4 @@
+// This component simply centers your content
 export function Container({ children, className = '', ...props }) {
   return (
     <div 

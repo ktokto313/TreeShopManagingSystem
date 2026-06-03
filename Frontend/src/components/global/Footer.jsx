@@ -1,11 +1,12 @@
-import { Container } from './Container'; // Adjust import path as needed
+import { Container } from './Container';
+import { cn } from '../../utils/cn';
 
 export function Footer({ className = '', ...props }) {
   const currentYear = new Date().getFullYear();
 
   return (
     <footer 
-      className={`bg-bg-surface border-t border-border py-8 mt-auto ${className}`} 
+      className={cn(`bg-bg-surface border-t border-border py-8 mt-auto ${className}`)} 
       {...props}
     >
       <Container className="flex flex-col md:flex-row items-center justify-between gap-4">
