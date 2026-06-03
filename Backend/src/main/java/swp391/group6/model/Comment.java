@@ -4,26 +4,28 @@ import jakarta.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "Comment")
+@Table(name = "comments")
 public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne
-    @JoinColumn(name = "ticket_id")
-    private Ticket ticket;
 
     @Column(nullable = false)
     private String detail;
 
-    @Column
+    // DB column name is "time_created"
+    @Column(name = "time_created")
     private Timestamp timeCreated;
 
     @ManyToOne
-    @JoinColumn(name = "creator_id")
+    @JoinColumn(name = "creator_id", nullable = false)
     private User commentCreator;
+
+    @ManyToOne
+    @JoinColumn(name = "ticket_id", nullable = false)
+    private Ticket ticket;
 
     public long getId() {
         return id;
@@ -33,13 +35,6 @@ public class Comment {
         this.id = id;
     }
 
-    public Ticket getTicket() {
-        return ticket;
-    }
-
-    public void setTicket(Ticket ticket) {
-        this.ticket = ticket;
-    }
 
     public String getDetail() {
         return detail;
@@ -63,5 +58,13 @@ public class Comment {
 
     public void setCommentCreator(User commentCreator) {
         this.commentCreator = commentCreator;
+    }
+
+    public Ticket getTicket() {
+        return ticket;
+    }
+
+    public void setTicket(Ticket ticket) {
+        this.ticket = ticket;
     }
 }

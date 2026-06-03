@@ -6,10 +6,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import swp391.group6.dto.LoginResponse;
-import swp391.group6.model.User;
 
 import java.time.Instant;
 

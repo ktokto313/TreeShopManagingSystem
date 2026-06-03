@@ -1,10 +1,12 @@
 package swp391.group6.model;
 
 import jakarta.persistence.*;
+
 import java.util.List;
+import java.math.BigDecimal;
 
 @Entity
-@Table(name = "Products")
+@Table(name = "products")
 public class Product {
 
     @Id
@@ -18,8 +20,8 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private double price;
+    @Column(nullable = false, precision = 15, scale = 2)
+    private BigDecimal price;
 
     @Column(nullable = false)
     private int stock = 0;
@@ -27,11 +29,10 @@ public class Product {
     @Column(nullable = false)
     private boolean status = true;
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String sku;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "product_detail_id")
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
     private ProductDetail productDetail;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
@@ -49,8 +50,8 @@ public class Product {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
     public int getStock() { return stock; }
     public void setStock(int stock) { this.stock = stock; }

@@ -1,6 +1,5 @@
 package swp391.group6.controller;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -29,8 +28,7 @@ public class AuthController {
         LoginResponse loginResponse = authService.login(request);
 
         if (loginResponse == null)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body
-                    (new LoginResponse("Invalid email or password"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         String jwt = JWTUtil.createToken(loginResponse);
         ResponseCookie cookie = CookieUtil.makeCookieFromJWT(jwt);

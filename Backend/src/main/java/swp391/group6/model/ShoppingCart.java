@@ -12,7 +12,7 @@ public class ShoppingCart {
     private long id;
 
     @OneToOne
-    @JoinColumn(name = "customer_id", nullable = false)
+    @JoinColumn(name = "customer_id", nullable = false, unique = true)
     private User customer;
 
     @OneToMany(mappedBy = "shoppingCart", cascade = CascadeType.ALL, orphanRemoval = true)

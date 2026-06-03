@@ -8,10 +8,18 @@ public final class JacksonUtil {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static String parseObjectToJSONString(Object object) {
-        return objectMapper.writeValueAsString(object);
+        try {
+            return objectMapper.writeValueAsString(object);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to serialize object to JSON", e);
+        }
     }
 
     public static <T> T parseJSONToObject(String json, Class<T> clazz) {
-        return objectMapper.readValue(json, clazz);
+        try {
+            return objectMapper.readValue(json, clazz);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to deserialize JSON to object", e);
+        }
     }
 }

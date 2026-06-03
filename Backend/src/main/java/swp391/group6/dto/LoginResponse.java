@@ -1,4 +1,5 @@
 package swp391.group6.dto;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -8,14 +9,12 @@ public class LoginResponse {
     private String role;
     private String error;
 
+    public LoginResponse() {}
+
     public LoginResponse(String email, String fullName, String role) {
         this.email = email;
         this.fullName = fullName;
         this.role = role;
-    }
-
-    public LoginResponse(String error){
-        this.error = error;
     }
 
     public String getEmail() { return email; }

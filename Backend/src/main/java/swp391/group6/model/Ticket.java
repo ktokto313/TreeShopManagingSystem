@@ -1,10 +1,11 @@
 package swp391.group6.model;
 
 import jakarta.persistence.*;
+
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "Tickets")
+@Table(name = "tickets")
 public class Ticket {
 
     @Id
@@ -18,7 +19,7 @@ public class Ticket {
     private String detail;
 
     @ManyToOne
-    @JoinColumn(name = "creator_id")
+    @JoinColumn(name = "creator_id", nullable = false)
     private User ticketCreator;
 
     @ManyToOne
@@ -26,20 +27,20 @@ public class Ticket {
     private User assignee;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "state", nullable = false)
     private TicketState ticketState;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Priority priority;
 
-    @Column(nullable = false)
+    @Column(name = "ticket_type", nullable = false)
     private String ticketType;
 
-    @Column(nullable = false)
+    @Column(name = "time_created", nullable = false)
     private Timestamp timeCreated;
 
-    @Column
+    @Column(name = "time_resolved")
     private Timestamp timeResolved;
 
     public long getId() { return id; }

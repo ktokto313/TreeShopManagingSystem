@@ -2,27 +2,34 @@ package swp391.group6.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
 @Entity
-@Table(name = "Orders")
+@Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @ManyToOne
+    @JoinColumn(name = "customer_id")
     private User user;
+
+    // DB has shipper_id as a nullable FK to users
+    @ManyToOne
+    @JoinColumn(name = "shipper_id")
+    private User shipper;
 
     @Column
     private String shippingAddress;
 
     @Column(nullable = false)
-    private Double shippingFee;
+    private BigDecimal shippingFee;
 
     @Column(nullable = false)
-    private Double discount;
+    private BigDecimal discount;
 
     @Column(nullable = false)
     private Timestamp createdAt;
@@ -61,19 +68,19 @@ public class Order {
         this.shippingAddress = shippingAddress;
     }
 
-    public Double getShippingFee() {
+    public BigDecimal getShippingFee() {
         return shippingFee;
     }
 
-    public void setShippingFee(Double shippingFee) {
+    public void setShippingFee(BigDecimal shippingFee) {
         this.shippingFee = shippingFee;
     }
 
-    public Double getDiscount() {
+    public BigDecimal getDiscount() {
         return discount;
     }
 
-    public void setDiscount(Double discount) {
+    public void setDiscount(BigDecimal discount) {
         this.discount = discount;
     }
 

@@ -1,7 +1,6 @@
 package swp391.group6.util;
 
 import jakarta.servlet.http.Cookie;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
