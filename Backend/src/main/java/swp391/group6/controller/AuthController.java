@@ -1,5 +1,7 @@
 package swp391.group6.controller;
 
+import swp391.group6.dto.RegisterRequest;
+import swp391.group6.model.User;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -35,5 +37,17 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(loginResponse);
+    }
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+
+        User user = authService.register(request);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Email already exists");
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("Register successful");
     }
 }
