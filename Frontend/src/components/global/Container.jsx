@@ -1,11 +1,12 @@
-// This component simply centers your content
-export function Container({ children, className = '', ...props }) {
+import { cn } from '../../utils/cn'
+
+export default function Container({ className, children, ...props }) {
   return (
-    <div 
-      className={`w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 ${className}`} 
+    <div
+      className={cn('mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8', className)}
       {...props}
     >
       {children}
     </div>
-  );
+  )
 }

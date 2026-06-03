@@ -1,46 +1,32 @@
-import { forwardRef, useId } from 'react';
-import { cn } from '../../utils/cn';
+import { cn } from '../../utils/cn'
 
-export const Input = forwardRef(({ 
-  label, 
-  error, 
-  className = '', 
-  ...props 
-}, ref) => {
-  const generatedId = useId();
-  const inputId = props.id || generatedId;
-  const errorId = `${inputId}-error`;
+export default function Input({ label, error, className, id, ...props }) {
+  const inputId = id || props.name
+  const hasError = Boolean(error)
 
   return (
-    <div className={cn(`flex flex-col gap-1.5`, className)}>
+    <label className="block text-left" htmlFor={inputId}>
       {label && (
-        <label htmlFor={inputId} className="text-sm font-medium text-black">
+        <span className="mb-1 block text-sm font-medium text-[var(--text-h)]">
           {label}
-        </label>
+        </span>
       )}
-      
       <input
-        {...props}
         id={inputId}
-        ref={ref}
-        aria-invalid={!!error}
-        aria-describedby={error ? errorId : undefined}
-        className={cn(`
-          w-full px-3 py-2 border rounded-md outline-none transition-colors
-          bg-bg-base text-black border-border
-          focus-visible:border-interactive focus-visible:ring-1 focus-visible:ring-interactive
-          disabled:opacity-50 disabled:cursor-not-allowed
-          ${error ? 'border-bg-error focus-visible:border-bg-error focus-visible:ring-bg-error' : ''}
-        `)}
+        className={cn(
+          'h-10 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 text-sm text-[var(--text-h)] outline-none transition placeholder:text-[var(--text)] focus:border-[var(--accent)]',
+          hasError && 'border-red-500 focus:border-red-500',
+          className,
+        )}
+        aria-invalid={hasError}
+        aria-describedby={hasError ? `${inputId}-error` : undefined}
+        {...props}
       />
-      
-      {error && (
-        <p id={errorId} className={cn("text-sm font-medium text-bg-error", className)}>
+      {hasError && (
+        <span id={`${inputId}-error`} className="mt-1 block text-sm text-red-600">
           {error}
-        </p>
+        </span>
       )}
-    </div>
-  );
-});
-
-Input.displayName = 'Input';
+    </label>
+  )
+}
