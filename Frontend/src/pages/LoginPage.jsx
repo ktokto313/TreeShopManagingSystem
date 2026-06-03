@@ -44,7 +44,7 @@ export default function LoginPage() {
         ? fromPath === '/login'
           ? '/manage'
           : fromPath
-        : '/'
+        : '/catalog'
 
       navigate(targetPath, { replace: true })
     } catch (loginError) {

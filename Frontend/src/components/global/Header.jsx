@@ -17,18 +17,24 @@ export default function Header() {
 
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <nav className="flex items-center gap-2">
-            <Link
-              to="/"
-              className="rounded-md px-3 py-2 text-[var(--text-h)] transition hover:bg-[var(--social-bg)]"
-            >
-              Trang chủ
-            </Link>
-            <Link
-              to={canManage ? '/manage' : '/login'}
-              className="rounded-md px-3 py-2 text-[var(--text-h)] transition hover:bg-[var(--social-bg)]"
-            >
-              Quản lý
-            </Link>
+          <Link
+            to="/"
+            className="rounded-md px-3 py-2 text-[var(--text-h)] transition hover:bg-[var(--social-bg)]"
+          >
+            Trang chủ
+          </Link>
+          <Link
+            to={isAuthenticated ? '/catalog' : '/login'}
+            className="rounded-md px-3 py-2 text-[var(--text-h)] transition hover:bg-[var(--social-bg)]"
+          >
+            Sản phẩm
+          </Link>
+          <Link
+            to={canManage ? '/manage' : '/login'}
+            className="rounded-md px-3 py-2 text-[var(--text-h)] transition hover:bg-[var(--social-bg)]"
+          >
+            Quản lý
+          </Link>
           </nav>
 
           {isAuthenticated ? (
