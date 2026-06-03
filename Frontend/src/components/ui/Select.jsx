@@ -1,10 +1,12 @@
 import { forwardRef, useId } from 'react';
+import { cn } from '../../utils/cn';
 
 export const Select = forwardRef(({ 
   label, 
   error, 
   options = [], 
   className = '', 
+  onChange,
   ...props 
 }, ref) => {
   const generatedId = useId();
@@ -12,7 +14,7 @@ export const Select = forwardRef(({
   const errorId = `${selectId}-error`;
 
   return (
-    <div className={`flex flex-col gap-1.5 ${className}`}>
+    <div className={cn(`flex flex-col gap-1.5 ${className}`, className)}>
       {label && (
         <label htmlFor={selectId} className="text-sm font-medium text-black">
           {label}
@@ -21,6 +23,7 @@ export const Select = forwardRef(({
       
       <div className="relative">
         <select
+          onChange={onChange}
           {...props}
           id={selectId}
           ref={ref}
@@ -34,8 +37,8 @@ export const Select = forwardRef(({
             ${error ? 'border-bg-error focus-visible:border-bg-error focus-visible:ring-bg-error' : ''}
           `}
         >
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
+          {options.map((option, index) => (
+            <option key={`option-${option.value}-${index}`} value={option.value}>
               {option.label}
             </option>
           ))}

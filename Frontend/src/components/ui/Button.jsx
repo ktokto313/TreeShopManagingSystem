@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import { cn } from '../../utils/cn';
 
 export const Button = forwardRef(({ 
   children, 
@@ -19,7 +20,7 @@ export const Button = forwardRef(({
     <button
       ref={ref}
       type={type}
-      className={`${baseStyles} ${variants[variant]} ${className}`}
+      className={cn(`${baseStyles} ${variants[variant]}`, className)}
       {...props}
     >
       {children}

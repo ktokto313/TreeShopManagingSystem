@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
+import { cn } from '../../utils/cn';
 
-export function Modal({ isOpen, onClose, title, children }) {
+export function Modal({ isOpen, onClose, title, children, className }) {
   // Prevent scrolling on the background page when the modal is open
   useEffect(() => {
     if (isOpen) {
@@ -17,7 +18,7 @@ export function Modal({ isOpen, onClose, title, children }) {
 
   return (
     // The dark background overlay
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm", className)}>
       
       {/* Modal box */}
       <div 
