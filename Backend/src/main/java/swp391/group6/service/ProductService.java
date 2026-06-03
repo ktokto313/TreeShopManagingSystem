@@ -5,7 +5,9 @@ import swp391.group6.dto.ProductRequest;
 import swp391.group6.dto.ProductResponse;
 import swp391.group6.model.Category;
 import swp391.group6.model.Product;
+import swp391.group6.model.ProductDetail;
 import swp391.group6.repository.CategoryRepository;
+import swp391.group6.repository.ProductDetailRepository;
 import swp391.group6.repository.ProductRepository;
 
 import java.math.BigDecimal;
@@ -16,10 +18,12 @@ import java.util.Optional;
 public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductDetailRepository productDetailRepository;
 
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository, ProductDetailRepository productDetailRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.productDetailRepository = productDetailRepository;
     }
 
     public List<ProductResponse> listProducts(String keyword, Long categoryId, Boolean status) {
@@ -113,6 +117,27 @@ public class ProductService {
         product.setStock(request.getStock() == null ? 0 : request.getStock());
         product.setStatus(request.getStatus() == null || request.getStatus());
         product.setSku(sku);
+
+        String description = trimToNull(request.getDescription());
+        String variants = trimToNull(request.getVariants());
+        String images = trimToNull(request.getImages());
+        boolean hasDetail = description != null || variants != null || images != null;
+
+        ProductDetail detail = product.getProductDetail();
+        if (detail == null && hasDetail) {
+            detail = new ProductDetail();
+            detail.setProduct(product);
+        }
+
+        if (detail != null) {
+            detail.setProduct(product);
+            detail.setDescription(description);
+            detail.setVariants(variants);
+            detail.setImages(images);
+            product.setProductDetail(detail);
+        } else {
+            product.setProductDetail(null);
+        }
     }
 
     private ProductResponse toResponse(Product product) {
@@ -124,7 +149,20 @@ public class ProductService {
         response.setStock(product.getStock());
         response.setStatus(product.isStatus());
         response.setSku(product.getSku());
+        ProductDetail detail = resolveProductDetail(product);
+        if (detail != null) {
+            response.setDescription(detail.getDescription());
+            response.setVariants(detail.getVariants());
+            response.setImages(detail.getImages());
+        }
         return response;
+    }
+
+    private ProductDetail resolveProductDetail(Product product) {
+        if (product.getProductDetail() != null) {
+            return product.getProductDetail();
+        }
+        return productDetailRepository.findByProduct_Id(product.getId()).orElse(null);
     }
 
     private String trimToNull(String value) {
