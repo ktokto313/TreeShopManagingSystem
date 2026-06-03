@@ -13,7 +13,7 @@ import { Modal } from "../../components/ui/Modal";
 import { ticketSelectList } from "./data/ticketSelectList";
 
 const TicketDashboard = ({ className }) => {
-	const { isLoading, error, fetchedTickets, executeFetchAllTickets } =
+	const { isLoading, fetchedTickets, executeFetchAllTickets } =
 		useFetchAllTickets();
 	const { executeAuth } = useAuthUser();
 
