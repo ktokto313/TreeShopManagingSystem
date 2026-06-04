@@ -1,0 +1,17 @@
+.ticketSelectList {
+
+}
+
+.ticketSelectToggle {
+	display: none;
+}
+
+@media screen and (width < 800px) {
+    .ticketSelectToggle{
+        display: block;
+    }
+
+    .ticketSelectList{
+        display: none;
+    }
+}
