@@ -82,11 +82,11 @@ export function TicketCard({ ticket, variant = "default" }) {
 						<div className="flex items-center gap-2">
 							{/* Avatar Placeholder */}
 							<div className="w-5 h-5 rounded-full bg-border flex items-center justify-center font-bold text-[10px]">
-								{ticket.ticketCreator.fullName.charAt(0)}
+								{ticket?.ticketCreator?.fullName?.charAt(0)}
 							</div>
 							{/* Ticket's creator's full name */}
 							<span className="font-medium truncate">
-								{ticket.ticketCreator.fullName}
+								{ticket?.ticketCreator?.fullName}
 							</span>
 						</div>
 
