@@ -20,7 +20,15 @@ export function EditUserModal({ user, isOpen, onClose, onUpdated }) {
   });
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setForm({
+        fullName: "",
+        phone: "",
+        role: "CUSTOMER",
+        password: "",
+      });
+      return;
+    }
     setForm({
       fullName: user.fullName ?? "",
       phone: user.phone ?? "",

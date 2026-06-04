@@ -22,6 +22,8 @@ export function useUsers() {
 
   useEffect(() => {
     fetchAll();
+    // fetchAll is defined within component, safe to call
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { users, isLoading, hasError, refetch: fetchAll };
