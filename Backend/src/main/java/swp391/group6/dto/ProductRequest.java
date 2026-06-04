@@ -9,6 +9,9 @@ public class ProductRequest {
     private Integer stock;
     private Boolean status;
     private String sku;
+    private String description;
+    private String variants;
+    private String images;
 
     public Long getCategoryId() {
         return categoryId;
@@ -56,5 +59,29 @@ public class ProductRequest {
 
     public void setSku(String sku) {
         this.sku = sku;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getVariants() {
+        return variants;
+    }
+
+    public void setVariants(String variants) {
+        this.variants = variants;
+    }
+
+    public String getImages() {
+        return images;
+    }
+
+    public void setImages(String images) {
+        this.images = images;
     }
 }

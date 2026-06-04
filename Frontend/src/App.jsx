@@ -1,53 +1,87 @@
-import { Button } from "./components/ui/Button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./components/ui/Card";
-import { Form } from "./components/ui/Form";
-import { Input } from "./components/ui/Input";
-import { TicketCard } from "./features/tickets/TicketCard";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import Footer from './components/global/Footer'
+import Header from './components/global/Header'
+import { AuthProvider, useAuth } from './context/AuthContext'
+import CatalogPage from './pages/CatalogPage'
+import HomePage from './pages/HomePage'
+import LoginPage from './pages/LoginPage'
+import ManagementPage from './pages/ManagementPage'
 
-const App = () => {
-	const singleTicket = {
-		id: "TK-8092",
-		title: "Cannot access the billing dashboard",
-		status: "urgent",
-		description:
-			"Hello, I tried to update my credit card information this morning but the billing page keeps throwing a 500 Internal Server Error. I need this fixed before my subscription pauses.",
-		customerName: "Eleanor Shellstrop",
-		timeAgo: "15 mins ago",
-	};
+function RequireAuth({ children, managerOnly = false }) {
+  const { isAuthenticated, canManage } = useAuth()
+  const location = useLocation()
 
-	return (
-		<div>
-			<Button>Hello</Button>
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location }} />
+  }
 
+  if (managerOnly && !canManage) {
+    return <Navigate to="/catalog" replace />
+  }
 
-			<Form>
-				<Input type="text"></Input>
-			</Form>
+  return children
+}
 
-      {/* TicketCard Example */}
-			<TicketCard ticket={singleTicket}></TicketCard>
+function PublicOnlyRoute({ children }) {
+  const { isAuthenticated, canManage } = useAuth()
 
-      {/* Normal Card Example */}
-			<Card className="max-w-md">
-				<CardHeader>
-					<CardTitle>Standard Card Title</CardTitle>
-				</CardHeader>
+  if (isAuthenticated && canManage) {
+    return <Navigate to="/manage" replace />
+  }
 
-				<CardContent>
-					<p className="text-sm text-black opacity-80">
-						This is a normal card. You can drop text, images, or even entire
-						forms inside this content block. It will expand to fit whatever you
-						put in here.
-					</p>
-				</CardContent>
+  if (isAuthenticated) {
+    return <Navigate to="/catalog" replace />
+  }
 
-				<CardFooter className="justify-end gap-3 border-t border-border mt-4 pt-4">
-					<Button variant="secondary">Cancel</Button>
-					<Button variant="primary">Confirm</Button>
-				</CardFooter>
-			</Card>
-		</div>
-	);
-};
+  return children
+}
 
-export default App;
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route
+        path="/login"
+        element={
+          <PublicOnlyRoute>
+            <LoginPage />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/catalog"
+        element={
+          <RequireAuth>
+            <CatalogPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/manage"
+        element={
+          <RequireAuth managerOnly>
+            <ManagementPage />
+          </RequireAuth>
+        }
+      />
+      <Route path="/admin" element={<Navigate to="/manage" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <div className="min-h-screen bg-[var(--social-bg)]/50 text-[var(--text-h)]">
+          <Header />
+          <AppRoutes />
+          <Footer />
+        </div>
+      </BrowserRouter>
+    </AuthProvider>
+  )
+}
+
+export default App
