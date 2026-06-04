@@ -126,7 +126,6 @@ public class UserService {
             dto.setRoleName(user.getRole().getName());
         }
 
-        // Dùng isStatus() cho kiểu boolean nguyên thủy của Entity User
         dto.setStatus(user.isStatus());
 
         if (user.getCreatedAt() != null) {
@@ -142,10 +141,7 @@ public class UserService {
         user.setPassword(dto.getPassword());
         user.setFullName(dto.getFullName());
         user.setPhone(dto.getPhone());
-
-        // Dùng isStatus() từ DTO
         user.setStatus(dto.isStatus());
-
         user.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
 
         String roleName = (dto.getRoleName() != null && !dto.getRoleName().isBlank()) ? dto.getRoleName() : DEFAULT_ROLE_NAME;
