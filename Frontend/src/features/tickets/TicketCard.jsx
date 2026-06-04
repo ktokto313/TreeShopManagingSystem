@@ -27,6 +27,7 @@ export function TicketCard({ ticket, variant = "default" }) {
 	};
 
 	const ticketStatusTranslator = (status) => {
+		if (!status) return;
 		const _status = status.toLowerCase();
 		switch (_status) {
 			case "created":
