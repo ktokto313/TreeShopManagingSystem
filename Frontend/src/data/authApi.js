@@ -5,16 +5,15 @@ export const loginApi = async () => {
 			"Content-Type": "application/json",
 		},
 		body: JSON.stringify({
-			email: "testuser@gmail.com",
-			password: "123456",
+			email: "admin@greenshop.vn",
+			password: "admin",
 		}),
-        credentials: "include"
 	})
 
-    if (!response.ok) throw new Error("Failed to login");
+	if (!response.ok) throw new Error("Failed to login");
 	return response.json();
 };
 
 export const registerApi = async () => {
-    throw new Error("Register API has not been implemented")
+	throw new Error("Register API has not been implemented")
 }
