@@ -85,7 +85,9 @@ public class UserService {
             if (userDTO == null) {
                 throw new IllegalArgumentException("User data is required");
             }
-            if (userDTO.getEmail() != null) user.setEmail(userDTO.getEmail());
+            // Email cannot be updated via this endpoint for security reasons.
+            // A dedicated API for email change with verification should be implemented if needed.
+            // if (userDTO.getEmail() != null) user.setEmail(userDTO.getEmail());
             if (userDTO.getPassword() != null && !userDTO.getPassword().isBlank()) {
                 user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
             }
