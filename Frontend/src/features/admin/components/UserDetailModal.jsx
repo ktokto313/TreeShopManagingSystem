@@ -3,13 +3,9 @@ import { Modal } from "../../../components/ui/Modal";
 import { UserStatusBadge } from "./UserStatusBadge";
 import { UserRoleBadge } from "./UserRoleBadge";
 
-/**
- * @param {{ user: object|null, isOpen: boolean, onClose: () => void }} props
- */
-export function UserDetailModal({ user, isOpen, onClose }) {
-  if (!user) return null;
-
-  const Field = ({ label, value }) => (
+// Field component extracted to prevent recreation on each render
+function Field({ label, value }) {
+  return (
     <div>
       <p className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-0.5">
         {label}
@@ -17,6 +13,13 @@ export function UserDetailModal({ user, isOpen, onClose }) {
       <p className="text-sm text-stone-800">{value ?? "—"}</p>
     </div>
   );
+}
+
+/**
+ * @param {{ user: object|null, isOpen: boolean, onClose: () => void }} props
+ */
+export function UserDetailModal({ user, isOpen, onClose }) {
+  if (!user) return null;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="User Details">

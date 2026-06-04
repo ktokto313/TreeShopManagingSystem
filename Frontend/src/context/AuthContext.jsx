@@ -2,6 +2,15 @@ import { createContext, useContext, useEffect, useState } from 'react';
 
 const AuthContext = createContext();
 
+// Context hook - exported separately to satisfy fast refresh rules
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,6 +52,7 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+<<<<<<< HEAD
 
 export function useAuth() {
   const context = useContext(AuthContext);
@@ -51,3 +61,5 @@ export function useAuth() {
   }
   return context;
 }
+=======
+>>>>>>> 3961c7a (fix: fix ESLint errors)
