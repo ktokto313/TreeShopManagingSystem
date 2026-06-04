@@ -68,7 +68,7 @@ CREATE TABLE orders (
    shipping_fee     DECIMAL(10,2) NOT NULL DEFAULT 0.00,
    discount         DECIMAL(10,2) NOT NULL DEFAULT 0.00,
    status           VARCHAR(20) NOT NULL DEFAULT 'PENDING'
-                    CHECK (status IN ('PENDING','PROCESSING','SHIPPED','DELIVERED','CANCELLED')),
+                    CHECK (status IN ('PROCESSING','PENDING','DELIVERING','ARRIVED','RECEIVED','RETURN_PENDING','RETURNING','FAILED')),
    created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -502,13 +502,13 @@ INSERT INTO shopping_cart_entry (cart_id, product_id, quantity) VALUES
 --  ORDERS — 8 đơn hàng
 -- ============================================================
 INSERT INTO orders (customer_id, shipper_id, shipping_address, shipping_fee, discount, status) VALUES
-(5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 0,      'DELIVERED'),
-(6,  3, '45 Lê Lợi, Quận Hải Châu, Đà Nẵng',        30000, 15000,  'DELIVERED'),
-(7,  3, '78 Hoàn Kiếm, Hà Nội',                     30000, 0,      'SHIPPED'),
+(5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 0,      'DELIVERING'),
+(6,  3, '45 Lê Lợi, Quận Hải Châu, Đà Nẵng',        30000, 15000,  'DELIVERING'),
+(7,  3, '78 Hoàn Kiếm, Hà Nội',                     30000, 0,      'ARRIVED'),
 (8,  NULL,'22 Trần Phú, Nha Trang, Khánh Hòa',      30000, 0,      'PROCESSING'),
 (9,  NULL,'55 Lý Thường Kiệt, Huế',                 30000, 20000,  'PENDING'),
 (10, NULL,'99 Nguyễn Huệ, Cần Thơ',                 30000, 0,      'PENDING'),
-(5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 0,      'DELIVERED'),
+(5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 0,      'DELIVERING'),
 (6,  NULL,'45 Lê Lợi, Quận Hải Châu, Đà Nẵng',      30000, 10000,  'PROCESSING');
 
 -- ============================================================
