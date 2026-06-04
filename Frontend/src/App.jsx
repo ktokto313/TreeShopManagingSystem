@@ -1,7 +1,13 @@
+<<<<<<< HEAD
 import { Routes, Route, Navigate } from "react-router-dom";
 import TicketDashboard from "./features/tickets/TicketDashboard";
 import TicketDetail from "./features/tickets/TicketDetail";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+=======
+import { Route, Routes, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./hooks/useAuth";
+>>>>>>> a916de3 (fix: fix ESLint errors (again))
 import UserManagement from "./pages/UserManagement";
 import Authentication from "./pages/Authentication";
 
