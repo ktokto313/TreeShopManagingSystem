@@ -8,7 +8,7 @@ export const Button = forwardRef(({
   className = '', 
   ...props 
 }, ref) => {
-  const baseStyles = "inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
+  const baseStyles = "inline-flex cursor-pointer items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
 
   const variants = {
     primary: "bg-interactive hover:bg-interactive-hover text-white focus-visible:ring-interactive",
