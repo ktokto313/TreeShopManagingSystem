@@ -39,9 +39,12 @@ export default function Header() {
 
           {isAuthenticated ? (
             <div className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--social-bg)] px-3 py-1.5">
-              <span className="text-xs text-[var(--text)]">
+              <Link
+                  to="/profile"
+                  className="text-xs text-[var(--text)] hover:underline"
+              >
                 {user?.fullName || user?.email || 'Đã đăng nhập'}
-              </span>
+              </Link>
               <button
                 type="button"
                 onClick={logout}

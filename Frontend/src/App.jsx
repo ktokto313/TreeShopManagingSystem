@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import ManagementPage from './pages/ManagementPage'
 import RegisterPage from './pages/RegisterPage'
+import ProfilePage from './pages/ProfilePage'
 function RequireAuth({ children, managerOnly = false }) {
   const { isAuthenticated, canManage } = useAuth()
   const location = useLocation()
@@ -64,6 +65,14 @@ function AppRoutes() {
           </RequireAuth>
         }
       />
+        <Route
+            path="/profile"
+            element={
+                <RequireAuth>
+                    <ProfilePage />
+                </RequireAuth>
+            }
+        />
       <Route
         path="/manage"
         element={
