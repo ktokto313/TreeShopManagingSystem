@@ -1,20 +1,13 @@
 import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
-function canAccessManagement(role) {
-  return role === 'MANAGER' || role === 'SYSTEM_ADMIN'
-}
-
-export default function LoginPage() {
+export default function RegisterPage() {
   const navigate = useNavigate()
-  const location = useLocation()
-  const { login } = useAuth()
-  const [values, setValues] = useState({ email: '', password: '' })
+  const { register } = useAuth()
+  const [values, setValues] = useState({ fullName: '', email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  const fromPath = location.state?.from?.pathname || '/manage'
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -26,13 +19,10 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     try {
-      const loggedInUser = await login(values.email, values.password)
-      const targetPath = canAccessManagement(loggedInUser.role)
-          ? fromPath === '/login' ? '/manage' : fromPath
-          : '/catalog'
-      navigate(targetPath, { replace: true })
-    } catch (loginError) {
-      setError(loginError.message || 'Invalid email or password')
+      await register(values.fullName, values.email, values.password)
+      navigate('/login')
+    } catch (err) {
+      setError(err.message || 'Registration failed')
     } finally {
       setLoading(false)
     }
@@ -40,28 +30,14 @@ export default function LoginPage() {
 
   return (
       <div className="min-h-[calc(100vh-4rem)] flex">
-        {/* Left panel */}
-        <div className="w-[40%] bg-[#7a9ab0] flex flex-col items-center justify-center p-12 text-white">
-          <h2 className="text-xl font-bold tracking-widest uppercase mb-4">Register</h2>
-          <p className="mb-8 text-center text-sm text-white/90">
-            Don't have an account? Register one!
-          </p>
-          <button
-              onClick={() => navigate('/register')}
-              className="border border-white text-white px-6 py-2.5 text-xs font-bold tracking-widest uppercase hover:bg-white hover:text-[#7a9ab0] transition-colors duration-200"
-          >
-            Register an account
-          </button>
-        </div>
-
-        {/* Right panel */}
+        {/* Left panel — Register form */}
         <div className="w-[60%] bg-white flex flex-col items-center justify-center px-16 py-12">
           <div className="w-full max-w-md">
             <h1
                 className="text-2xl font-bold tracking-wider uppercase mb-8"
                 style={{ color: '#2c3e2d', fontFamily: 'Georgia, serif' }}
             >
-              Login
+              Register
             </h1>
 
             {error && (
@@ -73,7 +49,21 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit}>
               <div className="mb-5">
                 <label className="block text-sm text-gray-700 mb-1.5">
-                  Username or email address *
+                  Full name *
+                </label>
+                <input
+                    type="text"
+                    name="fullName"
+                    required
+                    value={values.fullName}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-500 transition-colors"
+                />
+              </div>
+
+              <div className="mb-5">
+                <label className="block text-sm text-gray-700 mb-1.5">
+                  Email address *
                 </label>
                 <input
                     type="email"
@@ -85,7 +75,7 @@ export default function LoginPage() {
                 />
               </div>
 
-              <div className="mb-5">
+              <div className="mb-6">
                 <label className="block text-sm text-gray-700 mb-1.5">
                   Password *
                 </label>
@@ -99,31 +89,30 @@ export default function LoginPage() {
                 />
               </div>
 
-              <div className="flex items-center mb-6">
-                <input
-                    type="checkbox"
-                    id="remember"
-                    className="w-4 h-4 border border-gray-400 mr-2.5 cursor-pointer accent-[#2c5f2e]"
-                />
-                <label htmlFor="remember" className="text-sm text-gray-700 cursor-pointer">
-                  Remember me
-                </label>
-              </div>
-
               <button
                   type="submit"
                   disabled={loading}
                   className="px-8 py-3 text-xs font-bold tracking-widest uppercase text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
                   style={{ backgroundColor: '#2c5f2e' }}
               >
-                {loading ? 'Logging in...' : 'Log in'}
+                {loading ? 'Registering...' : 'Register an account'}
               </button>
             </form>
-
-            <p className="mt-6 text-sm text-gray-500 cursor-pointer hover:underline w-fit">
-              Lost your password?
-            </p>
           </div>
+        </div>
+
+        {/* Right panel — Login CTA */}
+        <div className="w-[40%] bg-[#7a9ab0] flex flex-col items-center justify-center p-12 text-white">
+          <h2 className="text-xl font-bold tracking-widest uppercase mb-4">Login</h2>
+          <p className="mb-8 text-center text-sm text-white/90">
+            Already have an account? Log in!
+          </p>
+          <button
+              onClick={() => navigate('/login')}
+              className="border border-white text-white px-6 py-2.5 text-xs font-bold tracking-widest uppercase hover:bg-white hover:text-[#7a9ab0] transition-colors duration-200"
+          >
+            Login
+          </button>
         </div>
       </div>
   )

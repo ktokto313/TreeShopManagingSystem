@@ -6,7 +6,7 @@ import CatalogPage from './pages/CatalogPage'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import ManagementPage from './pages/ManagementPage'
-
+import RegisterPage from './pages/RegisterPage'
 function RequireAuth({ children, managerOnly = false }) {
   const { isAuthenticated, canManage } = useAuth()
   const location = useLocation()
@@ -48,6 +48,14 @@ function AppRoutes() {
           </PublicOnlyRoute>
         }
       />
+        <Route
+            path="/register"
+            element={
+            <PublicOnlyRoute>
+                <RegisterPage />
+            </PublicOnlyRoute>
+        }
+        />
       <Route
         path="/catalog"
         element={
