@@ -1,58 +1,53 @@
-import { createContext, useState } from "react";
-import { loginApi, logoutApi, registerApi } from "../data/authApi";
+import { createContext, useContext, useEffect, useState } from 'react';
 
 const AuthContext = createContext();
 
-const AuthProvider = ({ children }) => {
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
-    
-    const [user, setUser] = useState(() => {
-        const savedUser = localStorage.getItem("currentUser");
-        return savedUser ? JSON.parse(savedUser) : null;
-    });
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    const executeAuth = async (authOption = "login") => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            let userData;
+  useEffect(() => {
+    // Fetch current user profile from /api/users/me
+    const fetchUser = async () => {
+      try {
+        const response = await fetch('/api/users/me', {
+          method: 'GET',
+          credentials: 'include',
+        });
 
-            if (authOption === "login") {
-                console.log("1. Sending login request to backend...");
-                userData = await loginApi();
-                console.log("2. Backend responded with:", userData);
-            } else if (authOption === "register") {
-                userData = await registerApi();
-            }
-
-            // Update React State
-            setUser(userData);
-            
-            // SAVE TO HARD DRIVE! (This is what keeps you logged in)
-            console.log("3. Saving user to LocalStorage...");
-            localStorage.setItem("currentUser", JSON.stringify(userData));
-            console.log("4. Save complete!");
-
-        } catch (err) {
-            console.error("Login crashed:", err);
-            setError(err);
-        } finally {
-            setIsLoading(false);
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+        } else if (response.status === 401) {
+          // Not authenticated
+          setUser(null);
+        } else {
+          setError('Failed to fetch user profile');
         }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    const logout = async () => {
-        console.log("1. Logging out...");
-        const logoutResponse = await logoutApi();
-        console.log("Backend responded with: " + logoutResponse);
-    };
+    fetchUser();
+  }, []);
 
-    return (
-        <AuthContext.Provider value={{ user, isLoading, error, executeAuth, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
-};
+  const isAdmin = user?.roleName === 'SYSTEM_ADMIN';
 
-export { AuthContext, AuthProvider };
+  return (
+    <AuthContext.Provider value={{ user, isAdmin, isLoading, error }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+}

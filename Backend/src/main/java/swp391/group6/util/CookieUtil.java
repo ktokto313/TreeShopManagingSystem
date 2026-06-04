@@ -9,21 +9,30 @@ public final class CookieUtil {
     //TODO: remove hardcode value when migrate to docker
     private static Long cookieMaxAge = 86400L;
     private static String cookieName = "hihi";
+    private static boolean cookieSecure = true;
 
     private CookieUtil() {}
 
-    //TODO: uncomment when migrate to docker
-//    static {
-//        cookieMaxAge = Long.parseLong(System.getenv("JWT_LIFETIME"));
-//        cookieName = System.getenv("JWT_COOKIE_NAME");
-//    }
+    // Configure from environment when available (useful for docker / dev)
+    static {
+        try {
+            String lifetime = System.getenv("JWT_LIFETIME");
+            if (lifetime != null) cookieMaxAge = Long.parseLong(lifetime);
+        } catch (Exception ignored) {}
+
+        String envName = System.getenv("JWT_COOKIE_NAME");
+        if (envName != null && !envName.isBlank()) cookieName = envName;
+
+        String secure = System.getenv("JWT_COOKIE_SECURE");
+        if (secure != null) cookieSecure = Boolean.parseBoolean(secure);
+    }
 
     public static ResponseCookie makeCookieFromJWT(String jwt) {
         return ResponseCookie.from(cookieName)
                 .value(jwt)
                 .httpOnly(true)
                 .path("/")
-                .secure(true)
+                .secure(cookieSecure)
                 .sameSite("Strict")
                 .maxAge(cookieMaxAge)
                 .build();
@@ -33,7 +42,7 @@ public final class CookieUtil {
         return ResponseCookie.from(cookieName)
                 .value("")
                 .path("/")
-                .secure(true)
+                .secure(cookieSecure)
                 .httpOnly(true)
                 .sameSite("Strict")
                 .maxAge(0)

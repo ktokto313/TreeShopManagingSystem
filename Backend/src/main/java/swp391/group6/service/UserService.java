@@ -127,6 +127,12 @@ public class UserService {
                 .map(this::convertToDTO);
     }
 
+    // Allow users to view their own profile regardless of role protection
+    public Optional<UserDTO> getUserByEmailUnprotected(String email) {
+        return userRepository.findByEmail(email)
+                .map(this::convertToDTO);
+    }
+
     private UserDTO convertToDTO(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
