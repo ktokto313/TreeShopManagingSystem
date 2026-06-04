@@ -25,14 +25,14 @@ public class UserController {
     //get all users
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers(HttpServletRequest request) {
-        if (!isSystemAdmin(request)) {
+        LoginResponse currentUser = JWTUtil.getUser(request);
+        if (currentUser == null || !"SYSTEM_ADMIN".equalsIgnoreCase(currentUser.getRole())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-
         List<UserDTO> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
-    //get user by id
+
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable long id, HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);
@@ -40,7 +40,9 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        if (!isSystemAdmin(request) && !(currentUser.getId() == id)) {
+        String role = currentUser.getRole();
+        if (!"SYSTEM_ADMIN".equalsIgnoreCase(role) && !(currentUser.getId() == id) &&
+            !"MANAGER".equalsIgnoreCase(role) && !"SHIPPER".equalsIgnoreCase(role) && !"SUPPORT_AGENT".equalsIgnoreCase(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -60,10 +62,11 @@ public class UserController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
-    //create a new user
+
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO, HttpServletRequest request) {
-        if (!isSystemAdmin(request)) {
+        LoginResponse currentUser = JWTUtil.getUser(request);
+        if (currentUser == null || !"SYSTEM_ADMIN".equalsIgnoreCase(currentUser.getRole())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -74,7 +77,7 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
     }
-    //update user via id
+
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable long id,
                                                @RequestBody UserDTO userDTO,
@@ -84,7 +87,9 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        if (!isSystemAdmin(request) && !(currentUser.getId() == id)) {
+        String role = currentUser.getRole();
+        if (!"SYSTEM_ADMIN".equalsIgnoreCase(role) && !(currentUser.getId() == id) &&
+            !"MANAGER".equalsIgnoreCase(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -116,10 +121,11 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
     }
-    //delete a user
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable long id, HttpServletRequest request) {
-        if (!isSystemAdmin(request)) {
+        LoginResponse currentUser = JWTUtil.getUser(request);
+        if (currentUser == null || !"SYSTEM_ADMIN".equalsIgnoreCase(currentUser.getRole())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -132,7 +138,8 @@ public class UserController {
 
     @PatchMapping("/{id}/ban")
     public ResponseEntity<UserDTO> banUser(@PathVariable long id, HttpServletRequest request) {
-        if (!isSystemAdmin(request)) {
+        LoginResponse currentUser = JWTUtil.getUser(request);
+        if (currentUser == null || !"SYSTEM_ADMIN".equalsIgnoreCase(currentUser.getRole())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -145,7 +152,8 @@ public class UserController {
 
     @PatchMapping("/{id}/unban")
     public ResponseEntity<UserDTO> unbanUser(@PathVariable long id, HttpServletRequest request) {
-        if (!isSystemAdmin(request)) {
+        LoginResponse currentUser = JWTUtil.getUser(request);
+        if (currentUser == null || !"SYSTEM_ADMIN".equalsIgnoreCase(currentUser.getRole())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -156,12 +164,17 @@ public class UserController {
         return ResponseEntity.ok(unbannedUser);
     }
 
-    //search user by name or email
     @GetMapping("/search")
     public ResponseEntity<?> searchUsers(@RequestParam(required = false) String query,
                                          @RequestParam(required = false) String email,
                                          HttpServletRequest request) {
-        if (!isSystemAdmin(request)) {
+        LoginResponse currentUser = JWTUtil.getUser(request);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String role = currentUser.getRole();
+        if (!"SYSTEM_ADMIN".equalsIgnoreCase(role) && !"MANAGER".equalsIgnoreCase(role) && !"SUPPORT_AGENT".equalsIgnoreCase(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
