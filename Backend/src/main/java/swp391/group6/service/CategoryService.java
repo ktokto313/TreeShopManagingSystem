@@ -1,6 +1,7 @@
 package swp391.group6.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Sort;
 import swp391.group6.dto.CategoryRequest;
 import swp391.group6.dto.CategoryResponse;
 import swp391.group6.model.Category;
@@ -19,7 +20,7 @@ public class CategoryService {
     }
 
     public List<CategoryResponse> listCategories() {
-        return categoryRepository.findAll()
+        return categoryRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
                 .stream()
                 .map(this::toResponse)
                 .toList();

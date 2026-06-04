@@ -2,32 +2,10 @@ import Badge from '../../../components/ui/Badge'
 import Button from '../../../components/ui/Button'
 import Card from '../../../components/ui/Card'
 import { formatCurrency, parseCatalogImages } from '../utils/catalogUtils'
-import { parseVariantGroups } from '../../products/utils/variantUtils'
-
-function summarizeText(value, maxLength = 110) {
-  if (!value) {
-    return 'Chưa có mô tả.'
-  }
-
-  const stringValue = String(value)
-  return stringValue.length > maxLength ? `${stringValue.slice(0, maxLength)}...` : stringValue
-}
-
-function summarizeVariant(group) {
-  if (!group?.name) {
-    return ''
-  }
-
-  const values = Array.isArray(group.values) ? group.values : []
-  const visibleValues = values.slice(0, 3)
-  const suffix = values.length > visibleValues.length ? '…' : ''
-
-  return `${group.name}: ${visibleValues.join(', ')}${suffix}`
-}
 
 export default function CatalogProductCard({ product, categoryName, onOpen }) {
   const images = parseCatalogImages(product.images)
-  const variantGroups = parseVariantGroups(product.variants)
+  const isInStock = Number(product.stock ?? 0) > 0
 
   return (
     <Card className="flex h-full flex-col gap-4 border-[var(--border)] bg-white/95 p-4 transition hover:-translate-y-0.5 hover:shadow-md">
@@ -36,7 +14,7 @@ export default function CatalogProductCard({ product, categoryName, onOpen }) {
           <div className="space-y-1">
             <h3 className="text-lg font-semibold text-[var(--text-h)]">{product.name}</h3>
           </div>
-          <ProductBadge isActive={product.status} />
+          <ProductBadge isInStock={isInStock} />
         </div>
 
         <div className="flex h-52 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-100 via-white to-lime-100 text-sm text-[var(--text)]">
@@ -52,26 +30,6 @@ export default function CatalogProductCard({ product, categoryName, onOpen }) {
         <Badge status="active" className="bg-emerald-100 text-emerald-700">
           {categoryName || `Danh mục ${product.categoryId ?? ''}`}
         </Badge>
-      </div>
-
-      <div className="space-y-3 rounded-2xl border border-[var(--border)] bg-[var(--social-bg)] p-4">
-        <p className="text-sm leading-6 text-[var(--text)]">{summarizeText(product.description)}</p>
-        <div className="flex flex-wrap gap-2 text-sm text-[var(--text-h)]">
-          {variantGroups.length ? (
-            variantGroups.map((group) => (
-              <span
-                key={group.name}
-                className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-[var(--text-h)]"
-              >
-                {summarizeVariant(group)}
-              </span>
-            ))
-          ) : (
-            <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-[var(--text-h)]">
-              Chưa có biến thể nào
-            </span>
-          )}
-        </div>
       </div>
 
       <div className="grid gap-2 rounded-2xl bg-[var(--social-bg)] px-4 py-3 text-sm text-[var(--text-h)]">
@@ -94,6 +52,6 @@ export default function CatalogProductCard({ product, categoryName, onOpen }) {
   )
 }
 
-function ProductBadge({ isActive }) {
-  return <Badge status={isActive ? 'active' : 'inactive'}>{isActive ? 'Đang bán' : 'Tạm ẩn'}</Badge>
+function ProductBadge({ isInStock }) {
+  return <Badge status={isInStock ? 'active' : 'inactive'}>{isInStock ? 'Còn hàng' : 'Hết hàng'}</Badge>
 }

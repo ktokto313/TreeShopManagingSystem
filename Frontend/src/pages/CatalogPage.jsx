@@ -29,9 +29,9 @@ const sortOptions = [
 ]
 
 const statusOptions = [
-  { value: '', label: 'Tất cả trạng thái' },
-  { value: 'true', label: 'Chỉ đang bán' },
-  { value: 'false', label: 'Chỉ đã ẩn' },
+  { value: '', label: 'Tất cả tình trạng' },
+  { value: 'true', label: 'Chỉ còn hàng' },
+  { value: 'false', label: 'Chỉ hết hàng' },
 ]
 
 function getActiveFilterCount(filters) {
@@ -176,13 +176,6 @@ export default function CatalogPage() {
       <section className="bg-gradient-to-br from-emerald-50 via-white to-lime-50">
         <Container className="py-14 lg:py-20">
           <div className="space-y-6">
-            <div className="flex flex-wrap items-center gap-3">
-              <Badge status="active" className="bg-emerald-100 text-emerald-700">
-                Catalog khách hàng
-              </Badge>
-              <span className="text-sm text-[var(--text)]">Xem sản phẩm công khai</span>
-            </div>
-
             <div className="space-y-4">
               <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-[var(--text-h)] sm:text-5xl">
                 Khám phá cây xanh phù hợp cho nhà ở, bàn làm việc và góc thư giãn
@@ -208,13 +201,8 @@ export default function CatalogPage() {
           {showFilters ? (
             <aside className="space-y-6">
               <Card className="space-y-5">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <h2 className="text-xl font-semibold text-[var(--text-h)]">Bộ lọc sản phẩm</h2>
-                  </div>
-                  <Badge status={loading ? 'inactive' : 'active'}>
-                    {loading ? 'Đang tải' : 'Sẵn sàng'}
-                  </Badge>
+                <div className="space-y-1">
+                  <h2 className="text-xl font-semibold text-[var(--text-h)]">Bộ lọc sản phẩm</h2>
                 </div>
 
                 <Input
@@ -242,7 +230,7 @@ export default function CatalogPage() {
                 />
 
                 <Select
-                  label="Trạng thái"
+                  label="Tình trạng kho"
                   value={filters.status}
                   onChange={(event) =>
                     setFilters((current) => ({ ...current, status: event.target.value }))
