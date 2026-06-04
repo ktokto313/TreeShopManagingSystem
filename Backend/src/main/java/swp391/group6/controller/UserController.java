@@ -22,7 +22,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    // get all users
+    // SYSTEM_ADMIN only
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers(HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);
@@ -30,10 +30,10 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        List<UserDTO> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    // Get by id (role-based)
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable long id, HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);
@@ -43,15 +43,10 @@ public class UserController {
 
         String role = currentUser.getRole();
 
-        boolean isOwnProfile = userService.getUserByEmail(currentUser.getEmail())
-                .map(u -> u.getId() == id)
-                .orElse(false);
-
         if (!"SYSTEM_ADMIN".equalsIgnoreCase(role)
-                && !isOwnProfile
                 && !"MANAGER".equalsIgnoreCase(role)
-                && !"SHIPPER".equalsIgnoreCase(role)
-                && !"SUPPORT_AGENT".equalsIgnoreCase(role)) {
+                && !"SUPPORT_AGENT".equalsIgnoreCase(role)
+                && !"SHIPPER".equalsIgnoreCase(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -60,18 +55,7 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<UserDTO> getMyProfile(HttpServletRequest request) {
-        LoginResponse currentUser = JWTUtil.getUser(request);
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        return userService.getUserByEmail(currentUser.getEmail())
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
+    // SYSTEM_ADMIN only
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO, HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);
@@ -87,6 +71,7 @@ public class UserController {
         }
     }
 
+    // SYSTEM_ADMIN / MANAGER
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable long id,
                                               @RequestBody UserDTO userDTO,
@@ -98,50 +83,20 @@ public class UserController {
 
         String role = currentUser.getRole();
 
-        boolean isOwnProfile = userService.getUserByEmail(currentUser.getEmail())
-                .map(u -> u.getId() == id)
-                .orElse(false);
-
         if (!"SYSTEM_ADMIN".equalsIgnoreCase(role)
-                && !isOwnProfile
                 && !"MANAGER".equalsIgnoreCase(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        try {
-            UserDTO updatedUser = userService.updateUser(id, userDTO);
-            if (updatedUser == null) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.ok(updatedUser);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+        UserDTO updatedUser = userService.updateUser(id, userDTO);
+        if (updatedUser == null) {
+            return ResponseEntity.notFound().build();
         }
+
+        return ResponseEntity.ok(updatedUser);
     }
 
-    @PutMapping("/me")
-    public ResponseEntity<UserDTO> updateMyProfile(@RequestBody UserDTO userDTO,
-                                                   HttpServletRequest request) {
-        LoginResponse currentUser = JWTUtil.getUser(request);
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        try {
-            UserDTO updatedUser = userService.getUserByEmail(currentUser.getEmail())
-                    .map(u -> userService.updateUser(u.getId(), userDTO))
-                    .orElse(null);
-
-            if (updatedUser == null) {
-                return ResponseEntity.notFound().build();
-            }
-
-            return ResponseEntity.ok(updatedUser);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
+    // SYSTEM_ADMIN only
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable long id, HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);
@@ -179,18 +134,19 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        UserDTO unbannedUser = userService.unbanUser(id);
-        if (unbannedUser == null) {
+        UserDTO user = userService.unbanUser(id);
+        if (user == null) {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(unbannedUser);
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/search")
     public ResponseEntity<?> searchUsers(@RequestParam(required = false) String query,
                                          @RequestParam(required = false) String email,
                                          HttpServletRequest request) {
+
         LoginResponse currentUser = JWTUtil.getUser(request);
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -206,7 +162,6 @@ public class UserController {
 
         if (email != null && !email.isBlank()) {
             Optional<UserDTO> user = userService.getUserByEmail(email);
-
             return user.<ResponseEntity<?>>map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.notFound().build());
         }
@@ -215,8 +170,6 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
 
-        List<UserDTO> users = userService.searchUsers(query);
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userService.searchUsers(query));
     }
-
 }
