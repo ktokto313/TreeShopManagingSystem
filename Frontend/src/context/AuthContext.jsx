@@ -1,96 +1,53 @@
-import { createContext, useContext, useMemo, useState, useCallback } from 'react'
-import {
-  login as loginRequest,
-  register as registerRequest,
-  logout as logoutRequest,
-} from '../features/auth/api/authApi'
+import { createContext, useContext, useEffect, useState } from 'react';
 
-const STORAGE_KEY = 'treeshop-auth-user'
-
-const AuthContext = createContext(null)
-
-function readStoredUser() {
-  if (typeof window === 'undefined') return null
-  try {
-    const stored = window.localStorage.getItem(STORAGE_KEY)
-    return stored ? JSON.parse(stored) : null
-  } catch {
-    return null
-  }
-}
-
-function canManageRole(role) {
-  return role === 'MANAGER' || role === 'SYSTEM_ADMIN'
-}
+const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(readStoredUser)
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const persistUser = useCallback((userData) => {
-    setUser(userData)
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(userData))
-    }
-  }, [])
+  useEffect(() => {
+    // Fetch current user profile from /api/users/me
+    const fetchUser = async () => {
+      try {
+        const response = await fetch('/api/users/me', {
+          method: 'GET',
+          credentials: 'include',
+        });
 
-  const login = useCallback(async (email, password) => {
-    const loggedInUser = await loginRequest(email, password)
-    persistUser(loggedInUser)
-    return loggedInUser
-  }, [persistUser])
-
-  const register = useCallback(async (fullName, email, password) => {
-    await registerRequest(fullName, email, password)
-    await login(email, password)
-  }, [login])
-
-  const logout = useCallback(async () => {
-    try {
-      await logoutRequest()
-    } finally {
-      setUser(null)
-      if (typeof window !== 'undefined') {
-        window.localStorage.removeItem(STORAGE_KEY)
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+        } else if (response.status === 401) {
+          // Not authenticated
+          setUser(null);
+        } else {
+          setError('Failed to fetch user profile');
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
       }
-    }
-  }, [])
+    };
 
-  const loginWithGoogle = useCallback((userData) => {
-    persistUser(userData)
-  }, [persistUser])
+    fetchUser();
+  }, []);
 
-  const updateUser = useCallback((updatedData) => {
-    if (!user) return
-    const updated = {
-      ...user,
-      fullName: updatedData.fullName,
-      phone: updatedData.phone,
-    }
-    persistUser(updated)
-  }, [user, persistUser])
+  const isAdmin = user?.roleName === 'SYSTEM_ADMIN';
 
-  const value = useMemo(
-      () => ({
-        user,
-        login,
-        register,
-        logout,
-        updateUser,
-        loginWithGoogle,
-        isAuthenticated: Boolean(user),
-        canManage: canManageRole(user?.role),
-      }),
-      [user, login, register, logout, updateUser, loginWithGoogle],
-  )
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={{ user, isAdmin, isLoading, error }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
-  const context = useContext(AuthContext)
+  const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
+    throw new Error('useAuth must be used within AuthProvider');
   }
-  return context
+  return context;
 }

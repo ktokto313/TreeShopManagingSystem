@@ -22,11 +22,28 @@ public class JWTUtil {
     private JWTUtil() {}
 
     static {
-        //TODO uncomment when migrate to docker
-//        cookieName = System.getenv("JWT_COOKIE_NAME");
-//        jwtIssuer = System.getenv("JWT_ISSUER");
-//        lifetime = Long.parseLong(System.getenv("JWT_LIFETIME"));
-//        algorithm = Algorithm.HMAC256(System.getenv("JWT_SECRET"));
+        // Allow override via environment for docker
+        String secret = System.getenv("JWT_SECRET");
+        if (secret != null && !secret.isBlank()) {
+            algorithm = Algorithm.HMAC256(secret);
+        }
+        
+        String issuer = System.getenv("JWT_ISSUER");
+        if (issuer != null && !issuer.isBlank()) {
+            jwtIssuer = issuer;
+        }
+        
+        String lifetimeEnv = System.getenv("JWT_LIFETIME");
+        if (lifetimeEnv != null) {
+            try {
+                lifetime = Long.parseLong(lifetimeEnv);
+            } catch (Exception ignored) {}
+        }
+        
+        String name = System.getenv("JWT_COOKIE_NAME");
+        if (name != null && !name.isBlank()) {
+            cookieName = name;
+        }
     }
 
     public static String createToken(LoginResponse user) {
