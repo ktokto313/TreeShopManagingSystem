@@ -1,6 +1,7 @@
 package swp391.group6.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Sort;
 import swp391.group6.dto.ProductRequest;
 import swp391.group6.dto.ProductResponse;
 import swp391.group6.model.Category;
@@ -27,7 +28,7 @@ public class ProductService {
     }
 
     public List<ProductResponse> listProducts(String keyword, Long categoryId, Boolean status) {
-        return productRepository.findAll().stream()
+        return productRepository.findAll(Sort.by(Sort.Direction.ASC, "id")).stream()
                 .filter(product -> keyword == null
                         || keyword.isEmpty()
                         || containsIgnoreCase(product.getName(), keyword)

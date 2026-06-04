@@ -343,9 +343,6 @@ export default function ManagementPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Badge status={loading ? 'inactive' : 'active'}>
-              {loading ? 'Đang tải' : 'Sẵn sàng'}
-            </Badge>
             <Button variant="secondary" onClick={() => void loadCategories()}>
               Tải lại danh mục
             </Button>
