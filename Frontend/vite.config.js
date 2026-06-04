@@ -5,4 +5,13 @@ import tailwindcss from "@tailwindcss/vite";
 // https://vite.dev/config/
 export default defineConfig({
 	plugins: [react(), tailwindcss()],
+	server: {
+		proxy: {
+		// Whenever React tries to fetch '/api/...', Vite will forward it to port 8080
+		'/api': {
+			target: 'http://localhost:8080',
+			changeOrigin: true,
+		}
+		}
+	}
 });
