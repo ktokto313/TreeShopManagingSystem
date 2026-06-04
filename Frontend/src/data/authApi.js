@@ -5,7 +5,7 @@ export const loginApi = async () => {
 			"Content-Type": "application/json",
 		},
 		body: JSON.stringify({
-			email: "testuser@gmail.com",
+			email: "support@greenshop.vn",
 			password: "123456",
 		}),
         credentials: "include"

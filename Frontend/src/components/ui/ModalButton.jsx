@@ -7,6 +7,7 @@ import { IoWarningOutline } from "react-icons/io5";
 const ModalButton = ({
 	isLoading,
 	buttonClasses,
+	buttonDisabled,
 	modalClasses,
 	modalTitle,
 	buttonLabel,
@@ -24,6 +25,7 @@ const ModalButton = ({
 	return (
 		<>
 			<Button
+				disabled={buttonDisabled}
 				className={cn(buttonClasses)}
 				onClick={() => setIsModalOpen(true)}
 			>
