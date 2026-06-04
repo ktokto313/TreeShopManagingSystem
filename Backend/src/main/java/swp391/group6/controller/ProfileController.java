@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.dto.ProfileResponse;
-import swp391.group6.model.User;
+import swp391.group6.dto.UserDTO;
 import swp391.group6.service.UserService;
 import swp391.group6.util.JWTUtil;
 
@@ -30,11 +30,11 @@ public class ProfileController {
                     .body("Invalid token");
         }
 
-        User user = userService.findByEmail(jwtUser.getEmail());
+        UserDTO user = userService.getUserByEmail(jwtUser.getEmail())
+                .orElse(null);
 
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("User not found");
+            return ResponseEntity.notFound().build();
         }
 
         ProfileResponse response = new ProfileResponse(
