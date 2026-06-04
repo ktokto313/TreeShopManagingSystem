@@ -35,11 +35,28 @@ public class UserController {
     //get user by id
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable long id, HttpServletRequest request) {
-        if (!isSystemAdmin(request)) {
+        LoginResponse currentUser = JWTUtil.getUser(request);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if (!isSystemAdmin(request) && !(currentUser.getId() == id)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         return userService.getUserById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getMyProfile(HttpServletRequest request) {
+        LoginResponse currentUser = JWTUtil.getUser(request);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        return userService.getUserById(currentUser.getId())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -60,14 +77,37 @@ public class UserController {
     //update user via id
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable long id,
-                                              @RequestBody UserDTO userDTO,
-                                              HttpServletRequest request) {
-        if (!isSystemAdmin(request)) {
+                                               @RequestBody UserDTO userDTO,
+                                               HttpServletRequest request) {
+        LoginResponse currentUser = JWTUtil.getUser(request);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if (!isSystemAdmin(request) && !(currentUser.getId() == id)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         try {
             UserDTO updatedUser = userService.updateUser(id, userDTO);
+            if (updatedUser == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(updatedUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserDTO> updateMyProfile(@RequestBody UserDTO userDTO, HttpServletRequest request) {
+        LoginResponse currentUser = JWTUtil.getUser(request);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            UserDTO updatedUser = userService.updateUser(currentUser.getId(), userDTO);
             if (updatedUser == null) {
                 return ResponseEntity.notFound().build();
             }
