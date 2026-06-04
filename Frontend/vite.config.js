@@ -7,11 +7,11 @@ export default defineConfig({
 	plugins: [react(), tailwindcss()],
 	server: {
 		proxy: {
-		// Whenever React tries to fetch '/api/...', Vite will forward it to port 8080
-		'/api': {
-			target: 'http://localhost:8080',
-			changeOrigin: true,
-		}
+			// Forward '/api' requests to backend container (port 8081)
+			'/api': {
+				target: 'http://localhost:8081',
+				changeOrigin: true,
+			},
 		}
 	}
 });

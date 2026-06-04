@@ -67,7 +67,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        return userService.getUserByEmail(currentUser.getEmail())
+        // Allow users to view their own profile regardless of role protection
+        return userService.getUserByEmailUnprotected(currentUser.getEmail())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
