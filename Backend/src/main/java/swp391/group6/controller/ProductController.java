@@ -27,11 +27,12 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductResponse> listProducts(
+    public ResponseEntity<List<ProductResponse>> listProducts(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Boolean status) {
-        return productService.listProducts(keyword, categoryId, status);
+        List<ProductResponse> products = productService.listProducts(keyword, categoryId, status);
+        return ResponseEntity.ok(products);
     }
 
     @GetMapping("/{id}")

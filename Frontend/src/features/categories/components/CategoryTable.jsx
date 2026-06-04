@@ -2,9 +2,9 @@ import Button from '../../../components/ui/Button'
 
 export default function CategoryTable({ categories = [], onEdit, onDelete }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-[var(--border)]">
+    <div className="max-h-[65vh] overflow-auto rounded-lg border border-[var(--border)]">
       <table className="w-full border-collapse text-left text-sm">
-        <thead className="bg-[var(--social-bg)] text-xs uppercase text-[var(--text)]">
+        <thead className="sticky top-0 z-10 bg-[var(--social-bg)] text-xs uppercase text-[var(--text)]">
           <tr>
             <th className="px-4 py-3 font-medium">Tên</th>
             <th className="px-4 py-3 font-medium">Mô tả</th>

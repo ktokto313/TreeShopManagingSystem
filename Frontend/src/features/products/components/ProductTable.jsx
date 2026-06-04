@@ -29,9 +29,9 @@ function renderImagePreview(product) {
 
 export default function ProductTable({ products = [], onEdit, onDeactivate }) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+    <div className="max-h-[70vh] overflow-auto rounded-lg border border-[var(--border)]">
       <table className="min-w-[1120px] w-full border-collapse text-left text-sm">
-        <thead className="bg-[var(--social-bg)] text-xs uppercase text-[var(--text)]">
+        <thead className="sticky top-0 z-10 bg-[var(--social-bg)] text-xs uppercase text-[var(--text)]">
           <tr>
             <th className="px-4 py-3 font-medium">Ảnh</th>
             <th className="px-4 py-3 font-medium">SKU</th>

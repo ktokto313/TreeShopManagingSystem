@@ -19,7 +19,12 @@ export function parseVariantGroups(value) {
 
   return Object.entries(parsedValue).map(([name, items]) => ({
     name,
-    values: Array.isArray(items) ? items.join(', ') : String(items ?? ''),
+    values: Array.isArray(items)
+      ? items.map((item) => String(item).trim()).filter(Boolean)
+      : String(items ?? '')
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean),
   }))
 }
 
@@ -50,9 +55,19 @@ export function serializeVariantGroups(groups) {
 export function summarizeVariantGroups(value) {
   return parseVariantGroups(value).map((group) => ({
     name: group.name,
-    count: group.values
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean).length,
+    values: group.values,
+    count: group.values.length,
   }))
+}
+
+export function formatVariantGroupSummary(group) {
+  if (!group?.name) {
+    return ''
+  }
+
+  if (!Array.isArray(group.values) || !group.values.length) {
+    return group.name
+  }
+
+  return `${group.name}: ${group.values.join(', ')}`
 }
