@@ -1,5 +1,7 @@
 package swp391.group6.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.sql.Timestamp;
@@ -17,6 +19,7 @@ public class User {
     private String email;
 
     @Column
+    @JsonIgnore
     private String password;
 
     @Column(name = "full_name")
@@ -48,6 +51,7 @@ public class User {
     private List<Review> reviewList;
 
     @OneToMany(mappedBy = "user")
+    @JsonBackReference
     private List<Order> orderList;
 
     @OneToOne(mappedBy = "customer")

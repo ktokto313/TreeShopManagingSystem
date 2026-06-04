@@ -1,5 +1,7 @@
 package swp391.group6.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -15,11 +17,13 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
+    @JsonIgnore
     private User user;
 
     // DB has shipper_id as a nullable FK to users
     @ManyToOne
     @JoinColumn(name = "shipper_id")
+    @JsonIgnore
     private User shipper;
 
     @Column
@@ -58,6 +62,14 @@ public class Order {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public User getShipper() {
+        return shipper;
+    }
+
+    public void setShipper(User shipper) {
+        this.shipper = shipper;
     }
 
     public String getShippingAddress() {
