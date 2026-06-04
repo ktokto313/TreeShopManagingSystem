@@ -1,23 +1,15 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Container from '../components/global/Container'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
-import Modal from '../components/ui/Modal'
 import Input from '../components/ui/Input'
 import Select from '../components/ui/Select'
 import { useAuth } from '../context/AuthContext'
 import CatalogProductCard from '../features/catalog/components/CatalogProductCard'
-import {
-  formatCurrency,
-  matchesCatalogFilters,
-  parseCatalogImages,
-  sortCatalogProducts,
-} from '../features/catalog/utils/catalogUtils'
-import { getCategories } from '../features/categories/categoryApi'
-import { getProducts } from '../features/products/productApi'
-import { summarizeVariantGroups } from '../features/products/utils/variantUtils'
+import { loadPublicJson } from '../features/catalog/utils/catalogApi'
+import { matchesCatalogFilters, sortCatalogProducts } from '../features/catalog/utils/catalogUtils'
 
 const emptyFilters = {
   keyword: '',
@@ -29,11 +21,11 @@ const emptyFilters = {
 }
 
 const sortOptions = [
-  { value: 'popular', label: 'Sort by popularity' },
-  { value: 'rating', label: 'Sort by average rating' },
-  { value: 'latest', label: 'Sort by latest' },
-  { value: 'price-asc', label: 'Sort by price: low to high' },
-  { value: 'price-desc', label: 'Sort by price: high to low' },
+  { value: 'popular', label: 'Phổ biến nhất' },
+  { value: 'rating', label: 'Được quan tâm' },
+  { value: 'latest', label: 'Mới nhất' },
+  { value: 'price-asc', label: 'Giá tăng dần' },
+  { value: 'price-desc', label: 'Giá giảm dần' },
 ]
 
 const statusOptions = [
@@ -41,15 +33,6 @@ const statusOptions = [
   { value: 'true', label: 'Chỉ đang bán' },
   { value: 'false', label: 'Chỉ đã ẩn' },
 ]
-
-function summarizeDescription(value, maxLength = 120) {
-  if (!value) {
-    return 'Chưa có mô tả.'
-  }
-
-  const stringValue = String(value)
-  return stringValue.length > maxLength ? `${stringValue.slice(0, maxLength)}...` : stringValue
-}
 
 function getActiveFilterCount(filters) {
   return ['keyword', 'categoryId', 'status', 'minPrice', 'maxPrice']
@@ -65,25 +48,37 @@ function toChipText(category) {
   return `${category.name} (${category.count})`
 }
 
+function getPageNumbers(currentPage, totalPages) {
+  const startPage = Math.max(1, currentPage - 2)
+  const endPage = Math.min(totalPages, currentPage + 2)
+
+  return Array.from({ length: Math.max(0, endPage - startPage + 1) }, (_, index) => startPage + index)
+}
+
 export default function CatalogPage() {
   const navigate = useNavigate()
-  const { logout } = useAuth()
+  const { logout, isAuthenticated } = useAuth()
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
   const [filters, setFilters] = useState(emptyFilters)
   const [showFilters, setShowFilters] = useState(true)
   const [loading, setLoading] = useState(false)
   const [notice, setNotice] = useState('')
-  const [selectedProduct, setSelectedProduct] = useState(null)
-  const [isDetailOpen, setIsDetailOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 9
 
   function handleAuthError(error) {
     if (error?.status !== 401) {
       return false
     }
 
-    logout()
-    navigate('/login', { replace: true, state: { from: { pathname: '/catalog' } } })
+    if (isAuthenticated) {
+      logout()
+      navigate('/login', { replace: true, state: { from: { pathname: '/catalog' } } })
+    } else {
+      setNotice('Không thể tải catalog lúc này.')
+    }
+
     return true
   }
 
@@ -92,12 +87,19 @@ export default function CatalogPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filters.keyword, filters.categoryId, filters.status, filters.minPrice, filters.maxPrice, filters.sort])
+
   async function loadCatalogData() {
     setLoading(true)
     setNotice('')
 
     try {
-      const [categoryData, productData] = await Promise.all([getCategories(), getProducts()])
+      const [categoryData, productData] = await Promise.all([
+        loadPublicJson('/api/categories'),
+        loadPublicJson('/api/products'),
+      ])
       setCategories(Array.isArray(categoryData) ? categoryData : [])
       setProducts(Array.isArray(productData) ? productData : [])
     } catch (error) {
@@ -130,6 +132,19 @@ export default function CatalogPage() {
     return sortCatalogProducts(filteredProducts, filters.sort)
   }, [filters, productsWithCategoryName])
 
+  const totalPages = Math.max(1, Math.ceil(visibleProducts.length / itemsPerPage))
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages)
+    }
+  }, [currentPage, totalPages])
+
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    return visibleProducts.slice(startIndex, startIndex + itemsPerPage)
+  }, [currentPage, visibleProducts])
+
   const categoryCounts = useMemo(() => {
     return [
       { id: '', name: 'Tất cả', count: productsWithCategoryName.length },
@@ -143,97 +158,42 @@ export default function CatalogPage() {
   }, [categories, productsWithCategoryName])
 
   const activeFilterCount = getActiveFilterCount(filters)
+  const pageNumbers = getPageNumbers(currentPage, totalPages)
 
   function clearFilters() {
     setFilters(emptyFilters)
   }
 
   function openDetail(product) {
-    setSelectedProduct(product)
-    setIsDetailOpen(true)
+    navigate(`/catalog/${product.id}`, { state: { product } })
   }
 
-  function closeDetail() {
-    setIsDetailOpen(false)
-    setSelectedProduct(null)
-  }
+  const displayStart = visibleProducts.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1
+  const displayEnd = Math.min(currentPage * itemsPerPage, visibleProducts.length)
 
   return (
     <main className="bg-[var(--social-bg)]/50">
       <section className="bg-gradient-to-br from-emerald-50 via-white to-lime-50">
-        <Container className="grid gap-10 py-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-20">
+        <Container className="py-14 lg:py-20">
           <div className="space-y-6">
-            <Badge status="active" className="bg-emerald-100 text-emerald-700">
-              Trải nghiệm khách hàng
-            </Badge>
+            <div className="flex flex-wrap items-center gap-3">
+              <Badge status="active" className="bg-emerald-100 text-emerald-700">
+                Catalog khách hàng
+              </Badge>
+              <span className="text-sm text-[var(--text)]">Xem sản phẩm công khai</span>
+            </div>
 
             <div className="space-y-4">
               <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-[var(--text-h)] sm:text-5xl">
-                Khám phá cây xanh và lọc sản phẩm theo nhu cầu
+                Khám phá cây xanh phù hợp cho nhà ở, bàn làm việc và góc thư giãn
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-[var(--text)]">
-                Trang catalog riêng cho khách hàng: tìm theo từ khóa, danh mục, trạng thái, khoảng
-                giá và xem chi tiết sản phẩm trong một giao diện gọn gàng.
+                Tìm cây theo nhu cầu, xem ảnh và mở chi tiết khi muốn biết thêm mô tả, biến thể
+                hoặc thông tin mua hàng.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Button onClick={() => setShowFilters((current) => !current)}>
-                {showFilters ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}
-              </Button>
-              <Button variant="secondary" onClick={() => void loadCatalogData()}>
-                Làm mới dữ liệu
-              </Button>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Card className="space-y-1 border-emerald-100 bg-white/95 p-4">
-                <div className="text-2xl font-semibold text-[var(--text-h)]">{products.length}</div>
-                <div className="text-sm text-[var(--text)]">sản phẩm</div>
-              </Card>
-              <Card className="space-y-1 border-emerald-100 bg-white/95 p-4">
-                <div className="text-2xl font-semibold text-[var(--text-h)]">
-                  {visibleProducts.length}
-                </div>
-                <div className="text-sm text-[var(--text)]">kết quả lọc</div>
-              </Card>
-              <Card className="space-y-1 border-emerald-100 bg-white/95 p-4">
-                <div className="text-2xl font-semibold text-[var(--text-h)]">
-                  {categories.length}
-                </div>
-                <div className="text-sm text-[var(--text)]">danh mục</div>
-              </Card>
-            </div>
           </div>
-
-          <Card className="space-y-5 border-emerald-100 bg-white/95 p-6 shadow-lg">
-            <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.24em] text-[var(--accent)]">
-                Tìm kiếm nhanh
-              </p>
-              <h2 className="text-2xl font-semibold text-[var(--text-h)]">
-                Bộ lọc thân thiện cho khách hàng
-              </h2>
-              <p className="text-sm text-[var(--text)]">
-                Dùng bộ lọc để thu hẹp sản phẩm theo tiêu chí cần xem trước khi mở chi tiết.
-              </p>
-            </div>
-
-            <div className="grid gap-3">
-              {[
-                'Tìm nhanh theo tên, SKU, mô tả và danh mục',
-                'Lọc theo giá, trạng thái và nhóm danh mục',
-                'Mở chi tiết để xem mô tả, biến thể và ảnh',
-              ].map((item) => (
-                <div
-                  key={item}
-                  className="rounded-xl border border-[var(--border)] bg-[var(--social-bg)] px-4 py-3 text-sm text-[var(--text-h)]"
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
-          </Card>
         </Container>
       </section>
 
@@ -250,9 +210,7 @@ export default function CatalogPage() {
               <Card className="space-y-5">
                 <div className="flex items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <h2 className="text-xl font-semibold text-[var(--text-h)]">
-                      Bộ lọc sản phẩm
-                    </h2>
+                    <h2 className="text-xl font-semibold text-[var(--text-h)]">Bộ lọc sản phẩm</h2>
                   </div>
                   <Badge status={loading ? 'inactive' : 'active'}>
                     {loading ? 'Đang tải' : 'Sẵn sàng'}
@@ -262,7 +220,7 @@ export default function CatalogPage() {
                 <Input
                   label="Từ khóa"
                   value={filters.keyword}
-                  placeholder="Tên, SKU, mô tả..."
+                  placeholder="Tên, mô tả, danh mục..."
                   onChange={(event) =>
                     setFilters((current) => ({ ...current, keyword: event.target.value }))
                   }
@@ -329,20 +287,17 @@ export default function CatalogPage() {
                 <div className="flex items-center justify-between gap-3">
                   <div className="space-y-1">
                     <h2 className="text-lg font-semibold text-[var(--text-h)]">Danh mục</h2>
-                    <p className="text-sm text-[var(--text)]">
-                      Chọn nhanh một danh mục để lọc theo nhóm.
-                    </p>
+                    <p className="text-sm text-[var(--text)]">Chọn nhanh một danh mục để lọc theo nhóm.</p>
                   </div>
-                  <span className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">
-                    {activeFilterCount} bộ lọc
-                  </span>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
                   {categoryCounts.map((category) => (
                     <Button
                       key={category.id || 'all'}
-                      variant={String(filters.categoryId) === String(category.id) ? 'primary' : 'secondary'}
+                      variant={
+                        String(filters.categoryId) === String(category.id) ? 'primary' : 'secondary'
+                      }
                       size="sm"
                       onClick={() =>
                         setFilters((current) => ({
@@ -368,7 +323,9 @@ export default function CatalogPage() {
                   {categoryCounts.map((category) => (
                     <Button
                       key={category.id || 'all'}
-                      variant={String(filters.categoryId) === String(category.id) ? 'primary' : 'secondary'}
+                      variant={
+                        String(filters.categoryId) === String(category.id) ? 'primary' : 'secondary'
+                      }
                       size="sm"
                       onClick={() =>
                         setFilters((current) => ({
@@ -389,11 +346,9 @@ export default function CatalogPage() {
             <Card className="space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <h2 className="text-xl font-semibold text-[var(--text-h)]">
-                    Danh sách sản phẩm
-                  </h2>
+                  <h2 className="text-xl font-semibold text-[var(--text-h)]">Danh sách sản phẩm</h2>
                   <p className="text-sm text-[var(--text)]">
-                    {visibleProducts.length} sản phẩm phù hợp với bộ lọc hiện tại
+                    Hiển thị {displayStart}-{displayEnd} trên {visibleProducts.length} sản phẩm phù hợp
                   </p>
                 </div>
 
@@ -410,7 +365,7 @@ export default function CatalogPage() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {visibleProducts.map((product) => (
+                {paginatedProducts.map((product) => (
                   <CatalogProductCard
                     key={product.id}
                     product={product}
@@ -425,114 +380,46 @@ export default function CatalogPage() {
                   Chưa tìm thấy sản phẩm phù hợp với bộ lọc hiện tại.
                 </div>
               ) : null}
+
+              {visibleProducts.length > itemsPerPage ? (
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
+                  <div className="text-sm text-[var(--text)]">
+                    Trang {currentPage} / {totalPages}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage((value) => Math.max(1, value - 1))}
+                    >
+                      Trước
+                    </Button>
+                    {pageNumbers.map((pageNumber) => (
+                      <Button
+                        key={pageNumber}
+                        variant={pageNumber === currentPage ? 'primary' : 'secondary'}
+                        size="sm"
+                        onClick={() => setCurrentPage(pageNumber)}
+                      >
+                        {pageNumber}
+                      </Button>
+                    ))}
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage((value) => Math.min(totalPages, value + 1))}
+                    >
+                      Sau
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
             </Card>
           </section>
         </div>
       </Container>
-
-      <Modal
-        open={isDetailOpen}
-        onClose={() => {
-          closeDetail()
-        }}
-      >
-        <div className="space-y-5 p-6">
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-1">
-              <h2 className="text-2xl font-semibold text-[var(--text-h)]">
-                {selectedProduct?.name || 'Chi tiết sản phẩm'}
-              </h2>
-              <p className="text-sm text-[var(--text)]">
-                Xem nhanh mô tả, biến thể, ảnh và thông tin bán hàng.
-              </p>
-            </div>
-            {selectedProduct ? (
-              <Badge status={selectedProduct.status ? 'active' : 'inactive'}>
-                {selectedProduct.status ? 'Đang bán' : 'Đã ẩn'}
-              </Badge>
-            ) : null}
-          </div>
-
-          {selectedProduct ? (
-            <div className="grid gap-5 lg:grid-cols-[240px_1fr]">
-              <div className="space-y-3">
-                <div className="flex h-56 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-100 via-white to-lime-100 text-6xl">
-                  🌿
-                </div>
-                <div className="rounded-xl border border-[var(--border)] bg-[var(--social-bg)] p-4 text-sm text-[var(--text)]">
-                  <div className="font-medium text-[var(--text-h)]">Ảnh đã tải lên</div>
-                  <div className="mt-2 space-y-1">
-                    {parseCatalogImages(selectedProduct.images).length ? (
-                      parseCatalogImages(selectedProduct.images).map((image) => (
-                        <div key={image} className="rounded-md bg-white px-3 py-2">
-                          {image}
-                        </div>
-                      ))
-                    ) : (
-                      <div>Chưa có ảnh nào.</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <InfoBox label="SKU" value={selectedProduct.sku} />
-                  <InfoBox label="Danh mục" value={selectedProduct.categoryName || '-'} />
-                  <InfoBox label="Giá" value={formatCurrency(selectedProduct.price)} />
-                  <InfoBox label="Tồn kho" value={selectedProduct.stock ?? 0} />
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
-                    Mô tả
-                  </h3>
-                  <p className="rounded-xl border border-[var(--border)] bg-[var(--bg)] p-4 text-sm leading-7 text-[var(--text)]">
-                    {summarizeDescription(selectedProduct.description, 360)}
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
-                    Biến thể
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {summarizeVariantGroups(selectedProduct.variants).length ? (
-                      summarizeVariantGroups(selectedProduct.variants).map((group) => (
-                        <span
-                          key={group.name}
-                          className="rounded-full bg-[var(--social-bg)] px-3 py-1.5 text-sm text-[var(--text-h)]"
-                        >
-                          {group.name}: {group.count}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="rounded-full bg-[var(--social-bg)] px-3 py-1.5 text-sm text-[var(--text-h)]">
-                        Chưa có biến thể
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          <div className="flex justify-end">
-            <Button variant="secondary" onClick={closeDetail}>
-              Đóng
-            </Button>
-          </div>
-        </div>
-      </Modal>
     </main>
-  )
-}
-
-function InfoBox({ label, value }) {
-  return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg)] p-4">
-      <div className="text-xs uppercase tracking-[0.18em] text-[var(--accent)]">{label}</div>
-      <div className="mt-2 text-sm font-medium text-[var(--text-h)]">{value}</div>
-    </div>
   )
 }

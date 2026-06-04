@@ -57,7 +57,7 @@ function matchesText(product, keyword, categoryName) {
     product.description,
     categoryName,
     summarizeVariantGroups(product.variants)
-      .map((group) => `${group.name}:${group.count}`)
+      .map((group) => `${group.name}:${group.values.join(', ')}`)
       .join(' '),
   ]
     .map(normalize)

@@ -2,9 +2,9 @@ import Badge from '../../../components/ui/Badge'
 import Button from '../../../components/ui/Button'
 import Card from '../../../components/ui/Card'
 import { formatCurrency, parseCatalogImages } from '../utils/catalogUtils'
-import { summarizeVariantGroups } from '../../products/utils/variantUtils'
+import { parseVariantGroups } from '../../products/utils/variantUtils'
 
-function summarizeText(value, maxLength = 96) {
+function summarizeText(value, maxLength = 110) {
   if (!value) {
     return 'Chưa có mô tả.'
   }
@@ -13,68 +13,76 @@ function summarizeText(value, maxLength = 96) {
   return stringValue.length > maxLength ? `${stringValue.slice(0, maxLength)}...` : stringValue
 }
 
+function summarizeVariant(group) {
+  if (!group?.name) {
+    return ''
+  }
+
+  const values = Array.isArray(group.values) ? group.values : []
+  const visibleValues = values.slice(0, 3)
+  const suffix = values.length > visibleValues.length ? '…' : ''
+
+  return `${group.name}: ${visibleValues.join(', ')}${suffix}`
+}
+
 export default function CatalogProductCard({ product, categoryName, onOpen }) {
   const images = parseCatalogImages(product.images)
-  const variantGroups = summarizeVariantGroups(product.variants)
+  const variantGroups = parseVariantGroups(product.variants)
 
   return (
     <Card className="flex h-full flex-col gap-4 border-[var(--border)] bg-white/95 p-4 transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-emerald-100 via-white to-lime-100 text-xs text-[var(--text)]">
-            {images[0] ? (
-              <span className="px-2 text-center leading-4">{images[0]}</span>
-            ) : (
-              <span>Không ảnh</span>
-            )}
-          </div>
+      <div className="space-y-3">
+        <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.16em] text-[var(--text)]">
-              {product.sku}
-            </p>
             <h3 className="text-lg font-semibold text-[var(--text-h)]">{product.name}</h3>
           </div>
+          <ProductBadge isActive={product.status} />
         </div>
-        <ProductBadge isActive={product.status} />
+
+        <div className="flex h-52 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-100 via-white to-lime-100 text-sm text-[var(--text)]">
+          {images[0] ? (
+            <span className="px-4 text-center leading-5">{images[0]}</span>
+          ) : (
+            <span>Chưa có ảnh</span>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 text-xs text-[var(--text)]">
         <Badge status="active" className="bg-emerald-100 text-emerald-700">
           {categoryName || `Danh mục ${product.categoryId ?? ''}`}
         </Badge>
-        <Badge status="inactive" className="bg-slate-100 text-slate-700">
-          {variantGroups.length} nhóm biến thể
-        </Badge>
-        <Badge status="inactive" className="bg-slate-100 text-slate-700">
-          {images.length} ảnh
-        </Badge>
       </div>
 
-      <p className="text-sm leading-6 text-[var(--text)]">{summarizeText(product.description)}</p>
+      <div className="space-y-3 rounded-2xl border border-[var(--border)] bg-[var(--social-bg)] p-4">
+        <p className="text-sm leading-6 text-[var(--text)]">{summarizeText(product.description)}</p>
+        <div className="flex flex-wrap gap-2 text-sm text-[var(--text-h)]">
+          {variantGroups.length ? (
+            variantGroups.map((group) => (
+              <span
+                key={group.name}
+                className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-[var(--text-h)]"
+              >
+                {summarizeVariant(group)}
+              </span>
+            ))
+          ) : (
+            <span className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-[var(--text-h)]">
+              Chưa có biến thể nào
+            </span>
+          )}
+        </div>
+      </div>
 
-      <div className="space-y-2 rounded-xl bg-[var(--social-bg)] px-4 py-3 text-sm text-[var(--text-h)]">
+      <div className="grid gap-2 rounded-2xl bg-[var(--social-bg)] px-4 py-3 text-sm text-[var(--text-h)]">
         <div className="flex items-center justify-between gap-3">
-          <span>Giá</span>
+          <span className="text-[var(--text)]">Giá</span>
           <span className="font-semibold text-[var(--accent)]">{formatCurrency(product.price)}</span>
         </div>
         <div className="flex items-center justify-between gap-3">
-          <span>Tồn kho</span>
+          <span className="text-[var(--text)]">Tồn kho</span>
           <span>{product.stock ?? 0}</span>
         </div>
-      </div>
-
-      <div className="flex flex-wrap gap-2 text-xs text-[var(--text)]">
-        {variantGroups.length ? (
-          variantGroups.map((group) => (
-            <span key={group.name} className="rounded-full bg-[var(--social-bg)] px-3 py-1.5">
-              {group.name}: {group.count}
-            </span>
-          ))
-        ) : (
-          <span className="rounded-full bg-[var(--social-bg)] px-3 py-1.5">
-            Chưa có biến thể
-          </span>
-        )}
       </div>
 
       <div className="mt-auto flex justify-end">
@@ -87,9 +95,5 @@ export default function CatalogProductCard({ product, categoryName, onOpen }) {
 }
 
 function ProductBadge({ isActive }) {
-  return (
-    <Badge status={isActive ? 'active' : 'inactive'}>
-      {isActive ? 'Đang bán' : 'Tạm ẩn'}
-    </Badge>
-  )
+  return <Badge status={isActive ? 'active' : 'inactive'}>{isActive ? 'Đang bán' : 'Tạm ẩn'}</Badge>
 }

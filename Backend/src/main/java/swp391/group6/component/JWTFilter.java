@@ -25,7 +25,21 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getRequestURI().startsWith("/api/auth");
+        String requestUri = request.getRequestURI();
+        String method = request.getMethod();
+
+        if (requestUri.startsWith("/api/auth")) {
+            return true;
+        }
+
+        if ("GET".equalsIgnoreCase(method)) {
+            return requestUri.equals("/api/categories")
+                    || requestUri.startsWith("/api/categories/")
+                    || requestUri.equals("/api/products")
+                    || requestUri.startsWith("/api/products/");
+        }
+
+        return false;
     }
 
     @Override

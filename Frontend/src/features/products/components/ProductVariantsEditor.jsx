@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import Button from '../../../components/ui/Button'
 import Input from '../../../components/ui/Input'
-import { parseVariantGroups, serializeVariantGroups, summarizeVariantGroups } from '../utils/variantUtils'
+import {
+  formatVariantGroupSummary,
+  parseVariantGroups,
+  serializeVariantGroups,
+} from '../utils/variantUtils'
 
 function createEmptyRow() {
   return {
@@ -60,7 +64,7 @@ export default function ProductVariantsEditor({ value, onChange }) {
     emitChange(nextRows.length ? nextRows : [createEmptyRow()])
   }
 
-  const preview = summarizeVariantGroups(value)
+  const preview = parseVariantGroups(value)
 
   return (
     <div className="space-y-3">
@@ -106,14 +110,14 @@ export default function ProductVariantsEditor({ value, onChange }) {
       <div className="rounded-xl border border-[var(--border)] bg-[var(--social-bg)] p-4">
         <div className="mb-2 text-sm font-medium text-[var(--text-h)]">Xem trước</div>
         {preview.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-2">
             {preview.map((group) => (
-              <span
+              <div
                 key={group.name}
-                className="rounded-full bg-white px-3 py-1 text-xs font-medium text-[var(--text-h)]"
+                className="rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm text-[var(--text-h)]"
               >
-                {group.name}: {group.count}
-              </span>
+                {formatVariantGroupSummary(group)}
+              </div>
             ))}
           </div>
         ) : (
