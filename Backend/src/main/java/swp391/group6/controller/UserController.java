@@ -22,13 +22,14 @@ public class UserController {
         this.userService = userService;
     }
 
-    //get all users
+    // get all users
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers(HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);
         if (currentUser == null || !"SYSTEM_ADMIN".equalsIgnoreCase(currentUser.getRole())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
         List<UserDTO> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
@@ -41,8 +42,16 @@ public class UserController {
         }
 
         String role = currentUser.getRole();
-        if (!"SYSTEM_ADMIN".equalsIgnoreCase(role) && !(currentUser.getId() == id) &&
-            !"MANAGER".equalsIgnoreCase(role) && !"SHIPPER".equalsIgnoreCase(role) && !"SUPPORT_AGENT".equalsIgnoreCase(role)) {
+
+        boolean isOwnProfile = userService.getUserByEmail(currentUser.getEmail())
+                .map(u -> u.getId() == id)
+                .orElse(false);
+
+        if (!"SYSTEM_ADMIN".equalsIgnoreCase(role)
+                && !isOwnProfile
+                && !"MANAGER".equalsIgnoreCase(role)
+                && !"SHIPPER".equalsIgnoreCase(role)
+                && !"SUPPORT_AGENT".equalsIgnoreCase(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -58,7 +67,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        return userService.getUserById(currentUser.getId())
+        return userService.getUserByEmail(currentUser.getEmail())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -80,16 +89,22 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable long id,
-                                               @RequestBody UserDTO userDTO,
-                                               HttpServletRequest request) {
+                                              @RequestBody UserDTO userDTO,
+                                              HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         String role = currentUser.getRole();
-        if (!"SYSTEM_ADMIN".equalsIgnoreCase(role) && !(currentUser.getId() == id) &&
-            !"MANAGER".equalsIgnoreCase(role)) {
+
+        boolean isOwnProfile = userService.getUserByEmail(currentUser.getEmail())
+                .map(u -> u.getId() == id)
+                .orElse(false);
+
+        if (!"SYSTEM_ADMIN".equalsIgnoreCase(role)
+                && !isOwnProfile
+                && !"MANAGER".equalsIgnoreCase(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -105,17 +120,22 @@ public class UserController {
     }
 
     @PutMapping("/me")
-    public ResponseEntity<UserDTO> updateMyProfile(@RequestBody UserDTO userDTO, HttpServletRequest request) {
+    public ResponseEntity<UserDTO> updateMyProfile(@RequestBody UserDTO userDTO,
+                                                   HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         try {
-            UserDTO updatedUser = userService.updateUser(currentUser.getId(), userDTO);
+            UserDTO updatedUser = userService.getUserByEmail(currentUser.getEmail())
+                    .map(u -> userService.updateUser(u.getId(), userDTO))
+                    .orElse(null);
+
             if (updatedUser == null) {
                 return ResponseEntity.notFound().build();
             }
+
             return ResponseEntity.ok(updatedUser);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -133,6 +153,7 @@ public class UserController {
         if (!deleted) {
             return ResponseEntity.notFound().build();
         }
+
         return ResponseEntity.noContent().build();
     }
 
@@ -147,6 +168,7 @@ public class UserController {
         if (bannedUser == null) {
             return ResponseEntity.notFound().build();
         }
+
         return ResponseEntity.ok(bannedUser);
     }
 
@@ -161,6 +183,7 @@ public class UserController {
         if (unbannedUser == null) {
             return ResponseEntity.notFound().build();
         }
+
         return ResponseEntity.ok(unbannedUser);
     }
 
@@ -174,12 +197,16 @@ public class UserController {
         }
 
         String role = currentUser.getRole();
-        if (!"SYSTEM_ADMIN".equalsIgnoreCase(role) && !"MANAGER".equalsIgnoreCase(role) && !"SUPPORT_AGENT".equalsIgnoreCase(role)) {
+
+        if (!"SYSTEM_ADMIN".equalsIgnoreCase(role)
+                && !"MANAGER".equalsIgnoreCase(role)
+                && !"SUPPORT_AGENT".equalsIgnoreCase(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         if (email != null && !email.isBlank()) {
             Optional<UserDTO> user = userService.getUserByEmail(email);
+
             return user.<ResponseEntity<?>>map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.notFound().build());
         }
@@ -192,8 +219,4 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    private boolean isSystemAdmin(HttpServletRequest request) {
-        LoginResponse currentUser = JWTUtil.getUser(request);
-        return currentUser != null && "SYSTEM_ADMIN".equalsIgnoreCase(currentUser.getRole());
-    }
 }

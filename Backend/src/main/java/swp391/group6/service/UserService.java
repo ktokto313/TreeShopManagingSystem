@@ -64,46 +64,26 @@ public class UserService {
     }
 
     private void validateUserForCreate(UserDTO userDTO) {
-        if (userDTO == null) {
-            throw new IllegalArgumentException("User data is required");
-        }
-        if (userDTO.getEmail() == null || userDTO.getEmail().isBlank()) {
-            throw new IllegalArgumentException("Email is required");
-        }
-        if (userDTO.getPassword() == null || userDTO.getPassword().isBlank()) {
-            throw new IllegalArgumentException("Password is required");
-        }
-    }
-    
-    public UserDTO updateUser(long id, UserDTO userDTO) {
-        Optional<User> existingUser = userRepository.findById(id);
-        if (existingUser.isPresent()) {
-            User user = existingUser.get();
-            if (hasRole(user, PROTECTED_ROLE_NAME)) {
-                return null;
-            }
             if (userDTO == null) {
                 throw new IllegalArgumentException("User data is required");
             }
-            // Email cannot be updated via this endpoint for security reasons.
-            // A dedicated API for email change with verification should be implemented if needed.
-            // if (userDTO.getEmail() != null) user.setEmail(userDTO.getEmail());
-            if (userDTO.getPassword() != null && !userDTO.getPassword().isBlank()) {
-                user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
             }
-            if (userDTO.getFullName() != null) user.setFullName(userDTO.getFullName());
-            if (userDTO.getPhone() != null) user.setPhone(userDTO.getPhone());
-            if (userDTO.getRoleName() != null && !userDTO.getRoleName().isBlank()) {
-                user.setRole(resolveRole(userDTO.getRoleName()));
-            }
-            if (userDTO.getStatus() != null) {
-                user.setStatus(userDTO.getStatus());
-            }
-            
-            User updatedUser = userRepository.save(user);
-            return convertToDTO(updatedUser);
-        }
-        return null;
+
+    public UserDTO updateUser(long id, UserDTO userDTO) {
+        if (userDTO == null) throw new IllegalArgumentException("User data is required");
+
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null || hasRole(user, PROTECTED_ROLE_NAME)) return null;
+
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isBlank())
+            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        if (userDTO.getFullName() != null) user.setFullName(userDTO.getFullName());
+        if (userDTO.getPhone() != null) user.setPhone(userDTO.getPhone());
+        if (userDTO.getRoleName() != null && !userDTO.getRoleName().isBlank())
+            user.setRole(resolveRole(userDTO.getRoleName()));
+        if (userDTO.getStatus() != null) user.setStatus(userDTO.getStatus());
+
+        return convertToDTO(userRepository.save(user));
     }
     
     public boolean deleteUser(long id) {
