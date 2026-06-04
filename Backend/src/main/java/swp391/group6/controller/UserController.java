@@ -65,7 +65,19 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // SYSTEM_ADMIN only
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getMyProfile(HttpServletRequest request) {
+        LoginResponse currentUser = JWTUtil.getUser(request);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // Allow users to view their own profile regardless of role protection
+        return userService.getUserByEmailUnprotected(currentUser.getEmail())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO, HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);
