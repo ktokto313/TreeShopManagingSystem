@@ -1,17 +1,7 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
-	plugins: [react(), tailwindcss()],
-	server: {
-		proxy: {
-		// Whenever React tries to fetch '/api/...', Vite will forward it to port 8081
-		'/api': {
-			target: 'http://localhost:8081',
-			changeOrigin: true,
-		}
-		}
-	}
-});
+  plugins: [react()],
+})
