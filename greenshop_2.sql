@@ -544,11 +544,11 @@ INSERT INTO reviews (order_id, product_id, customer_id, rating, comment) VALUES
 --  TICKETS
 -- ============================================================
 INSERT INTO tickets (creator_id, assignee_id, title, detail, state, priority) VALUES
-(5,  4, 'Cây bị héo sau 2 ngày nhận hàng', 'Tôi nhận cây kim tiền nhưng sau 2 ngày lá bắt đầu héo vàng, không biết do vận chuyển hay cây bệnh.', 'Khiếu nại sản phẩm', 'PROCESSING', 'HIGH'),
-(6,  4, 'Đơn hàng giao sai sản phẩm',       'Tôi đặt Monstera nhỏ nhưng nhận được Pothos, mong shop kiểm tra và giao đúng sản phẩm.', 'Giao hàng sai', 'PROCESSING', 'CRITICAL'),
-(7,  NULL,'Tư vấn chọn cây cho phòng ngủ', 'Phòng ngủ tôi ít ánh sáng, muốn trồng vài cây nhỏ trang trí, nhờ shop tư vấn loại cây phù hợp.', 'Tư vấn', 'CREATED', 'LOW'),
-(8,  4, 'Hỏi về cách chăm sóc sen đá',     'Tôi mới mua sen đá lần đầu, không biết tưới bao nhiêu và để ở đâu là đúng. Nhờ shop hướng dẫn.', 'Tư vấn', 'RESOLVED', 'MEDIUM'),
-(9,  NULL,'Yêu cầu đổi trả cây bị hỏng',   'Cây nhận về bị gãy cành do đóng gói không kỹ, muốn đổi cây mới hoặc hoàn tiền.', 'Đổi trả', 'CREATED', 'HIGH');
+(5,  4, 'Cây bị héo sau 2 ngày nhận hàng', 'Tôi nhận cây kim tiền nhưng sau 2 ngày lá bắt đầu héo vàng, không biết do vận chuyển hay cây bệnh.', 'PROCESSING', 'HIGH'),
+(6,  4, 'Đơn hàng giao sai sản phẩm',       'Tôi đặt Monstera nhỏ nhưng nhận được Pothos, mong shop kiểm tra và giao đúng sản phẩm.', 'PROCESSING', 'CRITICAL'),
+(7,  NULL,'Tư vấn chọn cây cho phòng ngủ', 'Phòng ngủ tôi ít ánh sáng, muốn trồng vài cây nhỏ trang trí, nhờ shop tư vấn loại cây phù hợp.', 'CREATED', 'LOW'),
+(8,  4, 'Hỏi về cách chăm sóc sen đá',     'Tôi mới mua sen đá lần đầu, không biết tưới bao nhiêu và để ở đâu là đúng. Nhờ shop hướng dẫn.', 'RESOLVED', 'MEDIUM'),
+(9,  NULL,'Yêu cầu đổi trả cây bị hỏng',   'Cây nhận về bị gãy cành do đóng gói không kỹ, muốn đổi cây mới hoặc hoàn tiền.', 'CREATED', 'HIGH');
 
 -- ============================================================
 --  COMMENTS
