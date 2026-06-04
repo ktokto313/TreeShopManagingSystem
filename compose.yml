@@ -19,8 +19,6 @@ services:
     #  POSTGRES_USER: sa
     #  POSTGRES_PASSWORD: example
     env_file: ".env"
-    volumes:
-      - pgdata:/var/lib/postgresql
     ports:
       - 5432:5432
     networks:
@@ -44,14 +42,12 @@ services:
     image: treeshopmanagingsystem:latest
     restart: unless-stopped
     env_file: ".env"
-    ports:
-      - "8081:8081"
     depends_on: 
       - db
     networks:
       - frontend
       - backend
-   
+  
   frontend:
     build:
       context: ./Frontend
@@ -68,6 +64,3 @@ networks:
     driver: bridge
   backend:
     driver: bridge
-
-volumes:
-  pgdata:
