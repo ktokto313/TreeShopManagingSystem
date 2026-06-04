@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Select } from "../../components/ui/Select";
 import { cn } from "../../utils/cn";
 import { TicketCard } from "./TicketCard";
 import { Button } from "../../components/ui/Button";
 import styles from "./TicketDashboard.module.css";
 import useFetchAllTickets from "./hooks/useFetchAllTickets";
-import useAuthUser from "../../hooks/useAuthUser";
 import { Container } from "../../components/global/Container";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { FaFilter } from "react-icons/fa";
@@ -20,11 +19,18 @@ import { FaPlus } from "react-icons/fa";
 import useFilterAndSortTickets from "./hooks/useFilterAndSortTickets";
 import { IoWarningOutline } from "react-icons/io5";
 import { FaCheck } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
 const TicketDashboard = ({ className }) => {
+	const navigate = useNavigate();
+
 	const { isLoading, fetchedTickets, executeFetchAllTickets } =
 		useFetchAllTickets();
-	const { executeAuth } = useAuthUser();
+	const { user, executeAuth } = useContext(AuthContext);
+
+	const isAgent = user?.role.toLowerCase() === "support_agent";
+	// const isCustomer = user?.role.toLowerCase() === "customer";
 
 	const {
 		isCreateTicketLoading,
@@ -177,55 +183,60 @@ const TicketDashboard = ({ className }) => {
 							<TbReload className="text-xl"></TbReload>
 						</Button>
 
-						{/* Ticket Creation Button */}
-						<ModalButton
-							buttonLabel={
-								<div className={cn("flex flex-row items-center gap-2")}>
-									<FaPlus></FaPlus>
-									<p className={cn(styles.createTicketBtnContent)}>
-										Tạo Ticket
-									</p>
-								</div>
-							}
-							modalTitle="Tạo Ticket"
-							isLoading={isCreateTicketLoading}
-							buttonClasses={cn(
-								"w-30 cursor-pointer hover:bg-green-400",
-								styles.createTicketBtn,
-							)}
-						>
-							<Form
-								onSubmit={(e) => {
-									handleCreateTicketSubmit(e);
-								}}
+						{/* Create Ticket Button */}
+						{!isAgent && (
+							<ModalButton
+								buttonLabel={
+									<div className={cn("flex flex-row items-center gap-2")}>
+										<FaPlus></FaPlus>
+										<p className={cn(styles.createTicketBtnContent)}>
+											Tạo Ticket
+										</p>
+									</div>
+								}
+								modalTitle="Tạo Ticket"
+								isLoading={isCreateTicketLoading}
+								buttonClasses={cn(
+									"w-30 cursor-pointer hover:bg-green-400",
+									styles.createTicketBtn,
+								)}
 							>
-								{isCreateTicketSuccess && (
-									<span className="flex items-center gap-2 py-2 px-4 rounded-xl bg-bg-success text-white">
-										<FaCheck className="text-xl" />
-										<p>Ticket đã được khởi tạo xong!</p>
-									</span>
-								)}
+								<Form
+									onSubmit={(e) => {
+										handleCreateTicketSubmit(e);
+									}}
+								>
+									{isCreateTicketSuccess && (
+										<span className="flex items-center gap-2 py-2 px-4 rounded-xl bg-bg-success text-white">
+											<FaCheck className="text-xl" />
+											<p>Ticket đã được khởi tạo xong!</p>
+										</span>
+									)}
 
-								{localValidation && (
-									<span className="flex items-center gap-2 py-2 px-4 rounded-xl bg-red-600 text-white">
-										<IoWarningOutline className="text-xl" />
-										{localValidation}
-									</span>
-								)}
+									{localValidation && (
+										<span className="flex items-center gap-2 py-2 px-4 rounded-xl bg-red-600 text-white">
+											<IoWarningOutline className="text-xl" />
+											{localValidation}
+										</span>
+									)}
 
-								<Input label="Tiêu đề" type="text" name="title"></Input>
-								<Input label="Chi tiết" type="text" name="detail"></Input>
-								<Select
-									name="priority"
-									label="Ưu tiên"
-									options={getSelectOption("priority")}
-								></Select>
+									<Input label="Tiêu đề" type="text" name="title"></Input>
+									<Input label="Chi tiết" type="text" name="detail"></Input>
+									<Select
+										name="priority"
+										label="Ưu tiên"
+										options={getSelectOption("priority")}
+									></Select>
 
-								<Button type="submit" disabled={isCreateTicketLoading && true}>
-									{isCreateTicketLoading ? <p>Đang Xử Lí...</p> : <p>Lưu</p>}
-								</Button>
-							</Form>
-						</ModalButton>
+									<Button
+										type="submit"
+										disabled={isCreateTicketLoading && true}
+									>
+										{isCreateTicketLoading ? <p>Đang Xử Lí...</p> : <p>Lưu</p>}
+									</Button>
+								</Form>
+							</ModalButton>
+						)}
 					</div>
 				</div>
 
@@ -237,11 +248,13 @@ const TicketDashboard = ({ className }) => {
 				>
 					{!isLoading &&
 						fetchedTickets.map((t, index) => (
-							<TicketCard
-								className={cn("cursor-pointer")}
+							<div
 								key={`ticketCard-${t.id}-${index}`}
-								ticket={t}
-							/>
+								onClick={() => navigate(`/tickets/${t.id}`)}
+								className="cursor-pointer transition-transform hover:scale-[1.02]"
+							>
+								<TicketCard ticket={t} />
+							</div>
 						))}
 					{isLoading &&
 						Array.from({ length: 12 }).map((_, index) => (

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { fetchAllTickets } from "../data/fetchAllTickets";
+import { fetchAllTickets } from "../data/ticketApi.js";
 
 const useFetchAllTickets = (initialTickets = []) => {
 	const [fetchedTickets, setFetchedTickets] = useState(initialTickets);

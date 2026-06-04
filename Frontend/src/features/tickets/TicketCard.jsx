@@ -7,42 +7,9 @@ import {
 } from "../../components/ui/Card";
 import { cn } from "../../utils/cn";
 import { timeFormat } from "../../utils/timeFormat";
+import { getTicketStatusStyles, translateTicketStatus } from "./utils/ticketUtils";
 
 export function TicketCard({ ticket, variant = "default" }) {
-	// A helper function to map the ticket status to semantic tokens
-	const getStatusStyles = (ticketState) => {
-		if (!ticketState) return;
-		switch (ticketState.toLowerCase()) {
-			case "created":
-				return "bg-blue-500 text-white";
-			case "processing":
-				return "bg-bg-warning text-text-warning";
-			case "resolved":
-				return "bg-bg-success text-text-error";
-			case "done":
-				return "bg-gray-500 border border-border text-white";
-			default:
-				return "bg-gray-500 border border-border text-white";
-		}
-	};
-
-	const ticketStatusTranslator = (status) => {
-		if (!status) return;
-		const _status = status.toLowerCase();
-		switch (_status) {
-			case "created":
-				return "Đã Khởi Tạo";
-			case "processing":
-				return "Đang Xử Lí";
-			case "resolved":
-				return "Đã Xử Lí";
-			case "done":
-				return "Đã Xong";
-			default:
-				return "Chưa Xác Định";
-		}
-	};
-
 	return (
 		<>
 			{variant === "default" && ticket && (
@@ -55,9 +22,9 @@ export function TicketCard({ ticket, variant = "default" }) {
 								</span>
 								{/* Ticket's status */}
 								<span
-									className={`px-2 py-1 rounded-xl text-[0.7rem] font-bold gap-1 ${getStatusStyles(ticket.ticketState)}`}
+									className={`px-2 py-1 rounded-xl text-[0.7rem] font-bold gap-1 ${getTicketStatusStyles(ticket.ticketState)}`}
 								>
-									{ticketStatusTranslator(ticket.ticketState)}
+									{translateTicketStatus(ticket.ticketState)}
 								</span>
 							</div>
 							{/* Ticket's title */}
