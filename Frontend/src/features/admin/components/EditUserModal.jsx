@@ -21,6 +21,7 @@ export function EditUserModal({ user, isOpen, onClose, onUpdated }) {
 
   useEffect(() => {
     if (!user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm({
         fullName: "",
         phone: "",
@@ -29,6 +30,7 @@ export function EditUserModal({ user, isOpen, onClose, onUpdated }) {
       });
       return;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setForm({
       fullName: user.fullName ?? "",
       phone: user.phone ?? "",
