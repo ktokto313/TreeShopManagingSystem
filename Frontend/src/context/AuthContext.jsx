@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, useState } from 'react'
-import { login as loginRequest } from '../features/auth/authApi'
+import { login as loginRequest, register as registerRequest } from '../features/auth/authApi'
 
 const STORAGE_KEY = 'treeshop-auth-user'
 
@@ -36,6 +36,10 @@ export function AuthProvider({ children }) {
     return loggedInUser
   }
 
+  async function register(fullName, email, password) {
+    await registerRequest(fullName, email, password)
+  }
+
   function logout() {
     setUser(null)
 
@@ -45,14 +49,15 @@ export function AuthProvider({ children }) {
   }
 
   const value = useMemo(
-    () => ({
-      user,
-      login,
-      logout,
-      isAuthenticated: Boolean(user),
-      canManage: canManageRole(user?.role),
-    }),
-    [user],
+      () => ({
+        user,
+        login,
+        register,
+        logout,
+        isAuthenticated: Boolean(user),
+        canManage: canManageRole(user?.role),
+      }),
+      [user],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
