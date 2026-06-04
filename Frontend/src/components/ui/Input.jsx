@@ -1,4 +1,5 @@
 import { forwardRef, useId } from 'react';
+import { cn } from '../../utils/cn';
 
 export const Input = forwardRef(({ 
   label, 
@@ -11,7 +12,7 @@ export const Input = forwardRef(({
   const errorId = `${inputId}-error`;
 
   return (
-    <div className={`flex flex-col gap-1.5 ${className}`}>
+    <div className={cn(`flex flex-col gap-1.5`, className)}>
       {label && (
         <label htmlFor={inputId} className="text-sm font-medium text-black">
           {label}
@@ -24,17 +25,17 @@ export const Input = forwardRef(({
         ref={ref}
         aria-invalid={!!error}
         aria-describedby={error ? errorId : undefined}
-        className={`
+        className={cn(`
           w-full px-3 py-2 border rounded-md outline-none transition-colors
           bg-bg-base text-black border-border
           focus-visible:border-interactive focus-visible:ring-1 focus-visible:ring-interactive
           disabled:opacity-50 disabled:cursor-not-allowed
           ${error ? 'border-bg-error focus-visible:border-bg-error focus-visible:ring-bg-error' : ''}
-        `}
+        `)}
       />
       
       {error && (
-        <p id={errorId} className="text-sm font-medium text-bg-error">
+        <p id={errorId} className={cn("text-sm font-medium text-bg-error", className)}>
           {error}
         </p>
       )}
