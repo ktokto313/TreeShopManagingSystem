@@ -123,7 +123,6 @@ CREATE TABLE tickets (
    assignee_id  BIGINT REFERENCES users(id),
    title        VARCHAR(255) NOT NULL,
    detail       TEXT NOT NULL,
-   ticket_type  VARCHAR(100) NOT NULL,
    state        VARCHAR(20) NOT NULL DEFAULT 'CREATED'
                 CHECK (state IN ('CREATED','PROCESSING','RESOLVED','DONE')),
    priority     VARCHAR(10) NOT NULL DEFAULT 'MEDIUM'
@@ -544,7 +543,7 @@ INSERT INTO reviews (order_id, product_id, customer_id, rating, comment) VALUES
 -- ============================================================
 --  TICKETS
 -- ============================================================
-INSERT INTO tickets (creator_id, assignee_id, title, detail, ticket_type, state, priority) VALUES
+INSERT INTO tickets (creator_id, assignee_id, title, detail, state, priority) VALUES
 (5,  4, 'Cây bị héo sau 2 ngày nhận hàng', 'Tôi nhận cây kim tiền nhưng sau 2 ngày lá bắt đầu héo vàng, không biết do vận chuyển hay cây bệnh.', 'Khiếu nại sản phẩm', 'PROCESSING', 'HIGH'),
 (6,  4, 'Đơn hàng giao sai sản phẩm',       'Tôi đặt Monstera nhỏ nhưng nhận được Pothos, mong shop kiểm tra và giao đúng sản phẩm.', 'Giao hàng sai', 'PROCESSING', 'CRITICAL'),
 (7,  NULL,'Tư vấn chọn cây cho phòng ngủ', 'Phòng ngủ tôi ít ánh sáng, muốn trồng vài cây nhỏ trang trí, nhờ shop tư vấn loại cây phù hợp.', 'Tư vấn', 'CREATED', 'LOW'),
