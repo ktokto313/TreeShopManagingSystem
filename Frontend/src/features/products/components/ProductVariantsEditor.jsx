@@ -28,6 +28,7 @@ export default function ProductVariantsEditor({ value, onChange }) {
   const initialRows = useMemo(() => normalizeRows(value), [value])
   const [rows, setRows] = useState(initialRows)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     setRows(initialRows)
   }, [initialRows])

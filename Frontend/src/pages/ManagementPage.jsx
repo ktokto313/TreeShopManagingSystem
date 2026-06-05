@@ -90,11 +90,6 @@ export default function ManagementPage() {
     }))
   }, [products, categoryLookup])
 
-  useEffect(() => {
-    void loadInitialData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   async function loadInitialData() {
     setLoading(true)
     setNotice('')
@@ -112,6 +107,11 @@ export default function ManagementPage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    void loadInitialData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function loadCategories() {
     setLoading(true)
@@ -204,9 +204,9 @@ export default function ManagementPage() {
     openEditCategoryModal(category)
   }
 
-  function editProduct(product) {
-    openEditProductModal(product)
-  }
+  // function editProduct(product) {
+  //   openEditProductModal(product)
+  // }
 
   async function saveCategory(event) {
     event.preventDefault()
