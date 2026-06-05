@@ -21,14 +21,9 @@ public class ProfileController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getProfile(HttpServletRequest request) {
+    public ResponseEntity<ProfileResponse> getProfile(HttpServletRequest request) {
 
         LoginResponse jwtUser = JWTUtil.getUser(request);
-
-        if (jwtUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Invalid token");
-        }
 
         UserDTO user = userService.getUserByEmail(jwtUser.getEmail())
                 .orElse(null);
@@ -47,13 +42,10 @@ public class ProfileController {
         return ResponseEntity.ok(response);
     }
     @PutMapping
-    public ResponseEntity<?> updateProfile(@RequestBody UserDTO userDTO,
+    public ResponseEntity<ProfileResponse> updateProfile(@RequestBody UserDTO userDTO,
                                            HttpServletRequest request) {
 
         LoginResponse jwtUser = JWTUtil.getUser(request);
-        if (jwtUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-        }
 
         UserDTO currentUser = userService.getUserByEmail(jwtUser.getEmail()).orElse(null);
         if (currentUser == null) {
