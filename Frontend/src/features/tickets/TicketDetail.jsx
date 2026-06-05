@@ -20,7 +20,6 @@ import {
 	translateTicketStatus,
 } from "./utils/ticketUtils";
 import sadPlant from "./images/sad-plant.gif";
-import { Skeleton } from "../../components/ui/Skeleton";
 import { CgSpinner } from "react-icons/cg";
 import { Form } from "../../components/ui/Form";
 import { MdOutlineDangerous } from "react-icons/md";
@@ -68,7 +67,7 @@ const TicketDetail = () => {
 			// If the user is an agent taking the ticket, pass their Email.
 			// If it's the customer accepting/rejecting, agentEmail is null.
 			const agentEmail =
-				user?.role?.name?.toLowerCase() === "support_agent" ? user.email : null;
+				user?.role?.toLowerCase() === "support_agent" ? user.email : null;
 			const updatedTicket = await updateTicketStatus(
 				ticket.id,
 				newState,
@@ -105,11 +104,9 @@ const TicketDetail = () => {
 	if (isLoading)
 		return (
 			<Container className="flex items-center justify-content-center h-screen">
-				<Skeleton className="text-4xl border-5 py-5 px-10 mx-auto rounded-full w-max text-green-600 border-green-400">
-					<h1 className="flex gap-4 items-center">
+					<h1 className="flex gap-4 items-center text-3xl mx-auto w-max text-green-600">
 						<CgSpinner className="animate-spin"></CgSpinner>Đang tải...
 					</h1>
-				</Skeleton>
 			</Container>
 		);
 
@@ -210,7 +207,7 @@ const TicketDetail = () => {
 							Bạn có đồng ý với cách giải quyết này không?
 						</p>
 						<Button
-							className="bg-bg-success text-white hover:bg-green-600"
+							className="bg-bg-success text-white hover:bg-emerald-600"
 							onClick={() => handleStatusChange("DONE")}
 							disabled={isStatusChangeLoading && isCommentSubmitLoading}
 						>
@@ -218,7 +215,7 @@ const TicketDetail = () => {
 								{isStatusChangeLoading && (
 									<CgSpinner className="animate-spin"></CgSpinner>
 								)}
-								Chấp nhận (Done)
+								Chấp nhận 
 							</h1>
 						</Button>
 						<Button
@@ -230,7 +227,7 @@ const TicketDetail = () => {
 								{isStatusChangeLoading && (
 									<CgSpinner className="animate-spin"></CgSpinner>
 								)}
-								Từ chối (Xử lý lại)
+								Từ chối 
 							</h1>
 						</Button>
 					</>

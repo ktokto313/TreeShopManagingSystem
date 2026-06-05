@@ -28,9 +28,6 @@ public class TicketController {
     @PostMapping
     public ResponseEntity<Ticket> createTicket(@RequestBody TicketRequest ticketRequest, HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
         Ticket ticket = ticketService.createTicket(ticketRequest, currentUser.getEmail());
 
@@ -45,14 +42,10 @@ public class TicketController {
     public ResponseEntity<List<Ticket>> getAuthorizedTickets(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String priority,
-            Sort sort,
+            @RequestParam(required = false) Sort sort,
             HttpServletRequest request) {
 
         LoginResponse currentUser = JWTUtil.getUser(request);
-
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
         String email = currentUser.getEmail();
 

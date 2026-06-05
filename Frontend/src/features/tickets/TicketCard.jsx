@@ -13,7 +13,7 @@ export function TicketCard({ ticket, variant = "default" }) {
 	return (
 		<>
 			{variant === "default" && ticket && (
-				<Card className="w-full flex flex-col justify-between transition-all duration-200 hover:border-interactive-hover border-2 group cursor-pointer">
+				<Card className="w-full flex flex-col h-full min-h-[180px] justify-between transition-all duration-200 hover:border-interactive-hover border-2 group cursor-pointer">
 					<CardHeader className="pb-0 flex-row items-start justify-between gap-4 border-none">
 						<div className="flex flex-col gap-1">
 							<div className="flex justify-between">

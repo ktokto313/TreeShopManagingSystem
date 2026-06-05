@@ -1,5 +1,5 @@
-﻿import { createContext, useEffect, useState } from "react";
-import { loginApi, registerApi } from "../data/authApi";
+import { createContext, useState } from "react";
+import { loginApi, logoutApi, registerApi } from "../data/authApi";
 
 export const AuthContext = createContext();
 
@@ -21,20 +21,10 @@ export function AuthProvider({ children }) {
           credentials: "include",
         });
 
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
-          localStorage.setItem("currentUser", JSON.stringify(userData));
-        } else {
-          setUser(null);
-          localStorage.removeItem("currentUser");
-        }
-      } catch (err) {
-        setError(err.message);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
+    const logout = async () => {
+        console.log("1. Logging out...");
+        const logoutResponse = await logoutApi();
+        console.log("Backend responded with: " + logoutResponse);
     };
 
     fetchUser();
