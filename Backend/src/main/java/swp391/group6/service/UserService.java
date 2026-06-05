@@ -68,8 +68,9 @@ public class UserService {
             if (userDTO.getFullName() != null) user.setFullName(userDTO.getFullName());
             if (userDTO.getPhone() != null) user.setPhone(userDTO.getPhone());
 
-            // Cập nhật dùng isStatus() cho kiểu boolean nguyên thủy
-            user.setStatus(userDTO.isStatus());
+            if (userDTO.getStatus() != null) {
+                user.setStatus(userDTO.getStatus());
+            }
 
             User updatedUser = userRepository.save(user);
             return convertToDTO(updatedUser);
@@ -141,7 +142,9 @@ public class UserService {
         user.setPassword(dto.getPassword());
         user.setFullName(dto.getFullName());
         user.setPhone(dto.getPhone());
-        user.setStatus(dto.isStatus());
+
+        user.setStatus(dto.getStatus() != null ? dto.getStatus() : true);
+
         user.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
 
         String roleName = (dto.getRoleName() != null && !dto.getRoleName().isBlank()) ? dto.getRoleName() : DEFAULT_ROLE_NAME;
@@ -157,5 +160,19 @@ public class UserService {
 
     private boolean hasRole(User user, String roleName) {
         return user.getRole() != null && roleName.equalsIgnoreCase(user.getRole().getName());
+    }
+
+    public UserDTO updateProfile(long id, UserDTO userDTO) {
+        Optional<User> existingUser = userRepository.findById(id);
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+
+            if (userDTO.getFullName() != null) user.setFullName(userDTO.getFullName());
+            if (userDTO.getPhone() != null) user.setPhone(userDTO.getPhone());
+
+            User updatedUser = userRepository.save(user);
+            return convertToDTO(updatedUser);
+        }
+        return null;
     }
 }

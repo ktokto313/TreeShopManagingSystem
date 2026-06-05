@@ -41,7 +41,7 @@ public class ProfileController {
                 user.getEmail(),
                 user.getFullName(),
                 user.getPhone() != null ? user.getPhone() : "",
-                user.isStatus()
+                user.getStatus()
         );
 
         return ResponseEntity.ok(response);
@@ -52,29 +52,25 @@ public class ProfileController {
 
         LoginResponse jwtUser = JWTUtil.getUser(request);
         if (jwtUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Invalid token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
 
-        UserDTO currentUser = userService.getUserByEmail(jwtUser.getEmail())
-                .orElse(null);
-
+        UserDTO currentUser = userService.getUserByEmail(jwtUser.getEmail()).orElse(null);
         if (currentUser == null) {
             return ResponseEntity.notFound().build();
         }
 
         try {
-            UserDTO updatedUser = userService.updateUser(currentUser.getId(), userDTO);
+            UserDTO updatedUser = userService.updateProfile(currentUser.getId(), userDTO);
 
             if (updatedUser == null) {
                 return ResponseEntity.notFound().build();
             }
-
             ProfileResponse response = new ProfileResponse(
                     updatedUser.getEmail(),
                     updatedUser.getFullName(),
                     updatedUser.getPhone() != null ? updatedUser.getPhone() : "",
-                    updatedUser.isStatus()
+                    updatedUser.getStatus()
             );
 
             return ResponseEntity.ok(response);

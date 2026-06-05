@@ -25,6 +25,26 @@ function canManageRole(role) {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(readStoredUser)
 
+  function updateUser(updatedData) {
+    if (!user) return;
+    const newUserState = {
+      ...user,
+      fullName: updatedData.fullName,
+      phone: updatedData.phone
+    };
+    if (user.user) {
+      newUserState.user = {
+        ...user.user,
+        fullName: updatedData.fullName,
+        phone: updatedData.phone
+      };
+    }
+    setUser(newUserState);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(newUserState));
+    }
+  }
+
   async function login(email, password) {
     const loggedInUser = await loginRequest(email, password)
     setUser(loggedInUser)
@@ -54,6 +74,7 @@ export function AuthProvider({ children }) {
         login,
         register,
         logout,
+        updateUser,
         isAuthenticated: Boolean(user),
         canManage: canManageRole(user?.role),
       }),

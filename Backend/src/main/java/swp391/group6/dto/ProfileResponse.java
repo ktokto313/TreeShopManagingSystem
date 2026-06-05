@@ -19,5 +19,5 @@ public class ProfileResponse {
 
     public String getPhone() {return phone; }
 
-    public boolean isActive() { return status; }
+    public boolean isStatus() { return status; }
 }
