@@ -29,7 +29,7 @@ export default function ProductVariantsEditor({ value, onChange }) {
   const [rows, setRows] = useState(initialRows)
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect //
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRows(initialRows)
   }, [initialRows])
 
