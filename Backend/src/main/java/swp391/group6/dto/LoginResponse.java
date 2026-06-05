@@ -7,7 +7,6 @@ public class LoginResponse {
     private String email;
     private String fullName;
     private String role;
-    private String error;
 
     public LoginResponse() {}
 
@@ -20,5 +19,4 @@ public class LoginResponse {
     public String getEmail() { return email; }
     public String getFullName() { return fullName; }
     public String getRole() { return role; }
-    public String getError(){ return error;}
 }
