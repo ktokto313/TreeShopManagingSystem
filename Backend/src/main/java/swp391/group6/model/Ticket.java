@@ -34,9 +34,6 @@ public class Ticket {
     @Column(nullable = false)
     private Priority priority;
 
-    @Column(name = "ticket_type", nullable = false)
-    private String ticketType;
-
     @Column(name = "time_created", nullable = false)
     private Timestamp timeCreated;
 
@@ -63,9 +60,6 @@ public class Ticket {
 
     public Priority getPriority() { return priority; }
     public void setPriority(Priority priority) { this.priority = priority; }
-
-    public String getTicketType() { return ticketType; }
-    public void setTicketType(String ticketType) { this.ticketType = ticketType; }
 
     public Timestamp getTimeCreated() { return timeCreated; }
     public void setTimeCreated(Timestamp timeCreated) { this.timeCreated = timeCreated; }

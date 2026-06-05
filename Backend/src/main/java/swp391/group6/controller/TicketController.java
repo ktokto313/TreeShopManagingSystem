@@ -1,6 +1,7 @@
 package swp391.group6.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,8 +26,11 @@ public class TicketController {
 
     // Customer creates a ticket
     @PostMapping
-    public ResponseEntity<Ticket> createTicket(@RequestBody TicketRequest request) {
-        Ticket ticket = ticketService.createTicket(request);
+    public ResponseEntity<Ticket> createTicket(@RequestBody TicketRequest ticketRequest, HttpServletRequest request) {
+        LoginResponse currentUser = JWTUtil.getUser(request);
+
+        Ticket ticket = ticketService.createTicket(ticketRequest, currentUser.getEmail());
+
         if (ticket == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -35,15 +39,18 @@ public class TicketController {
 
     // Agent & Customer views their own tickets
     @GetMapping("/")
-    public ResponseEntity<List<Ticket>> getAuthorizedTickets(HttpServletRequest request) {
+    public ResponseEntity<List<Ticket>> getAuthorizedTickets(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String priority,
+            @RequestParam(required = false) Sort sort,
+            HttpServletRequest request) {
+
         LoginResponse currentUser = JWTUtil.getUser(request);
 
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         String email = currentUser.getEmail();
-        List<Ticket> tickets = ticketService.getAuthorizedTicketsByEmail(email);
+
+        // Pass everything down the chain
+        List<Ticket> tickets = ticketService.getAuthorizedTicketsByEmail(email, status, priority, sort);
 
         return ResponseEntity.ok(tickets);
     }

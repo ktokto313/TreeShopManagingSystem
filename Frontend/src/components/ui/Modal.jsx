@@ -33,7 +33,7 @@ export function Modal({ isOpen, onClose, title, children, className }) {
           </h2>
           <button 
             onClick={onClose}
-            className="text-black opacity-50 hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-border"
+            className="text-black opacity-50 hover:opacity-100 transition-opacity p-1 cursor-pointer rounded-md hover:bg-border"
             aria-label="Close"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
