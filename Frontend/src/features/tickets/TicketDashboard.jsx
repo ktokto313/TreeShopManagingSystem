@@ -89,7 +89,7 @@ const TicketDashboard = ({ className }) => {
 					<ModalButton
 						modalTitle={"Lọc Ticket"}
 						buttonClasses={cn(
-							"cursor-pointer hover:bg-green-400 py-4 px-4.5",
+							"cursor-pointer hover:bg-green-400 py-3.5 px-4 md:py-4 md:px-4.5",
 							styles.ticketSelectToggle,
 						)}
 						buttonLabel={<FaFilter className={"text-base"} />}
@@ -175,12 +175,15 @@ const TicketDashboard = ({ className }) => {
 
 						{/* Reload Button */}
 						<Button
-							className="ml-2 mr-2 w-13 h-full cursor-pointer hover:bg-green-400"
+							className="hover:bg-green-400 ms-3"
 							onClick={() =>
 								executeFetchAllTickets(ticketState, ticketPriority, ticketSort)
 							}
 						>
-							<TbReload className="text-xl"></TbReload>
+							<div className={cn("flex flex-row items-center gap-2")}>
+								<TbReload className="text-xl"></TbReload>
+								<p className={cn(styles.reloadTicketBtnContent)}>Tải Lại</p>
+							</div>
 						</Button>
 
 						{/* Create Ticket Button */}
@@ -197,7 +200,7 @@ const TicketDashboard = ({ className }) => {
 								modalTitle="Tạo Ticket"
 								isLoading={isCreateTicketLoading}
 								buttonClasses={cn(
-									"w-30 cursor-pointer hover:bg-green-400",
+									"px-3 ml-1 cursor-pointer hover:bg-green-400",
 									styles.createTicketBtn,
 								)}
 							>

@@ -33,3 +33,10 @@
 		display: none;
 	}
 }
+
+.reloadTicketBtnContent {
+	@container (width < 1000px) {
+		display: none;
+	}
+}
+
