@@ -28,7 +28,7 @@ function normalizeRows(value) {
   }))
 }
 
-export default function ProductVariantsEditor({ value, onChange }) {
+export default function ProductVariantsEditor({ value, error, onChange }) {
   const initialRows = useMemo(() => normalizeRows(value), [value])
   const [rows, setRows] = useState(initialRows)
 
@@ -73,6 +73,7 @@ export default function ProductVariantsEditor({ value, onChange }) {
         <p className="text-xs text-[var(--text)]">
           Dùng cấu trúc JSON chuẩn: <code>{`{ "sizes": ["nhỏ", "vừa", "lớn"] }`}</code>
         </p>
+        {error ? <p className="text-sm text-red-600">{error}</p> : null}
       </div>
 
       <div className="space-y-3 rounded-xl border border-[var(--border)] bg-[var(--bg)] p-4">
