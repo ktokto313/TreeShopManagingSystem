@@ -1,5 +1,5 @@
 import { createContext, useState } from "react";
-import { loginApi, registerApi } from "../data/authApi";
+import { loginApi, logoutApi, registerApi } from "../data/authApi";
 
 const AuthContext = createContext();
 
@@ -42,9 +42,10 @@ const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem("currentUser");
+    const logout = async () => {
+        console.log("1. Logging out...");
+        const logoutResponse = await logoutApi();
+        console.log("Backend responded with: " + logoutResponse);
     };
 
     return (
