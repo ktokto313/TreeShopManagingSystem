@@ -2,9 +2,11 @@ import Badge from '../../../components/ui/Badge'
 import Button from '../../../components/ui/Button'
 import Card from '../../../components/ui/Card'
 import { formatCurrency, parseCatalogImages } from '../utils/catalogUtils'
+import { resolveProductImageSource } from '../../products/utils/productImageResolver'
 
 export default function CatalogProductCard({ product, categoryName, onOpen }) {
   const images = parseCatalogImages(product.images)
+  const imagePreview = resolveProductImageSource(images[0])
   const isInStock = Number(product.stock ?? 0) > 0
 
   return (
@@ -18,8 +20,13 @@ export default function CatalogProductCard({ product, categoryName, onOpen }) {
         </div>
 
         <div className="flex h-52 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-100 via-white to-lime-100 text-sm text-[var(--text)]">
-          {images[0] ? (
-            <span className="px-4 text-center leading-5">{images[0]}</span>
+          {imagePreview ? (
+            <img
+              src={imagePreview}
+              alt={product.name}
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
           ) : (
             <span>Chưa có ảnh</span>
           )}

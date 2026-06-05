@@ -6,7 +6,8 @@ import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
 import { useAuth } from '../context/AuthContext'
 import { loadPublicJson } from '../features/catalog/utils/catalogApi'
-import { formatCurrency, parseCatalogImages } from '../features/catalog/utils/catalogUtils'
+import { formatCurrency } from '../features/catalog/utils/catalogUtils'
+import { resolveProductImages } from '../features/products/utils/productImageResolver'
 import { parseVariantGroups } from '../features/products/utils/variantUtils'
 
 function summarizeDescription(value) {
@@ -24,14 +25,6 @@ function InfoBox({ label, value }) {
       <div className="mt-2 text-sm font-medium text-[var(--text-h)]">{value}</div>
     </div>
   )
-}
-
-function isRenderableImage(source) {
-  if (typeof source !== 'string') {
-    return false
-  }
-
-  return /^https?:\/\//i.test(source) || source.startsWith('/') || source.startsWith('data:')
 }
 
 export default function ProductDetailPage() {
@@ -84,9 +77,9 @@ export default function ProductDetailPage() {
     ? categoryLookup.get(String(product.categoryId)) || product.categoryName || '-'
     : '-'
 
-  const productImages = parseCatalogImages(product?.images)
+  const productImages = resolveProductImages(product?.images)
   const variantGroups = parseVariantGroups(product?.variants)
-  const imagePreview = productImages.find(isRenderableImage)
+  const imagePreview = productImages[0]
 
   return (
     <main className="bg-[var(--social-bg)]/50">

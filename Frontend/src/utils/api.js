@@ -51,14 +51,17 @@ function loadJsonp(path) {
 
 async function requestJsonWithFetch(path, options) {
   const { body, headers, method = 'GET' } = options
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
   const response = await fetch(path, {
     method,
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(headers ?? {}),
-    },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    headers: isFormData
+      ? headers
+      : {
+          'Content-Type': 'application/json',
+          ...(headers ?? {}),
+        },
+    body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
   })
 
   const contentType = response.headers.get('content-type') || ''
@@ -90,16 +93,21 @@ async function requestJsonWithFetch(path, options) {
 function requestJsonWithXhr(path, options) {
   const { body, headers, method = 'GET' } = options
   const absolutePath = new URL(path, window.location.origin).toString()
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
     xhr.open(method, absolutePath, true)
     xhr.withCredentials = true
 
-    Object.entries({
-      'Content-Type': 'application/json',
-      ...(headers ?? {}),
-    }).forEach(([key, value]) => {
+    Object.entries(
+      isFormData
+        ? headers ?? {}
+        : {
+            'Content-Type': 'application/json',
+            ...(headers ?? {}),
+          },
+    ).forEach(([key, value]) => {
       xhr.setRequestHeader(key, value)
     })
 
@@ -132,7 +140,7 @@ function requestJsonWithXhr(path, options) {
       reject(new Error('Network request failed'))
     }
 
-    xhr.send(body === undefined ? null : JSON.stringify(body))
+    xhr.send(body === undefined ? null : isFormData ? body : JSON.stringify(body))
   })
 }
 
