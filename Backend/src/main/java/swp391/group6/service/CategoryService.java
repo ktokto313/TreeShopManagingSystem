@@ -6,13 +6,15 @@ import swp391.group6.dto.CategoryRequest;
 import swp391.group6.dto.CategoryResponse;
 import swp391.group6.model.Category;
 import swp391.group6.repository.CategoryRepository;
-import swp391.group6.repository.ProductRepository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class CategoryService {
+    private static final int MAX_NAME_LENGTH = 100;
+    private static final int MAX_DESCRIPTION_LENGTH = 1000;
+
     private final CategoryRepository categoryRepository;
 
     public CategoryService(CategoryRepository categoryRepository) {
@@ -35,7 +37,8 @@ public class CategoryService {
      */
     public Optional<CategoryResponse> createCategory(CategoryRequest request) {
         String name = normalizeName(request.getName());
-        if (name == null) {
+        String description = trimToNull(request.getDescription());
+        if (!isValidCategory(name, description)) {
             return Optional.empty();
         }
         if (categoryRepository.existsByNameIgnoreCase(name)) {
@@ -43,7 +46,7 @@ public class CategoryService {
         }
         Category category = new Category();
         category.setName(name);
-        category.setDescription(trimToNull(request.getDescription()));
+        category.setDescription(description);
         return Optional.of(toResponse(categoryRepository.save(category)));
     }
 
@@ -56,7 +59,8 @@ public class CategoryService {
             return Optional.empty();
         }
         String name = normalizeName(request.getName());
-        if (name == null) {
+        String description = trimToNull(request.getDescription());
+        if (!isValidCategory(name, description)) {
             return Optional.empty();
         }
         if (categoryRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {
@@ -64,7 +68,7 @@ public class CategoryService {
         }
         Category category = existing.get();
         category.setName(name);
-        category.setDescription(trimToNull(request.getDescription()));
+        category.setDescription(description);
         return Optional.of(toResponse(categoryRepository.save(category)));
     }
 
@@ -90,6 +94,12 @@ public class CategoryService {
 
     private String normalizeName(String name) {
         return trimToNull(name);
+    }
+
+    private boolean isValidCategory(String name, String description) {
+        return name != null
+                && name.length() <= MAX_NAME_LENGTH
+                && (description == null || description.length() <= MAX_DESCRIPTION_LENGTH);
     }
 
     private String trimToNull(String value) {

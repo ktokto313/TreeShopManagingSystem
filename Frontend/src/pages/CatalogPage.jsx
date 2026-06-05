@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext'
 import CatalogProductCard from '../features/catalog/components/CatalogProductCard'
 import { loadPublicJson } from '../features/catalog/utils/catalogApi'
 import { matchesCatalogFilters, sortCatalogProducts } from '../features/catalog/utils/catalogUtils'
+import { sortCategories } from '../utils/categorySort'
 
 const emptyFilters = {
   keyword: '',
@@ -30,8 +31,8 @@ const sortOptions = [
 
 const statusOptions = [
   { value: '', label: 'Tất cả tình trạng' },
-  { value: 'true', label: 'Chỉ còn hàng' },
-  { value: 'false', label: 'Chỉ hết hàng' },
+  { value: 'true', label: 'Còn hàng' },
+  { value: 'false', label: 'Hết hàng' },
 ]
 
 function getActiveFilterCount(filters) {
@@ -100,7 +101,7 @@ export default function CatalogPage() {
         loadPublicJson('/api/categories'),
         loadPublicJson('/api/products'),
       ])
-      setCategories(Array.isArray(categoryData) ? categoryData : [])
+      setCategories(Array.isArray(categoryData) ? sortCategories(categoryData) : [])
       setProducts(Array.isArray(productData) ? productData : [])
     } catch (error) {
       if (handleAuthError(error)) {

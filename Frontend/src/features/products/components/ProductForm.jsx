@@ -20,6 +20,7 @@ export default function ProductForm({
 
   function handleImageChange(event) {
     const files = Array.from(event.target.files || [])
+    onChange?.('imageFiles', files)
     onChange?.(
       'images',
       files.map((file) => file.name),
@@ -31,6 +32,8 @@ export default function ProductForm({
       <Input
         label="Tên sản phẩm"
         name="name"
+        required
+        maxLength={200}
         value={values.name}
         error={errors.name}
         onChange={handleInputChange}
@@ -38,6 +41,9 @@ export default function ProductForm({
       <Input
         label="Mã SKU"
         name="sku"
+        required
+        maxLength={50}
+        pattern="[A-Za-z0-9_-]+"
         value={values.sku}
         error={errors.sku}
         onChange={handleInputChange}
@@ -45,6 +51,7 @@ export default function ProductForm({
       <Select
         label="Danh mục"
         name="categoryId"
+        required
         value={values.categoryId}
         error={errors.categoryId}
         options={categoryOptions}
@@ -53,18 +60,21 @@ export default function ProductForm({
       <Textarea
         label="Mô tả"
         name="description"
+        maxLength={1000}
         value={values.description}
         error={errors.description}
         placeholder="Mô tả chi tiết sản phẩm"
         onChange={handleInputChange}
       />
-      <ProductVariantsEditor value={values.variants} onChange={onChange} />
+      <ProductVariantsEditor value={values.variants} error={errors.variants} onChange={onChange} />
       <div className="grid gap-4 sm:grid-cols-2">
         <Input
           label="Giá"
           name="price"
           type="number"
+          required
           min="0"
+          step="1"
           value={values.price}
           error={errors.price}
           onChange={handleInputChange}
@@ -73,7 +83,9 @@ export default function ProductForm({
           label="Tồn kho"
           name="stock"
           type="number"
+          required
           min="0"
+          step="1"
           value={values.stock}
           error={errors.stock}
           onChange={handleInputChange}
@@ -103,6 +115,7 @@ export default function ProductForm({
         ) : (
           <p className="text-sm text-[var(--text)]">Chưa chọn ảnh nào.</p>
         )}
+        {errors.images ? <p className="text-sm text-red-600">{errors.images}</p> : null}
       </div>
       <label className="flex items-center gap-2 text-sm font-medium text-[var(--text-h)]">
         <input

@@ -21,7 +21,9 @@ import {
   deactivateProduct,
   getProducts,
   updateProduct,
+  uploadProductImages,
 } from '../features/products/productApi'
+import { sortCategories } from '../utils/categorySort'
 
 const emptyCategoryForm = { id: '', name: '', description: '' }
 const emptyProductForm = {
@@ -35,8 +37,129 @@ const emptyProductForm = {
   description: '',
   variants: '',
   images: [],
+  imageFiles: [],
 }
 const emptyFilters = { keyword: '', categoryId: '', status: '' }
+const SKU_PATTERN = /^[A-Za-z0-9_-]+$/
+const MAX_IMAGE_FILES = 5
+const MAX_IMAGE_FILE_SIZE = 5 * 1024 * 1024
+
+function hasErrors(errors) {
+  return Object.keys(errors).length > 0
+}
+
+function isBlank(value) {
+  return String(value ?? '').trim() === ''
+}
+
+function isJsonObject(value) {
+  if (isBlank(value)) {
+    return true
+  }
+
+  try {
+    const parsed = JSON.parse(value)
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+  } catch {
+    return false
+  }
+}
+
+function validateCategoryForm(values) {
+  const errors = {}
+  const name = String(values.name ?? '').trim()
+  const description = String(values.description ?? '').trim()
+
+  if (!name) {
+    errors.name = 'Vui lòng nhập tên danh mục.'
+  } else if (name.length > 100) {
+    errors.name = 'Tên danh mục tối đa 100 ký tự.'
+  }
+
+  if (description.length > 1000) {
+    errors.description = 'Mô tả tối đa 1000 ký tự.'
+  }
+
+  return errors
+}
+
+function validateProductImages(files = []) {
+  if (!files.length) {
+    return ''
+  }
+
+  if (files.length > MAX_IMAGE_FILES) {
+    return `Chỉ được tải tối đa ${MAX_IMAGE_FILES} ảnh.`
+  }
+
+  const invalidType = files.find((file) => file?.type && !file.type.startsWith('image/'))
+  if (invalidType) {
+    return 'Tệp tải lên phải là ảnh.'
+  }
+
+  const oversizedFile = files.find((file) => Number(file?.size ?? 0) > MAX_IMAGE_FILE_SIZE)
+  if (oversizedFile) {
+    return 'Mỗi ảnh tối đa 5MB.'
+  }
+
+  return ''
+}
+
+function validateProductForm(values) {
+  const errors = {}
+  const name = String(values.name ?? '').trim()
+  const sku = String(values.sku ?? '').trim()
+  const description = String(values.description ?? '').trim()
+  const price = values.price === '' ? null : Number(values.price)
+  const stock = values.stock === '' ? null : Number(values.stock)
+
+  if (isBlank(values.categoryId)) {
+    errors.categoryId = 'Vui lòng chọn danh mục.'
+  }
+
+  if (!name) {
+    errors.name = 'Vui lòng nhập tên sản phẩm.'
+  } else if (name.length > 200) {
+    errors.name = 'Tên sản phẩm tối đa 200 ký tự.'
+  }
+
+  if (!sku) {
+    errors.sku = 'Vui lòng nhập mã SKU.'
+  } else if (sku.length > 50) {
+    errors.sku = 'SKU tối đa 50 ký tự.'
+  } else if (!SKU_PATTERN.test(sku)) {
+    errors.sku = 'SKU chỉ gồm chữ, số, dấu gạch ngang hoặc gạch dưới.'
+  }
+
+  if (price === null || Number.isNaN(price)) {
+    errors.price = 'Vui lòng nhập giá hợp lệ.'
+  } else if (price < 0) {
+    errors.price = 'Giá không được âm.'
+  }
+
+  if (stock === null || Number.isNaN(stock)) {
+    errors.stock = 'Vui lòng nhập tồn kho hợp lệ.'
+  } else if (!Number.isInteger(stock)) {
+    errors.stock = 'Tồn kho phải là số nguyên.'
+  } else if (stock < 0) {
+    errors.stock = 'Tồn kho không được âm.'
+  }
+
+  if (description.length > 1000) {
+    errors.description = 'Mô tả tối đa 1000 ký tự.'
+  }
+
+  if (!isJsonObject(values.variants)) {
+    errors.variants = 'Biến thể phải là JSON object hợp lệ.'
+  }
+
+  const imageError = validateProductImages(values.imageFiles)
+  if (imageError) {
+    errors.images = imageError
+  }
+
+  return errors
+}
 
 function parseImageList(value) {
   if (!value) {
@@ -62,6 +185,8 @@ export default function ManagementPage() {
   const [products, setProducts] = useState([])
   const [categoryForm, setCategoryForm] = useState(emptyCategoryForm)
   const [productForm, setProductForm] = useState(emptyProductForm)
+  const [categoryErrors, setCategoryErrors] = useState({})
+  const [productErrors, setProductErrors] = useState({})
   const [filters, setFilters] = useState(emptyFilters)
   const [activeTab, setActiveTab] = useState('categories')
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
@@ -101,7 +226,7 @@ export default function ManagementPage() {
 
     try {
       const [categoryData, productData] = await Promise.all([getCategories(), getProducts()])
-      setCategories(Array.isArray(categoryData) ? categoryData : [])
+      setCategories(Array.isArray(categoryData) ? sortCategories(categoryData) : [])
       setProducts(Array.isArray(productData) ? productData : [])
     } catch (error) {
       if (handleAuthError(error)) {
@@ -118,7 +243,7 @@ export default function ManagementPage() {
 
     try {
       const categoryData = await getCategories()
-      setCategories(Array.isArray(categoryData) ? categoryData : [])
+      setCategories(Array.isArray(categoryData) ? sortCategories(categoryData) : [])
     } catch (error) {
       if (handleAuthError(error)) {
         return
@@ -147,10 +272,38 @@ export default function ManagementPage() {
 
   function resetCategoryForm() {
     setCategoryForm(emptyCategoryForm)
+    setCategoryErrors({})
   }
 
   function resetProductForm() {
     setProductForm(emptyProductForm)
+    setProductErrors({})
+  }
+
+  function updateCategoryFormField(name, value) {
+    setCategoryForm((current) => ({
+      ...current,
+      [name]: value,
+    }))
+    setCategoryErrors((current) => {
+      const { [name]: _removed, ...remainingErrors } = current
+      return remainingErrors
+    })
+  }
+
+  function updateProductFormField(name, value) {
+    setProductForm((current) => ({
+      ...current,
+      [name]: value,
+    }))
+    setProductErrors((current) => {
+      const nextErrors = { ...current }
+      delete nextErrors[name]
+      if (name === 'imageFiles') {
+        delete nextErrors.images
+      }
+      return nextErrors
+    })
   }
 
   function openCreateCategoryModal() {
@@ -161,6 +314,7 @@ export default function ManagementPage() {
 
   function openEditCategoryModal(category) {
     setActiveTab('categories')
+    setCategoryErrors({})
     setCategoryForm({
       id: category.id,
       name: category.name ?? '',
@@ -181,6 +335,7 @@ export default function ManagementPage() {
 
   function openEditProductModal(product) {
     setActiveTab('products')
+    setProductErrors({})
     setProductForm({
       id: product.id,
       categoryId: product.categoryId ?? '',
@@ -192,6 +347,7 @@ export default function ManagementPage() {
       description: product.description ?? '',
       variants: product.variants ?? '',
       images: parseImageList(product.images),
+      imageFiles: [],
     })
     setIsProductModalOpen(true)
   }
@@ -213,9 +369,15 @@ export default function ManagementPage() {
     setNotice('')
 
     try {
+      const validationErrors = validateCategoryForm(categoryForm)
+      setCategoryErrors(validationErrors)
+      if (hasErrors(validationErrors)) {
+        return
+      }
+
       const payload = {
-        name: categoryForm.name,
-        description: categoryForm.description,
+        name: categoryForm.name.trim(),
+        description: categoryForm.description.trim(),
       }
 
       if (categoryForm.id) {
@@ -243,16 +405,26 @@ export default function ManagementPage() {
     setNotice('')
 
     try {
+      const validationErrors = validateProductForm(productForm)
+      setProductErrors(validationErrors)
+      if (hasErrors(validationErrors)) {
+        return
+      }
+
+      const uploadedImages = productForm.imageFiles?.length
+        ? await uploadProductImages(productForm.imageFiles)
+        : productForm.images
+      const imageNames = Array.isArray(uploadedImages) ? uploadedImages : []
       const payload = {
         categoryId: productForm.categoryId === '' ? null : Number(productForm.categoryId),
-        name: productForm.name,
+        name: productForm.name.trim(),
         price: productForm.price === '' ? null : Number(productForm.price),
         stock: Number(productForm.stock),
         status: productForm.status,
-        sku: productForm.sku,
-        description: productForm.description,
+        sku: productForm.sku.trim(),
+        description: productForm.description.trim(),
         variants: productForm.variants,
-        images: productForm.images.length ? JSON.stringify(productForm.images) : null,
+        images: imageNames.length ? JSON.stringify(imageNames) : null,
       }
 
       if (productForm.id) {
@@ -500,12 +672,8 @@ export default function ManagementPage() {
 
           <CategoryForm
             values={categoryForm}
-            onChange={(name, value) =>
-              setCategoryForm((current) => ({
-                ...current,
-                [name]: value,
-              }))
-            }
+            errors={categoryErrors}
+            onChange={updateCategoryFormField}
             onSubmit={saveCategory}
           />
 
@@ -551,6 +719,7 @@ export default function ManagementPage() {
 
           <ProductForm
             values={productForm}
+            errors={productErrors}
             categoryOptions={[
               { value: '', label: 'Chọn danh mục' },
               ...categories.map((category) => ({
@@ -558,12 +727,7 @@ export default function ManagementPage() {
                 label: category.name,
               })),
             ]}
-            onChange={(name, value) =>
-              setProductForm((current) => ({
-                ...current,
-                [name]: value,
-              }))
-            }
+            onChange={updateProductFormField}
             onSubmit={saveProduct}
           />
 

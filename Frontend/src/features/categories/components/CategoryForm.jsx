@@ -18,6 +18,8 @@ export default function CategoryForm({
       <Input
         label="Tên danh mục"
         name="name"
+        required
+        maxLength={100}
         value={values.name}
         error={errors.name}
         onChange={handleInputChange}
@@ -25,6 +27,7 @@ export default function CategoryForm({
       <Input
         label="Mô tả"
         name="description"
+        maxLength={1000}
         value={values.description}
         error={errors.description}
         onChange={handleInputChange}

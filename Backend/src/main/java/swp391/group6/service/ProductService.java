@@ -14,9 +14,15 @@ import swp391.group6.repository.ProductRepository;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 public class ProductService {
+    private static final int MAX_NAME_LENGTH = 200;
+    private static final int MAX_SKU_LENGTH = 50;
+    private static final int MAX_DESCRIPTION_LENGTH = 1000;
+    private static final Pattern SKU_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
+
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductDetailRepository productDetailRepository;
@@ -51,10 +57,10 @@ public class ProductService {
         String sku = trimToNull(request.getSku());
         BigDecimal price = request.getPrice();
 
-        if (name == null || sku == null || price == null || price.compareTo(BigDecimal.ZERO) < 0) {
+        if (!isValidProductRequest(request, name, sku, price)) {
             return Optional.empty();
         }
-        if (request.getCategoryId() != null && !categoryRepository.existsById(request.getCategoryId())) {
+        if (!categoryRepository.existsById(request.getCategoryId())) {
             return Optional.empty();
         }
         if (productRepository.existsBySkuIgnoreCase(sku)) {
@@ -79,10 +85,10 @@ public class ProductService {
         String sku = trimToNull(request.getSku());
         BigDecimal price = request.getPrice();
 
-        if (name == null || sku == null || price == null || price.compareTo(BigDecimal.ZERO) < 0) {
+        if (!isValidProductRequest(request, name, sku, price)) {
             return Optional.empty();
         }
-        if (request.getCategoryId() != null && !categoryRepository.existsById(request.getCategoryId())) {
+        if (!categoryRepository.existsById(request.getCategoryId())) {
             return Optional.empty();
         }
         if (productRepository.existsBySkuIgnoreCaseAndIdNot(sku, id)) {
@@ -176,5 +182,22 @@ public class ProductService {
 
     private boolean containsIgnoreCase(String value, String keyword) {
         return value != null && keyword != null && value.toLowerCase().contains(keyword.toLowerCase());
+    }
+
+    private boolean isValidProductRequest(ProductRequest request, String name, String sku, BigDecimal price) {
+        String description = trimToNull(request.getDescription());
+        Integer stock = request.getStock();
+
+        return request.getCategoryId() != null
+                && name != null
+                && name.length() <= MAX_NAME_LENGTH
+                && sku != null
+                && sku.length() <= MAX_SKU_LENGTH
+                && SKU_PATTERN.matcher(sku).matches()
+                && price != null
+                && price.compareTo(BigDecimal.ZERO) >= 0
+                && stock != null
+                && stock >= 0
+                && (description == null || description.length() <= MAX_DESCRIPTION_LENGTH);
     }
 }
