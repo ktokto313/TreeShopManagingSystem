@@ -29,6 +29,18 @@ export function updateProduct(id, payload) {
   })
 }
 
+export function uploadProductImages(files = []) {
+  const formData = new FormData()
+  files.forEach((file) => {
+    formData.append('files', file)
+  })
+
+  return requestJson(`${PRODUCT_API_BASE}/images`, {
+    method: 'POST',
+    body: formData,
+  })
+}
+
 export function deactivateProduct(id) {
   return requestJson(`${PRODUCT_API_BASE}/${id}`, {
     method: 'DELETE',

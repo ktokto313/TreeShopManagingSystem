@@ -1,5 +1,7 @@
 import Button from '../../../components/ui/Button'
 import ProductStatusBadge from './ProductStatusBadge'
+import { parseCatalogImages } from '../../catalog/utils/catalogUtils'
+import { resolveProductImageSource } from '../utils/productImageResolver'
 import { summarizeVariantGroups } from '../utils/variantUtils'
 
 function summarizeText(value, maxLength = 80) {
@@ -12,14 +14,13 @@ function summarizeText(value, maxLength = 80) {
 }
 
 function renderImagePreview(product) {
-  const hasImage = Array.isArray(product.images)
-    ? product.images.length > 0
-    : Boolean(product.images)
+  const firstImage = parseCatalogImages(product.images)[0]
+  const imageSource = resolveProductImageSource(firstImage)
 
-  if (hasImage) {
+  if (imageSource) {
     return (
-      <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[var(--social-bg)] text-[10px] text-[var(--text)]">
-        Ảnh
+      <div className="flex h-12 w-12 overflow-hidden rounded-md bg-[var(--social-bg)]">
+        <img src={imageSource} alt={product.name} className="h-full w-full object-cover" />
       </div>
     )
   }
