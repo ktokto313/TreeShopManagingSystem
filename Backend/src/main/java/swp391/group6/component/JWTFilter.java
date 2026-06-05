@@ -28,6 +28,10 @@ public class JWTFilter extends OncePerRequestFilter {
         String requestUri = request.getRequestURI();
         String method = request.getMethod();
 
+        if (requestUri.startsWith("/product-images/")) {
+            return true;
+        }
+
         if (requestUri.startsWith("/api/auth")) {
             return true;
         }

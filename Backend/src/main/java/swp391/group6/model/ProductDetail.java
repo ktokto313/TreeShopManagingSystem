@@ -1,6 +1,8 @@
 package swp391.group6.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "product_details")
@@ -12,12 +14,12 @@ public class ProductDetail {
     @Column
     private String description;
 
-    //TODO map variant here, same with below
-    @Transient
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "json")
     private String variants;
 
-    //TODO map image here, the database return type JSON #Other and can't convert to String
-    @Transient
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "json")
     private String images;
 
     @OneToOne

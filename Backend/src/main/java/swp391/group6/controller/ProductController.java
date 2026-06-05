@@ -11,19 +11,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import swp391.group6.dto.ProductRequest;
 import swp391.group6.dto.ProductResponse;
+import swp391.group6.service.ProductImageStorageService;
 import swp391.group6.service.ProductService;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
     private final ProductService productService;
+    private final ProductImageStorageService productImageStorageService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ProductImageStorageService productImageStorageService) {
         this.productService = productService;
+        this.productImageStorageService = productImageStorageService;
     }
 
     @GetMapping
@@ -47,6 +52,19 @@ public class ProductController {
         return productService.createProduct(request)
                 .map(product -> ResponseEntity.status(HttpStatus.CREATED).body(product))
                 .orElse(ResponseEntity.badRequest().build());
+    }
+
+    @PostMapping("/images")
+    public ResponseEntity<List<String>> uploadProductImages(@RequestParam("files") List<MultipartFile> files) {
+        try {
+            List<String> storedFileNames = productImageStorageService.storeAll(files);
+            if (storedFileNames.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).body(storedFileNames);
+        } catch (IllegalArgumentException | IOException exception) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PutMapping("/{id}")
