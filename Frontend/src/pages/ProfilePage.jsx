@@ -11,23 +11,24 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({ fullName: '', phone: '' })
   const [submitting, setSubmitting] = useState(false)
-  const { user, updateUser } = useAuth();
-
-  useEffect(() => {
-    fetchProfile()
-  }, [])
+  const { updateUser } = useAuth();
 
   const fetchProfile = () => {
     setLoading(true)
     requestJson('/api/profile')
         .then((data) => {
           setProfile(data)
-          // Khởi tạo giá trị form ban đầu từ profile tải về
           setFormData({ fullName: data.fullName, phone: data.phone })
         })
         .catch(() => setProfile(null))
         .finally(() => setLoading(false))
   }
+
+  useEffect(() => {
+    /* eslint-disable-next-line react-hooks/set-state-in-effect */
+    fetchProfile()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleInputChange = (e, field) => {
     setFormData({
@@ -59,7 +60,9 @@ export default function ProfilePage() {
           status: profile.status
         }
       })
+
       setProfile(updatedData)
+
       updateUser({
         fullName: updatedData.fullName,
         phone: updatedData.phone

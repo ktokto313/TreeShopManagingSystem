@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from 'react'
+import { createContext, useContext, useMemo, useState, useCallback } from 'react'
 import { login as loginRequest, register as registerRequest } from '../features/auth/authApi'
 
 const STORAGE_KEY = 'treeshop-auth-user'
@@ -25,7 +25,7 @@ function canManageRole(role) {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(readStoredUser)
 
-  function updateUser(updatedData) {
+  const updateUser = useCallback((updatedData) => {
     if (!user) return;
     const newUserState = {
       ...user,
@@ -43,7 +43,7 @@ export function AuthProvider({ children }) {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(newUserState));
     }
-  }
+  }, [user]);
 
   async function login(email, password) {
     const loggedInUser = await loginRequest(email, password)
