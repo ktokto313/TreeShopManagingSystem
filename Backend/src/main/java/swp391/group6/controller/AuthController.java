@@ -39,13 +39,12 @@ public class AuthController {
                 .body(loginResponse);
     }
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<Void> register(@RequestBody RegisterRequest request) {
 
         User user = authService.register(request);
 
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Email already exists");
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
