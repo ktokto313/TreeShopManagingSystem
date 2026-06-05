@@ -3,17 +3,15 @@ import Container from '../components/global/Container'
 import Card from '../components/ui/Card'
 import Input from '../components/ui/Input'
 import { requestJson } from '../utils/api'
+import { useAuth } from '../context/AuthContext'
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
-
-  // State quản lý chế độ chỉnh sửa
   const [isEditing, setIsEditing] = useState(false)
-  // State lưu dữ liệu form khi người dùng nhập dữ liệu mới
   const [formData, setFormData] = useState({ fullName: '', phone: '' })
-  // State quản lý trạng thái đang gửi API cập nhật
   const [submitting, setSubmitting] = useState(false)
+  const { user, updateUser } = useAuth();
 
   useEffect(() => {
     fetchProfile()
@@ -31,7 +29,6 @@ export default function ProfilePage() {
         .finally(() => setLoading(false))
   }
 
-  // Xử lý khi người dùng gõ phím thay đổi dữ liệu trong Input
   const handleInputChange = (e, field) => {
     setFormData({
       ...formData,
@@ -39,7 +36,6 @@ export default function ProfilePage() {
     })
   }
 
-  // Xử lý khi bấm nút "Hủy" - trả về dữ liệu cũ
   const handleCancel = () => {
     setIsEditing(false)
     if (profile) {
@@ -47,7 +43,6 @@ export default function ProfilePage() {
     }
   }
 
-  // Xử lý gửi dữ liệu cập nhật lên Backend
   const handleSave = async () => {
     if (!formData.fullName.trim()) {
       alert("Họ tên không được để trống!")
@@ -56,18 +51,19 @@ export default function ProfilePage() {
 
     setSubmitting(true)
     try {
-      // 1. Gọi API cập nhật lên Backend
-      await requestJson('/api/profile', {
+      const updatedData = await requestJson('/api/profile', {
         method: 'PUT',
-        body: formData
+        body: {
+          fullName: formData.fullName,
+          phone: formData.phone,
+          status: profile.status
+        }
       })
-
-      // 2. Cập nhật trực tiếp vào state profile bằng cách giữ các trường cũ và đè dữ liệu mới lên
-      setProfile((prevProfile) => ({
-        ...prevProfile,
-        fullName: formData.fullName,
-        phone: formData.phone
-      }))
+      setProfile(updatedData)
+      updateUser({
+        fullName: updatedData.fullName,
+        phone: updatedData.phone
+      })
 
       setIsEditing(false)
       alert("Cập nhật thông tin cá nhân thành công!")
