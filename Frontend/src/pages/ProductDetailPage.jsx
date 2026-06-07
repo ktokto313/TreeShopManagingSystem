@@ -31,7 +31,7 @@ export default function ProductDetailPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { productId } = useParams()
-  const { logout, isAuthenticated } = useAuth()
+  const { logout, isAuthenticated, canManage } = useAuth()
 
   const [categories, setCategories] = useState([])
   const [product, setProduct] = useState(location.state?.product ?? null)
@@ -90,9 +90,18 @@ export default function ProductDetailPage() {
             <p className="text-sm uppercase tracking-[0.2em] text-[var(--accent)]">Catalog khách hàng</p>
             <h1 className="text-3xl font-semibold text-[var(--text-h)]">Chi tiết sản phẩm</h1>
           </div>
-          <Link to="/catalog">
-            <Button variant="secondary">Quay lại catalog</Button>
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            {canManage && product ? (
+              <Button
+                onClick={() => navigate('/manage', { state: { editProduct: product } })}
+              >
+                Sửa sản phẩm
+              </Button>
+            ) : null}
+            <Link to="/catalog">
+              <Button variant="secondary">Quay lại catalog</Button>
+            </Link>
+          </div>
         </div>
 
         {notice ? (
