@@ -2,6 +2,7 @@ package swp391.group6.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.websocket.server.PathParam;
+import lombok.extern.java.Log;
 import org.antlr.v4.runtime.atn.SemanticContext;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
@@ -54,8 +55,9 @@ public class OrderController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Void> changeOrder(@PathVariable long id, @RequestBody Order order) {
-        if (!orderService.changeOrder(id, order)) {
+    public ResponseEntity<Void> changeOrder(HttpServletRequest request, @PathVariable long id, @RequestBody Order order) {
+        LoginResponse loginResponse = JWTUtil.getUser(request);
+        if (!orderService.changeOrder(loginResponse, id, order)) {
             return ResponseEntity.badRequest().build();
         }
 

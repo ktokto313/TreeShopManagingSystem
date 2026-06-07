@@ -13,58 +13,6 @@ export function OrderCard({ order, onViewDetails }) {
   const discount = Number(order.discount || 0);
   const total = Math.max(0, itemsTotal + shippingFee - discount);
 
-  // Status mapping
-  const getStatusConfig = (status) => {
-    switch (status) {
-      case 'PENDING':
-        return {
-          bg: 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20',
-          label: 'Pending'
-        };
-      case 'PROCESSING':
-        return {
-          bg: 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
-          label: 'Processing'
-        };
-      case 'DELIVERING':
-        return {
-          bg: 'bg-cyan-500/10 text-cyan-600 border border-cyan-500/20',
-          label: 'Delivering'
-        };
-      case 'ARRIVED':
-        return {
-          bg: 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
-          label: 'Arrived'
-        };
-      case 'RECEIVED':
-        return {
-          bg: 'bg-green-600/10 text-green-600 border border-green-600/20',
-          label: 'Received'
-        };
-      case 'RETURN_PENDING':
-        return {
-          bg: 'bg-orange-500/10 text-orange-600 border border-orange-500/20',
-          label: 'Return Pending'
-        };
-      case 'RETURNING':
-        return {
-          bg: 'bg-purple-500/10 text-purple-600 border border-purple-500/20',
-          label: 'Returning'
-        };
-      case 'FAILED':
-        return {
-          bg: 'bg-red-500/10 text-red-600 border border-red-500/20',
-          label: 'Failed'
-        };
-      default:
-        return {
-          bg: 'bg-gray-500/10 text-gray-600 border border-gray-500/20',
-          label: status
-        };
-    }
-  };
-
-  const statusConfig = getStatusConfig(order.status);
   const itemsCount = orderDetails.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
   return (

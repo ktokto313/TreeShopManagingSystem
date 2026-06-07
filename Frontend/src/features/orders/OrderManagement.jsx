@@ -1,44 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Header } from '../components/global/Header';
-import { Footer } from '../components/global/Footer';
-import { Container } from '../components/global/Container';
-import { OrderCard } from '../features/orders/OrderCard';
-import { Modal } from '../components/ui/Modal';
-import { Button } from '../components/ui/Button';
-import { Skeleton } from '../components/ui/Skeleton';
-import { loginApi } from '../data/authApi';
-import { timeFormat } from '../utils/timeFormat';
-import useAuthUser from '../hooks/useAuthUser';
+import { Header } from '../../components/global/Header';
+import { Footer } from '../../components/global/Footer';
+import { Container } from '../../components/global/Container';
+import { OrderCard } from './OrderCard';
+import { Modal } from '../../components/ui/Modal';
+import { Button } from '../../components/ui/Button';
+import { Skeleton } from '../../components/ui/Skeleton';
+import { loginApi } from '../../data/authApi';
+import { timeFormat } from '../../utils/timeFormat';
+import useAuthUser from '../../hooks/useAuthUser';
 
 export default function OrderManagement() {
   const { isLoading, error, executeAuth } = useAuthUser();
-  const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('ALL');
 
   useEffect(() => {
     executeAuth();
   }, []);
-
-  const fetchOrders = async () => {
-    const response = await fetch("/api/orders", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include"
-    });
-
-    if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
-        throw new Error("UNAUTHORIZED");
-      }
-      throw new Error(`Failed to fetch orders (Status: ${response.status})`);
-    }
-
-    const data = await response.json();
-    setOrders(data);
-  };
 
   useEffect(() => {
     fetchOrders();
@@ -88,6 +67,7 @@ export default function OrderManagement() {
     if (selectedFilter === 'PROCESSING') return order.status === 'PROCESSING';
     if (selectedFilter === 'DELIVERING') return order.status === 'DELIVERING';
     if (selectedFilter === 'COMPLETED') return ['RECEIVED', 'ARRIVED'].includes(order.status);
+    //TODO make a new filter called waiting for action for manager choose shipper to make change
     if (selectedFilter === 'FAILED') return ['FAILED', 'RETURN_PENDING', 'RETURNING'].includes(order.status);
 
     return true;
@@ -95,111 +75,7 @@ export default function OrderManagement() {
 
   // Render Modal Details Breakdown
   const renderOrderDetailsModal = () => {
-    if (!selectedOrder) return null;
-
-    const details = selectedOrder.orderDetailList || [];
-    const itemsTotal = details.reduce((sum, item) => sum + (Number(item.pricePaid || 0) * (item.quantity || 0)), 0);
-    const shippingFee = Number(selectedOrder.shippingFee || 0);
-    const discount = Number(selectedOrder.discount || 0);
-    const finalTotal = Math.max(0, itemsTotal + shippingFee - discount);
-
-    return (
-      <Modal
-        isOpen={!!selectedOrder}
-        onClose={() => setSelectedOrder(null)}
-        title={`Order Details - #ORD-${selectedOrder.id}`}
-      >
-        <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
-          {/* Status Banner */}
-          <div className="rounded-lg bg-interactive/10 p-3 flex items-center justify-between border border-interactive/20">
-            <div>
-              <span className="text-[10px] uppercase font-bold text-black/55">Status</span>
-              <p className="text-sm font-bold text-interactive mt-0.5">{selectedOrder.status}</p>
-            </div>
-            <div className="text-right">
-              <span className="text-[10px] uppercase font-bold text-black/55">Ordered On</span>
-              <p className="text-xs font-semibold text-black/75 mt-0.5">{timeFormat(selectedOrder.createdAt)}</p>
-            </div>
-          </div>
-
-          {/* Items Section */}
-          <div>
-            <h4 className="text-xs font-bold text-black/60 uppercase tracking-wider mb-2">Items Breakdown</h4>
-            <div className="space-y-2">
-              {details.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg bg-bg-base border border-border/55">
-                  <div className="flex flex-col max-w-[200px]">
-                    <span className="text-sm font-semibold text-black/90 truncate">
-                      {item.product?.name || 'Unknown Product'}
-                    </span>
-                    <span className="text-[10px] text-black/45 mt-0.5">
-                      SKU: {item.product?.sku || 'N/A'}
-                    </span>
-                  </div>
-                  <div className="text-right flex flex-col">
-                    <span className="text-sm font-bold text-black/85">
-                      ${(Number(item.pricePaid || 0) * (item.quantity || 0)).toFixed(2)}
-                    </span>
-                    <span className="text-[10px] text-black/50 mt-0.5">
-                      ${Number(item.pricePaid || 0).toFixed(2)} x {item.quantity}
-                    </span>
-                  </div>
-                </div>
-              ))}
-              {details.length === 0 && (
-                <p className="text-sm text-black/40 italic">No products listed in this order.</p>
-              )}
-            </div>
-          </div>
-
-          {/* Shipping Address */}
-          <div className="p-3 rounded-lg bg-bg-base border border-border/55">
-            <h4 className="text-xs font-bold text-black/60 uppercase tracking-wider mb-1.5">Shipping Address</h4>
-            <p className="text-xs text-black/80 leading-relaxed">
-              {selectedOrder.shippingAddress || 'No shipping address specified.'}
-            </p>
-          </div>
-
-          {/* Pricing Summary */}
-          <div className="space-y-1.5 border-t border-border/60 pt-3 text-sm text-black/75">
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span className="font-semibold">${itemsTotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Shipping Fee</span>
-              <span className="font-semibold text-green-600">+${shippingFee.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Discount Applied</span>
-              <span className="font-semibold text-red-500">-${discount.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between border-t border-border/60 pt-2 text-base font-extrabold text-black">
-              <span>Grand Total</span>
-              <span className="text-interactive">${finalTotal.toFixed(2)}</span>
-            </div>
-          </div>
-
-          {/* Close / Actions */}
-          <div className="flex justify-end gap-3 mt-2">
-            <Button variant="secondary" className="px-4 py-2" onClick={() => setSelectedOrder(null)}>
-              Close
-            </Button>
-            <Button
-              variant="primary"
-              className="px-4 py-2"
-              onClick={() => {
-                alert(`Receipt for Order #ORD-${selectedOrder.id} sent to printer!`);
-              }}
-            >
-              Print Receipt
-            </Button>
-          </div>
-        </div>
-      </Modal>
-    );
-  };
-
+    
   return (
     <div className="min-h-screen flex flex-col bg-bg-base font-main">
       <Header />
