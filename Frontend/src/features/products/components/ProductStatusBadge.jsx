@@ -1,3 +1,4 @@
+// Created by minhlthe200133
 import Badge from '../../../components/ui/Badge'
 
 export default function ProductStatusBadge({ isActive }) {

@@ -1,3 +1,4 @@
+// Created by minhlthe200133
 import { summarizeVariantGroups } from '../../products/utils/variantUtils'
 
 export function parseCatalogImages(value) {

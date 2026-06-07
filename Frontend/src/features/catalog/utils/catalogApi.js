@@ -1,3 +1,4 @@
+// Created by minhlthe200133
 export async function loadPublicJson(path) {
   const response = await fetch(path, {
     credentials: 'include',

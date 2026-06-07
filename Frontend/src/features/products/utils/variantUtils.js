@@ -1,3 +1,4 @@
+// Created by minhlthe200133
 export function parseVariantGroups(value) {
   if (!value) {
     return []
