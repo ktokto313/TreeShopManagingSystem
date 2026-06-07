@@ -1,3 +1,4 @@
+// Created by minhlthe200133
 import { parseCatalogImages } from '../../catalog/utils/catalogUtils'
 
 const localImageModules = import.meta.glob('../images/*.{jpg,jpeg,png,webp,gif}', {
