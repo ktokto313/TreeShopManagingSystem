@@ -10,6 +10,7 @@ import swp391.group6.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swp391.group6.service.GoogleAuthService;
+import swp391.group6.service.OtpService;
 import swp391.group6.util.CookieUtil;
 import swp391.group6.util.JWTUtil;
 
@@ -21,9 +22,12 @@ public class AuthController {
 
     private final AuthService authService;
     private final GoogleAuthService googleAuthService;
-    public AuthController(AuthService authService, GoogleAuthService googleAuthService) {
+    private final OtpService otpService;
+
+    public AuthController(AuthService authService, GoogleAuthService googleAuthService, OtpService otpService) {
         this.authService = authService;
         this.googleAuthService = googleAuthService;
+        this.otpService = otpService;
     }
 
     @PostMapping("/login")
@@ -55,7 +59,12 @@ public class AuthController {
     @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@RequestBody GoogleAuthRequest request,
                                          HttpServletResponse response) {
-        return ResponseEntity.ok(googleAuthService.handleGoogleLogin(request.getCredential(), response));
+        try {
+            return ResponseEntity.ok(googleAuthService.handleGoogleLogin(request.getCredential(), response));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", e.getMessage()));
+        }
     }
 
     @PostMapping("/google/complete-profile")
@@ -63,5 +72,26 @@ public class AuthController {
                                              HttpServletResponse response) {
         googleAuthService.completeGoogleProfile(request, response);
         return ResponseEntity.ok(Map.of("success", true));
+    }
+
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@RequestBody OtpRequest request) {
+        // check if email already exists
+        if (authService.emailExists(request.getEmail())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", "Email already registered"));
+        }
+        otpService.generateAndSend(request.getEmail());
+        return ResponseEntity.ok(Map.of("message", "OTP sent"));
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody OtpRequest request) {
+        boolean valid = otpService.verify(request.getEmail(), request.getOtp());
+        if (!valid) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Invalid or expired OTP"));
+        }
+        return ResponseEntity.ok(Map.of("message", "OTP verified"));
     }
 }
