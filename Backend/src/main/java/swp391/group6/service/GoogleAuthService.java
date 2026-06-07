@@ -1,4 +1,4 @@
-//6/7: Hung Dao: Add Google Authorization Service for Google SSO
+//6/7: Hung Dao: Add Google Authorization Service for Google SSO, update for an alter flow
 package swp391.group6.service;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
@@ -47,6 +47,10 @@ public class GoogleAuthService {
 
         if (existing.isPresent()) {
             User user = existing.get();
+            if (user.getPassword() != null) {
+                throw new RuntimeException("Invalid email.");
+            }
+
             LoginResponse loginResponse = new LoginResponse(
                     user.getEmail(),
                     user.getFullName(),

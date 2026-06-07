@@ -1,3 +1,5 @@
+//6/4: Dao Hung: Frontend for Register screen
+//6/7: Dao Hung: Update send OTP for registering user
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -8,6 +10,8 @@ export default function RegisterPage() {
   const [values, setValues] = useState({ fullName: '', email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [otpSent, setOtpSent] = useState(false)
+  const [otp, setOtp] = useState('')
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -19,6 +23,36 @@ export default function RegisterPage() {
     setLoading(true)
     setError('')
     try {
+      const res = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: values.email }),
+      })
+      if (res.status === 409) {
+        setError('Email already registered')
+        return
+      }
+      setOtpSent(true)
+    } catch {
+      setError('Failed to send OTP, please try again')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleVerifyOtp() {
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: values.email, otp }),
+      })
+      if (!res.ok) {
+        setError('Invalid or expired OTP')
+        return
+      }
       await register(values.fullName, values.email, values.password)
       navigate('/login')
     } catch (err) {
@@ -46,58 +80,90 @@ export default function RegisterPage() {
                 </div>
             )}
 
-            <form onSubmit={handleSubmit}>
-              <div className="mb-5">
-                <label className="block text-sm text-gray-700 mb-1.5">
-                  Full name *
-                </label>
-                <input
-                    type="text"
-                    name="fullName"
-                    required
-                    value={values.fullName}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-500 transition-colors"
-                />
-              </div>
+            {!otpSent ? (
+                <form onSubmit={handleSubmit}>
+                  <div className="mb-5">
+                    <label className="block text-sm text-gray-700 mb-1.5">Full name *</label>
+                    <input
+                        type="text"
+                        name="fullName"
+                        required
+                        value={values.fullName}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-500 transition-colors"
+                    />
+                  </div>
 
-              <div className="mb-5">
-                <label className="block text-sm text-gray-700 mb-1.5">
-                  Email address *
-                </label>
-                <input
-                    type="email"
-                    name="email"
-                    required
-                    value={values.email}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-500 transition-colors"
-                />
-              </div>
+                  <div className="mb-5">
+                    <label className="block text-sm text-gray-700 mb-1.5">Email address *</label>
+                    <input
+                        type="email"
+                        name="email"
+                        required
+                        value={values.email}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-500 transition-colors"
+                    />
+                  </div>
 
-              <div className="mb-6">
-                <label className="block text-sm text-gray-700 mb-1.5">
-                  Password *
-                </label>
-                <input
-                    type="password"
-                    name="password"
-                    required
-                    value={values.password}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-500 transition-colors"
-                />
-              </div>
+                  <div className="mb-6">
+                    <label className="block text-sm text-gray-700 mb-1.5">Password *</label>
+                    <input
+                        type="password"
+                        name="password"
+                        required
+                        value={values.password}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-500 transition-colors"
+                    />
+                  </div>
 
-              <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-8 py-3 text-xs font-bold tracking-widest uppercase text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: '#2c5f2e' }}
-              >
-                {loading ? 'Registering...' : 'Register an account'}
-              </button>
-            </form>
+                  <button
+                      type="submit"
+                      disabled={loading}
+                      className="px-8 py-3 text-xs font-bold tracking-widest uppercase text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
+                      style={{ backgroundColor: '#2c5f2e' }}
+                  >
+                    {loading ? 'Sending OTP...' : 'Register an account'}
+                  </button>
+                </form>
+            ) : (
+                <div>
+                  <p className="text-sm text-gray-600 mb-6">
+                    An OTP has been sent to <strong>{values.email}</strong>. Please enter it below.
+                  </p>
+
+                  <div className="mb-6">
+                    <label className="block text-sm text-gray-700 mb-1.5">OTP Code *</label>
+                    <input
+                        type="text"
+                        maxLength={6}
+                        value={otp}
+                        onChange={e => setOtp(e.target.value)}
+                        placeholder="Enter 6-digit OTP"
+                        className="w-full border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:border-gray-500 transition-colors"
+                    />
+                  </div>
+
+                  <div className="flex gap-4">
+                    <button
+                        onClick={handleVerifyOtp}
+                        disabled={loading || otp.length !== 6}
+                        className="px-8 py-3 text-xs font-bold tracking-widest uppercase text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
+                        style={{ backgroundColor: '#2c5f2e' }}
+                    >
+                      {loading ? 'Verifying...' : 'Verify OTP'}
+                    </button>
+
+                    <button
+                        onClick={() => { setOtpSent(false); setOtp(''); setError('') }}
+                        className="px-8 py-3 text-xs font-bold tracking-widest uppercase border border-gray-400 text-gray-600 hover:bg-gray-50 transition-colors"
+                    >
+                      Back
+                    </button>
+                  </div>
+                </div>
+            )}
           </div>
         </div>
 

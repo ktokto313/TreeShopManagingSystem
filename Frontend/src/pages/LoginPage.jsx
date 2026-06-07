@@ -1,3 +1,5 @@
+//6/4: Dao Hung: Frontend for login screen
+//6/7: Dao Hung: Update login by Google Account service through Google SSO
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -42,7 +44,6 @@ export default function LoginPage() {
   }
 
   async function handleGoogleSuccess(credentialResponse) {
-    console.log('Google credential received:', credentialResponse)
     try {
       const res = await fetch('/api/auth/google', {
         method: 'POST',
@@ -50,15 +51,17 @@ export default function LoginPage() {
         credentials: 'include',
         body: JSON.stringify({ credential: credentialResponse.credential }),
       })
-      console.log('Response status:', res.status)
       const data = await res.json()
-      console.log('Response data:', data)
+      if (!res.ok) {
+        setError(data.message || 'Google login failed')
+        return
+      }
       if (data.newUser) {
         setPendingGoogle({ email: data.email, fullName: data.fullName })
       } else {
         const userData = { email: data.email, fullName: data.fullName, role: data.role }
         window.localStorage.setItem('treeshop-auth-user', JSON.stringify(userData))
-        window.location.href = '/catalog'  // force full page reload instead of navigate
+        window.location.href = '/catalog'
       }
     } catch (err) {
       console.error('Error:', err)

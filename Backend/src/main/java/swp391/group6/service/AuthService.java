@@ -66,4 +66,8 @@ public class AuthService {
 
         return userRepository.save(user);
     }
+
+    public boolean emailExists(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
 }
