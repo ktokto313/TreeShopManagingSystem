@@ -1,3 +1,4 @@
+//6/7: Hung Dao: Add handler for user who create account via GoogleSSO try to log in normally
 package swp391.group6.service;
 
 import swp391.group6.dto.LoginRequest;
@@ -27,14 +28,17 @@ public class AuthService {
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail()).orElse(null);
 
-        if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword()))
+        if (user == null) return null;
+
+        if (user.getPassword() == null) return null;
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))
             return null;
 
         if (!user.isStatus())
             return null;
 
         String role = user.getRole() != null ? user.getRole().getName() : "CUSTOMER";
-
         return new LoginResponse(user.getEmail(), user.getFullName(), role);
     }
     public User register(RegisterRequest request) {
