@@ -1,3 +1,4 @@
+//6/7: Dao Hung: Fix cookie config to run well on http
 package swp391.group6.util;
 
 import jakarta.servlet.http.Cookie;
@@ -23,8 +24,11 @@ public final class CookieUtil {
                 .value(jwt)
                 .httpOnly(true)
                 .path("/")
-                .secure(true)
-                .sameSite("Strict")
+                //TODO: revert to secure(true) and sameSite("Strict") when migrating to production with HTTPS
+                //.secure(true)
+                //.sameSite("Strict")
+                .secure(false)
+                .sameSite("Lax")
                 .maxAge(cookieMaxAge)
                 .build();
     }
@@ -33,9 +37,12 @@ public final class CookieUtil {
         return ResponseCookie.from(cookieName)
                 .value("")
                 .path("/")
-                .secure(true)
+                //TODO: revert to secure(true) and sameSite("Strict") when migrating to production with HTTPS
+                //.secure(true)
+                //.sameSite("Strict")
+                .secure(false)
                 .httpOnly(true)
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .maxAge(0)
                 .build();
     }

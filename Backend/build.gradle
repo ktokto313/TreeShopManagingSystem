@@ -22,11 +22,13 @@ dependencies {
 	implementation 'org.springframework.security:spring-security-crypto'
 	implementation 'com.auth0:java-jwt:4.5.1'
 	implementation 'org.postgresql:postgresql:42.7.10'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+	implementation 'com.google.api-client:google-api-client:2.2.0'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-
 }
 
 tasks.named('test') {

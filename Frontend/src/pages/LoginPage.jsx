@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { GoogleLogin } from '@react-oauth/google'
+import CompleteProfileModal from './CompleteProfileModal'
 
 function canAccessManagement(role) {
   return role === 'MANAGER' || role === 'SYSTEM_ADMIN'
@@ -13,6 +15,7 @@ export default function LoginPage() {
   const [values, setValues] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [pendingGoogle, setPendingGoogle] = useState(null)
 
   const fromPath = location.state?.from?.pathname || '/manage'
 
@@ -38,8 +41,43 @@ export default function LoginPage() {
     }
   }
 
+  async function handleGoogleSuccess(credentialResponse) {
+    console.log('Google credential received:', credentialResponse)
+    try {
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      })
+      console.log('Response status:', res.status)
+      const data = await res.json()
+      console.log('Response data:', data)
+      if (data.newUser) {
+        setPendingGoogle({ email: data.email, fullName: data.fullName })
+      } else {
+        const userData = { email: data.email, fullName: data.fullName, role: data.role }
+        window.localStorage.setItem('treeshop-auth-user', JSON.stringify(userData))
+        window.location.href = '/catalog'  // force full page reload instead of navigate
+      }
+    } catch (err) {
+      console.error('Error:', err)
+      setError('Google login failed, please try again')
+    }
+  }
+
   return (
       <div className="min-h-[calc(100vh-4rem)] flex">
+        {pendingGoogle && (
+            <CompleteProfileModal
+                email={pendingGoogle.email}
+                fullName={pendingGoogle.fullName}
+                onComplete={() => {
+                  window.location.href = '/catalog'
+                }}
+            />
+        )}
+
         {/* Left panel */}
         <div className="w-[40%] bg-[#7a9ab0] flex flex-col items-center justify-center p-12 text-white">
           <h2 className="text-xl font-bold tracking-widest uppercase mb-4">Register</h2>
@@ -119,6 +157,24 @@ export default function LoginPage() {
                 {loading ? 'Logging in...' : 'Log in'}
               </button>
             </form>
+
+            <div className="flex items-center my-6">
+              <div className="flex-1 border-t border-gray-300" />
+              <span className="mx-4 text-sm text-gray-400">or</span>
+              <div className="flex-1 border-t border-gray-300" />
+            </div>
+
+            <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError('Google login failed, please try again')}
+                type="standard"
+                theme="outline"
+                size="large"
+                text="signin_with"
+                shape="rectangular"
+                logo_alignment="left"
+                width="400"
+            />
 
             <p className="mt-6 text-sm text-gray-500 cursor-pointer hover:underline w-fit">
               Lost your password?
