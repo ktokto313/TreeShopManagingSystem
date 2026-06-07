@@ -51,7 +51,7 @@ function getPageNumbers(currentPage, totalPages) {
 
 export default function CatalogPage() {
   const navigate = useNavigate()
-  const { logout, isAuthenticated } = useAuth()
+  const { logout, isAuthenticated, canManage } = useAuth()
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
   const [filters, setFilters] = useState(emptyFilters)
@@ -153,6 +153,10 @@ export default function CatalogPage() {
 
   function openDetail(product) {
     navigate(`/catalog/${product.id}`, { state: { product } })
+  }
+
+  function openEditProduct(product) {
+    navigate('/manage', { state: { editProduct: product } })
   }
 
   const displayStart = visibleProducts.length === 0 ? 0 : (effectiveCurrentPage - 1) * itemsPerPage + 1
@@ -328,6 +332,7 @@ export default function CatalogPage() {
                     product={product}
                     categoryName={product.categoryName}
                     onOpen={openDetail}
+                    onEdit={canManage ? openEditProduct : undefined}
                   />
                 ))}
               </div>

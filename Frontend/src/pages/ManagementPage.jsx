@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Container from '../components/global/Container'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
@@ -180,6 +180,7 @@ function parseImageList(value) {
 
 export default function ManagementPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { logout } = useAuth()
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
@@ -258,6 +259,16 @@ export default function ManagementPage() {
     void loadInitialData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    const productToEdit = location.state?.editProduct
+
+    if (!productToEdit) {
+      return
+    }
+
+    openEditProductModal(productToEdit)
+  }, [location.state])
 
   function resetCategoryForm() {
     setCategoryForm(emptyCategoryForm)
@@ -553,8 +564,8 @@ export default function ManagementPage() {
         </section>
 
         <section className={activeTab === 'products' ? 'block' : 'hidden'}>
-          <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
-            <Card className="space-y-5">
+          <div className="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)] lg:items-start">
+            <Card className="space-y-5 self-start lg:sticky lg:top-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="space-y-1">
                   <h2 className="text-xl font-semibold text-[var(--text-h)]">Bộ lọc sản phẩm</h2>
@@ -615,7 +626,7 @@ export default function ManagementPage() {
               </form>
             </Card>
 
-            <Card className="space-y-5">
+            <Card className="space-y-5 min-w-0">
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-1">
                   <h2 className="text-xl font-semibold text-[var(--text-h)]">Bảng sản phẩm</h2>

@@ -5,7 +5,7 @@ import Card from '../../../components/ui/Card'
 import { formatCurrency, parseCatalogImages } from '../utils/catalogUtils'
 import { resolveProductImageSource } from '../../products/utils/productImageResolver'
 
-export default function CatalogProductCard({ product, categoryName, onOpen }) {
+export default function CatalogProductCard({ product, categoryName, onOpen, onEdit }) {
   const images = parseCatalogImages(product.images)
   const imagePreview = resolveProductImageSource(images[0])
   const isInStock = Number(product.stock ?? 0) > 0
@@ -51,7 +51,12 @@ export default function CatalogProductCard({ product, categoryName, onOpen }) {
         </div>
       </div>
 
-      <div className="mt-auto flex justify-end">
+      <div className="mt-auto flex flex-wrap justify-end gap-2">
+        {onEdit ? (
+          <Button variant="secondary" size="sm" onClick={() => onEdit?.(product)}>
+            Sửa
+          </Button>
+        ) : null}
         <Button variant="secondary" size="sm" onClick={() => onOpen?.(product)}>
           Xem chi tiết
         </Button>
