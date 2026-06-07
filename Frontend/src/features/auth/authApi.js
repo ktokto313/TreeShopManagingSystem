@@ -8,6 +8,10 @@ export async function login(email, password) {
     body: JSON.stringify({ email, password }),
   })
 
+  if (res.status === 403) {
+    throw new Error('This account was created using Google Sign-In.')
+  }
+
   if (res.status === 401) {
     throw new Error('Invalid email or password')
   }
@@ -16,7 +20,7 @@ export async function login(email, password) {
     throw new Error('Login failed')
   }
 
-  return res.json() // LoginResponse → stored as `user` in AuthContext
+  return res.json()
 }
 
 export async function register(fullName, email, password) {

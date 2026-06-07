@@ -33,10 +33,13 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request,
                                                HttpServletResponse response) {
-        LoginResponse loginResponse = authService.login(request);
+        if (authService.isGoogleAccount(request.getEmail())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403
+        }
 
+        LoginResponse loginResponse = authService.login(request);
         if (loginResponse == null)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401
 
         String jwt = JWTUtil.createToken(loginResponse);
         ResponseCookie cookie = CookieUtil.makeCookieFromJWT(jwt);
