@@ -65,14 +65,14 @@ function AppRoutes() {
           </RequireAuth>
         }
       />
-        <Route
-            path="/profile"
-            element={
-                <RequireAuth>
-                    <ProfilePage />
-                </RequireAuth>
-            }
-        />
+      <Route
+          path="/profile"
+          element={
+              <RequireAuth>
+                  <ProfilePage />
+              </RequireAuth>
+          }
+      />
       <Route
         path="/manage"
         element={
@@ -89,15 +89,11 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <div className="min-h-screen bg-[var(--social-bg)]/50 text-[var(--text-h)]">
-          <Header />
-          <AppRoutes />
-          <Footer />
-        </div>
-      </BrowserRouter>
-    </AuthProvider>
+    <div className="min-h-screen bg-[var(--social-bg)]/50 text-[var(--text-h)]">
+      <Header />
+      <AppRoutes />
+      <Footer />
+    </div>
   )
 }
 

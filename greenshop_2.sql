@@ -14,7 +14,7 @@ CREATE TABLE users (
    id          BIGSERIAL PRIMARY KEY,
    role_id     BIGINT NOT NULL DEFAULT 1 REFERENCES role(id),
    email       VARCHAR(150) NOT NULL UNIQUE,
-   password    VARCHAR(255) NOT NULL,
+   password    VARCHAR(255),
    full_name   VARCHAR(150) NOT NULL,
    phone       VARCHAR(20),
    status      BOOLEAN NOT NULL DEFAULT TRUE,

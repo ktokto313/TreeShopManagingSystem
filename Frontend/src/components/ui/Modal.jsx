@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { cn } from '../../utils/cn';
 
-export function Modal({ isOpen, onClose, title, children, className }) {
+export default function Modal({ isOpen, onClose, title, children, className }) {
   // Prevent scrolling on the background page when the modal is open
   useEffect(() => {
     if (isOpen) {
