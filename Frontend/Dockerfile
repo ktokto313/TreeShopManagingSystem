@@ -13,5 +13,5 @@ RUN chown frontend:frontend ./
 USER frontend:frontend
 RUN npm run build
 EXPOSE 3000
-CMD ["serve", "-s", "build"]
+CMD ["serve", "-s", "dist"]
 
