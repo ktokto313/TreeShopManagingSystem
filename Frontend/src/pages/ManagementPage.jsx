@@ -191,7 +191,6 @@ export default function ManagementPage() {
   const [activeTab, setActiveTab] = useState('categories')
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
   const [isProductModalOpen, setIsProductModalOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [notice, setNotice] = useState('')
 
   function handleAuthError(error) {
@@ -215,13 +214,7 @@ export default function ManagementPage() {
     }))
   }, [products, categoryLookup])
 
-  useEffect(() => {
-    void loadInitialData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   async function loadInitialData() {
-    setLoading(true)
     setNotice('')
 
     try {
@@ -233,14 +226,10 @@ export default function ManagementPage() {
         return
       }
       setNotice(error.message)
-    } finally {
-      setLoading(false)
     }
   }
 
   async function loadCategories() {
-    setLoading(true)
-
     try {
       const categoryData = await getCategories()
       setCategories(Array.isArray(categoryData) ? sortCategories(categoryData) : [])
@@ -249,14 +238,10 @@ export default function ManagementPage() {
         return
       }
       setNotice(error.message)
-    } finally {
-      setLoading(false)
     }
   }
 
   async function loadProducts(nextFilters = filters) {
-    setLoading(true)
-
     try {
       const productData = await getProducts(nextFilters)
       setProducts(Array.isArray(productData) ? productData : [])
@@ -265,10 +250,14 @@ export default function ManagementPage() {
         return
       }
       setNotice(error.message)
-    } finally {
-      setLoading(false)
     }
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadInitialData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function resetCategoryForm() {
     setCategoryForm(emptyCategoryForm)
@@ -286,7 +275,8 @@ export default function ManagementPage() {
       [name]: value,
     }))
     setCategoryErrors((current) => {
-      const { [name]: _removed, ...remainingErrors } = current
+      const remainingErrors = { ...current }
+      delete remainingErrors[name]
       return remainingErrors
     })
   }
@@ -358,10 +348,6 @@ export default function ManagementPage() {
 
   function editCategory(category) {
     openEditCategoryModal(category)
-  }
-
-  function editProduct(product) {
-    openEditProductModal(product)
   }
 
   async function saveCategory(event) {

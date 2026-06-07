@@ -38,11 +38,6 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(!location.state?.product)
   const [notice, setNotice] = useState('')
 
-  useEffect(() => {
-    void loadProductDetail()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId])
-
   async function loadProductDetail() {
     setLoading(true)
     setNotice('')
@@ -67,6 +62,12 @@ export default function ProductDetailPage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadProductDetail()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productId])
 
   const categoryLookup = useMemo(
     () => new Map(categories.map((category) => [String(category.id), category.name])),
