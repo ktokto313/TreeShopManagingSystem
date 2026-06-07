@@ -55,9 +55,8 @@ public class OrderService {
         return true;
     }
 
-    public boolean changeOrder(HttpServletRequest request, long id, Order order) {
+    public boolean changeOrder(LoginResponse loginResponse, long id, Order order) {
         //TODO placeholder, implement this
-        LoginResponse loginResponse = JWTUtil.getUser(request);
         User user = userRepository.findByEmail(loginResponse.getEmail()).orElse(null);
         boolean changed = false;
         if (order.getShipper() != null && user.getRole().getName().equals("SHIPPER") && order.getShipper().equals(user)) {
