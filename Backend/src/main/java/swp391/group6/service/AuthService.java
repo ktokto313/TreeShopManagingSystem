@@ -70,4 +70,10 @@ public class AuthService {
     public boolean emailExists(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
+
+    public boolean isGoogleAccount(String email) {
+        return userRepository.findByEmail(email)
+                .map(u -> u.getPassword() == null)
+                .orElse(false);
+    }
 }

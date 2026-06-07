@@ -37,8 +37,8 @@ export default function LoginPage() {
           : '/catalog'
       navigate(targetPath, { replace: true })
     } catch (loginError) {
-      setError(loginError.message || 'Invalid email or password')
-    } finally {
+        setError(loginError.message || 'Invalid email or password')
+      } finally {
       setLoading(false)
     }
   }
