@@ -4,10 +4,10 @@ import Header from './components/global/Header'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import CatalogPage from './pages/CatalogPage'
 import HomePage from './pages/HomePage'
-import LoginPage from './pages/LoginPage'
 import ManagementPage from './pages/ManagementPage'
-import RegisterPage from './pages/RegisterPage'
-import ProfilePage from './pages/ProfilePage'
+import LoginPage from './features/auth/pages/LoginPage'
+import RegisterPage from './features/auth/pages/RegisterPage'
+import ProfilePage from './features/auth/pages/ProfilePage'
 function RequireAuth({ children, managerOnly = false }) {
   const { isAuthenticated, canManage } = useAuth()
   const location = useLocation()
