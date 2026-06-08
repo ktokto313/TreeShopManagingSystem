@@ -1,3 +1,4 @@
+//6/8: Dao Hung: Separate the hook from the UI file
 import { useEffect, useState } from 'react'
 import { getProfile, updateProfile } from '../api/profileApi'
 import { useAuth } from '../../../context/AuthContext'
@@ -10,19 +11,14 @@ export function useProfile() {
     const [submitting, setSubmitting] = useState(false)
     const { updateUser } = useAuth()
 
-    const fetchProfile = () => {
-        setLoading(true)
+    useEffect(() => {
         getProfile()
             .then((data) => {
                 setProfile(data)
-                setFormData({ fullName: data.fullName, phone: data.phone })
+                setFormData({ fullName: data.fullName, phone: data.phone ?? '' })
             })
             .catch(() => setProfile(null))
             .finally(() => setLoading(false))
-    }
-
-    useEffect(() => {
-        fetchProfile()
     }, [])
 
     const handleInputChange = (e, field) => {
@@ -32,7 +28,7 @@ export function useProfile() {
     const handleCancel = () => {
         setIsEditing(false)
         if (profile) {
-            setFormData({ fullName: profile.fullName, phone: profile.phone })
+            setFormData({ fullName: profile.fullName, phone: profile.phone ?? '' })
         }
     }
 

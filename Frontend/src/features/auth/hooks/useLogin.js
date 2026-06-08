@@ -1,3 +1,4 @@
+//6/8: Dao Hung: Separate the hook from the UI file
 import { useState } from 'react'
 import { useAuth } from '../../../context/AuthContext'
 

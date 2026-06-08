@@ -1,3 +1,4 @@
+//6/8: Dao Hung: Fix this into pure UI files and move to features/auth/pages
 import { useNavigate } from 'react-router-dom'
 import { useRegister } from '../hooks/useRegister'
 

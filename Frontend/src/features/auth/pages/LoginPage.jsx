@@ -1,3 +1,4 @@
+//6/8: Fix this to pure UI files and move into features/auth/pages
 import { useNavigate, useLocation } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import CompleteProfileModal from '../components/CompleteProfileModal.jsx'

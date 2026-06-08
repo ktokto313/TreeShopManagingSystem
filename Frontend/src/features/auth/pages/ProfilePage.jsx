@@ -1,3 +1,4 @@
+//6/8: Dao Hung: Move this file to features/auth/pages
 import Container from '../../../components/global/Container'
 import Card from '../../../components/ui/Card'
 import Input from '../../../components/ui/Input'
