@@ -35,6 +35,10 @@ public class TicketService {
         User creator = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        if(!creator.getRole().getName().equalsIgnoreCase("customer")) {
+            throw new RuntimeException("User not allowed to create tickets.");
+        }
+
         Ticket ticket = new Ticket();
         ticket.setTitle(request.getTitle());
         ticket.setDetail(request.getDetail());
@@ -51,7 +55,7 @@ public class TicketService {
 
     // UC 12 & 16: Customer/Agent views tickets
     public List<Ticket> getAuthorizedTickets(long userId) {
-        return new ArrayList<>(ticketRepository.findTicketsByCreatorOrAssignee(userId));
+        return new ArrayList<>(ticketRepository.findTicketsByCreator(userId));
     }
 
     public List<Ticket> getAuthorizedTicketsByEmail(String email, String statusStr, String priorityStr, Sort sort) {
@@ -66,11 +70,18 @@ public class TicketService {
                 ? Priority.valueOf(priorityStr.toUpperCase()) : null;
 
         // Pass everything to the repository
-        return ticketRepository.findTicketsByCreatorOrAssigneeWithFilters(user.getId(), state, priority, sort);
+        List<Ticket> ticketsResult = null;
+        if(user.getRole().getId() == 1){ // Id of customer
+            ticketsResult = ticketRepository.findTicketsByCreatorWithFilters(user.getId(), state, priority, sort);
+        } else if(user.getRole().getId() == 4){ // Id of support agent
+            ticketsResult = ticketRepository.findAllWithFilters(state, priority, sort);
+        }
+
+        return ticketsResult;
     }
 
     // UC 12 & 16: Update ticket status (Agent sets to Progress, Customer sets to Resolved)
-    public Ticket updateTicketStatus(long ticketId, String newStateStr, Long agentId) {
+    public Ticket updateTicketStatus(long ticketId, String newStateStr, String agentEmail) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
@@ -82,8 +93,8 @@ public class TicketService {
         }
 
         // If an agent is taking the ticket, assign them
-        if (agentId != null) {
-            User agent = userRepository.findById(agentId).orElse(null);
+        if (agentEmail != null) {
+            User agent = userRepository.findByEmail(agentEmail).orElse(null);
             ticket.setAssignee(agent);
         }
 

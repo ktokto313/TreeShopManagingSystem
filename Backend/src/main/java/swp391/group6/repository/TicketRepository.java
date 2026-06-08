@@ -14,14 +14,21 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByTicketCreator(long id);
     List<Ticket> findByTicketStateNot(TicketState state);
 
-    @Query("SELECT t FROM Ticket t WHERE t.ticketCreator.id = :userId OR t.assignee.id = :userId")
-    List<Ticket> findTicketsByCreatorOrAssignee(@Param("userId") long userId);
+    @Query("SELECT t FROM Ticket t WHERE t.ticketCreator.id = :userId")
+    List<Ticket> findTicketsByCreator(@Param("userId") long userId);
 
-    @Query("SELECT t FROM Ticket t WHERE (t.ticketCreator.id = :userId OR t.assignee.id = :userId) " +
+    @Query("SELECT t FROM Ticket t WHERE (t.ticketCreator.id = :userId) " +
             "AND (:state IS NULL OR t.ticketState = :state) " +
             "AND (:priority IS NULL OR t.priority = :priority)")
-    List<Ticket> findTicketsByCreatorOrAssigneeWithFilters(
+    List<Ticket> findTicketsByCreatorWithFilters(
             @Param("userId") long userId,
+            @Param("state") TicketState state,
+            @Param("priority") Priority priority,
+            Sort sort);
+
+    @Query("SELECT t FROM Ticket t WHERE (:state IS NULL OR t.ticketState = :state) " +
+            "AND (:priority IS NULL OR t.priority = :priority)")
+    List<Ticket> findAllWithFilters(
             @Param("state") TicketState state,
             @Param("priority") Priority priority,
             Sort sort);

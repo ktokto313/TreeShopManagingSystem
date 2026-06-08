@@ -71,9 +71,9 @@ public class TicketController {
     public ResponseEntity<Ticket> updateTicketStatus(
             @PathVariable long id,
             @RequestParam String newState,
-            @RequestParam(required = false) Long agentId) {
+            @RequestParam(required = false) String agentEmail) {
         try {
-            Ticket updatedTicket = ticketService.updateTicketStatus(id, newState, agentId);
+            Ticket updatedTicket = ticketService.updateTicketStatus(id, newState, agentEmail);
             return ResponseEntity.ok(updatedTicket);
         } catch (IllegalArgumentException e) { // Catches bad enum
             return ResponseEntity.badRequest().build();
