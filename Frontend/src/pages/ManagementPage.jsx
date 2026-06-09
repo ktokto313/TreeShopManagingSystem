@@ -506,8 +506,6 @@ export default function ManagementPage() {
               Quản lý danh mục và sản phẩm
             </h1>
             <p className="max-w-3xl text-sm text-[var(--text)]">
-              Khu vực này tách riêng khỏi trang chủ. Nếu thấy lỗi 401, hãy kiểm tra lại đăng nhập
-              và phiên xác thực trước khi thử CRUD.
             </p>
           </div>
 
@@ -614,8 +612,8 @@ export default function ManagementPage() {
                   className="h-10 w-full rounded-md border border-[var(--border)] bg-white px-3 text-sm text-[var(--text-h)] outline-none"
                 >
                   <option value="">Tất cả trạng thái</option>
-                  <option value="true">Chỉ đang hoạt động</option>
-                  <option value="false">Chỉ đã ẩn</option>
+                  <option value="true">Đang hoạt động</option>
+                  <option value="false">Đã ẩn</option>
                 </select>
                 <div className="flex gap-2">
                   <Button type="submit">Áp dụng</Button>
