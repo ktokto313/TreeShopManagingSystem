@@ -1,7 +1,9 @@
 // Created by minhlthe200133
 import Button from '../../../components/ui/Button'
+import { formatCurrency, parseCatalogImages } from '../../catalog/utils/catalogUtils'
+import ProductImageFrame from './ProductImageFrame'
 import ProductStatusBadge from './ProductStatusBadge'
-import { parseCatalogImages } from '../../catalog/utils/catalogUtils'
+import { getProductAvailability } from '../utils/productAvailability'
 import { resolveProductImageSource } from '../utils/productImageResolver'
 import { summarizeVariantGroups } from '../utils/variantUtils'
 
@@ -18,15 +20,14 @@ function renderImagePreview(product) {
   const firstImage = parseCatalogImages(product.images)[0]
   const imageSource = resolveProductImageSource(firstImage)
 
-  if (imageSource) {
-    return (
-      <div className="flex h-12 w-12 overflow-hidden rounded-md bg-[var(--social-bg)]">
-        <img src={imageSource} alt={product.name} className="h-full w-full object-cover" />
-      </div>
-    )
-  }
-
-  return <div className="h-12 w-12 rounded-md bg-[var(--social-bg)]" />
+  return (
+    <ProductImageFrame
+      src={imageSource}
+      alt={product.name}
+      className="h-12 w-12 rounded-md bg-[var(--social-bg)]"
+      fallbackLabel={imageSource ? 'Ảnh lỗi' : 'Chưa có ảnh'}
+    />
+  )
 }
 
 export default function ProductTable({ products = [], onEdit, onDeactivate }) {
@@ -42,13 +43,14 @@ export default function ProductTable({ products = [], onEdit, onDeactivate }) {
             <th className="px-4 py-3 font-medium">Chi tiết</th>
             <th className="px-4 py-3 font-medium">Giá</th>
             <th className="px-4 py-3 font-medium">Tồn kho</th>
-            <th className="px-4 py-3 font-medium">Trạng thái</th>
+            <th className="px-4 py-3 font-medium">Tình trạng</th>
             <th className="px-4 py-3 text-right font-medium">Thao tác</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-[var(--border)]">
           {products.map((product) => {
             const variantGroups = summarizeVariantGroups(product.variants)
+            const availability = getProductAvailability(product)
 
             return (
               <tr key={product.id}>
@@ -71,10 +73,15 @@ export default function ProductTable({ products = [], onEdit, onDeactivate }) {
                     </div>
                   </div>
                 </td>
-                <td className="px-4 py-3">{product.price}</td>
-                <td className="px-4 py-3">{product.stock}</td>
+                <td className="px-4 py-3">{formatCurrency(product.price)}</td>
                 <td className="px-4 py-3">
-                  <ProductStatusBadge isActive={product.status} />
+                  <div className="space-y-1">
+                    <div className="font-medium text-[var(--text-h)]">{product.stock ?? 0}</div>
+                    <div className="text-xs text-[var(--text)]">{availability.helper}</div>
+                  </div>
+                </td>
+                <td className="px-4 py-3">
+                  <ProductStatusBadge product={product} />
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
@@ -82,7 +89,7 @@ export default function ProductTable({ products = [], onEdit, onDeactivate }) {
                       Sửa
                     </Button>
                     <Button variant="danger" size="sm" onClick={() => onDeactivate?.(product)}>
-                      Ẩn
+                      Ngừng bán
                     </Button>
                   </div>
                 </td>
