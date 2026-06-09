@@ -58,7 +58,7 @@ export default function CatalogPage() {
   const [showFilters, setShowFilters] = useState(true)
   const [notice, setNotice] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 9
+  const itemsPerPage = 12
 
   function handleAuthError(error) {
     if (error?.status !== 401) {
@@ -159,13 +159,17 @@ export default function CatalogPage() {
     navigate('/manage', { state: { editProduct: product } })
   }
 
+  function previewAddToCart(product) {
+    setNotice(`${product.name} có thể thêm vào giỏ hàng khi luồng mua hàng được bật.`)
+  }
+
   const displayStart = visibleProducts.length === 0 ? 0 : (effectiveCurrentPage - 1) * itemsPerPage + 1
   const displayEnd = Math.min(effectiveCurrentPage * itemsPerPage, visibleProducts.length)
 
   return (
     <main className="bg-[var(--social-bg)]/50">
       <section className="bg-gradient-to-br from-emerald-50 via-white to-lime-50">
-        <Container className="py-14 lg:py-20">
+        <Container className="max-w-[96rem] py-14 lg:py-20">
           <div className="space-y-6">
             <div className="space-y-4">
               <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-[var(--text-h)] sm:text-5xl">
@@ -181,14 +185,14 @@ export default function CatalogPage() {
         </Container>
       </section>
 
-      <Container className="py-10">
+      <Container className="max-w-[96rem] py-10">
         {notice ? (
           <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
             {notice}
           </div>
         ) : null}
 
-        <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+        <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
           {showFilters ? (
             <aside className="space-y-6">
               <Card className="space-y-5">
@@ -325,7 +329,7 @@ export default function CatalogPage() {
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {paginatedProducts.map((product) => (
                   <CatalogProductCard
                     key={product.id}
@@ -333,6 +337,7 @@ export default function CatalogPage() {
                     categoryName={product.categoryName}
                     onOpen={openDetail}
                     onEdit={canManage ? openEditProduct : undefined}
+                    onAdd={previewAddToCart}
                   />
                 ))}
               </div>

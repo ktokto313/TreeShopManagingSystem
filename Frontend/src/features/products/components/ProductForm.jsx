@@ -118,15 +118,20 @@ export default function ProductForm({
         )}
         {errors.images ? <p className="text-sm text-red-600">{errors.images}</p> : null}
       </div>
-      <label className="flex items-center gap-2 text-sm font-medium text-[var(--text-h)]">
-        <input
-          name="status"
-          type="checkbox"
-          checked={Boolean(values.status)}
-          onChange={handleInputChange}
-        />
-        Đang hoạt động
-      </label>
+      <div className="space-y-1">
+        <label className="flex items-center gap-2 text-sm font-medium text-[var(--text-h)]">
+          <input
+            name="status"
+            type="checkbox"
+            checked={Boolean(values.status)}
+            onChange={handleInputChange}
+          />
+          Đang hoạt động
+        </label>
+        <p className="text-sm text-[var(--text)]">
+          Sản phẩm chỉ mua được khi đang hoạt động và tồn kho lớn hơn 0.
+        </p>
+      </div>
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? 'Đang lưu...' : 'Lưu sản phẩm'}
       </Button>

@@ -1,5 +1,6 @@
 // Created by minhlthe200133
 import { summarizeVariantGroups } from '../../products/utils/variantUtils'
+import { getProductAvailability } from '../../products/utils/productAvailability'
 
 export function parseCatalogImages(value) {
   if (!value) {
@@ -73,17 +74,17 @@ export function matchesCatalogFilters(product, filters, categoryName) {
   const selectedStatus = String(filters.status ?? '')
   const minPrice = filters.minPrice === '' ? null : Number(filters.minPrice)
   const maxPrice = filters.maxPrice === '' ? null : Number(filters.maxPrice)
-  const isInStock = Number(product.stock ?? 0) > 0
+  const isPurchasable = getProductAvailability(product).canPurchase
 
   if (selectedCategoryId && String(product.categoryId) !== selectedCategoryId) {
     return false
   }
 
-  if (selectedStatus === 'true' && !isInStock) {
+  if (selectedStatus === 'true' && !isPurchasable) {
     return false
   }
 
-  if (selectedStatus === 'false' && isInStock) {
+  if (selectedStatus === 'false' && isPurchasable) {
     return false
   }
 

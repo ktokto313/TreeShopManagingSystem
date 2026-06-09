@@ -7,6 +7,8 @@ import Card from '../components/ui/Card'
 import { useAuth } from '../context/AuthContext'
 import { loadPublicJson } from '../features/catalog/utils/catalogApi'
 import { formatCurrency } from '../features/catalog/utils/catalogUtils'
+import ProductImageFrame from '../features/products/components/ProductImageFrame'
+import { getProductAvailability } from '../features/products/utils/productAvailability'
 import { resolveProductImages } from '../features/products/utils/productImageResolver'
 import { parseVariantGroups } from '../features/products/utils/variantUtils'
 
@@ -37,6 +39,7 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState(location.state?.product ?? null)
   const [loading, setLoading] = useState(!location.state?.product)
   const [notice, setNotice] = useState('')
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
 
   async function loadProductDetail() {
     setLoading(true)
@@ -80,7 +83,14 @@ export default function ProductDetailPage() {
 
   const productImages = resolveProductImages(product?.images)
   const variantGroups = parseVariantGroups(product?.variants)
-  const imagePreview = productImages[0]
+  const imageKey = productImages.join('|')
+  const imagePreview = productImages[activeImageIndex] || productImages[0]
+  const availability = getProductAvailability(product)
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setActiveImageIndex(0)
+  }, [imageKey])
 
   return (
     <main className="bg-[var(--social-bg)]/50">
@@ -121,30 +131,46 @@ export default function ProductDetailPage() {
                 <div className="space-y-1">
                   <h2 className="text-2xl font-semibold text-[var(--text-h)]">{product.name}</h2>
                 </div>
-                <Badge status={product.status ? 'active' : 'inactive'}>
-                  {product.status ? 'Đang bán' : 'Đã ẩn'}
+                <Badge status={availability.badgeStatus} className={availability.badgeClassName}>
+                  {availability.label}
                 </Badge>
               </div>
 
-              <div className="flex h-80 items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 via-white to-lime-100 p-4 text-sm text-[var(--text)]">
-                {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt={product.name}
-                    className="max-h-full max-w-full rounded-2xl object-contain"
-                  />
-                ) : (
-                  <div className="text-center">
-                    <div className="text-6xl">🌿</div>
-                    <p className="mt-3">Chưa có ảnh hiển thị</p>
-                  </div>
-                )}
-              </div>
+              <ProductImageFrame
+                src={imagePreview}
+                alt={product.name}
+                className="h-80 rounded-3xl p-4"
+                imageClassName="max-h-full max-w-full rounded-2xl object-contain"
+              />
+
+              {productImages.length > 1 ? (
+                <div className="grid grid-cols-4 gap-3 sm:grid-cols-5">
+                  {productImages.map((imageSource, index) => (
+                    <button
+                      key={`${imageSource}-${index}`}
+                      type="button"
+                      className={`rounded-2xl border p-1 transition ${
+                        index === activeImageIndex
+                          ? 'border-[var(--accent)] bg-emerald-50'
+                          : 'border-[var(--border)] bg-white hover:border-[var(--accent)]'
+                      }`}
+                      onClick={() => setActiveImageIndex(index)}
+                    >
+                      <ProductImageFrame
+                        src={imageSource}
+                        alt={`${product.name} ${index + 1}`}
+                        className="h-16 rounded-xl"
+                        fallbackLabel="Ảnh lỗi"
+                      />
+                    </button>
+                  ))}
+                </div>
+              ) : null}
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <InfoBox label="Danh mục" value={categoryName} />
                 <InfoBox label="Giá" value={formatCurrency(product.price)} />
-                <InfoBox label="Tồn kho" value={product.stock ?? 0} />
+                <InfoBox label="Tồn kho" value={`${product.stock ?? 0} - ${availability.label}`} />
                 <InfoBox label="Biến thể" value={`${variantGroups.length} nhóm`} />
               </div>
             </Card>
@@ -198,10 +224,17 @@ export default function ProductDetailPage() {
                   <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">Mua hàng</p>
                   <div className="rounded-2xl border border-[var(--border)] bg-[var(--social-bg)] p-4 text-sm text-[var(--text)]">
                     <p className="leading-7">
-                      Tính năng thêm vào giỏ hàng sẽ được bổ sung sau. Khách có thể xem trước thông tin
-                      sản phẩm ở đây để chuẩn bị cho bước mua tiếp theo.
+                      {availability.canPurchase
+                        ? 'Sản phẩm hiện có thể mua. Luồng giỏ hàng sẽ được kết nối ở bước mua hàng sau.'
+                        : availability.helper}
                     </p>
-                    <Button className="mt-4" disabled>
+                    <Button
+                      className="mt-4"
+                      disabled={!availability.canPurchase}
+                      onClick={() =>
+                        setNotice(`${product.name} có thể thêm vào giỏ hàng khi luồng mua hàng được bật.`)
+                      }
+                    >
                       Thêm vào giỏ hàng
                     </Button>
                   </div>
