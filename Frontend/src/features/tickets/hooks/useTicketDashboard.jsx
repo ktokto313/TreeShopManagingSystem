@@ -40,6 +40,8 @@ export const useTicketDashboard = () => {
 			executeFetchAllTickets(ticketState, ticketPriority, ticketSort);
 		}
 		// Must not put executeFetchAllTickets inside of the dependencies to avoid infinite looping
+		
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ticketState, ticketPriority, ticketSort, isSelectAutoFilterSort]);
 
 	return {
