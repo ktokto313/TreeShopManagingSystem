@@ -1,6 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { timeFormat } from '../../utils/timeFormat';
+import ORDER_STATUS_MAP from './data/orderStatusMap';
 
 export function OrderCard({ order, onViewDetails }) {
   const orderDetails = order.orderDetailList || [];
@@ -14,6 +15,8 @@ export function OrderCard({ order, onViewDetails }) {
   const total = Math.max(0, itemsTotal + shippingFee - discount);
 
   const itemsCount = orderDetails.reduce((sum, item) => sum + (item.quantity || 0), 0);
+
+  const statusConfig = ORDER_STATUS_MAP[order.status] || { bg: 'bg-gray-500/10 text-gray-600 border border-gray-500/20', label: order.status };
 
   return (
     <Card 

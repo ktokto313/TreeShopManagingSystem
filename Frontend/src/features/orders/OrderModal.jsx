@@ -1,6 +1,13 @@
 import { Modal } from "../../components/ui/Modal";
+import { Button } from "../../components/ui/Button";
+import { timeFormat } from "../../utils/timeFormat";
+import ShipperSelect from "./ShipperSelect";
+import ORDER_STATUS_MAP from "./data/orderStatusMap";
 
-export default function OrderModal({ selectedOrder }) {
+/**
+ * @param {{ selectedOrder: object|null, onClose: () => void }} props
+ */
+export default function OrderModal({ selectedOrder, onClose }) {
     if (!selectedOrder) return null;
 
     const details = selectedOrder.orderDetailList || [];
@@ -9,10 +16,15 @@ export default function OrderModal({ selectedOrder }) {
     const discount = Number(selectedOrder.discount || 0);
     const finalTotal = Math.max(0, itemsTotal + shippingFee - discount);
 
+    const statusConfig = ORDER_STATUS_MAP[selectedOrder.status] || {
+        bg: 'bg-gray-500/10 text-gray-600 border border-gray-500/20',
+        label: selectedOrder.status,
+    };
+
     return (
       <Modal
         isOpen={!!selectedOrder}
-        onClose={() => setSelectedOrder(null)}
+        onClose={onClose}
         title={`Order Details - #ORD-${selectedOrder.id}`}
       >
         <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
@@ -20,12 +32,25 @@ export default function OrderModal({ selectedOrder }) {
           <div className="rounded-lg bg-interactive/10 p-3 flex items-center justify-between border border-interactive/20">
             <div>
               <span className="text-[10px] uppercase font-bold text-black/55">Status</span>
-              <p className="text-sm font-bold text-interactive mt-0.5">{selectedOrder.status}</p>
+              <p className={`text-sm font-bold mt-0.5 ${statusConfig.bg} px-2 py-0.5 rounded-full inline-block`}>
+                {statusConfig.label}
+              </p>
             </div>
             <div className="text-right">
               <span className="text-[10px] uppercase font-bold text-black/55">Ordered On</span>
               <p className="text-xs font-semibold text-black/75 mt-0.5">{timeFormat(selectedOrder.createdAt)}</p>
             </div>
+          </div>
+
+          {/* Shipper Assignment */}
+          <div className="p-3 rounded-lg bg-bg-base border border-border/55">
+            <ShipperSelect
+              value={selectedOrder.shipperId ?? ''}
+              onChange={(shipperId) => {
+                // TODO: wire up to an API call to update the order's shipper
+                console.log(`Assign shipper ${shipperId} to order ${selectedOrder.id}`);
+              }}
+            />
           </div>
 
           {/* Items Section */}
@@ -88,7 +113,7 @@ export default function OrderModal({ selectedOrder }) {
 
           {/* Close / Actions */}
           <div className="flex justify-end gap-3 mt-2">
-            <Button variant="secondary" className="px-4 py-2" onClick={() => setSelectedOrder(null)}>
+            <Button variant="secondary" className="px-4 py-2" onClick={onClose}>
               Close
             </Button>
             <Button
@@ -104,6 +129,4 @@ export default function OrderModal({ selectedOrder }) {
         </div>
       </Modal>
     );
-  };
-
 }
