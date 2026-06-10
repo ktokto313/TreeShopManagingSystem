@@ -1,17 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Header } from '../../components/global/Header';
 import { Footer } from '../../components/global/Footer';
 import { Container } from '../../components/global/Container';
 import { OrderCard } from './OrderCard';
-import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { loginApi } from '../../data/authApi';
-import { timeFormat } from '../../utils/timeFormat';
+import { useState } from 'react';
 import useAuthUser from '../../hooks/useAuthUser';
+import useFetchAllOrders from './hooks/useFetchAllOrders';
+import OrderModal from './OrderModal';
 
 export default function OrderManagement() {
-  const { isLoading, error, executeAuth } = useAuthUser();
+  const { executeAuth } = useAuthUser();
+  const {
+    orders,
+    isLoading,
+    error,
+    selectedFilter,
+    setSelectedFilter,
+    fetchOrders,
+  } = useFetchAllOrders();
+
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -23,20 +32,6 @@ export default function OrderManagement() {
     fetchOrders();
   }, []);
 
-  const handleTestLogin = async () => {
-    setIsLoggingIn(true);
-    setError(null);
-    try {
-      await loginApi();
-      // Wait a moment and then re-fetch
-      await fetchOrders();
-    } catch (err) {
-      setError(`Authentication failed: ${err.message}`);
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
-
   // Compute metrics
   const totalOrders = orders.length;
 
@@ -44,7 +39,7 @@ export default function OrderManagement() {
     ['PROCESSING', 'PENDING', 'DELIVERING', 'RETURN_PENDING', 'RETURNING'].includes(o.status)
   ).length;
 
-  const totalSpent = orders.reduce((sum, order) => {
+  const totalRevenue = orders.reduce((sum, order) => {
     const orderDetails = order.orderDetailList || [];
     const itemsTotal = orderDetails.reduce((iSum, item) => iSum + (Number(item.pricePaid || 0) * (item.quantity || 0)), 0);
     const shippingFee = Number(order.shippingFee || 0);
@@ -54,28 +49,22 @@ export default function OrderManagement() {
 
   // Filter and Search Logic
   const filteredOrders = orders.filter(order => {
-    // Search filter
     const matchesSearch =
       order.id.toString().includes(searchQuery) ||
       (order.shippingAddress && order.shippingAddress.toLowerCase().includes(searchQuery.toLowerCase()));
 
     if (!matchesSearch) return false;
 
-    // Tab filter
     if (selectedFilter === 'ALL') return true;
     if (selectedFilter === 'PENDING') return order.status === 'PENDING';
     if (selectedFilter === 'PROCESSING') return order.status === 'PROCESSING';
     if (selectedFilter === 'DELIVERING') return order.status === 'DELIVERING';
     if (selectedFilter === 'COMPLETED') return ['RECEIVED', 'ARRIVED'].includes(order.status);
-    //TODO make a new filter called waiting for action for manager choose shipper to make change
     if (selectedFilter === 'FAILED') return ['FAILED', 'RETURN_PENDING', 'RETURNING'].includes(order.status);
 
     return true;
   });
 
-  // Render Modal Details Breakdown
-  const renderOrderDetailsModal = () => {
-    
   return (
     <div className="min-h-screen flex flex-col bg-bg-base font-main">
       <Header />
@@ -137,7 +126,7 @@ export default function OrderManagement() {
                 {isLoading ? (
                   <Skeleton className="h-9 w-32 mt-1" />
                 ) : (
-                  `$${totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  `$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                 )}
               </p>
               <div className="absolute right-4 bottom-4 text-interactive/10 group-hover:text-interactive/20 transition-all duration-300">
@@ -230,24 +219,13 @@ export default function OrderManagement() {
               </h3>
               <p className="text-sm text-black/60 mb-6 leading-relaxed">
                 {error === 'UNAUTHORIZED'
-                  ? 'You need to be signed in to access your order dashboard.'
+                  ? 'You need to be signed in to access the order dashboard.'
                   : error
                 }
               </p>
-              {error === 'UNAUTHORIZED' ? (
-                <Button
-                  variant="primary"
-                  onClick={handleTestLogin}
-                  disabled={isLoggingIn}
-                  className="px-6 py-2.5 shadow-md"
-                >
-                  {isLoggingIn ? 'Logging In...' : 'Log In as Test User'}
-                </Button>
-              ) : (
-                <Button variant="primary" onClick={fetchOrders} className="px-6 py-2.5">
-                  Try Again
-                </Button>
-              )}
+              <Button variant="primary" onClick={fetchOrders} className="px-6 py-2.5">
+                Try Again
+              </Button>
             </div>
           )}
 
@@ -263,10 +241,10 @@ export default function OrderManagement() {
               <p className="text-sm text-black/60 mb-6">
                 {searchQuery || selectedFilter !== 'ALL'
                   ? "We couldn't find any orders matching your search query or filter."
-                  : "You haven't placed any orders yet. Visit our shop catalog to find your next favorite tree!"
+                  : "No orders have been placed yet."
                 }
               </p>
-              {(searchQuery || selectedFilter !== 'ALL') ? (
+              {(searchQuery || selectedFilter !== 'ALL') && (
                 <Button
                   variant="secondary"
                   onClick={() => {
@@ -277,12 +255,6 @@ export default function OrderManagement() {
                 >
                   Clear Filters
                 </Button>
-              ) : (
-                <a href="/">
-                  <Button variant="primary" className="px-5 py-2">
-                    Browse Shop
-                  </Button>
-                </a>
               )}
             </div>
           )}
@@ -303,7 +275,12 @@ export default function OrderManagement() {
       </main>
 
       <Footer />
-      {renderOrderDetailsModal()}
+
+      {/* Order Detail Modal */}
+      <OrderModal
+        selectedOrder={selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+      />
     </div>
   );
 }

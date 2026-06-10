@@ -1,32 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export default function useFetchAllOrders() {
-    const [orders, setOrders] = useState([]);
-    const [selectedFilter, setSelectedFilter] = useState('ALL');
+/**
+ * Fetches all users with the SHIPPER role from the API.
+ * Endpoint: GET /api/users?role=SHIPPER
+ * Note: The endpoint is not yet implemented on the backend.
+ */
+export default function useFetchAllShippers() {
+    const [shippers, setShippers] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    //TODO add ticket type to fetchOrders
-    const fetchOrders = async () => {
+    const fetchShippers = async () => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await fetch("/api/orders", {
+            const response = await fetch("/api/users?role=SHIPPER", {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                credentials: "include"
+                credentials: "include",
             });
 
             if (!response.ok) {
                 if (response.status === 401 || response.status === 403) {
                     throw new Error("UNAUTHORIZED");
                 }
-                throw new Error(`Failed to fetch orders (Status: ${response.status})`);
+                throw new Error(`Failed to fetch shippers (Status: ${response.status})`);
             }
 
             const data = await response.json();
-            setOrders(data);
+            setShippers(data);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -34,12 +37,14 @@ export default function useFetchAllOrders() {
         }
     };
 
+    useEffect(() => {
+        fetchShippers();
+    }, []);
+
     return {
-        orders,
+        shippers,
         isLoading,
         error,
-        selectedFilter,
-        setSelectedFilter,
-        fetchOrders,
+        fetchShippers,
     };
 }

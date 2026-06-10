@@ -8,6 +8,8 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swp391.group6.dto.LoginResponse;
+import swp391.group6.dto.OrderDTO;
+import swp391.group6.dto.OrderListDTO;
 import swp391.group6.model.Order;
 import swp391.group6.model.OrderStatus;
 import swp391.group6.model.ShoppingCart;
@@ -28,21 +30,24 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Order>> getOrders(HttpServletRequest request) {
+    public ResponseEntity<List<OrderListDTO>> getOrders(HttpServletRequest request) {
         LoginResponse loggedInUser = JWTUtil.getUser(request);
-        List<Order> orderList = orderService.getOrders(loggedInUser);
+        List<OrderListDTO> orderList = orderService.getOrders(loggedInUser)
+                .stream()
+                .map(OrderListDTO::new)
+                .toList();
         return ResponseEntity.ok(orderList);
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Order> getOrder(HttpServletRequest request, @PathVariable long id) {
+    public ResponseEntity<OrderDTO> getOrder(HttpServletRequest request, @PathVariable long id) {
         LoginResponse loggedInUser = JWTUtil.getUser(request);
         Order order = orderService.getOrder(id, loggedInUser);
         if (order == null) {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(order);
+        return ResponseEntity.ok(new OrderDTO(order));
     }
 
     @PostMapping

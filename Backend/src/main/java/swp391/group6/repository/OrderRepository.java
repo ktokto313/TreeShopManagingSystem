@@ -11,5 +11,5 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findOrdersByUser_IdOrShipper_Id(long userID, long shipperID);
     Optional<Order> findOrderByIdAndUser_IdOrShipper_Id(long orderId, long userID, long shipperID);
-    boolean existByShipper_Id(long shipperID);
+    boolean existsByShipper_Id(long shipperID);
 }
