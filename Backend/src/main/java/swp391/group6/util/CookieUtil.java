@@ -1,4 +1,5 @@
 //6/7: Dao Hung: Fix cookie config to run well on http
+//6/9: Dao Hung: Add delete cookie for better logic on log out
 package swp391.group6.util;
 
 import jakarta.servlet.http.Cookie;
@@ -53,5 +54,13 @@ public final class CookieUtil {
             if (cookie.getName().equals(cookieName)) return cookie;
         }
         return null;
+    }
+
+    public static ResponseCookie deleteCookie() {
+        return ResponseCookie.from("hihi", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .build();
     }
 }

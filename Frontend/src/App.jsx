@@ -8,6 +8,7 @@ import ManagementPage from './pages/ManagementPage'
 import LoginPage from './features/auth/pages/LoginPage'
 import RegisterPage from './features/auth/pages/RegisterPage'
 import ProfilePage from './features/auth/pages/ProfilePage'
+import ChangePasswordPage from './features/auth/pages/ChangePasswordPage'
 function RequireAuth({ children, managerOnly = false }) {
   const { isAuthenticated, canManage } = useAuth()
   const location = useLocation()
@@ -73,6 +74,14 @@ function AppRoutes() {
               </RequireAuth>
           }
       />
+        <Route
+            path="/change-password"
+            element={
+                <RequireAuth>
+                    <ChangePasswordPage />
+                </RequireAuth>
+            }
+        />
       <Route
         path="/manage"
         element={

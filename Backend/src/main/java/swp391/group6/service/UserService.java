@@ -123,6 +123,7 @@ public class UserService {
         dto.setPassword(user.getPassword());
         dto.setFullName(user.getFullName());
         dto.setPhone(user.getPhone());
+        dto.setHasPassword(user.getPassword() != null && !user.getPassword().isBlank());
         if (user.getRole() != null) {
             dto.setRoleName(user.getRole().getName());
         }
@@ -166,10 +167,11 @@ public class UserService {
         Optional<User> existingUser = userRepository.findById(id);
         if (existingUser.isPresent()) {
             User user = existingUser.get();
-
+            String currentPassword = user.getPassword();
             if (userDTO.getFullName() != null) user.setFullName(userDTO.getFullName());
             if (userDTO.getPhone() != null) user.setPhone(userDTO.getPhone());
 
+            user.setPassword(currentPassword);
             User updatedUser = userRepository.save(user);
             return convertToDTO(updatedUser);
         }

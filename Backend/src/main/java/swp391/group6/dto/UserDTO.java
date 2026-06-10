@@ -17,4 +17,5 @@ public class UserDTO implements Serializable {
     private String roleName;
     private Boolean status;
     private String createdAt;
+    private boolean isHasPassword;
 }

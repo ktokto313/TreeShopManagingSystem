@@ -1,5 +1,6 @@
 package swp391.group6.controller;
 
+
 import swp391.group6.dto.*;
 import swp391.group6.model.User;
 import jakarta.servlet.http.HttpServletResponse;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseCookie;
 import swp391.group6.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import swp391.group6.service.ChangePasswordService;
 import swp391.group6.service.GoogleAuthService;
 import swp391.group6.service.OtpService;
 import swp391.group6.util.CookieUtil;
@@ -23,11 +25,13 @@ public class AuthController {
     private final AuthService authService;
     private final GoogleAuthService googleAuthService;
     private final OtpService otpService;
+    private final ChangePasswordService changePasswordService;
 
-    public AuthController(AuthService authService, GoogleAuthService googleAuthService, OtpService otpService) {
+    public AuthController(AuthService authService, GoogleAuthService googleAuthService, OtpService otpService, ChangePasswordService changePasswordService) {
         this.authService = authService;
         this.googleAuthService = googleAuthService;
         this.otpService = otpService;
+        this.changePasswordService = changePasswordService;
     }
 
     @PostMapping("/login")
@@ -96,5 +100,12 @@ public class AuthController {
                     .body(Map.of("message", "Invalid or expired OTP"));
         }
         return ResponseEntity.ok(Map.of("message", "OTP verified"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, CookieUtil.deleteCookie().toString())
+                .build();
     }
 }

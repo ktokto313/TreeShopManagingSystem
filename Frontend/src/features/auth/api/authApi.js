@@ -31,9 +31,8 @@ export async function register(fullName, email, password) {
     body: JSON.stringify({ fullName, email, password }),
   })
 
-  if (res.status === 400) {
-    const message = await res.text()
-    throw new Error(message) // e.g. "Email already exists"
+  if (res.status === 409) {
+    throw new Error('Email already registered')
   }
 
   if (!res.ok) {
@@ -89,7 +88,7 @@ export async function logout() {
 }
 
 export async function completeGoogleProfile(email, fullName, phoneNumber) {
-  const res = await fetch('/api/auth/google/complete-profile', {
+  const res = await fetch(`${BASE}/google/complete-profile`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -100,5 +99,5 @@ export async function completeGoogleProfile(email, fullName, phoneNumber) {
     throw new Error('Failed to complete profile')
   }
 
-  return true;
+  return true
 }
