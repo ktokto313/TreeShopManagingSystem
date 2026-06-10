@@ -1,3 +1,10 @@
+/*
+ * Name: User Search Hook
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: React hook for email and keyword user search with normalized result arrays.
+ */
 import { useState, useCallback } from "react";
 import { userApi } from "../data/userApi";
 import { mapUserFromApi, mapUsersFromApi } from "../data/userMapper";

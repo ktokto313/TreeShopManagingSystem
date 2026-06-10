@@ -1,3 +1,10 @@
+/*
+ * Name: User Entity
+ * @Author: DucLM
+ * Date: 2026-06-02
+ * Version: 2.0
+ * Description: JPA entity mapping the users table, including role, status, and related domain associations.
+ */
 package swp391.group6.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;

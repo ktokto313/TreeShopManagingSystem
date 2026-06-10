@@ -1,4 +1,10 @@
-// features/admin-users/components/UserDetailModal.jsx
+/*
+ * Name: User Detail Modal
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: Read-only modal displaying a selected user's profile, role, status, and contact information.
+ */
 import { Modal } from "../../../components/ui/Modal";
 import { UserStatusBadge } from "./UserStatusBadge";
 import { UserRoleBadge } from "./UserRoleBadge";

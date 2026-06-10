@@ -1,9 +1,12 @@
-// features/admin-users/UserManagementContainer.jsx
+/*
+ * Name: User Management Container
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: Main admin dashboard composing the user table, search bar, sorting, and create/edit/detail modals.
+ */
 import { useState, useMemo } from "react";
-import { useUsers } from "./hooks/useUsers";
-import { useBanUser } from "./hooks/useBanUser";
-import { useDeleteUser } from "./hooks/useDeleteUser";
-import { useUserSearch } from "./hooks/useUserSearch";
+import { useManageUsers } from "./hooks/useManageUsers";
 import { UserTableRow } from "./components/UserTableRow";
 import { UserSearchBar } from "./components/UserSearchBar";
 import { CreateUserModal } from "./components/CreateUserModal";
@@ -32,10 +35,12 @@ function SortIcon({ active, direction }) {
 }
 
 export function UserManagementContainer() {
-  const { users, isLoading, hasError, refetch } = useUsers();
-  const { handleBan, handleUnban, isLoading: isBanLoading } = useBanUser(refetch);
-  const { handleDelete, isLoading: isDeleteLoading } = useDeleteUser(refetch);
-  const { results: searchResults, isSearching, handleSearch, handleClear } = useUserSearch();
+  const {
+    users, isLoading, hasError, refetch,
+    handleBan, handleUnban, handleDelete,
+    searchResults, isSearching, handleSearch, handleClear,
+    isActionLoading
+  } = useManageUsers();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -59,7 +64,7 @@ export function UserManagementContainer() {
     return [...list].sort(SORT_OPTIONS[`${sortKey}_${sortDir}`]);
   }, [searchResults, users, sortKey, sortDir]);
 
-  const isActionLoading = isBanLoading || isDeleteLoading;
+
 
   const thClass =
     "px-4 py-3 text-xs font-medium text-stone-500 uppercase tracking-wide cursor-pointer select-none hover:text-stone-800";

@@ -1,4 +1,10 @@
-// features/admin-users/components/UserTableRow.jsx
+/*
+ * Name: User Table Row
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: Table row rendering user summary data with view, edit, delete, and ban/unban action buttons.
+ */
 import { UserStatusBadge } from "./UserStatusBadge";
 import { UserRoleBadge } from "./UserRoleBadge";
 import { Button } from "../../../components/ui/Button";

@@ -1,4 +1,10 @@
-// features/admin-users/hooks/useBanUser.js
+/*
+ * Name: Ban User Hook
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: React hook exposing ban and unban handlers that call the user API and refresh on success.
+ */
 import { useState } from "react";
 import { userApi } from "../data/userApi";
 

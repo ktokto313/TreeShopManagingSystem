@@ -1,4 +1,10 @@
-// features/admin-users/components/UserStatusBadge.jsx
+/*
+ * Name: User Status Badge
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: Badge component indicating whether a user account is active or banned.
+ */
 import { cn } from "../../../utils/cn";
 
 /**

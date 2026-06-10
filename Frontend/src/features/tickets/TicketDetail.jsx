@@ -67,7 +67,7 @@ const TicketDetail = () => {
 			// If the user is an agent taking the ticket, pass their Email.
 			// If it's the customer accepting/rejecting, agentEmail is null.
 			const agentEmail =
-				user?.role?.toLowerCase() === "support_agent" ? user.email : null;
+				user?.roleName?.toLowerCase() === "support_agent" ? user.email : null;
 			const updatedTicket = await updateTicketStatus(
 				ticket.id,
 				newState,
@@ -139,7 +139,7 @@ const TicketDetail = () => {
 		);
 
 	const isCreator = user?.email === ticket.ticketCreator.email;
-	const isAgent = user?.role?.toLowerCase() === "support_agent";
+	const isAgent = user?.roleName?.toLowerCase() === "support_agent";
 	console.log(isAgent);
 	const isResolved = ticket.ticketState.toLowerCase() === "resolved";
 

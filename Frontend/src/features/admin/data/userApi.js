@@ -1,3 +1,10 @@
+/*
+ * Name: User API Client
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: Fetch wrapper for all /api/users endpoints using cookie-based authentication.
+ */
 const BASE = "/api/users";
 
 const defaultHeaders = { "Content-Type": "application/json" };
