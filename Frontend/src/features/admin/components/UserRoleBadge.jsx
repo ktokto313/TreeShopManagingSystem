@@ -1,4 +1,10 @@
-// features/admin-users/components/UserRoleBadge.jsx
+/*
+ * Name: User Role Badge
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: Styled badge component that renders a color-coded label for each user role.
+ */
 import { cn } from "../../../utils/cn";
 
 const ROLE_STYLES = {

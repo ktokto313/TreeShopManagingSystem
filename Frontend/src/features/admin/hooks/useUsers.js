@@ -1,3 +1,10 @@
+/*
+ * Name: Users List Hook
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: React hook that loads all users on mount and exposes refetch for admin table refresh.
+ */
 import { useEffect, useState } from "react";
 import { userApi } from "../data/userApi";
 import { mapUsersFromApi } from "../data/userMapper";

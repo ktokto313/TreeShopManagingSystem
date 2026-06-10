@@ -1,3 +1,10 @@
+/*
+ * Name: User Repository
+ * @Author: DucLM
+ * Date: 2026-06-01
+ * Version: 2.0
+ * Description: Spring Data JPA repository for user persistence, email lookup, and keyword search queries.
+ */
 package swp391.group6.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;

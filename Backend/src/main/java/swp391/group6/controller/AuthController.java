@@ -1,3 +1,10 @@
+/*
+ * Name: Authentication Controller
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: Handles login and secure logout via JWT HTTP cookies using CookieUtil.
+ */
 package swp391.group6.controller;
 
 
@@ -103,9 +110,10 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout() {
+    public ResponseEntity<String> logout() {
+        ResponseCookie deadCookie = CookieUtil.invalidateCookie();
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, CookieUtil.deleteCookie().toString())
-                .build();
+                .header(HttpHeaders.SET_COOKIE, deadCookie.toString())
+                .body("Logged out successfully");
     }
 }

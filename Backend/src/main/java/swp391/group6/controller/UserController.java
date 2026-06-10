@@ -1,3 +1,10 @@
+/*
+ * Name: User REST Controller
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: Exposes /api/users CRUD, search, ban/unban, and profile endpoints with JWT role-based access control.
+ */
 package swp391.group6.controller;
 
 import jakarta.servlet.http.HttpServletRequest;

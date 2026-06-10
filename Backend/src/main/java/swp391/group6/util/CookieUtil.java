@@ -59,11 +59,4 @@ public final class CookieUtil {
         return null;
     }
 
-    public static ResponseCookie deleteCookie() {
-        return ResponseCookie.from("hihi", "")
-                .httpOnly(true)
-                .path("/")
-                .maxAge(0)
-                .build();
-    }
 }

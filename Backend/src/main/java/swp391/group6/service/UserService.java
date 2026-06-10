@@ -1,3 +1,10 @@
+/*
+ * Name: User Service
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: Business logic for user CRUD, ban/unban, role validation, and DTO conversion; protects SYSTEM_ADMIN accounts.
+ */
 package swp391.group6.service;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

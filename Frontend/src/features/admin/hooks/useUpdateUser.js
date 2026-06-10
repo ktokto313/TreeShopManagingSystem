@@ -1,3 +1,10 @@
+/*
+ * Name: Update User Hook
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: React hook for updating existing user records via PUT /api/users/{id}.
+ */
 import { useState } from "react";
 import { userApi } from "../data/userApi";
 import { mapUserToApi } from "../data/userMapper";
