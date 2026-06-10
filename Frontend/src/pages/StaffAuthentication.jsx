@@ -5,7 +5,7 @@ import { Form } from '../components/ui/Form';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 
-export default function Authentication() {
+export default function StaffAuthentication() {
 	const navigate = useNavigate();
 	const [form, setForm] = useState({
 		email: '',
@@ -34,8 +34,8 @@ export default function Authentication() {
 				throw new Error('Login failed. Check your credentials.');
 			}
 
-			// Navigate to tickets page on success
-			navigate('/tickets');
+			// Navigate to admin page on success
+			navigate('/admin/users');
 		} catch (err) {
 			setError(err.message);
 		} finally {
@@ -47,8 +47,8 @@ export default function Authentication() {
 		<Container>
 			<div className="max-w-sm mx-auto py-16">
 				<div className="mb-8 text-center">
-					<h1 className="text-2xl font-bold text-stone-800 mb-2">TreeShop Login</h1>
-					<p className="text-sm text-stone-500">Sign in to your account</p>
+					<h1 className="text-2xl font-bold text-stone-800 mb-2">Staff Login</h1>
+					<p className="text-sm text-stone-500">Sign in to the staff portal</p>
 				</div>
 
 				<Form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -57,7 +57,7 @@ export default function Authentication() {
 						type="email"
 						value={form.email}
 						onChange={handleChange('email')}
-						placeholder="Enter your email"
+						placeholder="Enter your staff email"
 						required
 					/>
 					<Input
@@ -79,7 +79,6 @@ export default function Authentication() {
 						{isLoading ? 'Signing in...' : 'Sign In'}
 					</Button>
 				</Form>
-
 			</div>
 		</Container>
 	);

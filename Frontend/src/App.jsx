@@ -5,35 +5,34 @@ import TicketDetail from "./features/tickets/TicketDetail";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 =======
 import { Route, Routes, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./hooks/useAuth";
 >>>>>>> a916de3 (fix: fix ESLint errors (again))
 import UserManagement from "./pages/UserManagement";
 import Authentication from "./pages/Authentication";
+<<<<<<< HEAD
+=======
+import StaffAuthentication from "./pages/StaffAuthentication";
+import TicketDashboard from "./features/tickets/TicketDashboard";
+import TicketDetail from "./features/tickets/TicketDetail";
+import { Header } from "./components/global/Header";
+>>>>>>> ff49b2c (chore: added comments block for version control)
 
-// Protected route component
 function ProtectedAdminRoute({ element }) {
-	const { isAdmin, isLoading } = useAuth();
+    const { isAdmin, isLoading } = useAuth();
 
-	if (isLoading) {
-		return (
-			<div className="flex items-center justify-center min-h-screen">
-				<div className="text-center">
-					<div className="h-8 w-8 rounded-full border-4 border-stone-200 border-t-[#283C1D] animate-spin mx-auto mb-4" />
-					<p className="text-stone-500">Loading...</p>
-				</div>
-			</div>
-		);
-	}
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
 
-	if (!isAdmin) {
-		return <Navigate to="/login" replace />;
-	}
+    if (!isAdmin) {
+        return <Navigate to="/staff-login" replace />;
+    }
 
-	return element;
+    return element;
 }
 
 function AppRoutes() {
+<<<<<<< HEAD
 	return (
 		<Routes>
 			<Route path="/login" element={<Authentication />} />
@@ -48,14 +47,43 @@ function AppRoutes() {
 			<Route path="*" element={<Navigate to="/admin/users" replace />} />
 		</Routes>
 	);
+=======
+    return (
+        <Routes>
+            <Route path="/login" element={<Authentication />} />
+            <Route path="/register" element={<Authentication />} />
+            <Route path="/staff-login" element={<StaffAuthentication />} />
+            <Route path="/" element={<Navigate to="/admin/users" replace />} />
+
+            <Route
+                path="/admin/users"
+                element={<ProtectedAdminRoute element={<UserManagement />} />}
+            />
+
+            <Route
+                path="/tickets"
+                element={<TicketDashboard />}
+            />
+
+            <Route
+                path="/tickets/:id"
+                element={<TicketDetail />}
+            />
+
+            <Route
+                path="*"
+                element={<Navigate to="/admin/users" replace />}
+            />
+        </Routes>
+    );
+>>>>>>> ff49b2c (chore: added comments block for version control)
 }
 
-const App = () => {
-	return (
-		<AuthProvider>
-			<AppRoutes />
-		</AuthProvider>
-	);
-};
-
-export default App;
+export default function App() {
+    return (
+        <>
+            <Header />
+            <AppRoutes />
+        </>
+    );
+}

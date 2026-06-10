@@ -27,10 +27,10 @@ const TicketDashboard = ({ className }) => {
 
 	const { isLoading, fetchedTickets, executeFetchAllTickets } =
 		useFetchAllTickets();
-	const { user, executeAuth } = useContext(AuthContext);
+	const { user } = useContext(AuthContext);
 
-	const isAgent = user?.role.toLowerCase() === "support_agent";
-	// const isCustomer = user?.role.toLowerCase() === "customer";
+	const isAgent = user?.roleName?.toLowerCase() === "support_agent";
+	// const isCustomer = user?.roleName?.toLowerCase() === "customer";
 
 	const {
 		isCreateTicketLoading,
@@ -58,7 +58,7 @@ const TicketDashboard = ({ className }) => {
 	return (
 		<div>
 			<Container className={cn("container flex mt-5 gap-2")}>
-				<Button onClick={() => executeAuth()}>Login</Button>
+				<Button onClick={() => navigate('/login')}>Login</Button>
 			</Container>
 
 			<div

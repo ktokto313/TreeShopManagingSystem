@@ -1,3 +1,10 @@
+/*
+ * Name: Edit User Modal
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: Modal form for updating an existing user's profile fields and role assignment.
+ */
 import { useEffect, useState } from "react";
 import { Modal } from "../../../components/ui/Modal";
 import { Form } from "../../../components/ui/Form";

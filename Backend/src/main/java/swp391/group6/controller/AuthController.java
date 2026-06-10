@@ -1,14 +1,21 @@
+/*
+ * Name: Authentication Controller
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: Handles login and secure logout via JWT HTTP cookies using CookieUtil.
+ */
 package swp391.group6.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import swp391.group6.dto.LoginRequest;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.service.AuthService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import swp391.group6.util.CookieUtil;
 import swp391.group6.util.JWTUtil;
 
@@ -35,5 +42,13 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(loginResponse);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout() {
+        ResponseCookie deadCookie = CookieUtil.invalidateCookie();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, deadCookie.toString())
+                .body("Logged out successfully");
     }
 }

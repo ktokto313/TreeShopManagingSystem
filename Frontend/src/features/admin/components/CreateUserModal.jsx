@@ -1,3 +1,10 @@
+/*
+ * Name: Create User Modal
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: Modal form for SYSTEM_ADMIN to create new users with role, credentials, and contact details.
+ */
 import { useState } from "react";
 import { Modal } from "../../../components/ui/Modal";
 import { Form } from "../../../components/ui/Form";

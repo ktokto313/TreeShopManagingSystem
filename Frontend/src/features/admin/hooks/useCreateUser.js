@@ -1,3 +1,10 @@
+/*
+ * Name: Create User Hook
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: React hook for submitting new user creation requests with loading and error state.
+ */
 import { useState } from "react";
 import { userApi } from "../data/userApi";
 import { mapUserToApi } from "../data/userMapper";

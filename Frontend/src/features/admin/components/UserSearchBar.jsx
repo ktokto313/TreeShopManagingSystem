@@ -1,4 +1,10 @@
-// features/admin-users/components/UserSearchBar.jsx
+/*
+ * Name: User Search Bar
+ * @Author: DucLM
+ * Date: 2026-06-05
+ * Version: 2.0
+ * Description: Search input and controls for finding users by email or keyword query.
+ */
 import { useState } from "react";
 import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/Button";
