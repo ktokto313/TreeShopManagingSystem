@@ -5,7 +5,7 @@
  * Version: 2.0
  * Description: Modal form for updating an existing user's profile fields and role assignment.
  */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Modal } from "../../../components/ui/Modal";
 import { Form } from "../../../components/ui/Form";
 import { Input } from "../../../components/ui/Input";
@@ -26,15 +26,14 @@ function validate(form) {
 }
 
 export function EditUserModal({ user, isOpen, onClose, onUpdated }) {
-  const [form, setForm] = useState({ fullName: "", phone: "", role: "CUSTOMER", password: "" });
+  const [form, setForm] = useState(() => ({
+    fullName: user?.fullName ?? "",
+    phone: user?.phone ?? "",
+    role: user?.role ?? "CUSTOMER",
+    password: "",
+  }));
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    if (!user) { setForm({ fullName: "", phone: "", role: "CUSTOMER", password: "" }); return; }
-    setForm({ fullName: user.fullName ?? "", phone: user.phone ?? "", role: user.role ?? "CUSTOMER", password: "" });
-    setErrors({});
-  }, [user]);
 
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));

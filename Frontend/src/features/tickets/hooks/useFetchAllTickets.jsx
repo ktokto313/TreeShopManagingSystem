@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { fetchAllTickets } from "../data/ticketApi.js";
 
 const useFetchAllTickets = (initialTickets = []) => {
@@ -6,7 +6,7 @@ const useFetchAllTickets = (initialTickets = []) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
-	const executeFetchAllTickets = async (ticketFilter, ticketPiority, ticketSort) => {
+	const executeFetchAllTickets = useCallback(async (ticketFilter, ticketPiority, ticketSort) => {
         setIsLoading(true);
         setError(null)
 
@@ -18,7 +18,7 @@ const useFetchAllTickets = (initialTickets = []) => {
         } finally{
             setIsLoading(false);
         }
-	};
+	}, []);
 
 	return { isLoading, error, fetchedTickets, executeFetchAllTickets };
 };
