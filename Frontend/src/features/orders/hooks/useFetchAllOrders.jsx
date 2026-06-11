@@ -1,17 +1,42 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+
+const FILTER_TO_STATUSES = {
+    ALL: [],
+    PENDING: ['PENDING'],
+    PROCESSING: ['PROCESSING'],
+    DELIVERING: ['DELIVERING'],
+    COMPLETED: ['RECEIVED', 'ARRIVED'],
+    FAILED: ['FAILED', 'RETURN_PENDING', 'RETURNING'],
+};
+
+const DEBOUNCE_MS = 400;
 
 export default function useFetchAllOrders() {
     const [orders, setOrders] = useState([]);
     const [selectedFilter, setSelectedFilter] = useState('ALL');
+    const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const debounceTimerRef = useRef(null);
 
-    //TODO add ticket type to fetchOrders
-    const fetchOrders = async () => {
+    const fetchOrders = useCallback(async () => {
+        const activeFilter = selectedFilter;
+        const activeQuery = searchQuery;
+        const statuses = FILTER_TO_STATUSES[activeFilter] || [];
+
         setIsLoading(true);
         setError(null);
         try {
-            const response = await fetch("/api/orders", {
+            const params = new URLSearchParams();
+            statuses.forEach((s) => params.append('statusList', s));
+            if (activeQuery.trim()) {
+                params.append('query', activeQuery.trim());
+            }
+
+            const queryString = params.toString();
+            const url = queryString ? `/api/orders?${queryString}` : '/api/orders';
+
+            const response = await fetch(url, {
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -32,14 +57,41 @@ export default function useFetchAllOrders() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [selectedFilter, searchQuery]);
+
+    const changeFilter = useCallback((newFilter) => {
+        setSelectedFilter(newFilter);
+        fetchOrders();
+    }, [fetchOrders]);
+
+    const changeSearchQuery = useCallback((newQuery) => {
+        setSearchQuery(newQuery);
+
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+        debounceTimerRef.current = setTimeout(() => {
+            fetchOrders();
+        }, DEBOUNCE_MS);
+    }, [fetchOrders]);
+
+    // Cleanup debounce timer on unmount
+    useEffect(() => {
+        return () => {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+        };
+    }, []);
 
     return {
         orders,
         isLoading,
         error,
         selectedFilter,
-        setSelectedFilter,
+        setSelectedFilter: changeFilter,
+        searchQuery,
+        setSearchQuery: changeSearchQuery,
         fetchOrders,
     };
 }

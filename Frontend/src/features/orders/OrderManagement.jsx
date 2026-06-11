@@ -18,19 +18,20 @@ export default function OrderManagement() {
     error,
     selectedFilter,
     setSelectedFilter,
+    searchQuery,
+    setSearchQuery,
     fetchOrders,
   } = useFetchAllOrders();
 
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     executeAuth();
-  }, []);
+  }, [executeAuth]);
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [fetchOrders]);
 
   // Compute metrics
   const totalOrders = orders.length;
@@ -47,23 +48,7 @@ export default function OrderManagement() {
     return sum + Math.max(0, itemsTotal + shippingFee - discount);
   }, 0);
 
-  // Filter and Search Logic
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch =
-      order.id.toString().includes(searchQuery) ||
-      (order.shippingAddress && order.shippingAddress.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    if (!matchesSearch) return false;
-
-    if (selectedFilter === 'ALL') return true;
-    if (selectedFilter === 'PENDING') return order.status === 'PENDING';
-    if (selectedFilter === 'PROCESSING') return order.status === 'PROCESSING';
-    if (selectedFilter === 'DELIVERING') return order.status === 'DELIVERING';
-    if (selectedFilter === 'COMPLETED') return ['RECEIVED', 'ARRIVED'].includes(order.status);
-    if (selectedFilter === 'FAILED') return ['FAILED', 'RETURN_PENDING', 'RETURNING'].includes(order.status);
-
-    return true;
-  });
 
   return (
     <div className="min-h-screen flex flex-col bg-bg-base font-main">
@@ -230,7 +215,7 @@ export default function OrderManagement() {
           )}
 
           {/* Empty State */}
-          {!isLoading && !error && filteredOrders.length === 0 && (
+          {!isLoading && !error && orders.length === 0 && (
             <div className="text-center py-16 px-4 max-w-md mx-auto">
               <div className="w-16 h-16 bg-interactive/10 text-interactive rounded-full flex items-center justify-center mx-auto mb-5">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -260,9 +245,9 @@ export default function OrderManagement() {
           )}
 
           {/* Orders Grid List */}
-          {!isLoading && !error && filteredOrders.length > 0 && (
+          {!isLoading && !error && orders.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredOrders.map((order) => (
+              {orders.map((order) => (
                 <OrderCard
                   key={order.id}
                   order={order}

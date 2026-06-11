@@ -30,9 +30,12 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderListDTO>> getOrders(HttpServletRequest request) {
+    public ResponseEntity<List<OrderListDTO>> getOrders(
+            HttpServletRequest request,
+            @RequestParam(name = "statusList", required = false) List<OrderStatus> statusList,
+            @RequestParam(name = "query", required = false) String query) {
         LoginResponse loggedInUser = JWTUtil.getUser(request);
-        List<OrderListDTO> orderList = orderService.getOrders(loggedInUser)
+        List<OrderListDTO> orderList = orderService.getOrders(loggedInUser, statusList, query)
                 .stream()
                 .map(OrderListDTO::new)
                 .toList();
