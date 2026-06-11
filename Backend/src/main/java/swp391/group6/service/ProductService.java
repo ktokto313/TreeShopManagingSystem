@@ -196,7 +196,7 @@ public class ProductService {
                 && sku.length() <= MAX_SKU_LENGTH
                 && SKU_PATTERN.matcher(sku).matches()
                 && price != null
-                && price.compareTo(BigDecimal.ZERO) >= 0
+                && price.compareTo(BigDecimal.ZERO) > 0
                 && stock != null
                 && stock >= 0
                 && (description == null || description.length() <= MAX_DESCRIPTION_LENGTH);
