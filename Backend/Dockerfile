@@ -22,6 +22,6 @@ COPY --from=build /app/build/libs/*.jar app.jar
 RUN adduser spring && adduser spring spring
 USER spring:spring
 # Expose the application port
-EXPOSE 8081
+EXPOSE 8080
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
