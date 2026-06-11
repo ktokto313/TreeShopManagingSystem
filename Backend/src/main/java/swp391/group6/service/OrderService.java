@@ -22,13 +22,25 @@ public class OrderService {
         this.userRepository = userRepository;
     }
 
-    public List<Order> getOrders(LoginResponse loginResponse) {
+    public List<Order> getOrders(LoginResponse loginResponse, List<OrderStatus> statuses, String query) {
+        if (query == null) query = "";
+        boolean hasStatusFilter = statuses != null && !statuses.isEmpty();
+
         if (canAccessAllOrder(loginResponse)) {
-            return orderRepository.findAll();
+            if (hasStatusFilter) {
+                return orderRepository.searchByStatusIn(statuses, query);
+            } else {
+                return orderRepository.searchAll(query);
+            }
         } else {
             User fullUser = userRepository.findByEmail(loginResponse.getEmail()).orElse(null);
             if (fullUser == null) return new ArrayList<>();
-            return orderRepository.findOrdersByUser_IdOrShipper_Id(fullUser.getId(), fullUser.getId());
+            long uid = fullUser.getId();
+            if (hasStatusFilter) {
+                return orderRepository.searchByStatusInAndUserIdOrShipperId(statuses, query, uid, uid);
+            } else {
+                return orderRepository.searchByUserIdOrShipperId(query, uid, uid);
+            }
         }
     }
 
