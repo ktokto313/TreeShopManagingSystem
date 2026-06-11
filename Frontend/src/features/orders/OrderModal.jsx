@@ -16,10 +16,7 @@ export default function OrderModal({ selectedOrder, onClose }) {
     const discount = Number(selectedOrder.discount || 0);
     const finalTotal = Math.max(0, itemsTotal + shippingFee - discount);
 
-    const statusConfig = ORDER_STATUS_MAP[selectedOrder.status] || {
-        bg: 'bg-gray-500/10 text-gray-600 border border-gray-500/20',
-        label: selectedOrder.status,
-    };
+    const statusConfig = ORDER_STATUS_MAP[selectedOrder.status];
 
     return (
       <Modal
