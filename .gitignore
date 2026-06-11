@@ -44,6 +44,8 @@ out/
 .kiro/
 .cursor/
 .aiassistant/
+.codex/
+.codex-git-alt/
 
 #### React JS gitignore ####
 
