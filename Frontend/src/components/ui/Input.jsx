@@ -1,6 +1,6 @@
 import { cn } from '../../utils/cn'
 
-export default function Input({ label, error, className, id, ...props }) {
+export function Input({ label, error, className, id, ...props }) {
   const inputId = id || props.name
   const hasError = Boolean(error)
 
@@ -30,3 +30,5 @@ export default function Input({ label, error, className, id, ...props }) {
     </label>
   )
 }
+
+export default Input

@@ -1,6 +1,6 @@
 import { cn } from '../../utils/cn'
 
-export default function Select({
+export function Select({
   label,
   error,
   className,
@@ -43,3 +43,5 @@ export default function Select({
     </label>
   )
 }
+
+export default Select
