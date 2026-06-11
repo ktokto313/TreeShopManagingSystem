@@ -20,13 +20,13 @@ export async function changePassword(oldPassword, newPassword) {
         })
     } catch (error) {
         if (error.status === 401) {
-            throw new Error('Unauthorized')
+            throw new Error('Unauthorized', {cause: error});
         }
         if (error.status === 403) {
-            throw new Error('Google account cannot change password')
+            throw new Error('Google account cannot change password', {cause: error});
         }
         if (error.status === 400) {
-            throw new Error('Wrong old password or invalid input')
+            throw new Error('Wrong old password or invalid input', {cause: error});
         }
         throw error
     }
