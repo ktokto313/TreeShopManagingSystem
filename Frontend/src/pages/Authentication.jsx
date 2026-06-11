@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import { Container } from '../components/global/Container';
 import { Form } from '../components/ui/Form';
 import { Input } from '../components/ui/Input';
@@ -7,6 +8,7 @@ import { Button } from '../components/ui/Button';
 
 export default function Authentication() {
 	const navigate = useNavigate();
+	const { login } = useAuth();
 	const [form, setForm] = useState({
 		email: '',
 		password: '',
@@ -23,19 +25,10 @@ export default function Authentication() {
 		setError(null);
 
 		try {
-			const response = await fetch('/api/auth/login', {
-				method: 'POST',
-				credentials: 'include',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(form),
-			});
-
-			if (!response.ok) {
-				throw new Error('Login failed. Check your credentials.');
-			}
-
-			// Navigate to tickets page on success
-			navigate('/tickets');
+			const user = await login(form);
+			const destination =
+				user.roleName === 'SYSTEM_ADMIN' ? '/admin/users' : '/tickets';
+			navigate(destination, { replace: true });
 		} catch (err) {
 			setError(err.message);
 		} finally {

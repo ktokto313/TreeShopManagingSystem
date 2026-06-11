@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import {
 	fetchTicketById,
@@ -13,7 +13,7 @@ import { Select } from "../../components/ui/Select";
 import { timeFormat } from "../../utils/timeFormat";
 import { cn } from "../../utils/cn";
 import { getSelectOption } from "./data/ticketSelectList";
-import { AuthContext } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 import {
 	getTicketStatusStyles,
 	translateTicketPriority,
@@ -29,7 +29,7 @@ import { IoWarningOutline } from "react-icons/io5";
 const TicketDetail = () => {
 	const { id } = useParams();
 	const navigate = useNavigate();
-	const { user } = useContext(AuthContext);
+	const { user } = useAuth();
 
 	console.log(user);
 
