@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const FILTER_TO_STATUSES = {
     ALL: [],
@@ -19,7 +19,7 @@ export default function useFetchAllOrders() {
     const [error, setError] = useState(null);
     const debounceTimerRef = useRef(null);
 
-    const fetchOrders = useCallback(async () => {
+    const fetchOrders = async () => {
         const activeFilter = selectedFilter;
         const activeQuery = searchQuery;
         const statuses = FILTER_TO_STATUSES[activeFilter] || [];
@@ -57,14 +57,14 @@ export default function useFetchAllOrders() {
         } finally {
             setIsLoading(false);
         }
-    }, [selectedFilter, searchQuery]);
+};
 
-    const changeFilter = useCallback((newFilter) => {
+    const changeFilter = (newFilter) => {
         setSelectedFilter(newFilter);
         fetchOrders();
-    }, [fetchOrders]);
+    }
 
-    const changeSearchQuery = useCallback((newQuery) => {
+    const changeSearchQuery = (newQuery) => {
         setSearchQuery(newQuery);
 
         if (debounceTimerRef.current) {
@@ -73,10 +73,11 @@ export default function useFetchAllOrders() {
         debounceTimerRef.current = setTimeout(() => {
             fetchOrders();
         }, DEBOUNCE_MS);
-    }, [fetchOrders]);
+    };
 
     // Cleanup debounce timer on unmount
     useEffect(() => {
+        
         return () => {
             if (debounceTimerRef.current) {
                 clearTimeout(debounceTimerRef.current);

@@ -36,10 +36,6 @@ export default function OrderManagement() {
   // Compute metrics
   const totalOrders = orders.length;
 
-  const activeOrdersCount = orders.filter(o =>
-    ['PROCESSING', 'PENDING', 'DELIVERING', 'RETURN_PENDING', 'RETURNING'].includes(o.status)
-  ).length;
-
   const totalRevenue = orders.reduce((sum, order) => {
     const orderDetails = order.orderDetailList || [];
     const itemsTotal = orderDetails.reduce((iSum, item) => iSum + (Number(item.pricePaid || 0) * (item.quantity || 0)), 0);
@@ -47,8 +43,6 @@ export default function OrderManagement() {
     const discount = Number(order.discount || 0);
     return sum + Math.max(0, itemsTotal + shippingFee - discount);
   }, 0);
-
-
 
   return (
     <div className="min-h-screen flex flex-col bg-bg-base font-main">
@@ -96,7 +90,7 @@ export default function OrderManagement() {
             <div className="p-5 rounded-xl border border-border/60 bg-bg-surface/40 backdrop-blur-sm relative overflow-hidden group hover:border-interactive/40 transition-all duration-300">
               <span className="text-xs font-bold uppercase tracking-wider text-black/50">Active Deliveries</span>
               <p className="text-3xl font-black text-black mt-2">
-                {isLoading ? <Skeleton className="h-9 w-16 mt-1" /> : activeOrdersCount}
+                {isLoading ? <Skeleton className="h-9 w-16 mt-1" /> : totalOrders}
               </p>
               <div className="absolute right-4 bottom-4 text-interactive/10 group-hover:text-interactive/20 transition-all duration-300">
                 <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
