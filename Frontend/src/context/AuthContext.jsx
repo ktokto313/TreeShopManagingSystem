@@ -1,7 +1,6 @@
-import { createContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-
-export const AuthContext = createContext();
+import { AuthContext } from './AuthContext';
 
 const AUTH_STORAGE_KEYS = ['treeshop-auth-user', 'currentUser'];
 
@@ -13,6 +12,15 @@ function clearStoredAuth() {
   AUTH_STORAGE_KEYS.forEach((key) => {
     window.localStorage.removeItem(key);
   });
+}
+
+function normalizeUser(user) {
+  if (!user) {
+    return null;
+  }
+
+  const roleName = user.roleName ?? user.role ?? null;
+  return { ...user, roleName };
 }
 
 export function AuthProvider({ children }) {
@@ -31,7 +39,7 @@ export function AuthProvider({ children }) {
         });
 
         if (response.ok) {
-          const userData = await response.json();
+          const userData = normalizeUser(await response.json());
           setUser(userData);
         } else if (response.status === 401) {
           setUser(null);
@@ -49,6 +57,34 @@ export function AuthProvider({ children }) {
   }, []);
 
   const isAdmin = user?.roleName === 'SYSTEM_ADMIN';
+
+  const login = async (credentials) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+      });
+
+      if (!response.ok) {
+        throw new Error('Login failed. Check your credentials.');
+      }
+
+      const loggedInUser = normalizeUser(await response.json());
+      setUser(loggedInUser);
+      return loggedInUser;
+    } catch (err) {
+      setUser(null);
+      setError(err.message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const logout = async () => {
     const wasStaffSession =
@@ -75,7 +111,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, isLoading, error, logout }}>
+    <AuthContext.Provider value={{ user, isAdmin, isLoading, error, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

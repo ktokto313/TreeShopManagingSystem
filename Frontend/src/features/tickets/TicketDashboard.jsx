@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Select } from "../../components/ui/Select";
 import { cn } from "../../utils/cn";
 import { TicketCard } from "./TicketCard";
@@ -20,14 +20,14 @@ import useFilterAndSortTickets from "./hooks/useFilterAndSortTickets";
 import { IoWarningOutline } from "react-icons/io5";
 import { FaCheck } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 
 const TicketDashboard = ({ className }) => {
 	const navigate = useNavigate();
 
 	const { isLoading, fetchedTickets, executeFetchAllTickets } =
 		useFetchAllTickets();
-	const { user } = useContext(AuthContext);
+	const { user } = useAuth();
 
 	const isAgent = user?.roleName?.toLowerCase() === "support_agent";
 	// const isCustomer = user?.roleName?.toLowerCase() === "customer";
@@ -47,13 +47,19 @@ const TicketDashboard = ({ className }) => {
 		getFilterValue,
 	} = useFilterAndSortTickets();
 
+	const [isSelectAutoFilterSort, setIsSelectAutoFilterSort] = useState(true);
+
 	useEffect(() => {
 		if (isSelectAutoFilterSort) {
 			executeFetchAllTickets(ticketState, ticketPriority, ticketSort);
 		}
-	}, [ticketState, ticketPriority, ticketSort]);
-
-	const [isSelectAutoFilterSort, setIsSelectAutoFilterSort] = useState(true);
+	}, [
+		executeFetchAllTickets,
+		isSelectAutoFilterSort,
+		ticketPriority,
+		ticketSort,
+		ticketState,
+	]);
 
 	return (
 		<div>
