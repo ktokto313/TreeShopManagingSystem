@@ -3,7 +3,8 @@ import { fetchAllTickets } from "../data/ticketApi.js";
 
 const useFetchAllTickets = (initialTickets = []) => {
 	const [fetchedTickets, setFetchedTickets] = useState(initialTickets);
-	const [isLoading, setIsLoading] = useState(false);
+	const [isFetchAllTicketsLoading, setIsFetchAllTicketsLoading] =
+		useState(false);
 	const [fetchAllTicketsError, setFetchAllTicketsError] = useState(null);
 
 	const executeFetchAllTickets = async (
@@ -11,7 +12,7 @@ const useFetchAllTickets = (initialTickets = []) => {
 		ticketPiority,
 		ticketSort,
 	) => {
-		setIsLoading(true);
+		setIsFetchAllTicketsLoading(true);
 		setFetchAllTicketsError(null);
 
 		try {
@@ -26,12 +27,12 @@ const useFetchAllTickets = (initialTickets = []) => {
 
 			setFetchAllTicketsError(errorMessage);
 		} finally {
-			setIsLoading(false);
+			setIsFetchAllTicketsLoading(false);
 		}
 	};
 
 	return {
-		isLoading,
+		isFetchAllTicketsLoading,
 		fetchAllTicketsError,
 		fetchedTickets,
 		executeFetchAllTickets,

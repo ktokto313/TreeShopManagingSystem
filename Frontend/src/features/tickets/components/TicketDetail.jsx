@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { cn } from "../../../utils/cn";
-import { useTicketDetail } from "../hooks/useTicketDetail"; 
+import { useTicketDetail } from "../hooks/useTicketDetail";
 
 import { Container } from "../../../components/global/Container";
 import { Button } from "../../../components/ui/Button";
@@ -12,7 +12,7 @@ import { Form } from "../../../components/ui/Form";
 import { CgSpinner } from "react-icons/cg";
 import { IoWarningOutline } from "react-icons/io5";
 import { MdOutlineDangerous } from "react-icons/md";
-import sadPlant from "../assets/images/sadPlant.gif"
+import sadPlant from "../assets/images/sadPlant.gif";
 import { getSelectOption } from "../data/ticketSelectList";
 import { timeFormat } from "../../../utils/timeFormat";
 import {
@@ -22,7 +22,7 @@ import {
 } from "../utils/ticketUtils";
 
 const TicketDetail = () => {
-	const { ticketId } = useParams();
+	const { id: ticketId } = useParams();
 	const navigate = useNavigate();
 
 	const detailState = useTicketDetail(ticketId);
@@ -32,7 +32,8 @@ const TicketDetail = () => {
 		comments,
 		newCommentDetail,
 		setNewCommentDetail,
-		isLoading,
+		isFetchDetailError,
+		isFetchDetailLoading,
 		isStatusChangeLoading,
 		isCommentSubmitLoading,
 		commentTicketError,
@@ -43,7 +44,7 @@ const TicketDetail = () => {
 		isAgent,
 	} = detailState;
 
-	if (isLoading)
+	if (isFetchDetailLoading)
 		return (
 			<Container className="flex items-center justify-content-center h-screen">
 				<h1 className="flex gap-4 items-center text-3xl mx-auto w-max text-green-600">
@@ -59,7 +60,11 @@ const TicketDetail = () => {
 					className="border-5 text-2xl py-5 px-8 mx-auto rounded-full max-w-80 min-w-50 text-red-500 border-red-300"
 					style={{ boxShadow: "15px 15px 0 5px" }}
 				>
-					Không tìm thấy Ticket!
+					{isFetchDetailError ? (
+						<span>Không tìm thấy Ticket!</span>
+					) : (
+						<span>Lỗi Khi Tải Ticket</span>
+					)}
 				</h1>
 				<div
 					className="bg-bg-surface min-w-50 max-w-90 flex items-center mx-auto mt-20 justify-center rounded-full aspect-square w-[20%] p-5 text-green-500"
@@ -72,7 +77,7 @@ const TicketDetail = () => {
 					/>
 				</div>
 				<Button
-					onClick={() => navigate("/tickets")}
+					onClick={() => navigate("/tickets/dashboard")}
 					className="w-fit mb-4 hover:bg-green-400 text-2xl mx-auto block mt-20 pr-8"
 				>
 					<h2>← Quay Lại</h2>
@@ -86,7 +91,7 @@ const TicketDetail = () => {
 	return (
 		<Container className="max-w-4xl mx-auto mt-10 p-5 flex flex-col gap-6">
 			<Button
-				onClick={() => navigate("/tickets")}
+				onClick={() => navigate("/tickets/dashboard")}
 				className="w-fit mb-1 py-2 hover:bg-green-400 pr-6 text-xl"
 			>
 				← Quay Lại

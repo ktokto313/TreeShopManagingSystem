@@ -47,7 +47,6 @@ const useCreateTicket = () => {
 
         if (!title || title.trim() === "") {
             setLocalValidationError("Tiêu đề không được để trống!");
-			console.log("ASDSAD")
             return false;
         }
 

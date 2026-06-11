@@ -13,7 +13,7 @@ import { MdBlock } from "react-icons/md";
 
 export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 	const {
-		isLoading,
+		isFetchAllTicketsLoading,
 		getFilterValue,
 		handleFilterChange,
 		executeFetchAllTickets,
@@ -38,7 +38,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 		>
 			<div
 				className={cn(
-					`flex gap-2 items-center mb-1 py-4 px-4 w-full rounded-2xl bg-green-600 text-white font-semibold`,
+					`flex gap-2 items-center mb-1 py-6 px-4 w-full rounded-2xl bg-green-600 text-white font-semibold`,
 					styles.ticketFilterHeader,
 				)}
 			>
@@ -81,7 +81,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 						className={cn("flex flex-row items-center justify-center gap-2")}
 					>
 						<IoReload
-							className={cn("text-xl", { "animate-spin": isLoading })}
+							className={cn("text-xl", { "animate-spin": isFetchAllTicketsLoading })}
 						></IoReload>
 						<p className={cn(styles.reloadTicketBtnContent)}>Tải Lại</p>
 					</div>
@@ -158,7 +158,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 
 export const TicketDashboardFilterBtn = ({ dashboardState, modalButtonClasses, reloadButtonClasses, reloadButtonContentClasses }) => {
 	const {
-		isLoading,
+		isFetchAllTicketsLoading,
 		getFilterValue,
 		handleFilterChange,
 		executeFetchAllTickets,
@@ -230,7 +230,7 @@ export const TicketDashboardFilterBtn = ({ dashboardState, modalButtonClasses, r
 			>
 				<div className={cn("flex flex-row items-center justify-center gap-2"), reloadButtonContentClasses}>
 					<IoReload
-						className={cn("text-xl", { "animate-spin": isLoading })}
+						className={cn("text-xl", { "animate-spin": isFetchAllTicketsLoading })}
 					></IoReload>
 				</div>
 			</Button>
