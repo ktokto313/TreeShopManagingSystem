@@ -1,14 +1,11 @@
 package swp391.group6.service;
 
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.exception.InvalidStateTransitionException;
 import swp391.group6.model.*;
 import swp391.group6.repository.OrderRepository;
 import swp391.group6.repository.UserRepository;
-import swp391.group6.util.JWTUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +56,7 @@ public class OrderService {
         //TODO placeholder, implement this
         User user = userRepository.findByEmail(loginResponse.getEmail()).orElse(null);
         boolean changed = false;
-        if (order.getShipper() != null && user.getRole().getName().equals("SHIPPER") && order.getShipper().equals(user)) {
+        if (order.getShipper() != null && user.getRole().getName().equals("MANAGER")) {
             order.setShipper(user);
             changed = true;
         }
