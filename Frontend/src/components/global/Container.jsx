@@ -1,6 +1,6 @@
 import { cn } from '../../utils/cn'
 
-export default function Container({ className, children, ...props }) {
+export function Container({ className, children, ...props }) {
   return (
     <div
       className={cn('mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8', className)}
@@ -10,3 +10,5 @@ export default function Container({ className, children, ...props }) {
     </div>
   )
 }
+
+export default Container

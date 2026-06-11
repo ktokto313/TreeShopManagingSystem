@@ -13,7 +13,7 @@ const buttonSizes = {
   lg: 'h-11 px-5 text-base',
 }
 
-export default function Button({
+export function Button({
   variant = 'primary',
   size = 'md',
   className,
@@ -33,3 +33,5 @@ export default function Button({
     />
   )
 }
+
+export default Button
