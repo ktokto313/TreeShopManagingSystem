@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 import useFetchAllTickets from "./useFetchAllTickets";
@@ -16,13 +16,17 @@ export const useTicketDashboard = () => {
 		fetchedTickets,
 		executeFetchAllTickets,
 	} = useFetchAllTickets();
+
 	const {
 		ticketState,
 		ticketPriority,
 		ticketSort,
+		isSelectAutoFilterSort,
+		setIsSelectAutoFilterSort,
 		getFilterValue,
 		handleFilterChange,
-	} = useFilterAndSortTickets();
+	} = useFilterAndSortTickets(executeFetchAllTickets);
+
 	const {
 		ticketCreateError,
 		setTicketCreateError,
@@ -33,16 +37,10 @@ export const useTicketDashboard = () => {
 		handleCreateTicketSubmit,
 	} = useCreateTicket();
 
-	const [isSelectAutoFilterSort, setIsSelectAutoFilterSort] = useState(true);
-
 	useEffect(() => {
-		if (isSelectAutoFilterSort) {
-			executeFetchAllTickets(ticketState, ticketPriority, ticketSort);
-		}
-		// Must not put executeFetchAllTickets inside of the dependencies to avoid infinite looping
-
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ticketState, ticketPriority, ticketSort, isSelectAutoFilterSort]);
+		executeFetchAllTickets();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []); 
 
 	return {
 		// UI State
@@ -60,6 +58,7 @@ export const useTicketDashboard = () => {
 		ticketState,
 		ticketPriority,
 		ticketSort,
+		isSelectAutoFilterSort,
 		getFilterValue,
 		handleFilterChange,
 		setIsSelectAutoFilterSort,
