@@ -42,7 +42,7 @@ public class TicketController {
     public ResponseEntity<List<Ticket>> getAuthorizedTickets(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String priority,
-            @RequestParam(required = false) Sort sort,
+            Sort sort, // Since the system doesn't know what to do with a comma, I leave it without RequestParam for now.
             HttpServletRequest request) {
 
         LoginResponse currentUser = JWTUtil.getUser(request);
