@@ -30,19 +30,19 @@ public class JWTUtil {
         if (secret != null && !secret.isBlank()) {
             algorithm = Algorithm.HMAC256(secret);
         }
-        
+
         String issuer = System.getenv("JWT_ISSUER");
         if (issuer != null && !issuer.isBlank()) {
             jwtIssuer = issuer;
         }
-        
+
         String lifetimeEnv = System.getenv("JWT_LIFETIME");
         if (lifetimeEnv != null) {
             try {
                 lifetime = Long.parseLong(lifetimeEnv);
             } catch (Exception ignored) {}
         }
-        
+
         String name = System.getenv("JWT_COOKIE_NAME");
         if (name != null && !name.isBlank()) {
             cookieName = name;
