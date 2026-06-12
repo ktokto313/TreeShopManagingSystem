@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Container from '../components/global/Container'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
@@ -51,10 +51,14 @@ function getPageNumbers(currentPage, totalPages) {
 
 export default function CatalogPage() {
   const navigate = useNavigate()
+  const { categoryId: routeCategoryId } = useParams()
   const { logout, isAuthenticated, canManage } = useAuth()
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
-  const [filters, setFilters] = useState(emptyFilters)
+  const [filters, setFilters] = useState(() => ({
+    ...emptyFilters,
+    categoryId: routeCategoryId ?? '',
+  }))
   const [showFilters, setShowFilters] = useState(true)
   const [notice, setNotice] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
@@ -98,11 +102,29 @@ export default function CatalogPage() {
     setFilters((current) => ({ ...current, [name]: value }))
   }
 
+  function selectCategory(categoryId) {
+    const nextCategoryId = String(categoryId ?? '')
+    setCurrentPage(1)
+    setFilters((current) => ({ ...current, categoryId: nextCategoryId }))
+    navigate(nextCategoryId ? `/catalog/category/${nextCategoryId}` : '/catalog')
+  }
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadCatalogData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    const nextCategoryId = routeCategoryId ?? ''
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFilters((current) => (
+      String(current.categoryId) === String(nextCategoryId)
+        ? current
+        : { ...current, categoryId: nextCategoryId }
+    ))
+    setCurrentPage(1)
+  }, [routeCategoryId])
 
   const categoryLookup = useMemo(
     () => new Map(categories.map((category) => [String(category.id), category.name])),
@@ -145,10 +167,14 @@ export default function CatalogPage() {
   }, [categories, productsWithCategoryName])
 
   const pageNumbers = getPageNumbers(effectiveCurrentPage, totalPages)
+  const selectedCategory = categories.find(
+    (category) => String(category.id) === String(filters.categoryId),
+  )
 
   function clearFilters() {
     setFilters(emptyFilters)
     setCurrentPage(1)
+    navigate('/catalog')
   }
 
   function openDetail(product) {
@@ -173,11 +199,14 @@ export default function CatalogPage() {
           <div className="space-y-6">
             <div className="space-y-4">
               <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-[var(--text-h)] sm:text-5xl">
-                Khám phá cây xanh phù hợp cho nhà ở, bàn làm việc và góc thư giãn
+                {selectedCategory
+                  ? `Danh mục ${selectedCategory.name}`
+                  : 'Khám phá cây xanh phù hợp cho nhà ở, bàn làm việc và góc thư giãn'}
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-[var(--text)]">
-                Tìm cây theo nhu cầu, xem ảnh và mở chi tiết khi muốn biết thêm mô tả, biến thể
-                hoặc thông tin mua hàng.
+                {selectedCategory
+                  ? `Đang xem ${visibleProducts.length} sản phẩm thuộc danh mục ${selectedCategory.name}.`
+                  : 'Tìm cây theo nhu cầu, xem ảnh và mở chi tiết khi muốn biết thêm mô tả, biến thể hoặc thông tin mua hàng.'}
               </p>
             </div>
 
@@ -210,7 +239,7 @@ export default function CatalogPage() {
                 <Select
                   label="Danh mục"
                   value={filters.categoryId}
-                  onChange={(event) => updateFilter('categoryId', event.target.value)}
+                  onChange={(event) => selectCategory(event.target.value)}
                   options={[
                     { value: '', label: 'Tất cả danh mục' },
                     ...categories.map((category) => ({
@@ -273,7 +302,7 @@ export default function CatalogPage() {
                       }
                       size="sm"
                       onClick={() =>
-                        updateFilter('categoryId', String(category.id ?? ''))
+                        selectCategory(category.id ?? '')
                       }
                     >
                       {toChipText(category)}
@@ -298,7 +327,7 @@ export default function CatalogPage() {
                       }
                       size="sm"
                       onClick={() =>
-                        updateFilter('categoryId', String(category.id ?? ''))
+                        selectCategory(category.id ?? '')
                       }
                     >
                       {toChipText(category)}
@@ -337,6 +366,7 @@ export default function CatalogPage() {
                     categoryName={product.categoryName}
                     onOpen={openDetail}
                     onEdit={canManage ? openEditProduct : undefined}
+                    onCategoryOpen={selectCategory}
                     onAdd={previewAddToCart}
                   />
                 ))}
