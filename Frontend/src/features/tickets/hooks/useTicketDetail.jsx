@@ -81,7 +81,9 @@ export const useTicketDetail = (ticketId) => {
 	useEffect(() => {
 		if (!ticketId) {
 			dispatch({ type: "FETCH_ERROR" });
+			return;
 		}
+
 		const loadData = async () => {
 			dispatch({ type: "FETCH_START" });
 			try {
@@ -98,6 +100,7 @@ export const useTicketDetail = (ticketId) => {
 				dispatch({ type: "FETCH_ERROR" });
 			}
 		};
+		
 		loadData();
 	}, [ticketId]);
 
