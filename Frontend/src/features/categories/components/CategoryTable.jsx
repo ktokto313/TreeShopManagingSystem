@@ -9,7 +9,7 @@ export default function CategoryTable({ categories = [], onEdit, onDelete }) {
           <tr>
             <th className="px-4 py-3 font-medium">Tên</th>
             <th className="px-4 py-3 font-medium">Mô tả</th>
-            <th className="px-4 py-3 font-medium">Danh mục cha</th>
+            <th className="px-4 py-3 font-medium">Sản phẩm</th>
             <th className="px-4 py-3 text-right font-medium">Thao tác</th>
           </tr>
         </thead>
@@ -17,8 +17,12 @@ export default function CategoryTable({ categories = [], onEdit, onDelete }) {
           {categories.map((category) => (
             <tr key={category.id}>
               <td className="px-4 py-3 font-medium text-[var(--text-h)]">{category.name}</td>
-              <td className="px-4 py-3">{category.description}</td>
-              <td className="px-4 py-3">{category.parentId || '-'}</td>
+              <td className="px-4 py-3">{category.description || '-'}</td>
+              <td className="px-4 py-3">
+                <span className="rounded-full bg-[var(--social-bg)] px-3 py-1 text-xs font-medium text-[var(--text-h)]">
+                  {Number(category.productCount ?? 0)} sản phẩm
+                </span>
+              </td>
               <td className="px-4 py-3">
                 <div className="flex justify-end gap-2">
                   <Button variant="secondary" size="sm" onClick={() => onEdit?.(category)}>
