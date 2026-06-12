@@ -86,6 +86,11 @@ export default function ProductDetailPage() {
   const imageKey = productImages.join('|')
   const imagePreview = productImages[activeImageIndex] || productImages[0]
   const availability = getProductAvailability(product)
+  const categoryValue = product?.categoryId ? (
+    <Link className="text-[var(--accent)] hover:underline" to={`/catalog/category/${product.categoryId}`}>
+      {categoryName}
+    </Link>
+  ) : categoryName
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -143,6 +148,15 @@ export default function ProductDetailPage() {
                 imageClassName="max-h-full max-w-full rounded-2xl object-contain"
               />
 
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[var(--social-bg)] px-4 py-3 text-sm text-[var(--text)]">
+                <span>
+                  {productImages.length
+                    ? `Ảnh ${activeImageIndex + 1} / ${productImages.length}`
+                    : 'Sản phẩm chưa có ảnh riêng.'}
+                </span>
+                <span className="font-medium text-[var(--text-h)]">{availability.helper}</span>
+              </div>
+
               {productImages.length > 1 ? (
                 <div className="grid grid-cols-4 gap-3 sm:grid-cols-5">
                   {productImages.map((imageSource, index) => (
@@ -168,7 +182,7 @@ export default function ProductDetailPage() {
               ) : null}
 
               <div className="grid gap-3 sm:grid-cols-2">
-                <InfoBox label="Danh mục" value={categoryName} />
+                <InfoBox label="Danh mục" value={categoryValue} />
                 <InfoBox label="Giá" value={formatCurrency(product.price)} />
                 <InfoBox label="Tồn kho" value={`${product.stock ?? 0} - ${availability.label}`} />
                 <InfoBox label="Biến thể" value={`${variantGroups.length} nhóm`} />
