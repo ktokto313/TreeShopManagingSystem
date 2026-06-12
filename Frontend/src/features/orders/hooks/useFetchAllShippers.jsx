@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 /**
  * Fetches all users with the SHIPPER role from the API.
@@ -36,10 +36,6 @@ export default function useFetchAllShippers() {
             setIsLoading(false);
         }
     };
-
-    useEffect(() => {
-        fetchShippers();
-    }, []);
 
     return {
         shippers,

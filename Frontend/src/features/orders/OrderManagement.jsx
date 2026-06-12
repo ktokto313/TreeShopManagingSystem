@@ -31,7 +31,7 @@ export default function OrderManagement() {
 
   useEffect(() => {
     fetchOrders();
-  }, [fetchOrders]);
+  }, []);
 
   // Compute metrics
   const totalOrders = orders.length;
