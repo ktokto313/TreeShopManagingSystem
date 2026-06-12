@@ -39,7 +39,7 @@ const emptyProductForm = {
   images: [],
   imageFiles: [],
 }
-const emptyFilters = { keyword: '', categoryId: '', status: '' }
+const emptyFilters = { keyword: '', categoryId: '', status: '', stockState: '' }
 const SKU_PATTERN = /^[A-Za-z0-9_-]+$/
 const MAX_IMAGE_FILES = 5
 const MAX_IMAGE_FILE_SIZE = 5 * 1024 * 1024
@@ -133,8 +133,8 @@ function validateProductForm(values) {
 
   if (price === null || Number.isNaN(price)) {
     errors.price = 'Vui lòng nhập giá hợp lệ.'
-  } else if (price < 0) {
-    errors.price = 'Giá không được âm.'
+  } else if (price <= 0) {
+    errors.price = 'Giá phải lớn hơn 0.'
   }
 
   if (stock === null || Number.isNaN(stock)) {
@@ -178,6 +178,18 @@ function parseImageList(value) {
   }
 }
 
+function toProductApiFilters(filters) {
+  return {
+    keyword: filters.keyword,
+    categoryId: filters.categoryId,
+    status: filters.status,
+  }
+}
+
+function isOutOfStockProduct(product) {
+  return Number(product?.stock ?? 0) <= 0 || product?.status === false
+}
+
 export default function ManagementPage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -215,6 +227,14 @@ export default function ManagementPage() {
     }))
   }, [products, categoryLookup])
 
+  const filteredProductsWithCategoryName = useMemo(() => {
+    if (filters.stockState !== 'out-of-stock') {
+      return productsWithCategoryName
+    }
+
+    return productsWithCategoryName.filter(isOutOfStockProduct)
+  }, [filters.stockState, productsWithCategoryName])
+
   async function loadInitialData() {
     setNotice('')
 
@@ -244,7 +264,7 @@ export default function ManagementPage() {
 
   async function loadProducts(nextFilters = filters) {
     try {
-      const productData = await getProducts(nextFilters)
+      const productData = await getProducts(toProductApiFilters(nextFilters))
       setProducts(Array.isArray(productData) ? productData : [])
     } catch (error) {
       if (handleAuthError(error)) {
@@ -568,7 +588,9 @@ export default function ManagementPage() {
                 <div className="space-y-1">
                   <h2 className="text-xl font-semibold text-[var(--text-h)]">Bộ lọc sản phẩm</h2>
                 </div>
-                <span className="text-sm text-[var(--text)]">{products.length} hàng</span>
+                <span className="text-sm text-[var(--text)]">
+                  {filteredProductsWithCategoryName.length} / {products.length} hàng
+                </span>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -615,6 +637,16 @@ export default function ManagementPage() {
                   <option value="true">Đang hoạt động</option>
                   <option value="false">Đã ẩn</option>
                 </select>
+                <select
+                  value={filters.stockState}
+                  onChange={(event) =>
+                    setFilters((current) => ({ ...current, stockState: event.target.value }))
+                  }
+                  className="h-10 w-full rounded-md border border-[var(--border)] bg-white px-3 text-sm text-[var(--text-h)] outline-none"
+                >
+                  <option value="">Tất cả tồn kho</option>
+                  <option value="out-of-stock">Hết hàng / đã ẩn</option>
+                </select>
                 <div className="flex gap-2">
                   <Button type="submit">Áp dụng</Button>
                   <Button type="button" variant="secondary" onClick={clearFilters}>
@@ -633,7 +665,7 @@ export default function ManagementPage() {
               </div>
 
               <ProductTable
-                products={productsWithCategoryName}
+                products={filteredProductsWithCategoryName}
                 onEdit={openEditProductModal}
                 onDeactivate={deactivateSelectedProduct}
               />
