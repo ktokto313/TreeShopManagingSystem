@@ -17,6 +17,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
                or lower(coalesce(u.phone, '')) like lower(concat('%', :query, '%'))
             """)
     List<User> search(@Param("query") String query);
+    
+    List<User> findByRole_Name(String roleName);
 
     Optional<User> findByEmail(String email);
 

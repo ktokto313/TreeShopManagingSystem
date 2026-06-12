@@ -2,6 +2,7 @@ package swp391.group6.service;
 
 import org.springframework.stereotype.Service;
 import swp391.group6.dto.LoginResponse;
+import swp391.group6.dto.OrderDTO;
 import swp391.group6.exception.InvalidStateTransitionException;
 import swp391.group6.model.*;
 import swp391.group6.repository.OrderRepository;
@@ -64,20 +65,27 @@ public class OrderService {
         return true;
     }
 
-    public boolean changeOrder(LoginResponse loginResponse, long id, Order order) {
-        //TODO placeholder, implement this
+    public boolean changeOrder(LoginResponse loginResponse, long id, OrderDTO order) {
         User user = userRepository.findByEmail(loginResponse.getEmail()).orElse(null);
-        boolean changed = false;
-        if (order.getShipper() != null && user.getRole().getName().equals("MANAGER")) {
-            order.setShipper(user);
-            changed = true;
+        if (user == null || !user.getRole().getName().equals("MANAGER")) {
+            return false;
         }
-
-        if (changed) {
-            orderRepository.save(order);
+        Order existingOrder = orderRepository.findById(id).orElse(null);
+        if (existingOrder == null) {
+            return false;
         }
-
-        return changed;
+        if (order.getShipperId() > 0) {
+            User newShipper = userRepository.findById(order.getShipperId()).orElse(null);
+            if (newShipper != null) {
+                existingOrder.setShipper(newShipper);
+                if (existingOrder.getStatus() == OrderStatus.PROCESSING) {
+                    tryToChangeState(existingOrder, user, OrderStatus.PENDING);
+                }
+                orderRepository.save(existingOrder);
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean changeOrderStatus(long id, OrderStatus orderStatus, LoginResponse loginResponse) {

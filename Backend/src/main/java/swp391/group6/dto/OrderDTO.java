@@ -12,26 +12,28 @@ public class OrderDTO {
 
     private long id;
     private String customerName;
+    private Long shipperId;
     private String shipperName;
     private String shippingAddress;
     private BigDecimal shippingFee;
     private BigDecimal discount;
     private Timestamp createdAt;
     private OrderStatus status;
-    private List<OrderDetail> orderDetailList;
+//    private List<OrderDetail> orderDetailList;
 
     public OrderDTO() {}
 
     public OrderDTO(Order order) {
         this.id = order.getId();
         this.customerName = order.getUser() != null ? order.getUser().getFullName() : null;
+        this.shipperId = order.getShipper() != null ? order.getShipper().getId() : null;
         this.shipperName = order.getShipper() != null ? order.getShipper().getFullName() : null;
         this.shippingAddress = order.getShippingAddress();
         this.shippingFee = order.getShippingFee();
         this.discount = order.getDiscount();
         this.createdAt = order.getCreatedAt();
         this.status = order.getStatus();
-        this.orderDetailList = order.getOrderDetailList();
+//        this.orderDetailList = order.getOrderDetailList();
     }
 
     public long getId() { return id; }
@@ -39,6 +41,14 @@ public class OrderDTO {
 
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
+
+    public Long getShipperId() {
+        return shipperId;
+    }
+
+    public void setShipperId(long shipperId) {
+        this.shipperId = shipperId;
+    }
 
     public String getShipperName() { return shipperName; }
     public void setShipperName(String shipperName) { this.shipperName = shipperName; }
@@ -58,6 +68,6 @@ public class OrderDTO {
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }
 
-    public List<OrderDetail> getOrderDetailList() { return orderDetailList; }
-    public void setOrderDetailList(List<OrderDetail> orderDetailList) { this.orderDetailList = orderDetailList; }
+//    public List<OrderDetail> getOrderDetailList() { return orderDetailList; }
+//    public void setOrderDetailList(List<OrderDetail> orderDetailList) { this.orderDetailList = orderDetailList; }
 }
