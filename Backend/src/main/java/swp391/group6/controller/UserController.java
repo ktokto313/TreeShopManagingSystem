@@ -112,14 +112,49 @@ public class UserController {
 
         String role = currentUser.getRole();
 
-        if (!"SYSTEM_ADMIN".equalsIgnoreCase(role)
-                && !"MANAGER".equalsIgnoreCase(role)) {
+        boolean isOwnProfile = userService.getUserByEmailUnprotected(currentUser.getEmail())
+                .map(u -> u.getId() == id)
+                .orElse(false);
+
+        boolean canManageUsers = "SYSTEM_ADMIN".equalsIgnoreCase(role)
+                || "MANAGER".equalsIgnoreCase(role);
+        if (!isOwnProfile && !canManageUsers) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        UserDTO updatedUser = userService.updateUser(id, userDTO);
-        if (updatedUser == null) {
-            return ResponseEntity.notFound().build();
+        try {
+            UserDTO updatedUser = isOwnProfile
+                    ? userService.updateOwnProfile(id, userDTO)
+                    : userService.updateUser(id, userDTO);
+            if (updatedUser == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(updatedUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserDTO> updateMyProfile(@RequestBody UserDTO userDTO,
+                                                   HttpServletRequest request) {
+        LoginResponse currentUser = JWTUtil.getUser(request);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            UserDTO updatedUser = userService.getUserByEmailUnprotected(currentUser.getEmail())
+                    .map(u -> userService.updateOwnProfile(u.getId(), userDTO))
+                    .orElse(null);
+
+            if (updatedUser == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(updatedUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
 
         return ResponseEntity.ok(updatedUser);
