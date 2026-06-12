@@ -7,7 +7,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "categories")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Category {
 
     @Id
