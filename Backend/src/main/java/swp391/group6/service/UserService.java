@@ -17,6 +17,7 @@ import swp391.group6.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +25,8 @@ public class UserService {
 
     private static final String DEFAULT_ROLE_NAME = "CUSTOMER";
     private static final String PROTECTED_ROLE_NAME = "SYSTEM_ADMIN";
+    private static final Pattern EMAIL_PATTERN =
+            Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -49,6 +52,8 @@ public class UserService {
     public UserDTO createUser(UserDTO userDTO) {
         validateUserForCreate(userDTO);
         User user = convertToEntity(userDTO);
+        user.setEmail(userDTO.getEmail().trim());
+        user.setRole(resolveRole(userDTO.getRoleName()));
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         User savedUser = userRepository.save(user);
         return convertToDTO(savedUser);
@@ -58,31 +63,56 @@ public class UserService {
         if (userDTO == null) {
             throw new IllegalArgumentException("User data is required");
         }
-        if (userDTO.getEmail() == null || userDTO.getEmail().isBlank()) {
-            throw new IllegalArgumentException("Email is required");
+        if (userDTO.getEmail() == null
+                || !EMAIL_PATTERN.matcher(userDTO.getEmail().trim()).matches()) {
+            throw new IllegalArgumentException("A valid email is required");
         }
         if (userDTO.getPassword() == null || userDTO.getPassword().isBlank()) {
             throw new IllegalArgumentException("Password is required");
         }
+        if (userRepository.findByEmail(userDTO.getEmail().trim()).isPresent()) {
+            throw new IllegalArgumentException("Email is already in use");
+        }
     }
 
     public UserDTO updateUser(long id, UserDTO userDTO) {
-        Optional<User> existingUser = userRepository.findById(id);
-        if (existingUser.isPresent()) {
-            User user = existingUser.get();
-            if (userDTO.getEmail() != null) user.setEmail(userDTO.getEmail());
-            if (userDTO.getPassword() != null) user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-            if (userDTO.getFullName() != null) user.setFullName(userDTO.getFullName());
-            if (userDTO.getPhone() != null) user.setPhone(userDTO.getPhone());
+        if (userDTO == null) throw new IllegalArgumentException("User data is required");
 
-            if (userDTO.getStatus() != null) {
-                user.setStatus(userDTO.getStatus());
-            }
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null || hasRole(user, PROTECTED_ROLE_NAME)) return null;
 
-            User updatedUser = userRepository.save(user);
-            return convertToDTO(updatedUser);
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isBlank())
+            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        if (userDTO.getFullName() != null) user.setFullName(userDTO.getFullName());
+        if (userDTO.getPhone() != null) user.setPhone(userDTO.getPhone());
+        if (userDTO.getRoleName() != null && !userDTO.getRoleName().isBlank())
+            user.setRole(resolveRole(userDTO.getRoleName()));
+        if (userDTO.getStatus() != null) user.setStatus(userDTO.getStatus());
+
+        return convertToDTO(userRepository.save(user));
+    }
+
+    public UserDTO updateOwnProfile(long id, UserDTO userDTO) {
+        if (userDTO == null) {
+            throw new IllegalArgumentException("User data is required");
         }
-        return null;
+
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            return null;
+        }
+
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        }
+        if (userDTO.getFullName() != null) {
+            user.setFullName(userDTO.getFullName());
+        }
+        if (userDTO.getPhone() != null) {
+            user.setPhone(userDTO.getPhone());
+        }
+
+        return convertToDTO(userRepository.save(user));
     }
 
     public boolean deleteUser(long id) {
@@ -139,7 +169,6 @@ public class UserService {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
         dto.setEmail(user.getEmail());
-        dto.setPassword(user.getPassword());
         dto.setFullName(user.getFullName());
         dto.setPhone(user.getPhone());
         dto.setHasPassword(user.getPassword() != null && !user.getPassword().isBlank());

@@ -13,6 +13,9 @@ import java.time.Instant;
 
 @Component
 public class JWTUtil {
+    public static final String CURRENT_USER_ATTRIBUTE =
+            JWTUtil.class.getName() + ".currentUser";
+
     //TODO: remove hardcode value when migrate to docker
     private static Algorithm algorithm = Algorithm.HMAC256("a-string-for-testing");
     private static String jwtIssuer = "a";
@@ -64,13 +67,25 @@ public class JWTUtil {
     }
 
     public static LoginResponse getUser(HttpServletRequest request) {
-        DecodedJWT decodedJWT = (DecodedJWT) request.getAttribute(cookieName);
+        Object currentUser = request.getAttribute(CURRENT_USER_ATTRIBUTE);
+        if (currentUser instanceof LoginResponse loginResponse) {
+            return loginResponse;
+        }
+
+        Object jwtAttribute = request.getAttribute(cookieName);
+        if (!(jwtAttribute instanceof DecodedJWT decodedJWT)) {
+            return null;
+        }
+
+        return getUser(decodedJWT);
+    }
+
+    public static LoginResponse getUser(DecodedJWT decodedJWT) {
         try {
             Claim claim = decodedJWT.getClaim("user");
 
             return JacksonUtil.parseJSONToObject(claim.asString(), LoginResponse.class);
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
     }
