@@ -7,6 +7,7 @@ import swp391.group6.dto.CategoryRequest;
 import swp391.group6.dto.CategoryResponse;
 import swp391.group6.model.Category;
 import swp391.group6.repository.CategoryRepository;
+import swp391.group6.repository.ProductRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,9 +18,11 @@ public class CategoryService {
     private static final int MAX_DESCRIPTION_LENGTH = 1000;
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, ProductRepository productRepository) {
         this.categoryRepository = categoryRepository;
+        this.productRepository = productRepository;
     }
 
     public List<CategoryResponse> listCategories() {
@@ -78,7 +81,7 @@ public class CategoryService {
      */
     public boolean deleteCategory(Long id) {
         Optional<Category> existing = categoryRepository.findById(id);
-        if (existing.isEmpty() || !existing.get().getProductList().isEmpty()) {
+        if (existing.isEmpty() || productRepository.existsByCategoryId(id)) {
             return false;
         }
         categoryRepository.delete(existing.get());
@@ -90,6 +93,7 @@ public class CategoryService {
         response.setId(category.getId());
         response.setName(category.getName());
         response.setDescription(category.getDescription());
+        response.setProductCount(productRepository.countByCategoryId(category.getId()));
         return response;
     }
 

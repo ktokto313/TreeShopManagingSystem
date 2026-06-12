@@ -5,6 +5,7 @@ public class CategoryResponse {
     private Long id;
     private String name;
     private String description;
+    private long productCount;
 
     public Long getId() {
         return id;
@@ -28,5 +29,13 @@ public class CategoryResponse {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public long getProductCount() {
+        return productCount;
+    }
+
+    public void setProductCount(long productCount) {
+        this.productCount = productCount;
     }
 }
