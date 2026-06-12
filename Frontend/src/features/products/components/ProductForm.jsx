@@ -74,7 +74,7 @@ export default function ProductForm({
           name="price"
           type="number"
           required
-          min="0"
+          min="1"
           step="1"
           value={values.price}
           error={errors.price}
