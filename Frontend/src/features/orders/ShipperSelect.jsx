@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Select } from '../../components/ui/Select';
 import useFetchAllShippers from './hooks/useFetchAllShippers';
 
@@ -8,7 +9,11 @@ import useFetchAllShippers from './hooks/useFetchAllShippers';
  * @param {{ value: string|number, onChange: (shipperId: string) => void, disabled?: boolean }} props
  */
 export default function ShipperSelect({ value, onChange, disabled = false }) {
-    const { shippers, isLoading, error } = useFetchAllShippers();
+    const { shippers, isLoading, error, fetchShippers } = useFetchAllShippers();
+
+    useEffect(() => {
+        fetchShippers();
+    }, []);
 
     const options = [
         { value: '', label: isLoading ? 'Loading shippers...' : 'Unassigned' },
