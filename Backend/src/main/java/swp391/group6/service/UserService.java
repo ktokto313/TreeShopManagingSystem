@@ -110,7 +110,13 @@ public class UserService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-
+    
+    public List<UserDTO> searchUsersByRole(String roleName) {
+        return userRepository.findByRole_Name(roleName).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+    
     public Optional<UserDTO> getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .map(this::convertToDTO);

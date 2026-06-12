@@ -7,9 +7,11 @@ import org.antlr.v4.runtime.atn.SemanticContext;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.dto.OrderDTO;
 import swp391.group6.dto.OrderListDTO;
+import swp391.group6.exception.InvalidStateTransitionException;
 import swp391.group6.model.Order;
 import swp391.group6.model.OrderStatus;
 import swp391.group6.model.ShoppingCart;
@@ -63,10 +65,14 @@ public class OrderController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Void> changeOrder(HttpServletRequest request, @PathVariable long id, @RequestBody Order order) {
+    public ResponseEntity<Void> changeOrder(HttpServletRequest request, @PathVariable long id, @RequestBody OrderDTO order) {
         LoginResponse loginResponse = JWTUtil.getUser(request);
-        if (!orderService.changeOrder(loginResponse, id, order)) {
-            return ResponseEntity.badRequest().build();
+        try {
+            if (!orderService.changeOrder(loginResponse, id, order)) {
+                return ResponseEntity.badRequest().build();
+            }
+        } catch (InvalidStateTransitionException e) {
+            return ResponseEntity.status(403).build();
         }
 
         return ResponseEntity.ok().build();

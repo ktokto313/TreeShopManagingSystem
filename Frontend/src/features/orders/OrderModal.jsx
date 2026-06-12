@@ -3,34 +3,67 @@ import { Button } from "../../components/ui/Button";
 import { timeFormat } from "../../utils/timeFormat";
 import ShipperSelect from "./ShipperSelect";
 import ORDER_STATUS_MAP from "./data/orderStatusMap";
+import useUpdateShipper from "./hooks/useUpdateShipper";
+import useFetchOrderDetail from "./hooks/useFetchOrderDetail";
+import { useEffect } from "react";
 
 /**
- * @param {{ selectedOrder: object|null, onClose: () => void }} props
+ * @param {{ selectedOrderId: number|string|null, onClose: () => void, onOrderChange?: () => void|Promise<void> }} props
  */
-export default function OrderModal({ selectedOrder, onClose }) {
-    if (!selectedOrder) return null;
+export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) {
+  const {
+    orderDetail,
+    isLoading: isDetailLoading,
+    error: detailError,
+    fetchOrderDetail,
+  } = useFetchOrderDetail();
+  const {
+    updateShipper,
+    isLoading: isUpdatingShipper,
+    error: updateError,
+  } = useUpdateShipper();
 
-    const details = selectedOrder.orderDetailList || [];
-    const itemsTotal = details.reduce((sum, item) => sum + (Number(item.pricePaid || 0) * (item.quantity || 0)), 0);
-    const shippingFee = Number(selectedOrder.shippingFee || 0);
-    const discount = Number(selectedOrder.discount || 0);
-    const finalTotal = Math.max(0, itemsTotal + shippingFee - discount);
+  useEffect(() => {
+    fetchOrderDetail(selectedOrderId);
+  }, [selectedOrderId]);
 
-    const statusConfig = ORDER_STATUS_MAP[selectedOrder.status];
+  if (!selectedOrderId) return null;
 
-    return (
-      <Modal
-        isOpen={!!selectedOrder}
-        onClose={onClose}
-        title={`Order Details - #ORD-${selectedOrder.id}`}
-      >
+  const selectedOrder = orderDetail;
+  const details = selectedOrder?.orderDetailList || [];
+  const itemsTotal = details.reduce((sum, item) => sum + (Number(item.pricePaid || 0) * (item.quantity || 0)), 0);
+  const shippingFee = Number(selectedOrder?.shippingFee || 0);
+  const discount = Number(selectedOrder?.discount || 0);
+  const finalTotal = Math.max(0, itemsTotal + shippingFee - discount);
+
+  const statusConfig = ORDER_STATUS_MAP[selectedOrder?.status];
+
+  return (
+    <Modal
+      isOpen={!!selectedOrderId}
+      onClose={onClose}
+      title={`Order Details - #ORD-${selectedOrder?.id || selectedOrderId}`}
+    >
+      {isDetailLoading && (
+        <div className="py-8 text-center text-sm font-semibold text-black/60">
+          Loading order details...
+        </div>
+      )}
+
+      {!isDetailLoading && detailError && (
+        <div className="p-4 rounded-lg border border-red-500/20 bg-red-500/5 text-sm text-red-600">
+          {detailError === 'UNAUTHORIZED' ? 'Authentication required to view this order.' : detailError}
+        </div>
+      )}
+
+      {!isDetailLoading && !detailError && selectedOrder && (
         <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
           {/* Status Banner */}
           <div className="rounded-lg bg-interactive/10 p-3 flex items-center justify-between border border-interactive/20">
             <div>
               <span className="text-[10px] uppercase font-bold text-black/55">Status</span>
-              <p className={`text-sm font-bold mt-0.5 ${statusConfig.bg} px-2 py-0.5 rounded-full inline-block`}>
-                {statusConfig.label}
+              <p className={`text-sm font-bold mt-0.5 ${statusConfig?.bg || ''} px-2 py-0.5 rounded-full inline-block`}>
+                {statusConfig?.label || selectedOrder.status}
               </p>
             </div>
             <div className="text-right">
@@ -43,11 +76,19 @@ export default function OrderModal({ selectedOrder, onClose }) {
           <div className="p-3 rounded-lg bg-bg-base border border-border/55">
             <ShipperSelect
               value={selectedOrder.shipperId ?? ''}
-              onChange={(shipperId) => {
-                // TODO: wire up to an API call to update the order's shipper
-                console.log(`Assign shipper ${shipperId} to order ${selectedOrder.id}`);
+              selectedShipperName={selectedOrder.shipperName}
+              onChange={async (shipperId) => {
+                const didUpdate = await updateShipper(selectedOrder.id, shipperId);
+                if (didUpdate) {
+                  fetchOrderDetail(selectedOrderId);
+                  onOrderChange();
+                }
               }}
+              disabled={isUpdatingShipper}
             />
+            {updateError && (
+              <p className="text-red-500 text-xs mt-1">{updateError}</p>
+            )}
           </div>
 
           {/* Items Section */}
@@ -124,6 +165,7 @@ export default function OrderModal({ selectedOrder, onClose }) {
             </Button>
           </div>
         </div>
-      </Modal>
-    );
+      )}
+    </Modal>
+  );
 }
