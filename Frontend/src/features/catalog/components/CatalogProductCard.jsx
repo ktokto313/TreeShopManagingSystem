@@ -7,7 +7,14 @@ import { getProductAvailability } from '../../products/utils/productAvailability
 import { resolveProductImageSource } from '../../products/utils/productImageResolver'
 import { formatCurrency, parseCatalogImages } from '../utils/catalogUtils'
 
-export default function CatalogProductCard({ product, categoryName, onOpen, onEdit, onAdd }) {
+export default function CatalogProductCard({
+  product,
+  categoryName,
+  onOpen,
+  onEdit,
+  onCategoryOpen,
+  onAdd,
+}) {
   const images = parseCatalogImages(product.images)
   const imagePreview = resolveProductImageSource(images[0])
   const availability = getProductAvailability(product)
@@ -31,9 +38,15 @@ export default function CatalogProductCard({ product, categoryName, onOpen, onEd
       </div>
 
       <div className="flex flex-wrap gap-2 text-xs text-[var(--text)]">
-        <Badge status="active" className="bg-emerald-100 text-emerald-700">
-          {categoryName || `Danh mục ${product.categoryId ?? ''}`}
-        </Badge>
+        <button
+          type="button"
+          className="text-left"
+          onClick={() => onCategoryOpen?.(product.categoryId)}
+        >
+          <Badge status="active" className="bg-emerald-100 text-emerald-700">
+            {categoryName || `Danh mục ${product.categoryId ?? ''}`}
+          </Badge>
+        </button>
       </div>
 
       <div className="grid gap-2 rounded-2xl bg-[var(--social-bg)] px-4 py-3 text-sm text-[var(--text-h)]">
