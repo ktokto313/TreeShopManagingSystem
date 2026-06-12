@@ -31,7 +31,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 	return (
 		<div
 			className={cn(
-				"flex flex-col justify-start gap-4 bg-white border-2 border-border rounded-2xl h-fit",
+				"flex flex-col justify-start gap-4 bg-white border-2 border-border rounded-2xl h-fit sticky top-0",
 				styles.ticketSelectList,
 				classNames,
 			)}
