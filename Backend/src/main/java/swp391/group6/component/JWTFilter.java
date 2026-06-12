@@ -12,6 +12,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import swp391.group6.dto.LoginResponse;
+import swp391.group6.model.User;
+import swp391.group6.repository.UserRepository;
 import swp391.group6.util.CookieUtil;
 import swp391.group6.util.JWTUtil;
 import swp391.group6.util.ResponseUtil;
@@ -21,8 +24,14 @@ import java.io.IOException;
 @Order(1)
 @Component
 public class JWTFilter extends OncePerRequestFilter {
+    private final UserRepository userRepository;
+
     @Value("${jwt.cookie.name}")
     private String cookieName;
+
+    public JWTFilter(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @PostConstruct
     public void init() {
@@ -51,7 +60,29 @@ public class JWTFilter extends OncePerRequestFilter {
 
         try {
             DecodedJWT decodedJWT = JWTUtil.verify(cookie.getValue());
+            LoginResponse tokenUser = JWTUtil.getUser(decodedJWT);
+            if (tokenUser == null || tokenUser.getEmail() == null) {
+                ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
+                return;
+            }
+
+            User user = userRepository.findByEmail(tokenUser.getEmail())
+                    .filter(User::isStatus)
+                    .orElse(null);
+            if (user == null) {
+                ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
+                return;
+            }
+
+            String role = user.getRole() == null ? "CUSTOMER" : user.getRole().getName();
+            LoginResponse currentUser = new LoginResponse(
+                    user.getEmail(),
+                    user.getFullName(),
+                    role
+            );
+
             request.setAttribute(cookieName, decodedJWT);
+            request.setAttribute(JWTUtil.CURRENT_USER_ATTRIBUTE, currentUser);
         } catch (Exception e) {
             ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
             return;

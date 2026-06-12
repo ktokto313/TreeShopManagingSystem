@@ -17,6 +17,7 @@ import swp391.group6.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +25,8 @@ public class UserService {
 
     private static final String DEFAULT_ROLE_NAME = "CUSTOMER";
     private static final String PROTECTED_ROLE_NAME = "SYSTEM_ADMIN";
+    private static final Pattern EMAIL_PATTERN =
+            Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -51,6 +54,7 @@ public class UserService {
     public UserDTO createUser(UserDTO userDTO) {
         validateUserForCreate(userDTO);
         User user = convertToEntity(userDTO);
+        user.setEmail(userDTO.getEmail().trim());
         user.setRole(resolveRole(userDTO.getRoleName()));
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         User savedUser = userRepository.save(user);
@@ -71,10 +75,20 @@ public class UserService {
     }
 
     private void validateUserForCreate(UserDTO userDTO) {
-            if (userDTO == null) {
-                throw new IllegalArgumentException("User data is required");
-            }
-            }
+        if (userDTO == null) {
+            throw new IllegalArgumentException("User data is required");
+        }
+        if (userDTO.getEmail() == null
+                || !EMAIL_PATTERN.matcher(userDTO.getEmail().trim()).matches()) {
+            throw new IllegalArgumentException("A valid email is required");
+        }
+        if (userDTO.getPassword() == null || userDTO.getPassword().isBlank()) {
+            throw new IllegalArgumentException("Password is required");
+        }
+        if (userRepository.findByEmail(userDTO.getEmail().trim()).isPresent()) {
+            throw new IllegalArgumentException("Email is already in use");
+        }
+    }
 
     public UserDTO updateUser(long id, UserDTO userDTO) {
         if (userDTO == null) throw new IllegalArgumentException("User data is required");
@@ -89,6 +103,29 @@ public class UserService {
         if (userDTO.getRoleName() != null && !userDTO.getRoleName().isBlank())
             user.setRole(resolveRole(userDTO.getRoleName()));
         if (userDTO.getStatus() != null) user.setStatus(userDTO.getStatus());
+
+        return convertToDTO(userRepository.save(user));
+    }
+
+    public UserDTO updateOwnProfile(long id, UserDTO userDTO) {
+        if (userDTO == null) {
+            throw new IllegalArgumentException("User data is required");
+        }
+
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            return null;
+        }
+
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        }
+        if (userDTO.getFullName() != null) {
+            user.setFullName(userDTO.getFullName());
+        }
+        if (userDTO.getPhone() != null) {
+            user.setPhone(userDTO.getPhone());
+        }
 
         return convertToDTO(userRepository.save(user));
     }

@@ -106,18 +106,20 @@ public class UserController {
 
         String role = currentUser.getRole();
 
-        boolean isOwnProfile = userService.getUserByEmail(currentUser.getEmail())
+        boolean isOwnProfile = userService.getUserByEmailUnprotected(currentUser.getEmail())
                 .map(u -> u.getId() == id)
                 .orElse(false);
 
-        if (!"SYSTEM_ADMIN".equalsIgnoreCase(role)
-                && !isOwnProfile
-                && !"MANAGER".equalsIgnoreCase(role)) {
+        boolean canManageUsers = "SYSTEM_ADMIN".equalsIgnoreCase(role)
+                || "MANAGER".equalsIgnoreCase(role);
+        if (!isOwnProfile && !canManageUsers) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         try {
-            UserDTO updatedUser = userService.updateUser(id, userDTO);
+            UserDTO updatedUser = isOwnProfile
+                    ? userService.updateOwnProfile(id, userDTO)
+                    : userService.updateUser(id, userDTO);
             if (updatedUser == null) {
                 return ResponseEntity.notFound().build();
             }
@@ -136,8 +138,8 @@ public class UserController {
         }
 
         try {
-            UserDTO updatedUser = userService.getUserByEmail(currentUser.getEmail())
-                    .map(u -> userService.updateUser(u.getId(), userDTO))
+            UserDTO updatedUser = userService.getUserByEmailUnprotected(currentUser.getEmail())
+                    .map(u -> userService.updateOwnProfile(u.getId(), userDTO))
                     .orElse(null);
 
             if (updatedUser == null) {
