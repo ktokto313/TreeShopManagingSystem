@@ -5,7 +5,9 @@ import ShipperSelect from "./ShipperSelect";
 import ORDER_STATUS_MAP from "./data/orderStatusMap";
 import useUpdateShipper from "./hooks/useUpdateShipper";
 import useFetchOrderDetail from "./hooks/useFetchOrderDetail";
-import { useEffect } from "react";
+import { useEffect, useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
+import useChangeOrderStatus from "./hooks/useChangeOrderStatus";
 
 /**
  * @param {{ selectedOrderId: number|string|null, onClose: () => void, onOrderChange?: () => void|Promise<void> }} props
@@ -22,6 +24,9 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
     isLoading: isUpdatingShipper,
     error: updateError,
   } = useUpdateShipper();
+
+  const { user } = useContext(AuthContext);
+  const { changeOrderStatus, isLoading: isChangingStatus } = useChangeOrderStatus();
 
   useEffect(() => {
     fetchOrderDetail(selectedOrderId);
@@ -73,23 +78,25 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
           </div>
 
           {/* Shipper Assignment */}
-          <div className="p-3 rounded-lg bg-bg-base border border-border/55">
-            <ShipperSelect
-              value={selectedOrder.shipperId ?? ''}
-              selectedShipperName={selectedOrder.shipperName}
-              onChange={async (shipperId) => {
-                const didUpdate = await updateShipper(selectedOrder.id, shipperId);
-                if (didUpdate) {
-                  fetchOrderDetail(selectedOrderId);
-                  onOrderChange();
-                }
-              }}
-              disabled={isUpdatingShipper}
-            />
-            {updateError && (
-              <p className="text-red-500 text-xs mt-1">{updateError}</p>
-            )}
-          </div>
+          {selectedOrder.status === "PROCESSING" && user?.role === "MANAGER" && (
+            <div className="p-3 rounded-lg bg-bg-base border border-border/55">
+              <ShipperSelect
+                value={selectedOrder.shipperId ?? ''}
+                selectedShipperName={selectedOrder.shipperName}
+                onChange={async (shipperId) => {
+                  const didUpdate = await updateShipper(selectedOrder.id, shipperId);
+                  if (didUpdate) {
+                    fetchOrderDetail(selectedOrderId);
+                    onOrderChange?.();
+                  }
+                }}
+                disabled={isUpdatingShipper}
+              />
+              {updateError && (
+                <p className="text-red-500 text-xs mt-1">{updateError}</p>
+              )}
+            </div>
+          )}
 
           {/* Items Section */}
           <div>
@@ -154,15 +161,88 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
             <Button variant="secondary" className="px-4 py-2" onClick={onClose}>
               Close
             </Button>
-            <Button
-              variant="primary"
-              className="px-4 py-2"
-              onClick={() => {
-                alert(`Receipt for Order #ORD-${selectedOrder.id} sent to printer!`);
-              }}
-            >
-              Print Receipt
-            </Button>
+
+            {/* MANAGER Actions */}
+            {selectedOrder.status === "PENDING" && user?.role === "MANAGER" && (
+              <Button
+                variant="primary"
+                className="px-4 py-2"
+                disabled={isChangingStatus}
+                onClick={async () => {
+                  const success = await changeOrderStatus(selectedOrder.id, "DELIVERING");
+                  if (success) {
+                    fetchOrderDetail(selectedOrderId);
+                    onOrderChange?.();
+                  }
+                }}
+              >
+                Give package to shipper
+              </Button>
+            )}
+
+            {selectedOrder.status === "RECEIVED" && user?.role === "MANAGER" && (
+              <Button
+                variant="primary"
+                className="px-4 py-2"
+                onClick={() => {
+                  alert(`Receipt for Order #ORD-${selectedOrder.id} sent to printer!`);
+                }}
+              >
+                Print Receipt
+              </Button>
+            )}
+
+            {/* SHIPPER Actions */}
+            {selectedOrder.status === "DELIVERING" && user?.role === "SHIPPER" && (
+              <Button
+                variant="primary"
+                className="px-4 py-2"
+                disabled={isChangingStatus}
+                onClick={async () => {
+                  const success = await changeOrderStatus(selectedOrder.id, "ARRIVED");
+                  if (success) {
+                    fetchOrderDetail(selectedOrderId);
+                    onOrderChange?.();
+                  }
+                }}
+              >
+                Confirm delivered
+              </Button>
+            )}
+
+            {/* CUSTOMER Actions */}
+            {selectedOrder.status === "ARRIVED" && user?.role === "CUSTOMER" && (
+              <>
+                <Button
+                  variant="primary"
+                  className="px-4 py-2"
+                  disabled={isChangingStatus}
+                  onClick={async () => {
+                    const success = await changeOrderStatus(selectedOrder.id, "RECEIVED");
+                    if (success) {
+                      fetchOrderDetail(selectedOrderId);
+                      onOrderChange?.();
+                    }
+                  }}
+                >
+                  Confirm order received
+                </Button>
+                <Button
+                  variant="primary"
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 border-none"
+                  disabled={isChangingStatus}
+                  onClick={async () => {
+                    const success = await changeOrderStatus(selectedOrder.id, "RETURN_PENDING");
+                    if (success) {
+                      fetchOrderDetail(selectedOrderId);
+                      onOrderChange?.();
+                    }
+                  }}
+                >
+                  Return/Refund
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
