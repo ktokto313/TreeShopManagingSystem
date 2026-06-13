@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { fetchAllTickets } from "../data/ticketApi.js";
 
 const useFetchAllTickets = (initialTickets = []) => {
@@ -7,29 +7,28 @@ const useFetchAllTickets = (initialTickets = []) => {
 		useState(false);
 	const [fetchAllTicketsError, setFetchAllTicketsError] = useState(null);
 
-	const executeFetchAllTickets = async (
-		ticketFilter,
-		ticketPiority,
-		ticketSort,
-	) => {
-		setIsFetchAllTicketsLoading(true);
-		setFetchAllTicketsError(null);
+	const executeFetchAllTickets = useCallback(
+		async (ticketFilter, ticketPiority, ticketSort) => {
+			setIsFetchAllTicketsLoading(true);
+			setFetchAllTicketsError(null);
 
-		try {
-			const data = await fetchAllTickets(
-				ticketFilter,
-				ticketPiority,
-				ticketSort,
-			);
-			setFetchedTickets(data);
-		} catch {
-			const errorMessage = "Đã xảy ra lỗi khi tải dữ liệu."; // Hardcoded message
+			try {
+				const data = await fetchAllTickets(
+					ticketFilter,
+					ticketPiority,
+					ticketSort,
+				);
+				setFetchedTickets(data);
+			} catch {
+				const errorMessage = "Đã xảy ra lỗi khi tải dữ liệu."; // Hardcoded message
 
-			setFetchAllTicketsError(errorMessage);
-		} finally {
-			setIsFetchAllTicketsLoading(false);
-		}
-	};
+				setFetchAllTicketsError(errorMessage);
+			} finally {
+				setIsFetchAllTicketsLoading(false);
+			}
+		}, 
+		[],
+	);
 
 	return {
 		isFetchAllTicketsLoading,

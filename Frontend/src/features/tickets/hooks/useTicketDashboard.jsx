@@ -39,8 +39,7 @@ export const useTicketDashboard = () => {
 
 	useEffect(() => {
 		executeFetchAllTickets();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []); 
+	}, [executeFetchAllTickets]); 
 
 	return {
 		// UI State
