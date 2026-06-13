@@ -11,6 +11,7 @@ import useFetchAllOrders from './hooks/useFetchAllOrders';
 import OrderModal from './OrderModal';
 
 export default function OrderManagement() {
+  //TODO remove use auth user when migrated to auth context approach
   const { executeAuth } = useAuthUser();
   const {
     orders,
