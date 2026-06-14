@@ -32,7 +32,7 @@ class UserControllerTest {
     void ownIdUpdateUsesRestrictedProfileUpdate() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setAttribute(
-                JWTUtil.CURRENT_USER_ATTRIBUTE,
+                JWTUtil.getCookieName(),
                 new LoginResponse("customer@example.com", "Customer", "CUSTOMER")
         );
 
