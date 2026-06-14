@@ -43,7 +43,7 @@ class JWTFilterTest {
         filter.doFilter(request, response, filterChain);
 
         assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
-        assertNull(request.getAttribute(JWTUtil.CURRENT_USER_ATTRIBUTE));
+        assertNull(request.getAttribute(JWTUtil.getCookieName()));
         verifyNoInteractions(filterChain);
     }
 
