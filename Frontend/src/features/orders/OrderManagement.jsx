@@ -163,7 +163,7 @@ export default function OrderManagement() {
           {isLoading && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="min-h-[260px] p-6 rounded-xl border border-border bg-bg-surface/20 flex flex-col justify-between">
+                <div key={i} className="min-h-[16rem] p-6 rounded-xl border border-border bg-bg-surface/20 flex flex-col justify-between">
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <div className="space-y-2">
