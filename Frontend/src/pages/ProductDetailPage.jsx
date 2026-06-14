@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import Container from '../components/global/Container'
 import Badge from '../components/ui/Badge'
@@ -39,7 +39,7 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState(location.state?.product ?? null)
   const [loading, setLoading] = useState(!location.state?.product)
   const [notice, setNotice] = useState('')
-  const [activeImageIndex, setActiveImageIndex] = useState(0)
+  const [activeImageSource, setActiveImageSource] = useState('')
 
   async function loadProductDetail() {
     setLoading(true)
@@ -72,30 +72,24 @@ export default function ProductDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId])
 
-  const categoryLookup = useMemo(
-    () => new Map(categories.map((category) => [String(category.id), category.name])),
-    [categories],
-  )
-
   const categoryName = product
-    ? categoryLookup.get(String(product.categoryId)) || product.categoryName || '-'
+    ? categories.find((category) => String(category.id) === String(product.categoryId))?.name ||
+      product.categoryName ||
+      '-'
     : '-'
 
   const productImages = resolveProductImages(product?.images)
   const variantGroups = parseVariantGroups(product?.variants)
-  const imageKey = productImages.join('|')
-  const imagePreview = productImages[activeImageIndex] || productImages[0]
+  const imagePreview = productImages.includes(activeImageSource)
+    ? activeImageSource
+    : productImages[0]
+  const activeImageIndex = Math.max(productImages.indexOf(imagePreview), 0)
   const availability = getProductAvailability(product)
   const categoryValue = product?.categoryId ? (
     <Link className="text-[var(--accent)] hover:underline" to={`/catalog/category/${product.categoryId}`}>
       {categoryName}
     </Link>
   ) : categoryName
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setActiveImageIndex(0)
-  }, [imageKey])
 
   return (
     <main className="bg-[var(--social-bg)]/50">
@@ -168,7 +162,7 @@ export default function ProductDetailPage() {
                           ? 'border-[var(--accent)] bg-emerald-50'
                           : 'border-[var(--border)] bg-white hover:border-[var(--accent)]'
                       }`}
-                      onClick={() => setActiveImageIndex(index)}
+                      onClick={() => setActiveImageSource(imageSource)}
                     >
                       <ProductImageFrame
                         src={imageSource}

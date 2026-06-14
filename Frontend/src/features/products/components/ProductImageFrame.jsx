@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { cn } from '../../../utils/cn'
 
 export default function ProductImageFrame({
@@ -8,14 +8,10 @@ export default function ProductImageFrame({
   imageClassName,
   fallbackLabel = 'Chưa có ảnh hiển thị',
 }) {
-  const [hasError, setHasError] = useState(false)
+  const [failedSrc, setFailedSrc] = useState('')
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setHasError(false)
-  }, [src])
-
-  const shouldShowImage = Boolean(src) && !hasError
+  // Store the exact failed src so changing to a new image automatically clears the fallback state.
+  const shouldShowImage = Boolean(src) && failedSrc !== src
 
   return (
     <div
@@ -30,7 +26,7 @@ export default function ProductImageFrame({
           alt={alt}
           className={cn('h-full w-full object-cover', imageClassName)}
           loading="lazy"
-          onError={() => setHasError(true)}
+          onError={() => setFailedSrc(src)}
         />
       ) : (
         <div className="grid h-full w-full place-items-center px-4 text-center">
