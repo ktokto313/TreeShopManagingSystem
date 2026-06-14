@@ -1,7 +1,6 @@
 package swp391.group6.component;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -31,15 +30,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
     public JWTFilter(UserRepository userRepository) {
         this.userRepository = userRepository;
-    }
-
-    @PostConstruct
-    public void init() {
-        // Allow environment to override property
-        String envName = System.getenv("JWT_COOKIE_NAME");
-        if (envName != null && !envName.isBlank()) {
-            cookieName = envName;
-        }
     }
 
     @Override
@@ -81,8 +71,7 @@ public class JWTFilter extends OncePerRequestFilter {
                     role
             );
 
-            request.setAttribute(cookieName, decodedJWT);
-            request.setAttribute(JWTUtil.CURRENT_USER_ATTRIBUTE, currentUser);
+            request.setAttribute(cookieName, currentUser);
         } catch (Exception e) {
             ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
             return;
