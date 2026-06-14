@@ -80,6 +80,8 @@ public class OrderService {
                 existingOrder.setShipper(newShipper);
                 if (existingOrder.getStatus() == OrderStatus.PROCESSING) {
                     tryToChangeState(existingOrder, user, OrderStatus.PENDING);
+                } else if (existingOrder.getStatus() == OrderStatus.RETURN_PENDING) {
+                    tryToChangeState(existingOrder, user, OrderStatus.RETURNING);
                 }
                 orderRepository.save(existingOrder);
                 return true;
@@ -99,11 +101,7 @@ public class OrderService {
                 return false;
             }
 
-            try {
-                tryToChangeState(order, user, orderStatus);
-            } catch (Exception e) {
-                return false;
-            }
+            tryToChangeState(order, user, orderStatus);
         }
 
         orderRepository.save(order);
@@ -118,7 +116,7 @@ public class OrderService {
             throw new InvalidStateTransitionException(
                 "Cannot transition order from " + currentStatus + " to " + targetStatus
                     + " with role " + roleName);
-        } else if (targetStatus != OrderStatus.PROCESSING && order.getShipper() == null) {
+        } else if (order.getShipper() == null) {
             throw new InvalidStateTransitionException(
                 "Cannot transition order from " + currentStatus + " to " + targetStatus
                     + " without shipper");
@@ -144,11 +142,9 @@ public class OrderService {
             case PROCESSING -> to == OrderStatus.PENDING && "MANAGER".equals(roleName);
             case PENDING -> to == OrderStatus.DELIVERING && "MANAGER".equals(roleName);
             case DELIVERING ->
-                (to == OrderStatus.ARRIVED || to == OrderStatus.FAILED) && "SHIPPER".equals(roleName);
-            case ARRIVED -> switch (to) {
-                case RECEIVED, RETURN_PENDING -> "CUSTOMER".equals(roleName);
-                default -> false;
-            };
+                (to == OrderStatus.ARRIVED || to == OrderStatus.RETURNING) && "SHIPPER".equals(roleName);
+            case ARRIVED ->
+                (to == OrderStatus.RECEIVED || to == OrderStatus.RETURN_PENDING) && "CUSTOMER".equals(roleName);
             case RETURN_PENDING -> to == OrderStatus.RETURNING && "MANAGER".equals(roleName);
             case RETURNING -> to == OrderStatus.FAILED && "SHIPPER".equals(roleName);
             default -> false;

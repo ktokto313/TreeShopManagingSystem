@@ -308,11 +308,28 @@ class OrderServiceTest {
     }
 
     @Test
+    void changeOrderStatus_limitedShipperCannotModifyUnrelatedOrder() {
+        LoginResponse shipper = login("SHIPPER@example.com", "SHIPPER");
+        User requester = user(1, "SHIPPER");
+        User orderShipper = user(2, "SHIPPER");
+        Order existingOrder = order(1L, manager(), orderShipper, OrderStatus.DELIVERING);
+        when(userRepository.findByEmail("SHIPPER@example.com")).thenReturn(Optional.of(requester));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(existingOrder));
+
+        boolean changed = orderService.changeOrderStatus(1L, OrderStatus.ARRIVED, shipper);
+
+        assertFalse(changed);
+        assertEquals(OrderStatus.DELIVERING, existingOrder.getStatus());
+        verify(orderRepository, never()).save(existingOrder);
+    }
+
+    @Test
     void changeOrderStatus_limitedUserReturnsFalseWhenTransitionIsInvalid() {
         LoginResponse customerLogin = login("customer@example.com", "CUSTOMER");
-        User requester = customer();
+        User requester = user(1, "CUSTOMER");
+        User orderUser = user(2, "CUSTOMER");
         Order existingOrder = order(1L, requester, shipper(), OrderStatus.PENDING);
-        when(userRepository.findByEmail("customer@example.com")).thenReturn(Optional.of(requester));
+        when(userRepository.findByEmail("customer@example.com")).thenReturn(Optional.of(orderUser));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(existingOrder));
 
         boolean changed = orderService.changeOrderStatus(1L, OrderStatus.RECEIVED, customerLogin);
@@ -334,6 +351,21 @@ class OrderServiceTest {
 
         assertTrue(changed);
         assertEquals(OrderStatus.RECEIVED, existingOrder.getStatus());
+        verify(orderRepository).save(existingOrder);
+    }
+
+    @Test
+    void changeOrderStatus_limitedShipperCanApplyAllowedTransition() {
+        LoginResponse shipper = login("shipper@example.com", "SHIPPER");
+        User requester = shipper();
+        Order existingOrder = order(1L, customer(), requester, OrderStatus.DELIVERING);
+        when(userRepository.findByEmail("shipper@example.com")).thenReturn(Optional.of(requester));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(existingOrder));
+
+        boolean changed = orderService.changeOrderStatus(1L, OrderStatus.ARRIVED, shipper);
+
+        assertTrue(changed);
+        assertEquals(OrderStatus.ARRIVED, existingOrder.getStatus());
         verify(orderRepository).save(existingOrder);
     }
 
@@ -394,6 +426,29 @@ class OrderServiceTest {
     }
 
     @Test
+    void tryToChangeState_rejectsTransitionWhenUserCannotBeResolved() {
+        Order order = order(1L, customer(), shipper(), OrderStatus.PENDING);
+
+        assertThrows(
+            InvalidStateTransitionException.class,
+            () -> orderService.tryToChangeState(order, null, OrderStatus.DELIVERING));
+        assertEquals(OrderStatus.PENDING, order.getStatus());
+    }
+
+    @Test
+    void tryToChangeState_rejectsTransitionWhenRoleNameCannotBeResolved() {
+        Order order = order(1L, customer(), shipper(), OrderStatus.PENDING);
+
+        User user = new User();
+        user.setRole(new Role());
+
+        assertThrows(
+                InvalidStateTransitionException.class,
+                () -> orderService.tryToChangeState(order, user, OrderStatus.DELIVERING));
+        assertEquals(OrderStatus.PENDING, order.getStatus());
+    }
+
+    @Test
     void tryToChangeState_rejectsNullFromOrTargetStatus() {
         Order nullCurrent = order(1L, customer(), shipper(), null);
         Order pending = order(2L, customer(), shipper(), OrderStatus.PENDING);
@@ -436,7 +491,7 @@ class OrderServiceTest {
             Arguments.of(OrderStatus.PROCESSING, OrderStatus.PENDING, "manager"),
             Arguments.of(OrderStatus.PENDING, OrderStatus.DELIVERING, "MANAGER"),
             Arguments.of(OrderStatus.DELIVERING, OrderStatus.ARRIVED, "SHIPPER"),
-            Arguments.of(OrderStatus.DELIVERING, OrderStatus.FAILED, "SHIPPER"),
+            Arguments.of(OrderStatus.DELIVERING, OrderStatus.RETURNING, "SHIPPER"),
             Arguments.of(OrderStatus.ARRIVED, OrderStatus.RECEIVED, "CUSTOMER"),
             Arguments.of(OrderStatus.ARRIVED, OrderStatus.RETURN_PENDING, "CUSTOMER"),
             Arguments.of(OrderStatus.RETURN_PENDING, OrderStatus.RETURNING, "MANAGER"),
@@ -447,11 +502,18 @@ class OrderServiceTest {
     private static Stream<Arguments> invalidTransitions() {
         return Stream.of(
             Arguments.of(OrderStatus.PROCESSING, OrderStatus.DELIVERING, "MANAGER"),
+            Arguments.of(OrderStatus.PROCESSING, OrderStatus.PENDING, "SHIPPER"),
             Arguments.of(OrderStatus.PENDING, OrderStatus.DELIVERING, "CUSTOMER"),
+            Arguments.of(OrderStatus.PENDING, OrderStatus.ARRIVED, "MANAGER"),
             Arguments.of(OrderStatus.DELIVERING, OrderStatus.ARRIVED, "MANAGER"),
+            Arguments.of(OrderStatus.DELIVERING, OrderStatus.RETURNING, "MANAGER"),
+            Arguments.of(OrderStatus.DELIVERING, OrderStatus.FAILED, "MANAGER"),
             Arguments.of(OrderStatus.ARRIVED, OrderStatus.FAILED, "CUSTOMER"),
+            Arguments.of(OrderStatus.ARRIVED, OrderStatus.RETURN_PENDING, "SHIPPER"),
             Arguments.of(OrderStatus.RETURN_PENDING, OrderStatus.RECEIVED, "MANAGER"),
+            Arguments.of(OrderStatus.RETURN_PENDING, OrderStatus.RETURNING, "SHIPPER"),
             Arguments.of(OrderStatus.RETURNING, OrderStatus.ARRIVED, "SHIPPER"),
+            Arguments.of(OrderStatus.RETURNING, OrderStatus.FAILED, "MANAGER"),
             Arguments.of(OrderStatus.RECEIVED, OrderStatus.RETURN_PENDING, "CUSTOMER")
         );
     }
