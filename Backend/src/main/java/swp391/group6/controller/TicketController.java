@@ -71,14 +71,15 @@ public class TicketController {
     public ResponseEntity<Ticket> updateTicketStatus(
             @PathVariable long id,
             @RequestParam String newState,
-            @RequestParam(required = false) String agentEmail) {
+            HttpServletRequest request) {
+
+        LoginResponse currentUser = JWTUtil.getUser(request);
+
         try {
-            Ticket updatedTicket = ticketService.updateTicketStatus(id, newState, agentEmail);
+            Ticket updatedTicket = ticketService.updateTicketStatus(id, newState, currentUser.getEmail());
             return ResponseEntity.ok(updatedTicket);
-        } catch (IllegalArgumentException e) { // Catches bad enum
-            return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().build();
         }
     }
 }

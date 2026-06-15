@@ -74,7 +74,7 @@ public class TicketService {
         if(user.getRole().getId() == 1){ // Id of customer
             ticketsResult = ticketRepository.findTicketsByCreatorWithFilters(user.getId(), state, priority, sort);
         } else if(user.getRole().getId() == 4){ // Id of support agent
-            ticketsResult = ticketRepository.findAllWithFilters(state, priority, sort);
+            ticketsResult = ticketRepository.findAllWithFiltersAndIsAssigned(user.getId(), state, priority, sort);
         }
 
         return ticketsResult;
@@ -88,14 +88,23 @@ public class TicketService {
         TicketState newState = TicketState.valueOf(newStateStr.toUpperCase());
         ticket.setTicketState(newState);
 
-        if (newState == TicketState.RESOLVED || newState == TicketState.DONE) {
-            ticket.setTimeResolved(new Timestamp(System.currentTimeMillis()));
-        }
+        boolean notAssigned = ticket.getAssignee() == null && agentEmail != null;
+        boolean isTheAssignedAgent = ticket.getAssignee().getEmail().equals(agentEmail);
 
-        // If an agent is taking the ticket, assign them
-        if (agentEmail != null) {
+        // If the ticket is unassigned, assign the agent changing the ticket
+        if (notAssigned) {
             User agent = userRepository.findByEmail(agentEmail).orElse(null);
             ticket.setAssignee(agent);
+        }
+
+        if(!notAssigned && !isTheAssignedAgent){
+            throw new RuntimeException("Cannot assign to a ticket with an already assigned support agent");
+        }
+
+        if (newState == TicketState.RESOLVED || newState == TicketState.DONE) {
+            ticket.setTimeResolved(new Timestamp(System.currentTimeMillis()));
+        } else{
+            ticket.setTimeResolved(null);
         }
 
         ticketRepository.save(ticket);
