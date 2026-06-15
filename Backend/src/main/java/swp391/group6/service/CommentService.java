@@ -37,14 +37,7 @@ public class CommentService {
         boolean isAssignee = ticket.getAssignee() != null &&
                 ticket.getAssignee().getEmail().equals(commentCreatorEmail);
 
-        // Check if the user is a support agent
-        boolean isAgent = commentCreator.getRole().getId() == 4;
-
-        // Allow commenting if they are an agent
-        if (!isCreator && !isAssignee && !isAgent) {
-            throw new RuntimeException("Unauthorized: You do not have permission to comment on this ticket.");
-        }
-
+        // Disallow commenting if they are not an agent or ticket creator
         if (!isCreator && !isAssignee) {
             throw new RuntimeException("Unauthorized: You do not have permission to comment on this ticket.");
         }

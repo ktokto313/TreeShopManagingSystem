@@ -12,7 +12,7 @@ import swp391.group6.util.JWTUtil;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/api/tickets/{ticketId}/comments")
 public class CommentController {
     private final CommentService commentService;
 
@@ -21,7 +21,7 @@ public class CommentController {
     }
 
     // Create comment
-    @PostMapping("/{ticketId}")
+    @PostMapping
     public ResponseEntity<Comment> addComment(
             @PathVariable long ticketId,
             @RequestBody String detail,
@@ -37,7 +37,7 @@ public class CommentController {
         }
     }
 
-    @GetMapping("/{ticketId}")
+    @GetMapping
     public ResponseEntity<List<Comment>> getCommentsByTicketId(
             @PathVariable long ticketId,
             HttpServletRequest request) {
