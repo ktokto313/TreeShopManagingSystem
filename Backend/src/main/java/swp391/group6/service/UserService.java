@@ -171,7 +171,7 @@ public class UserService {
         dto.setEmail(user.getEmail());
         dto.setFullName(user.getFullName());
         dto.setPhone(user.getPhone());
-        dto.setHasPassword(user.getPassword() != null && !user.getPassword().isBlank());
+        dto.setIsHasPassword(user.getPassword() != null && !user.getPassword().isBlank() ? Boolean.TRUE : Boolean.FALSE);
         if (user.getRole() != null) {
             dto.setRoleName(user.getRole().getName());
         }
@@ -206,7 +206,14 @@ public class UserService {
 
         return user;
     }
-
+    private Role resolveRole(String roleName) {
+        String name = (roleName != null && !roleName.isBlank()) ? roleName : DEFAULT_ROLE_NAME;
+        return roleRepository.findByName(name).orElseGet(() -> {
+            Role role = new Role();
+            role.setId(1L);
+            return role;
+        });
+    }
     private boolean hasRole(User user, String roleName) {
         return user.getRole() != null && roleName.equalsIgnoreCase(user.getRole().getName());
     }

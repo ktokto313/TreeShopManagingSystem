@@ -1,121 +1,162 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "./AuthContext";
+
+export const AuthContext = createContext(null);
+
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) throw new Error("useAuth must be used within AuthProvider");
+    return context;
+};
 
 const AUTH_STORAGE_KEYS = ["treeshop-auth-user", "currentUser"];
 
 function clearStoredAuth() {
-	if (typeof window === "undefined") {
-		return;
-	}
-
-	AUTH_STORAGE_KEYS.forEach((key) => {
-		window.localStorage.removeItem(key);
-	});
+    if (typeof window === "undefined") return;
+    AUTH_STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
 }
 
 function normalizeUser(user) {
-	if (!user) {
-		return null;
-	}
-
-	const roleName = user.roleName ?? user.role ?? null;
-	return { ...user, roleName };
+    if (!user) return null;
+    const roleName = user.roleName ?? user.role ?? null;
+    const role = user.role ?? roleName;
+    return { ...user, role, roleName };
 }
 
 export function AuthProvider({ children }) {
-	const navigate = useNavigate();
-	const location = useLocation();
-	const [user, setUser] = useState(null);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState(null);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [user, setUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-	useEffect(() => {
-		const fetchUser = async () => {
-			try {
-				const response = await fetch("/api/users/me", {
-					method: "GET",
-					credentials: "include",
-				});
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const response = await fetch("/api/users/me", {
+                    method: "GET",
+                    credentials: "include",
+                });
+                if (response.ok) {
+                    setUser(normalizeUser(await response.json()));
+                } else if (response.status === 401) {
+                    setUser(null);
+                } else {
+                    setError("Failed to fetch user profile");
+                }
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchUser();
+    }, []);
 
-				if (response.ok) {
-					setUser(normalizeUser(await response.json()));
-				} else if (response.status === 401) {
-					setUser(null);
-				} else {
-					setError("Failed to fetch user profile");
-				}
-			} catch (err) {
-				setError(err.message);
-			} finally {
-				setIsLoading(false);
-			}
-		};
+    const isAdmin = user?.roleName === "SYSTEM_ADMIN";
+    const isAuthenticated = Boolean(user);
+    const canManage = user?.roleName === "SYSTEM_ADMIN" || user?.roleName === "MANAGER";
 
-		fetchUser();
-	}, []);
+    const login = async (emailOrCredentials, password) => {
+        const credentials =
+            typeof emailOrCredentials === "object"
+                ? emailOrCredentials
+                : { email: emailOrCredentials, password };
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await fetch("/api/auth/login", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(credentials),
+            });
+            if (!response.ok) {
+                const loginError = new Error("Login failed. Check your credentials.");
+                loginError.status = response.status;
+                throw loginError;
+            }
+            const loggedInUser = normalizeUser(await response.json());
+            setUser(loggedInUser);
+            return loggedInUser;
+        } catch (err) {
+            setUser(null);
+            setError(err.message);
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-	const isAdmin = user?.roleName === "SYSTEM_ADMIN";
+    const loginWithGoogle = (googleUser) => {
+        const loggedInUser = normalizeUser(googleUser);
+        setUser(loggedInUser);
+        setError(null);
+        return loggedInUser;
+    };
 
-	const login = async (credentials) => {
-		setIsLoading(true);
-		setError(null);
+    const register = async (fullName, email, password) => {
+        setError(null);
+        const response = await fetch("/api/auth/register", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ fullName, email, password }),
+        });
+        if (!response.ok) {
+            const registerError = new Error(
+                response.status === 409 ? "Email already registered" : "Registration failed",
+            );
+            registerError.status = response.status;
+            setError(registerError.message);
+            throw registerError;
+        }
+        return true;
+    };
 
-		try {
-			const response = await fetch("/api/auth/login", {
-				method: "POST",
-				credentials: "include",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(credentials),
-			});
+    const updateUser = (updates) => {
+        setUser((current) => normalizeUser({ ...current, ...updates }));
+    };
 
-			if (!response.ok) {
-				throw new Error("Login failed. Check your credentials.");
-			}
+    const logout = async () => {
+        const wasStaffSession =
+            user?.roleName === "SYSTEM_ADMIN" ||
+            location.pathname.startsWith("/admin") ||
+            location.pathname.startsWith("/staff-login");
+        try {
+            const response = await fetch("/api/auth/logout", {
+                method: "POST",
+                credentials: "include",
+            });
+            if (response.ok) {
+                setUser(null);
+                clearStoredAuth();
+                navigate(wasStaffSession ? "/staff-login" : "/login", { replace: true });
+            } else {
+                setError("Failed to logout");
+            }
+        } catch (err) {
+            setError(err.message);
+        }
+    };
 
-			const loggedInUser = normalizeUser(await response.json());
-			setUser(loggedInUser);
-			return loggedInUser;
-		} catch (err) {
-			setUser(null);
-			setError(err.message);
-			throw err;
-		} finally {
-			setIsLoading(false);
-		}
-	};
-
-	const logout = async () => {
-		const wasStaffSession =
-			user?.roleName === "SYSTEM_ADMIN" ||
-			location.pathname.startsWith("/admin") ||
-			location.pathname.startsWith("/staff-login");
-
-		try {
-			const response = await fetch("/api/auth/logout", {
-				method: "POST",
-				credentials: "include",
-			});
-
-			if (response.ok) {
-				setUser(null);
-				clearStoredAuth();
-				navigate(wasStaffSession ? "/staff-login" : "/login", {
-					replace: true,
-				});
-			} else {
-				setError("Failed to logout");
-			}
-		} catch (err) {
-			setError(err.message);
-		}
-	};
-
-	return (
-		<AuthContext.Provider
-			value={{ user, isAdmin, isLoading, error, login, logout }}
-		>
-			{children}
-		</AuthContext.Provider>
-	);
+    return (
+        <AuthContext.Provider
+            value={{
+                user,
+                isAdmin,
+                isAuthenticated,
+                canManage,
+                isLoading,
+                error,
+                login,
+                loginWithGoogle,
+                register,
+                updateUser,
+                logout,
+            }}
+        >
+            {children}
+        </AuthContext.Provider>
+    );
 }

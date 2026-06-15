@@ -28,7 +28,8 @@ function validate(form) {
 }
 
 export function CreateUserModal({ isOpen, onClose, onCreated }) {
-  const [form, setForm] = useState({ fullName: "", email: "", phone: "", password: "", role: "CUSTOMER" });
+  const initialForm = { fullName: "", email: "", phone: "", password: "", roleName: "CUSTOMER" };
+  const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
@@ -40,7 +41,7 @@ export function CreateUserModal({ isOpen, onClose, onCreated }) {
   const { handleCreate, isLoading, hasError } = useCreateUser(() => {
     onCreated();
     onClose();
-    setForm({ fullName: "", email: "", phone: "", password: "", role: "CUSTOMER" });
+    setForm(initialForm);
     setErrors({});
   });
 
@@ -111,8 +112,8 @@ export function CreateUserModal({ isOpen, onClose, onCreated }) {
 
         <Select
           label="Role"
-          value={form.role}
-          onChange={handleChange("role")}
+          value={form.roleName}
+          onChange={handleChange("roleName")}
           options={ROLES.map((r) => ({ label: r.replace("_", " "), value: r }))}
         />
 

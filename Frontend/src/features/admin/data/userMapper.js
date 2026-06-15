@@ -39,8 +39,9 @@ export function mapUserToApi(user, { forCreate = false } = {}) {
   if (user.phone != null) {
     payload.phone = user.phone;
   }
-  if (user.role != null && user.role !== "") {
-    payload.roleName = user.role;
+  const roleName = user.roleName ?? user.role;
+  if (roleName != null && roleName !== "") {
+    payload.roleName = roleName;
   }
   if (forCreate) {
     if (user.email) payload.email = user.email;

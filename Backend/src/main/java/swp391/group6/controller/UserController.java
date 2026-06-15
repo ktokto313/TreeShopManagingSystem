@@ -156,8 +156,6 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
-
-        return ResponseEntity.ok(updatedUser);
     }
 
     // SYSTEM_ADMIN only
