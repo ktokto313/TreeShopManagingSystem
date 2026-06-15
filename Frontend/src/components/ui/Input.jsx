@@ -1,34 +1,46 @@
-import { cn } from '../../utils/cn'
+import { forwardRef, useId } from 'react';
+import { cn } from '../../utils/cn';
 
-export function Input({ label, error, className, id, ...props }) {
-  const inputId = id || props.name
-  const hasError = Boolean(error)
+export const Input = forwardRef(({ 
+  label, 
+  error, 
+  className = '', 
+  ...props 
+}, ref) => {
+  const generatedId = useId();
+  const inputId = props.id || generatedId;
+  const errorId = `${inputId}-error`;
 
   return (
-    <label className="block text-left" htmlFor={inputId}>
+    <div className={cn(`flex flex-col gap-1.5`, className)}>
       {label && (
-        <span className="mb-1 block text-sm font-medium text-[var(--text-h)]">
+        <label htmlFor={inputId} className="text-sm font-medium text-black">
           {label}
-        </span>
+        </label>
       )}
+      
       <input
-        id={inputId}
-        className={cn(
-          'h-10 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 text-sm text-[var(--text-h)] outline-none transition placeholder:text-[var(--text)] focus:border-[var(--accent)]',
-          hasError && 'border-red-500 focus:border-red-500',
-          className,
-        )}
-        aria-invalid={hasError}
-        aria-describedby={hasError ? `${inputId}-error` : undefined}
         {...props}
+        id={inputId}
+        ref={ref}
+        aria-invalid={!!error}
+        aria-describedby={error ? errorId : undefined}
+        className={cn(`
+          w-full px-3 py-2 border rounded-md outline-none transition-colors
+          bg-bg-base text-black border-border
+          focus-visible:border-interactive focus-visible:ring-1 focus-visible:ring-interactive
+          disabled:opacity-50 disabled:cursor-not-allowed
+          ${error ? 'border-bg-error focus-visible:border-bg-error focus-visible:ring-bg-error' : ''}
+        `)}
       />
-      {hasError && (
-        <span id={`${inputId}-error`} className="mt-1 block text-sm text-red-600">
+      
+      {error && (
+        <p id={errorId} className={cn("text-sm font-medium text-bg-error", className)}>
           {error}
-        </span>
+        </p>
       )}
-    </label>
-  )
-}
+    </div>
+  );
+});
 
-export default Input
+Input.displayName = 'Input';
