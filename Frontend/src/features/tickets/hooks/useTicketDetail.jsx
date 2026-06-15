@@ -22,11 +22,7 @@ const initialState = {
 const detailReducer = (state, action) => {
 	switch (action.type) {
 		case "FETCH_START":
-			return {
-				...state,
-				isFetchDetailLoadingError: false,
-				isFetchDetailLoading: true,
-			};
+			return { ...state, isFetchDetailLoadingError: false, isFetchDetailLoading: true };
 		case "FETCH_SUCCESS":
 			return {
 				...state,
@@ -80,9 +76,6 @@ export const useTicketDetail = (ticketId) => {
 	const { user } = useContext(AuthContext);
 	const [state, dispatch] = useReducer(detailReducer, initialState);
 
-	const isCreator = user?.email === state.status?.ticket?.ticketCreator?.email;
-	const isResolved = state.status?.ticket?.ticketState?.toLowerCase() === "resolved";
-
 	const isAgent = user?.roleName?.toLowerCase() === "support_agent";
 
 	useEffect(() => {
@@ -107,7 +100,7 @@ export const useTicketDetail = (ticketId) => {
 				dispatch({ type: "FETCH_ERROR" });
 			}
 		};
-
+		
 		loadData();
 	}, [ticketId]);
 
@@ -157,8 +150,6 @@ export const useTicketDetail = (ticketId) => {
 	return {
 		...state,
 		user,
-		isCreator,
-		isResolved,
 		isAgent,
 		handleStatusChange,
 		handleCommentSubmit,
