@@ -16,6 +16,7 @@ import ManagementPage from "./pages/ManagementPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import StaffAuthentication from "./pages/StaffAuthentication";
 import UserManagement from "./pages/UserManagement";
+import TicketManagement from "./pages/TicketManagement";
 
 function ProtectedRoute({ element, roles = [] }) {
 	const { user, isLoading } = useAuth();
