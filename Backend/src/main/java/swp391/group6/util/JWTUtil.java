@@ -23,6 +23,7 @@ public class JWTUtil {
     private JWTUtil() {}
 
     static {
+        // TODO remove try catch when moving to docker
         // Allow override via environment for docker
         String secret = System.getenv("JWT_SECRET");
         if (secret != null && !secret.isBlank()) {

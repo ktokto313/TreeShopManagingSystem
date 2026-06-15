@@ -15,7 +15,7 @@ public final class CookieUtil {
 
     private CookieUtil() {}
 
-    // Configure from environment when available (useful for docker / dev)
+    // TODO enforce wihtout try when migrate to docker from environment when available (useful for docker / dev)
     static {
         try {
             String lifetime = System.getenv("JWT_LIFETIME");
