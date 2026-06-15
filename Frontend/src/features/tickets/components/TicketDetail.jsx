@@ -20,12 +20,17 @@ import {
 	translateTicketPriority,
 	translateTicketStatus,
 } from "../utils/ticketUtils";
+import { Modal } from "../../../components/ui/Modal";
+import { useState } from "react";
 
 const TicketDetail = () => {
 	const { id: ticketId } = useParams();
 	const navigate = useNavigate();
 
 	const detailState = useTicketDetail(ticketId);
+
+	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+	const [pendingStatus, setPendingStatus] = useState(null);
 
 	const {
 		ticket,
@@ -188,11 +193,45 @@ const TicketDetail = () => {
 								className="w-48"
 								value={ticket.ticketState}
 								options={getSelectOption("status")}
-								onChange={(e) => handleStatusChange(e.target.value)}
+								onChange={(e) => {
+									setPendingStatus(e.target.value);
+									setIsConfirmOpen(true);
+								}}
 							/>
 						</div>
 					</div>
 				)}
+
+				<Modal title="Lưu ý" isOpen={isConfirmOpen}>
+					<h1 className="mb-4 -mt-7">
+						Thay đổi trạng thái sẽ cho bạn thành người xử lí cho Ticket này, bạn
+						có chắc chắn không?
+					</h1>
+					<div className="flex gap-4">
+						<Button
+							className="bg-green-500 hover:bg-green-600 text-white"
+							onClick={() => {
+								if (pendingStatus) {
+									handleStatusChange(pendingStatus);
+								}
+								setIsConfirmOpen(false); 
+								setPendingStatus(null); 
+							}}
+						>
+							Có
+						</Button>
+
+						<Button
+							className="bg-red-500 hover:bg-red-600 text-white"
+							onClick={() => {
+								setIsConfirmOpen(false); 
+								setPendingStatus(null); 
+							}}
+						>
+							Không
+						</Button>
+					</div>
+				</Modal>
 
 				{updateTicketError && (
 					<div className="bg-bg-error text-white p-3 gap-2 rounded-2xl flex items-center">
