@@ -1,116 +1,63 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
-import {
-	fetchTicketById,
-	updateTicketStatus,
-	fetchComments,
-	createComment,
-} from "./data/ticketApi";
-import { Button } from "../../components/ui/Button";
-import { Container } from "../../components/global/Container";
-import { Input } from "../../components/ui/Input";
-import { Select } from "../../components/ui/Select";
-import { timeFormat } from "../../utils/timeFormat";
-import { cn } from "../../utils/cn";
-import { getSelectOption } from "./data/ticketSelectList";
-import { useAuth } from "../../hooks/useAuth";
+import { useNavigate, useParams } from "react-router-dom";
+import { cn } from "../../../utils/cn";
+import { useTicketDetail } from "../hooks/useTicketDetail";
+
+import { Container } from "../../../components/global/Container";
+import { Button } from "../../../components/ui/Button";
+import { Select } from "../../../components/ui/Select";
+import { Input } from "../../../components/ui/Input";
+import ModalButton from "../../../components/ui/ModalButton";
+import { Form } from "../../../components/ui/Form";
+
+import { CgSpinner } from "react-icons/cg";
+import { IoWarningOutline } from "react-icons/io5";
+import { MdOutlineDangerous } from "react-icons/md";
+import sadPlant from "../assets/images/sadPlant.gif";
+import { getSelectOption } from "../data/ticketSelectList";
+import { timeFormat } from "../../../utils/timeFormat";
 import {
 	getTicketStatusStyles,
 	translateTicketPriority,
 	translateTicketStatus,
-} from "./utils/ticketUtils";
-import sadPlant from "./images/sad-plant.gif";
-import { CgSpinner } from "react-icons/cg";
-import { Form } from "../../components/ui/Form";
-import { MdOutlineDangerous } from "react-icons/md";
-import ModalButton from "../../components/ui/ModalButton";
-import { IoWarningOutline } from "react-icons/io5";
+} from "../utils/ticketUtils";
+import { Modal } from "../../../components/ui/Modal";
+import { useState } from "react";
 
 const TicketDetail = () => {
-	const { id } = useParams();
+	const { id: ticketId } = useParams();
 	const navigate = useNavigate();
-	const { user } = useAuth();
 
-	console.log(user);
+	const detailState = useTicketDetail(ticketId);
 
-	const [ticket, setTicket] = useState(null);
-	const [comments, setComments] = useState([]);
-	const [newCommentDetail, setNewCommentDetail] = useState("");
-	const [isLoading, setIsLoading] = useState(true);
-	const [commentTicketError, setCommentTicketError] = useState("");
-	const [updateTicketError, setUpdateTicketError] = useState("");
-	const [isStatusChangeLoading, setStatusChangeLoading] = useState(false);
-	const [isCommentSubmitLoading, setIsCommentSubmitLoading] = useState(false);
+	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+	const [pendingStatus, setPendingStatus] = useState(null);
 
-	useEffect(() => {
-		const loadData = async () => {
-			try {
-				setIsLoading(true);
-				const [ticketData, commentsData] = await Promise.all([
-					fetchTicketById(id),
-					fetchComments(id),
-				]);
-				setTicket(ticketData);
-				setComments(commentsData);
-			} catch (error) {
-				console.error(error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-		loadData();
-	}, [id]);
+	const {
+		ticket,
+		comments,
+		newCommentDetail,
+		setNewCommentDetail,
+		isFetchDetailError,
+		isFetchDetailLoading,
+		isStatusChangeLoading,
+		isCommentSubmitLoading,
+		commentTicketError,
+		updateTicketError,
+		handleStatusChange,
+		handleCommentSubmit,
+		user,
+		isAgent,
+	} = detailState;
 
-	const handleStatusChange = async (newState) => {
-		try {
-			setStatusChangeLoading(true);
-			// If the user is an agent taking the ticket, pass their Email.
-			// If it's the customer accepting/rejecting, agentEmail is null.
-			const agentEmail =
-				user?.roleName?.toLowerCase() === "support_agent" ? user.email : null;
-			const updatedTicket = await updateTicketStatus(
-				ticket.id,
-				newState,
-				agentEmail,
-			);
-			setTicket(updatedTicket);
-		} catch {
-			setUpdateTicketError("Không thể cập nhật trạng thái");
-		} finally {
-			setStatusChangeLoading(false);
-		}
-	};
-
-	const handleCommentSubmit = async (e, closeModal) => {
-		e.preventDefault();
-		setIsCommentSubmitLoading(true);
-		setCommentTicketError("");
-		if (!newCommentDetail.trim()) return;
-
-		try {
-			const addedComment = await createComment(ticket.id, newCommentDetail);
-			setComments([...comments, addedComment]);
-			setNewCommentDetail("");
-
-			if (closeModal) closeModal();
-		} catch (error) {
-			console.log(error);
-			setCommentTicketError("Lỗi khi gửi bình luận");
-		} finally {
-			setIsCommentSubmitLoading(false);
-		}
-	};
-
-	if (isLoading)
+	if (isFetchDetailLoading)
 		return (
 			<Container className="flex items-center justify-content-center h-screen">
-					<h1 className="flex gap-4 items-center text-3xl mx-auto w-max text-green-600">
-						<CgSpinner className="animate-spin"></CgSpinner>Đang tải...
-					</h1>
+				<h1 className="flex gap-4 items-center text-3xl mx-auto w-max text-green-600">
+					<CgSpinner className="animate-spin" /> Đang tải...
+				</h1>
 			</Container>
 		);
 
-	// Ticket Error Page
 	if (!ticket)
 		return (
 			<Container className="mt-10 font-semibold text-5xl">
@@ -118,7 +65,11 @@ const TicketDetail = () => {
 					className="border-5 text-2xl py-5 px-8 mx-auto rounded-full max-w-80 min-w-50 text-red-500 border-red-300"
 					style={{ boxShadow: "15px 15px 0 5px" }}
 				>
-					Không tìm thấy Ticket!
+					{isFetchDetailError ? (
+						<span>Không tìm thấy Ticket!</span>
+					) : (
+						<span>Lỗi Khi Tải Ticket</span>
+					)}
 				</h1>
 				<div
 					className="bg-bg-surface min-w-50 max-w-90 flex items-center mx-auto mt-20 justify-center rounded-full aspect-square w-[20%] p-5 text-green-500"
@@ -127,10 +78,11 @@ const TicketDetail = () => {
 					<img
 						className="object-cover aspect-square w-[80%]"
 						src={sadPlant}
-					></img>
+						alt="Sad plant"
+					/>
 				</div>
 				<Button
-					onClick={() => navigate("/tickets")}
+					onClick={() => navigate("/tickets/dashboard")}
 					className="w-fit mb-4 hover:bg-green-400 text-2xl mx-auto block mt-20 pr-8"
 				>
 					<h2>← Quay Lại</h2>
@@ -138,22 +90,18 @@ const TicketDetail = () => {
 			</Container>
 		);
 
-	const isCreator = user?.email === ticket.ticketCreator.email;
-	const isAgent = user?.roleName?.toLowerCase() === "support_agent";
-	console.log(isAgent);
-	const isResolved = ticket.ticketState.toLowerCase() === "resolved";
+	const isCreator = user?.email === ticket.ticketCreator?.email;
+	const isResolved = ticket.ticketState?.toLowerCase() === "resolved";
 
-	// Ticket Detail Page
 	return (
 		<Container className="max-w-4xl mx-auto mt-10 p-5 flex flex-col gap-6">
 			<Button
-				onClick={() => navigate("/tickets")}
+				onClick={() => navigate("/tickets/dashboard")}
 				className="w-fit mb-1 py-2 hover:bg-green-400 pr-6 text-xl"
 			>
 				← Quay Lại
 			</Button>
 
-			{/* TICKET HEADER & INFO */}
 			<div className="border-2 border-green-300 rounded-2xl p-6 bg-gray-100 shadow-sm">
 				<div className="flex justify-between items-start mb-4">
 					<div>
@@ -174,7 +122,7 @@ const TicketDetail = () => {
 				<div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-6 border-y border-border py-4">
 					<div>
 						<p className="text-gray-500">Người tạo</p>
-						<p className="font-semibold">{ticket.ticketCreator.fullName}</p>
+						<p className="font-semibold">{ticket.ticketCreator?.fullName}</p>
 					</div>
 					<div>
 						<p className="text-gray-500">Mức ưu tiên</p>
@@ -199,7 +147,6 @@ const TicketDetail = () => {
 				</div>
 			</div>
 
-			{/* ACTION PANEL (Conditional Rendering based on Role/State) */}
 			<div className="flex gap-4 items-center bg-gray-50 p-4 rounded-xl border border-border">
 				{isCreator && isResolved && (
 					<>
@@ -209,26 +156,26 @@ const TicketDetail = () => {
 						<Button
 							className="bg-bg-success text-white hover:bg-emerald-600"
 							onClick={() => handleStatusChange("DONE")}
-							disabled={isStatusChangeLoading && isCommentSubmitLoading}
+							disabled={isStatusChangeLoading || isCommentSubmitLoading}
 						>
-							<h1 className="flex gap-4 items-center">
+							<span className="flex gap-4 items-center">
 								{isStatusChangeLoading && (
-									<CgSpinner className="animate-spin"></CgSpinner>
+									<CgSpinner className="animate-spin" />
 								)}
-								Chấp nhận 
-							</h1>
+								Chấp nhận
+							</span>
 						</Button>
 						<Button
 							className="bg-red-500 text-white hover:bg-red-600"
 							onClick={() => handleStatusChange("PROCESSING")}
-							disabled={isStatusChangeLoading && isCommentSubmitLoading}
+							disabled={isStatusChangeLoading || isCommentSubmitLoading}
 						>
-							<h1 className="flex gap-4 items-center">
+							<span className="flex gap-4 items-center">
 								{isStatusChangeLoading && (
-									<CgSpinner className="animate-spin"></CgSpinner>
+									<CgSpinner className="animate-spin" />
 								)}
-								Từ chối 
-							</h1>
+								Từ chối
+							</span>
 						</Button>
 					</>
 				)}
@@ -238,34 +185,62 @@ const TicketDetail = () => {
 						<p className="font-semibold text-black mr-auto">
 							Thay đổi trạng thái:
 						</p>
-						<div className="flex gap-2">
-							<h1 className="flex gap-4 items-center">
-								{isStatusChangeLoading && (
-									<CgSpinner className="animate-spin text-xl"></CgSpinner>
-								)}
-							</h1>
+						<div className="flex gap-2 items-center">
+							{isStatusChangeLoading && (
+								<CgSpinner className="animate-spin text-xl text-green-600" />
+							)}
 							<Select
 								className="w-48"
 								value={ticket.ticketState}
 								options={getSelectOption("status")}
-								onChange={(e) => handleStatusChange(e.target.value)}
+								onChange={(e) => {
+									setPendingStatus(e.target.value);
+									setIsConfirmOpen(true);
+								}}
 							/>
 						</div>
 					</div>
 				)}
+
+				<Modal title="Lưu ý" isOpen={isConfirmOpen}>
+					<h1 className="mb-4 -mt-7">
+						Thay đổi trạng thái sẽ cho bạn thành người xử lí cho Ticket này, bạn
+						có chắc chắn không?
+					</h1>
+					<div className="flex gap-4">
+						<Button
+							className="bg-green-500 hover:bg-green-600 text-white"
+							onClick={() => {
+								if (pendingStatus) {
+									handleStatusChange(pendingStatus);
+								}
+								setIsConfirmOpen(false); 
+								setPendingStatus(null); 
+							}}
+						>
+							Có
+						</Button>
+
+						<Button
+							className="bg-red-500 hover:bg-red-600 text-white"
+							onClick={() => {
+								setIsConfirmOpen(false); 
+								setPendingStatus(null); 
+							}}
+						>
+							Không
+						</Button>
+					</div>
+				</Modal>
+
 				{updateTicketError && (
-					<div className={"bg-bg-error text-white p-3 gap-2 rounded-2xl flex"}>
+					<div className="bg-bg-error text-white p-3 gap-2 rounded-2xl flex items-center">
 						<IoWarningOutline className="text-2xl" />
-						<p>
-							Lorem ipsum dolor sit amet, consectetur adipisicing elit. Natus
-							itaque
-						</p>
-						{updateTicketError}
+						<p>{updateTicketError}</p>
 					</div>
 				)}
 			</div>
 
-			{/* COMMENTS SECTION */}
 			<div className="border-2 bg-white border-border rounded-2xl p-6 shadow-sm mt-4">
 				<h2 className="text-xl font-bold mb-6">Bình luận</h2>
 
@@ -278,11 +253,11 @@ const TicketDetail = () => {
 						comments.map((comment) => (
 							<div
 								key={comment.id}
-								className="p-4 bg-gray-50 rounded-2xl border-2 border border-border"
+								className="p-4 bg-gray-50 rounded-2xl border-2 border-border"
 							>
 								<div className="flex justify-between items-center mb-2">
 									<span className="font-bold text-sm">
-										{comment.commentCreator.fullName}
+										{comment.commentCreator?.fullName}
 									</span>
 									<span className="text-xs text-gray-500">
 										{timeFormat(comment.timeCreated)}
@@ -309,14 +284,14 @@ const TicketDetail = () => {
 					<ModalButton
 						buttonDisabled={!newCommentDetail.trim() || isCommentSubmitLoading}
 						buttonLabel={
-							isLoading ? (
-								<CgSpinner className="animate-spin text-lg"></CgSpinner>
+							isCommentSubmitLoading ? (
+								<CgSpinner className="animate-spin text-lg" />
 							) : (
 								"Gửi"
 							)
 						}
 						buttonClasses={cn("h-full h-10")}
-						modalTitle={"Lưu ý"}
+						modalTitle="Lưu ý"
 					>
 						{({ close }) => (
 							<>
@@ -331,9 +306,9 @@ const TicketDetail = () => {
 										type="submit"
 										onClick={(e) => handleCommentSubmit(e, close)}
 									>
-										<div className="flex gap-1">
+										<div className="flex gap-1 items-center">
 											{isCommentSubmitLoading && (
-												<CgSpinner className="animate-spin text-xl"></CgSpinner>
+												<CgSpinner className="animate-spin text-xl" />
 											)}
 											<p>Gửi</p>
 										</div>
@@ -349,9 +324,10 @@ const TicketDetail = () => {
 						)}
 					</ModalButton>
 				</Form>
+
 				{commentTicketError && (
 					<div className="flex items-center gap-1 p-3 mt-2 border font-light text-red-600 border-red-400 w-max">
-						<MdOutlineDangerous className="text-xl"></MdOutlineDangerous>
+						<MdOutlineDangerous className="text-xl" />
 						{commentTicketError}
 					</div>
 				)}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext.jsx';
 import { Container } from '../components/global/Container';
 import { Form } from '../components/ui/Form';
 import { Input } from '../components/ui/Input';
@@ -25,8 +25,7 @@ export default function StaffAuthentication() {
 
 		try {
 			const user = await login(form.email, form.password);
-			const destination =
-				user.roleName === 'SYSTEM_ADMIN' ? '/admin/users' : '/tickets';
+			const destination = user.roleName === 'SYSTEM_ADMIN' ? '/admin/users' : '/login';
 			navigate(destination, { replace: true });
 		} catch (err) {
 			setError(err.message);
@@ -57,7 +56,7 @@ export default function StaffAuthentication() {
 						type="password"
 						value={form.password}
 						onChange={handleChange('password')}
-						placeholder="••••••••"
+						placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
 						required
 					/>
 

@@ -4,20 +4,23 @@ import {
 	CardTitle,
 	CardContent,
 	CardFooter,
-} from "../../components/ui/Card";
-import { cn } from "../../utils/cn";
-import { timeFormat } from "../../utils/timeFormat";
-import { getTicketStatusStyles, translateTicketStatus } from "./utils/ticketUtils";
+} from "../../../components/ui/Card";
+import { cn } from "../../../utils/cn";
+import { timeFormat } from "../../../utils/timeFormat";
+import {
+	getTicketStatusStyles,
+	translateTicketStatus,
+} from "../utils/ticketUtils";
 
 export function TicketCard({ ticket, variant = "default" }) {
 	return (
 		<>
 			{variant === "default" && ticket && (
-				<Card className="w-full flex flex-col h-full min-h-[180px] justify-between transition-all duration-200 hover:border-interactive-hover border-2 group cursor-pointer">
+				<Card className="w-full flex flex-col h-full min-h-45 justify-between transition-all duration-200 hover:border-interactive-hover border-2 group cursor-pointer">
 					<CardHeader className="pb-0 flex-row items-start justify-between gap-4 border-none">
 						<div className="flex flex-col gap-1">
 							<div className="flex justify-between">
-								<span className="text-xs font-semibold tracking-wider text-black opacity-50 uppercase">
+								<span className="text-xs font-semibold tracking-wider text-gray-500 uppercase">
 									#{ticket.id}
 								</span>
 								{/* Ticket's status */}
@@ -45,7 +48,7 @@ export function TicketCard({ ticket, variant = "default" }) {
 						</p>
 					</CardContent>
 
-					<CardFooter className="pt-0 bg-transparent border-none flex gap-3 items-center justify-between opacity-70 text-xs text-black">
+					<CardFooter className="pt-0 bg-transparent border-none flex gap-3 items-center justify-between text-gray-600 text-xs">
 						<div className="flex items-center gap-2">
 							{/* Avatar Placeholder */}
 							<div className="w-5 h-5 rounded-full bg-border flex items-center justify-center font-bold text-[10px]">
@@ -70,7 +73,7 @@ export function TicketCard({ ticket, variant = "default" }) {
 					<CardHeader className="pb-0 flex-row items-start justify-between gap-4 border-none">
 						<div className="flex flex-col gap-1">
 							<div className="flex justify-between">
-								<span className="font-semibold tracking-wider text-gray-400 text-base opacity-50 uppercase">
+								<span className="font-semibold tracking-wider text-gray-300 text-base uppercase">
 									#
 								</span>
 								{/* Ticket's status */}
@@ -91,7 +94,7 @@ export function TicketCard({ ticket, variant = "default" }) {
 						<div className="rounded-full bg-gray-300 w-[50%] h-3"></div>
 					</CardContent>
 
-					<CardFooter className="pt-0 mt-1 bg-transparent border-none flex gap-3 items-center justify-between opacity-70 text-black">
+					<CardFooter className="pt-0 mt-1 bg-transparent border-none flex gap-3 items-center justify-between text-gray-300 text-black">
 						<div className="flex items-center gap-2 flex-6">
 							{/* Avatar Placeholder */}
 							<div className="h-5 rounded-full bg-gray-300 aspect-square"></div>

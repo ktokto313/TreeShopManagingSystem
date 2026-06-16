@@ -1,9 +1,4 @@
-.dashboard {
-	container-type: inline-size;
-	container-name: dashboard;
-}
-
-.ticketNavbar {
+.ticketFilterHeader {
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
 }
@@ -11,14 +6,6 @@
 .ticketSelectList {
 	@container (width < 750px) {
 		display: none !important;
-	}
-}
-
-.ticketSelectToggle {
-	display: none !important;
-
-	@container (width < 750px) {
-		display: block !important;
 	}
 }
 

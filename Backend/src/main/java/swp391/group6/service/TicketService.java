@@ -35,6 +35,10 @@ public class TicketService {
         User creator = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        if(!creator.getRole().getName().equalsIgnoreCase("customer")) {
+            throw new RuntimeException("User not allowed to create tickets.");
+        }
+
         Ticket ticket = new Ticket();
         ticket.setTitle(request.getTitle());
         ticket.setDetail(request.getDetail());
@@ -51,7 +55,7 @@ public class TicketService {
 
     // UC 12 & 16: Customer/Agent views tickets
     public List<Ticket> getAuthorizedTickets(long userId) {
-        return new ArrayList<>(ticketRepository.findTicketsByCreatorOrAssignee(userId));
+        return new ArrayList<>(ticketRepository.findTicketsByCreator(userId));
     }
 
     public List<Ticket> getAuthorizedTicketsByEmail(String email, String statusStr, String priorityStr, Sort sort) {
@@ -66,25 +70,41 @@ public class TicketService {
                 ? Priority.valueOf(priorityStr.toUpperCase()) : null;
 
         // Pass everything to the repository
-        return ticketRepository.findTicketsByCreatorOrAssigneeWithFilters(user.getId(), state, priority, sort);
+        List<Ticket> ticketsResult = null;
+        if(user.getRole().getId() == 1){ // Id of customer
+            ticketsResult = ticketRepository.findTicketsByCreatorWithFilters(user.getId(), state, priority, sort);
+        } else if(user.getRole().getId() == 4){ // Id of support agent
+            ticketsResult = ticketRepository.findAllWithFiltersAndIsAssigned(user.getId(), state, priority, sort);
+        }
+
+        return ticketsResult;
     }
 
     // UC 12 & 16: Update ticket status (Agent sets to Progress, Customer sets to Resolved)
-    public Ticket updateTicketStatus(long ticketId, String newStateStr, Long agentId) {
+    public Ticket updateTicketStatus(long ticketId, String newStateStr, String agentEmail) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
         TicketState newState = TicketState.valueOf(newStateStr.toUpperCase());
         ticket.setTicketState(newState);
 
-        if (newState == TicketState.RESOLVED || newState == TicketState.DONE) {
-            ticket.setTimeResolved(new Timestamp(System.currentTimeMillis()));
+        boolean notAssigned = ticket.getAssignee() == null && agentEmail != null;
+        boolean isTheAssignedAgent = ticket.getAssignee().getEmail().equals(agentEmail);
+
+        // If the ticket is unassigned, assign the agent changing the ticket
+        if (notAssigned) {
+            User agent = userRepository.findByEmail(agentEmail).orElse(null);
+            ticket.setAssignee(agent);
         }
 
-        // If an agent is taking the ticket, assign them
-        if (agentId != null) {
-            User agent = userRepository.findById(agentId).orElse(null);
-            ticket.setAssignee(agent);
+        if(!notAssigned && !isTheAssignedAgent){
+            throw new RuntimeException("Cannot assign to a ticket with an already assigned support agent");
+        }
+
+        if (newState == TicketState.RESOLVED || newState == TicketState.DONE) {
+            ticket.setTimeResolved(new Timestamp(System.currentTimeMillis()));
+        } else{
+            ticket.setTimeResolved(null);
         }
 
         ticketRepository.save(ticket);

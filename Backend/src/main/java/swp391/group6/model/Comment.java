@@ -1,31 +1,31 @@
 package swp391.group6.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "comments")
+@Table(name = "Comments")
 public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "ticket_id")
+    private Ticket ticket;
 
     @Column(nullable = false)
     private String detail;
 
-    // DB column name is "time_created"
-    @Column(name = "time_created")
+    @Column
     private Timestamp timeCreated;
 
     @ManyToOne
-    @JoinColumn(name = "creator_id", nullable = false)
+    @JoinColumn(name = "creator_id")
     private User commentCreator;
-
-    @ManyToOne
-    @JoinColumn(name = "ticket_id", nullable = false)
-    private Ticket ticket;
 
     public long getId() {
         return id;
@@ -34,7 +34,6 @@ public class Comment {
     public void setId(long id) {
         this.id = id;
     }
-
 
     public String getDetail() {
         return detail;

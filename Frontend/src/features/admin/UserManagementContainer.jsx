@@ -13,7 +13,6 @@ import { CreateUserModal } from "./components/CreateUserModal";
 import { EditUserModal } from "./components/EditUserModal";
 import { UserDetailModal } from "./components/UserDetailModal";
 
-
 const SORT_OPTIONS = {
   user_asc:    (a, b) => (a.fullName ?? "").localeCompare(b.fullName ?? ""),
   user_desc:   (a, b) => (b.fullName ?? "").localeCompare(a.fullName ?? ""),
@@ -30,7 +29,7 @@ const USERS_PER_PAGE = 10;
 function SortIcon({ active, direction }) {
   return (
     <span className={`ml-1 ${active ? "text-[#283C1D]" : "text-stone-300"}`}>
-      {active && direction === "desc" ? "↓" : "↑"}
+      {active && direction === "desc" ? "â†“" : "â†‘"}
     </span>
   );
 }
@@ -116,7 +115,6 @@ export function UserManagementContainer() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-stone-800">User Management</h1>
@@ -135,14 +133,12 @@ export function UserManagementContainer() {
         </button>
       </div>
 
-      {/* Search Bar */}
       <UserSearchBar
         onSearch={handleSearchWithPaginationReset}
         onClear={handleClearWithPaginationReset}
         isSearching={isSearching}
       />
 
-      {/* Table */}
       <div className="rounded-xl border border-stone-200 overflow-hidden bg-white">
         {hasError ? (
           <div className="py-16 text-center">
@@ -265,7 +261,6 @@ export function UserManagementContainer() {
         </div>
       )}
 
-      {/* Modals */}
       <CreateUserModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}

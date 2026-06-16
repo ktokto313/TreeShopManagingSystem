@@ -9,7 +9,7 @@ export const fetchTicketById = async (id) => {
 
 export const updateTicketStatus = async (id, newState, agentEmail = null) => {
 	let url = `/api/tickets/${id}/status?newState=${newState}`;
-	if (agentEmail) url += `&agentId=${agentEmail}`;
+	if (agentEmail) url += `&agentEmail=${agentEmail}`;
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 	const response = await fetch(url, { method: "PUT", credentials: "include" });
@@ -19,14 +19,14 @@ export const updateTicketStatus = async (id, newState, agentEmail = null) => {
 
 export const fetchComments = async (ticketId) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
-	const response = await fetch(`/api/comments/${ticketId}`, {credentials: "include"});
+	const response = await fetch(`/api/tickets/${ticketId}/comments`, {credentials: "include"});
 	if (!response.ok) throw new Error("Failed to fetch comments");
 	return response.json();
 };
 
 export const createComment = async (ticketId, detail) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
-	const response = await fetch(`/api/comments/${ticketId}`, {
+	const response = await fetch(`/api/tickets/${ticketId}/comments`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(detail),

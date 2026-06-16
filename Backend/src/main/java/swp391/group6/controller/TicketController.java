@@ -42,7 +42,7 @@ public class TicketController {
     public ResponseEntity<List<Ticket>> getAuthorizedTickets(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String priority,
-            @RequestParam(required = false) Sort sort,
+            Sort sort, // Since the system doesn't know what to do with a comma, I leave it without RequestParam for now.
             HttpServletRequest request) {
 
         LoginResponse currentUser = JWTUtil.getUser(request);
@@ -71,14 +71,15 @@ public class TicketController {
     public ResponseEntity<Ticket> updateTicketStatus(
             @PathVariable long id,
             @RequestParam String newState,
-            @RequestParam(required = false) Long agentId) {
+            HttpServletRequest request) {
+
+        LoginResponse currentUser = JWTUtil.getUser(request);
+
         try {
-            Ticket updatedTicket = ticketService.updateTicketStatus(id, newState, agentId);
+            Ticket updatedTicket = ticketService.updateTicketStatus(id, newState, currentUser.getEmail());
             return ResponseEntity.ok(updatedTicket);
-        } catch (IllegalArgumentException e) { // Catches bad enum
-            return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().build();
         }
     }
 }

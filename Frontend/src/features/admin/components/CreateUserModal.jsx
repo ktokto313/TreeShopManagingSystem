@@ -14,22 +14,22 @@ import { Button } from "../../../components/ui/Button";
 import { useCreateUser } from "../hooks/useCreateUser";
 
 const ROLES = ["CUSTOMER", "MANAGER", "SHIPPER", "SUPPORT_AGENT"];
+const INITIAL_FORM = { fullName: "", email: "", phone: "", password: "", roleName: "CUSTOMER" };
 
 function validate(form) {
   const errors = {};
   if (!form.fullName.trim()) errors.fullName = "Full name is required";
-  else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(form.fullName.trim()))
+  else if (!/^[a-zA-ZÃ€-á»¹\s]+$/.test(form.fullName.trim()))
     errors.fullName = "Full name must contain letters only";
   if (!form.email.trim()) errors.email = "Email is required";
   if (form.phone && !/^0\d{8,10}$/.test(form.phone.replace(/\s/g, "")))
-    errors.phone = "Phone must start with 0 and be 9–11 digits";
+    errors.phone = "Phone must start with 0 and be 9â€“11 digits";
   if (!form.password) errors.password = "Password is required";
   return errors;
 }
 
 export function CreateUserModal({ isOpen, onClose, onCreated }) {
-  const initialForm = { fullName: "", email: "", phone: "", password: "", roleName: "CUSTOMER" };
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
@@ -41,7 +41,7 @@ export function CreateUserModal({ isOpen, onClose, onCreated }) {
   const { handleCreate, isLoading, hasError } = useCreateUser(() => {
     onCreated();
     onClose();
-    setForm(initialForm);
+    setForm(INITIAL_FORM);
     setErrors({});
   });
 
@@ -55,7 +55,6 @@ export function CreateUserModal({ isOpen, onClose, onCreated }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Create New User">
       <Form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
         <div>
           <Input
             label="Full Name"
@@ -96,7 +95,7 @@ export function CreateUserModal({ isOpen, onClose, onCreated }) {
               type={showPassword ? "text" : "password"}
               value={form.password}
               onChange={handleChange("password")}
-              placeholder="••••••••"
+              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
               required
             />
             <button
@@ -121,7 +120,7 @@ export function CreateUserModal({ isOpen, onClose, onCreated }) {
 
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="outline" type="button" onClick={onClose}>Cancel</Button>
-          <Button type="submit" disabled={isLoading}>{isLoading ? "Creating…" : "Create User"}</Button>
+          <Button type="submit" disabled={isLoading}>{isLoading ? "Creatingâ€¦" : "Create User"}</Button>
         </div>
       </Form>
     </Modal>
