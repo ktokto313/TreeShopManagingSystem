@@ -1,7 +1,7 @@
 //6/8: Dao Hung: Separate the hook from the UI file
 import { useState } from 'react'
 import { sendOtp, verifyOtp } from '../api/authApi'
-import { useAuth } from '../../../context/AuthContext.jsx'
+import { useAuth } from '../../../hooks/useAuth'
 
 export function useRegister() {
     const { register } = useAuth()

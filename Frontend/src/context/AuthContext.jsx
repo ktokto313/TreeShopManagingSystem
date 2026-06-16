@@ -1,13 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
-export const AuthContext = createContext(null);
-
-export const useAuth = () => {
-	const context = useContext(AuthContext);
-	if (!context) throw new Error("useAuth must be used within AuthProvider");
-	return context;
-};
+import { AuthContext } from "./AuthContext";
 
 const AUTH_STORAGE_KEYS = ["treeshop-auth-user", "currentUser"];
 

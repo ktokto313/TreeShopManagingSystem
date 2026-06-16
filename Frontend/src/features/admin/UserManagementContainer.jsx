@@ -5,7 +5,7 @@
  * Version: 2.0
  * Description: Main admin dashboard composing the user table, search bar, sorting, and create/edit/detail modals.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useManageUsers } from "./hooks/useManageUsers";
 import { UserTableRow } from "./components/UserTableRow";
 import { UserSearchBar } from "./components/UserSearchBar";
@@ -93,22 +93,17 @@ export function UserManagementContainer() {
 
   const totalUsers = displayedUsers.length;
   const totalPages = Math.max(1, Math.ceil(totalUsers / USERS_PER_PAGE));
-  const firstUserIndex = totalUsers === 0 ? 0 : (currentPage - 1) * USERS_PER_PAGE + 1;
-  const lastUserIndex = Math.min(currentPage * USERS_PER_PAGE, totalUsers);
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const firstUserIndex = totalUsers === 0 ? 0 : (safeCurrentPage - 1) * USERS_PER_PAGE + 1;
+  const lastUserIndex = Math.min(safeCurrentPage * USERS_PER_PAGE, totalUsers);
   const paginatedUsers = useMemo(() => {
-    const start = (currentPage - 1) * USERS_PER_PAGE;
+    const start = (safeCurrentPage - 1) * USERS_PER_PAGE;
     return displayedUsers.slice(start, start + USERS_PER_PAGE);
-  }, [displayedUsers, currentPage]);
+  }, [displayedUsers, safeCurrentPage]);
   const pageItems = useMemo(
-    () => getPageItems(currentPage, totalPages),
-    [currentPage, totalPages],
+    () => getPageItems(safeCurrentPage, totalPages),
+    [safeCurrentPage, totalPages],
   );
-
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [currentPage, totalPages]);
 
   const thClass =
     "px-4 py-3 text-xs font-medium text-stone-500 uppercase tracking-wide cursor-pointer select-none hover:text-stone-800";
@@ -221,7 +216,7 @@ export function UserManagementContainer() {
             <button
               type="button"
               onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-              disabled={currentPage === 1}
+              disabled={safeCurrentPage === 1}
               className="h-9 min-w-9 rounded-md border border-stone-200 px-3 text-sm font-medium text-stone-700 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
               &lt;
@@ -240,7 +235,7 @@ export function UserManagementContainer() {
                   type="button"
                   onClick={() => setCurrentPage(page)}
                   className={`h-9 min-w-9 rounded-md border px-3 text-sm font-medium ${
-                    currentPage === page
+                    safeCurrentPage === page
                       ? "border-[#283C1D] bg-[#283C1D] text-white"
                       : "border-stone-200 text-stone-700 hover:bg-stone-50"
                   }`}
@@ -252,7 +247,7 @@ export function UserManagementContainer() {
             <button
               type="button"
               onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-              disabled={currentPage === totalPages}
+              disabled={safeCurrentPage === totalPages}
               className="h-9 min-w-9 rounded-md border border-stone-200 px-3 text-sm font-medium text-stone-700 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
               &gt;

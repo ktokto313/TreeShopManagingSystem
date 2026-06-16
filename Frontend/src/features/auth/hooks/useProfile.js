@@ -1,7 +1,7 @@
 //6/8: Dao Hung: Separate the hook from the UI file
 import { useEffect, useState } from 'react'
 import { getProfile, updateProfile } from '../api/profileApi'
-import { useAuth } from '../../../context/AuthContext'
+import { useAuth } from '../../../hooks/useAuth'
 
 export function useProfile() {
     const [profile, setProfile] = useState(null)

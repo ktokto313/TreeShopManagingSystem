@@ -1,6 +1,6 @@
 //6/8: Dao Hung: Separate the hook from the UI file
 import { useState } from 'react'
-import { useAuth } from '../../../context/AuthContext.jsx'
+import { useAuth } from '../../../hooks/useAuth'
 
 function canAccessManagement(role) {
     return role === 'MANAGER' || role === 'SYSTEM_ADMIN'

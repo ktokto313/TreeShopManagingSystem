@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useAuth } from '../hooks/useAuth';
 import { Container } from '../components/global/Container';
 import { Form } from '../components/ui/Form';
 import { Input } from '../components/ui/Input';

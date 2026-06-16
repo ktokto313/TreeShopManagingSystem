@@ -19,11 +19,11 @@ const INITIAL_FORM = { fullName: "", email: "", phone: "", password: "", roleNam
 function validate(form) {
   const errors = {};
   if (!form.fullName.trim()) errors.fullName = "Full name is required";
-  else if (!/^[a-zA-ZÃ€-á»¹\s]+$/.test(form.fullName.trim()))
+  else if (!/^[\p{L}\s]+$/u.test(form.fullName.trim()))
     errors.fullName = "Full name must contain letters only";
   if (!form.email.trim()) errors.email = "Email is required";
   if (form.phone && !/^0\d{8,10}$/.test(form.phone.replace(/\s/g, "")))
-    errors.phone = "Phone must start with 0 and be 9â€“11 digits";
+    errors.phone = "Phone must start with 0 and be 9-11 digits";
   if (!form.password) errors.password = "Password is required";
   return errors;
 }
@@ -95,7 +95,7 @@ export function CreateUserModal({ isOpen, onClose, onCreated }) {
               type={showPassword ? "text" : "password"}
               value={form.password}
               onChange={handleChange("password")}
-              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+              placeholder="********"
               required
             />
             <button
@@ -120,7 +120,7 @@ export function CreateUserModal({ isOpen, onClose, onCreated }) {
 
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="outline" type="button" onClick={onClose}>Cancel</Button>
-          <Button type="submit" disabled={isLoading}>{isLoading ? "Creatingâ€¦" : "Create User"}</Button>
+          <Button type="submit" disabled={isLoading}>{isLoading ? "Creating..." : "Create User"}</Button>
         </div>
       </Form>
     </Modal>
