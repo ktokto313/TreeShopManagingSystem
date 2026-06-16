@@ -6,12 +6,14 @@ import Authentication from "./pages/StaffAuthentication";
 import StaffAuthentication from "./pages/StaffAuthentication";
 import UserManagement from "./pages/UserManagement";
 import TicketManagement from "./pages/TicketManagement";
+import HomePage from "./pages/HomePage";
+import LoadingScreen from "./pages/LoadingScreen";
 
 function ProtectedAdminRoute({ element }) {
 	const { isAdmin, isLoading } = useAuth();
 
 	if (isLoading) {
-		return <div>Loading...</div>;
+		return <LoadingScreen></LoadingScreen>
 	}
 
 	if (!isAdmin) {
@@ -40,6 +42,8 @@ function AppRoutes() {
                 path="/tickets/:id" 
                 element={<TicketDetail />} 
             />
+
+			<Route path="/home" element={<HomePage></HomePage>}></Route>
 
 			<Route path="*" element={<Navigate to="/admin/users" replace />} />
 		</Routes>
