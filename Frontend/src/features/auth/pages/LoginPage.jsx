@@ -20,8 +20,6 @@ export default function LoginPage() {
     setPendingGoogle,
   } = useLogin()
 
-  const fromPath = location.state?.from?.pathname || '/manage'
-
   return (
       <div className="min-h-[calc(100vh-4rem)] flex">
 
@@ -30,7 +28,7 @@ export default function LoginPage() {
                 email={pendingGoogle.email}
                 fullName={pendingGoogle.fullName}
                 onComplete={() => {
-                  navigate('/catalog')
+                  navigate('/')
                   setPendingGoogle(null)
                 }}
             />
@@ -67,7 +65,7 @@ export default function LoginPage() {
             <form
                 onSubmit={async (e) => {
                   e.preventDefault()
-                  const result = await handleLogin(fromPath)
+                  const result = await handleLogin(location.state?.from?.pathname)
                   if (result?.success) navigate(result.redirect, { replace: true })
                 }}
             >

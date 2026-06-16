@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../../components/ui/Card';
-import { timeFormat } from '../../utils/timeFormat';
+import { timeFormat } from './utils/timeFormat';
 import ORDER_STATUS_MAP from './data/orderStatusMap';
 
 export function OrderCard({ order, onViewDetails }) {

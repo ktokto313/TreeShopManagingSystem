@@ -1,7 +1,6 @@
 import { cn } from "../../../utils/cn";
 import styles from "../assets/styles/TicketDashboard.module.css";
 import { TicketCard } from "./TicketCard";
-import { Skeleton } from "../../../components/ui/Skeleton";
 import { LuTicketCheck } from "react-icons/lu";
 
 import { useTicketDashboard } from "../hooks/useTicketDashboard";
@@ -67,12 +66,12 @@ const TicketDashboard = ({ className }) => {
 					{isFetchAllTicketsLoading ? (
 						/* If: Loading is true */
 						Array.from({ length: 8 }).map((_, index) => (
-							<Skeleton
-								className="rounded-xl h-48 w-full"
+							<div
+								className="animate-pulse rounded-xl h-48 w-full"
 								key={`skeleton-${index}`}
 							>
 								<TicketCard variant="skeleton" />
-							</Skeleton>
+							</div>
 						))
 					) : fetchedTickets.length === 0 && !fetchAllTicketsError ? (
 						/* Else if: Not loading, but the array is empty */

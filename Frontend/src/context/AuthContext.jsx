@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 
 const AUTH_STORAGE_KEYS = ["treeshop-auth-user", "currentUser"];
@@ -18,7 +18,6 @@ function normalizeUser(user) {
 
 export function AuthProvider({ children }) {
 	const navigate = useNavigate();
-	const location = useLocation();
 	const [user, setUser] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -112,10 +111,6 @@ export function AuthProvider({ children }) {
 	};
 
 	const logout = async () => {
-		const wasStaffSession =
-			user?.roleName === "SYSTEM_ADMIN" ||
-			location.pathname.startsWith("/admin") ||
-			location.pathname.startsWith("/staff-login");
 		try {
 			const response = await fetch("/api/auth/logout", {
 				method: "POST",
@@ -124,7 +119,7 @@ export function AuthProvider({ children }) {
 			if (response.ok) {
 				setUser(null);
 				clearStoredAuth();
-				navigate(wasStaffSession ? "/staff-login" : "/login", { replace: true });
+				navigate("/login", { replace: true });
 			} else {
 				setError("Failed to logout");
 			}

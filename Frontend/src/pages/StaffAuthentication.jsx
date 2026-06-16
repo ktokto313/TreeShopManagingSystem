@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Container } from '../components/global/Container';
 import { Form } from '../components/ui/Form';
 import { Input } from '../components/ui/Input';
+import { getDefaultRouteForRole } from '../utils/authRoutes';
 
 export default function StaffAuthentication() {
 	const navigate = useNavigate();
@@ -25,8 +26,7 @@ export default function StaffAuthentication() {
 
 		try {
 			const user = await login(form.email, form.password);
-			const destination = user.roleName === 'SYSTEM_ADMIN' ? '/admin/users' : '/login';
-			navigate(destination, { replace: true });
+			navigate(getDefaultRouteForRole(user), { replace: true });
 		} catch (err) {
 			setError(err.message);
 		} finally {

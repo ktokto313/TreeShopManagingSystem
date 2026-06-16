@@ -54,3 +54,15 @@ export const fetchAllTickets = async (status, priority, sort) => {
 	if (!response.ok) throw new Error("Failed to fetch all tickets");
 	return response.json();
 };
+
+export const createTicket = async (ticket) => {
+	const response = await fetch("/api/tickets", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(ticket),
+		credentials: "include",
+	});
+
+	if (!response.ok) throw new Error("Failed to create ticket");
+	return response.json();
+};
