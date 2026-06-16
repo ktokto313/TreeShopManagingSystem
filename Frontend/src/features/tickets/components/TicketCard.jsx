@@ -94,7 +94,7 @@ export function TicketCard({ ticket, variant = "default" }) {
 						<div className="rounded-full bg-gray-300 w-[50%] h-3"></div>
 					</CardContent>
 
-					<CardFooter className="pt-0 mt-1 bg-transparent border-none flex gap-3 items-center justify-between text-gray-300 text-black">
+					<CardFooter className="pt-0 mt-1 bg-transparent border-none flex gap-3 items-center justify-between text-gray-300">
 						<div className="flex items-center gap-2 flex-6">
 							{/* Avatar Placeholder */}
 							<div className="h-5 rounded-full bg-gray-300 aspect-square"></div>
