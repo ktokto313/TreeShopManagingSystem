@@ -24,7 +24,7 @@ import { Modal } from "../../../components/ui/Modal";
 import { useState } from "react";
 import LoadingScreen from "../../../pages/LoadingScreen";
 
-const TicketDetail = () => {
+const TicketDetailPage = () => {
 	const { id: ticketId } = useParams();
 	const navigate = useNavigate();
 
@@ -338,4 +338,4 @@ const TicketDetail = () => {
 	);
 };
 
-export default TicketDetail;
+export default TicketDetailPage;
