@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import Container from '../../../components/global/Container'
-import Card from '../../../components/ui/Card'
-import Input from '../../../components/ui/Input'
+import {Container} from '../../../components/global/Container'
+import {Card} from '../../../components/ui/Card'
+import {Input} from '../../../components/ui/Input'
 import { useProfile } from '../hooks/useProfile'
 
 export default function ProfilePage() {

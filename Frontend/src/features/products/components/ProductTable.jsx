@@ -1,5 +1,5 @@
 // Created by minhlthe200133
-import Button from '../../../components/ui/Button'
+import {Button} from '../../../components/ui/Button'
 import { formatCurrency, parseCatalogImages } from '../../catalog/utils/catalogUtils'
 import ProductImageFrame from './ProductImageFrame'
 import ProductStatusBadge from './ProductStatusBadge'

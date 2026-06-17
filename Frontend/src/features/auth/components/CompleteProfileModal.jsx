@@ -1,6 +1,5 @@
-import { useState } from 'react'
-import { useAuth } from '../../../hooks/useAuth'
-
+import { useContext, useState } from 'react'
+import {AuthContext} from '../../../context/AuthContext'
 export default function CompleteProfileModal({ email, fullName, onComplete }) {
   const [name, setName] = useState(fullName || '')
   const [phone, setPhone] = useState('')

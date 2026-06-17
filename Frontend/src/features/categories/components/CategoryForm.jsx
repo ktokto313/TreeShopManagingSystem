@@ -1,7 +1,7 @@
 // Created by minhlthe200133
-import Button from '../../../components/ui/Button'
-import Form from '../../../components/ui/Form'
-import Input from '../../../components/ui/Input'
+import {Button} from '../../../components/ui/Button'
+import {Form} from '../../../components/ui/Form'
+import {Input} from '../../../components/ui/Input'
 
 export default function CategoryForm({
   values,
