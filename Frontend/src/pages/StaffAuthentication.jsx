@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import {AuthContext} from "../context/AuthContext";
 import { Container } from '../components/global/Container';
 import { Form } from '../components/ui/Form';
 import { Input } from '../components/ui/Input';
@@ -8,7 +8,7 @@ import { getDefaultRouteForRole } from '../utils/authRoutes';
 
 export default function StaffAuthentication() {
 	const navigate = useNavigate();
-	const { login } = useAuth();
+	const { login } = useContext(AuthContext);
 	const [form, setForm] = useState({
 		email: '',
 		password: '',

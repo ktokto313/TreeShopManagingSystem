@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { Container } from "../components/global/Container";
-import { Badge } from "../components/ui/Badge";
-import { Button } from "../components/ui/Button";
-import { Card } from "../components/ui/Card";
-import { useAuth } from "../context/AuthContext";
-import { loadPublicJson } from "../features/catalog/utils/catalogApi";
-import { formatCurrency } from "../features/catalog/utils/catalogUtils";
-import ProductImageFrame from "../features/products/components/ProductImageFrame";
-import { getProductAvailability } from "../features/products/utils/productAvailability";
-import { resolveProductImages } from "../features/products/utils/productImageResolver";
-import { parseVariantGroups } from "../features/products/utils/variantUtils";
+import { useContext, useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import {Container} from '../components/global/Container'
+import {Badge} from '../components/ui/Badge'
+import {Button} from '../components/ui/Button'
+import {Card} from '../components/ui/Card'
+import { AuthContext } from '../context/AuthContext'
+import { loadPublicJson } from '../features/catalog/utils/catalogApi'
+import { formatCurrency } from '../features/catalog/utils/catalogUtils'
+import ProductImageFrame from '../features/products/components/ProductImageFrame'
+import { getProductAvailability } from '../features/products/utils/productAvailability'
+import { resolveProductImages } from '../features/products/utils/productImageResolver'
+import { parseVariantGroups } from '../features/products/utils/variantUtils'
 
 function summarizeDescription(value) {
 	if (!value) {
@@ -37,7 +37,7 @@ export default function ProductDetailPage() {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { productId } = useParams();
-	const { logout, isAuthenticated, canManage } = useAuth();
+	const { logout, isAuthenticated, canManage } = useContext(AuthContext);;
 
 	const [categories, setCategories] = useState([]);
 	const [product, setProduct] = useState(location.state?.product ?? null);

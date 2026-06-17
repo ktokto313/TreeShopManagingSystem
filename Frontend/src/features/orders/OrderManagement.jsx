@@ -1,16 +1,17 @@
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
+import { Header } from '../../components/global/Header';
+import { Footer } from '../../components/global/Footer';
 import { Container } from '../../components/global/Container';
 import { OrderCard } from './OrderCard';
 import { Button } from '../../components/ui/Button';
 import { useState } from 'react';
 import useFetchAllOrders from './hooks/useFetchAllOrders';
 import OrderModal from './OrderModal';
-
-function PulseBox({ className = '' }) {
-  return <div className={`animate-pulse rounded bg-stone-200 ${className}`} />;
-}
+import { AuthContext } from '../../context/AuthContext';
 
 export default function OrderManagement() {
+  //TODO remove use auth user when migrated to auth context approach
+  const { executeAuth } = useAuthUser();
   const {
     orders,
     isLoading,
@@ -26,7 +27,7 @@ export default function OrderManagement() {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [fetchOrders]);
 
   // Compute metrics
   const totalOrders = orders.length;

@@ -5,7 +5,7 @@ export default function CompleteProfileModal({ email, fullName, onComplete }) {
   const [phone, setPhone] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { loginWithGoogle } = useAuth()
+  const { loginWithGoogle } = useContext(AuthContext);
 
   const vnPhoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/
 

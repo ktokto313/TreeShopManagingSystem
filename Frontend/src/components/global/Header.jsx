@@ -44,6 +44,8 @@ const navItemsByRole = {
     { label: 'Profile', to: '/profile' },
   ],
 };
+import { AuthContext } from '../../context/AuthContext';
+import { useContext } from 'react';
 
 export function Header({ className = '', ...props }) {
   const { user, logout } = useAuth();
