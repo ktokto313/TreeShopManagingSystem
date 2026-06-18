@@ -56,7 +56,7 @@ export default function StaffAuthentication() {
 						type="password"
 						value={form.password}
 						onChange={handleChange('password')}
-						placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+						placeholder="Enter your password"
 						required
 					/>
 

@@ -29,7 +29,7 @@ const USERS_PER_PAGE = 10;
 function SortIcon({ active, direction }) {
   return (
     <span className={`ml-1 ${active ? "text-[#283C1D]" : "text-stone-300"}`}>
-      {active && direction === "desc" ? "â†“" : "â†‘"}
+      {active && direction === "desc" ? "\u2193" : "\u2191"}
     </span>
   );
 }

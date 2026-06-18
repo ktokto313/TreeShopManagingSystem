@@ -14,7 +14,7 @@ import { IoWarningOutline } from "react-icons/io5";
 import { MdOutlineDangerous } from "react-icons/md";
 import sadPlant from "../assets/images/sadPlant.gif";
 import { getSelectOption } from "../data/ticketSelectList";
-import { timeFormat } from "../utils/timeFormat";
+import { timeFormat } from "../../../utils/timeFormat";
 import {
 	getTicketStatusStyles,
 	translateTicketPriority,

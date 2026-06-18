@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 
 const AUTH_STORAGE_KEYS = ["treeshop-auth-user", "currentUser"];
@@ -17,7 +16,6 @@ function normalizeUser(user) {
 }
 
 export function AuthProvider({ children }) {
-	const navigate = useNavigate();
 	const [user, setUser] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -119,7 +117,6 @@ export function AuthProvider({ children }) {
 			if (response.ok) {
 				setUser(null);
 				clearStoredAuth();
-				navigate("/login", { replace: true });
 			} else {
 				setError("Failed to logout");
 			}

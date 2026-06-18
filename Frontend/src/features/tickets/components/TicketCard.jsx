@@ -6,7 +6,7 @@ import {
 	CardFooter,
 } from "../../../components/ui/Card";
 import { cn } from "../../../utils/cn";
-import { timeFormat } from "../utils/timeFormat";
+import { timeFormat } from "../../../utils/timeFormat";
 import {
 	getTicketStatusStyles,
 	translateTicketStatus,

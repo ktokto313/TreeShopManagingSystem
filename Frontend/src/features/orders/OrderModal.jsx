@@ -1,6 +1,6 @@
 import { Modal } from "../../components/ui/Modal";
 import { Button } from "../../components/ui/Button";
-import { timeFormat } from "./utils/timeFormat";
+import { timeFormat } from "../../utils/timeFormat";
 import ShipperSelect from "./ShipperSelect";
 import ORDER_STATUS_MAP from "./data/orderStatusMap";
 import useUpdateShipper from "./hooks/useUpdateShipper";
