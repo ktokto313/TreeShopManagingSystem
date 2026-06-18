@@ -89,6 +89,16 @@ public class TicketService {
         TicketState newState = TicketState.valueOf(newStateStr.toUpperCase());
         TicketState originalState = ticket.getTicketState();
 
+        if (newState == originalState) {
+            throw new RuntimeException("Ticket is already in state: " + newStateStr);
+        }
+        if (newState == TicketState.CREATED) {
+            throw new RuntimeException("Cannot revert ticket back to CREATED state.");
+        }
+        if (originalState == TicketState.DONE) {
+            throw new RuntimeException("Cannot modify a ticket that is already DONE.");
+        }
+
         String userEmail = currentUser.getEmail();
 
         boolean isAgent = currentUser.getRole().equals("SUPPORT_AGENT");
@@ -96,27 +106,45 @@ public class TicketService {
 
         boolean isCreator = ticket.getTicketCreator().getEmail().equals(userEmail);
         boolean notAssigned = ticket.getAssignee() == null && userEmail != null;
-        boolean isTheAssignedAgent = !notAssigned && ticket.getAssignee().getEmail().equals(userEmail);
 
         if (isAgent) {
-            // If the ticket is unassigned, assign the agent changing the ticket
+            // If nobody is assigned to the ticket, let current agent get assigned to it
             if (notAssigned) {
                 User agent = userRepository.findByEmail(userEmail).orElse(null);
                 ticket.setAssignee(agent);
-
-            } else if (!isTheAssignedAgent) {
-                throw new RuntimeException("Cannot assign to a ticket with an already assigned support agent");
             }
+
+            // If someone owns it, verify it is the current agent making the request.
+            else if (!ticket.getAssignee().getEmail().equals(userEmail)) {
+                throw new RuntimeException("Cannot modify a ticket assigned to another support agent.");
+            }
+
+            // Enforce Agent Paths from Diagram
+            if (originalState == TicketState.CREATED && newState != TicketState.PROCESSING) {
+                throw new RuntimeException("Agent can only transition a CREATED ticket to PROCESSING.");
+            }
+            if (originalState == TicketState.PROCESSING && (newState != TicketState.RESOLVED && newState != TicketState.DONE)) {
+                throw new RuntimeException("Agent can only transition a PROCESSING ticket to RESOLVED or DONE (reject).");
+            }
+            if (originalState == TicketState.RESOLVED) {
+                throw new RuntimeException("Agent cannot modify a RESOLVED ticket. Awaiting customer confirmation.");
+            }
+
         } else if (isCustomer) {
-            if (!isCreator) throw new RuntimeException("Cannot accept/decline ticket status when user is not the creator");
-            if (newState != TicketState.DONE && newState != TicketState.PROCESSING) {
-                throw new RuntimeException("Cannot accept ticket into this state: " + newState);
+            if (!isCreator) {
+                throw new RuntimeException("Cannot modify a ticket you did not create.");
             }
-            if(originalState == TicketState.DONE){
-                throw new RuntimeException("Cannot accept ticket when ticket state is DONE");
-            }
-        }
 
+            // Enforce Customer Paths from Diagram
+            if (originalState != TicketState.RESOLVED) {
+                throw new RuntimeException("Customer can only update the ticket state when it requires resolution feedback (RESOLVED).");
+            }
+            if (newState != TicketState.DONE && newState != TicketState.PROCESSING) {
+                throw new RuntimeException("Customer can only ACCEPT (Done) or REJECT (Processing) the resolution.");
+            }
+        } else {
+            throw new RuntimeException("Unauthorized role.");
+        }
 
         if (newState == TicketState.RESOLVED || newState == TicketState.DONE) {
             ticket.setTimeResolved(new Timestamp(System.currentTimeMillis()));
