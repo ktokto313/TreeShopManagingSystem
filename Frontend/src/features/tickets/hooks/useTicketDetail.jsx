@@ -80,8 +80,8 @@ export const useTicketDetail = (ticketId) => {
 	const { user } = useContext(AuthContext);
 	const [state, dispatch] = useReducer(detailReducer, initialState);
 
-	const isCreator = user?.email === state.ticket.ticketCreator?.email;
-	const isResolved = state.ticket.ticketState?.toLowerCase() === "resolved";
+	const isCreator = user?.email === state.status?.ticket?.ticketCreator?.email;
+	const isResolved = state.status?.ticket?.ticketState?.toLowerCase() === "resolved";
 
 	const isAgent = user?.roleName?.toLowerCase() === "support_agent";
 

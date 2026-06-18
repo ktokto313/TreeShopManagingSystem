@@ -6,7 +6,6 @@ import LoginPage from "./features/auth/pages/LoginPage";
 import ProfilePage from "./features/auth/pages/ProfilePage";
 import RegisterPage from "./features/auth/pages/RegisterPage";
 import OrderManagement from "./features/orders/OrderManagement";
-import TicketDetail from "./features/tickets/components/ticket-detail/TicketDetail";
 import CatalogPage from "./pages/CatalogPage";
 import HomePage from "./pages/HomePage";
 import ManagementPage from "./pages/ManagementPage";
@@ -18,6 +17,7 @@ import TicketManagement from "./pages/TicketManagement";
 import { useContext } from "react";
 import { hasAllowedRole } from "./utils/authRoutes";
 import { AuthContext } from "./context/AuthContext";
+import TicketDetailPage from "./pages/TicketDetailPage";
 
 function ProtectedRoute({ element, roles = [] }) {
 	const { user, isLoading } = useContext(AuthContext);
@@ -85,7 +85,7 @@ function AppRoutes() {
 				element={
 					<ProtectedRoute
 						roles={["SUPPORT_AGENT", "CUSTOMER", "SYSTEM_ADMIN"]}
-						element={<TicketDetail />}
+						element={<TicketDetailPage />}
 					/>
 				}
 			/>

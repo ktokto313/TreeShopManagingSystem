@@ -2,7 +2,7 @@ export const ticketSelectList = [
 	{
 		label: "Trạng Thái",
 		options: [
-			{ label: "Không", value: "" },
+			{ label: "Tất Cả", value: "" },
 			{ label: "Đã Khởi Tạo", value: "CREATED" },
 			{ label: "Đang Xử Lí", value: "PROCESSING" },
 			{ label: "Đã Xử Lí", value: "RESOLVED" },
