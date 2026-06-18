@@ -6,8 +6,7 @@ import LoginPage from "./features/auth/pages/LoginPage";
 import ProfilePage from "./features/auth/pages/ProfilePage";
 import RegisterPage from "./features/auth/pages/RegisterPage";
 import OrderManagement from "./features/orders/OrderManagement";
-import TicketDashboard from "./features/tickets/components/TicketDashboard";
-import TicketDetail from "./features/tickets/components/TicketDetail";
+import TicketDetail from "./features/tickets/components/ticket-detail/TicketDetail"
 import CatalogPage from "./pages/CatalogPage";
 import HomePage from "./pages/HomePage";
 import ManagementPage from "./pages/ManagementPage";
@@ -30,13 +29,13 @@ function ProtectedRoute({ element, roles = [] }) {
 function AppRoutes() {
 	return (
 		<Routes>
+			{/* Others */}
 			<Route path="/" element={<HomePage />} />
+
+			{/* Auth and Account */}
 			<Route path="/login" element={<LoginPage />} />
 			<Route path="/register" element={<RegisterPage />} />
 			<Route path="/staff-login" element={<StaffAuthentication />} />
-			<Route path="/catalog" element={<CatalogPage />} />
-			<Route path="/catalog/category/:categoryId" element={<CatalogPage />} />
-			<Route path="/catalog/:productId" element={<ProductDetailPage />} />
 			<Route
 				path="/profile"
 				element={<ProtectedRoute element={<ProfilePage />} />}
@@ -45,6 +44,13 @@ function AppRoutes() {
 				path="/change-password"
 				element={<ProtectedRoute element={<ChangePasswordPage />} />}
 			/>
+
+			{/* Catalog */}
+			<Route path="/catalog" element={<CatalogPage />} />
+			<Route path="/catalog/category/:categoryId" element={<CatalogPage />} />
+			<Route path="/catalog/:productId" element={<ProductDetailPage />} />
+
+			{/* Admin and Manager */}
 			<Route
 				path="/manage"
 				element={
@@ -65,20 +71,12 @@ function AppRoutes() {
 			/>
 
 			{/* Tickets */}
-			<Route path="/tickets" element={<TicketManagement />} />
-			<Route path="/tickets/:id" element={<TicketDetail />} />
-
-			{/* Orders */}
 			<Route
-				path="/tickets"
-				element={<Navigate to="/tickets/dashboard" replace />}
-			/>
-			<Route
-				path="/tickets/dashboard"
+				path="/tickets/"
 				element={
 					<ProtectedRoute
 						roles={["SUPPORT_AGENT", "CUSTOMER", "SYSTEM_ADMIN"]}
-						element={<TicketDashboard />}
+						element={<TicketManagement />}
 					/>
 				}
 			/>
@@ -91,6 +89,8 @@ function AppRoutes() {
 					/>
 				}
 			/>
+
+			{/* Orders */}
 			<Route
 				path="/orders"
 				element={

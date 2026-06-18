@@ -1,15 +1,9 @@
-<<<<<<< HEAD:Frontend/src/features/tickets/components/TicketDashboard.jsx
-import { cn } from "../../../utils/cn";
-import styles from "../assets/styles/TicketDashboard.module.css";
-import { TicketCard } from "./TicketCard";
-=======
->>>>>>> fd1cb01 (refactor: reorganize ticket components, split ticket detail into smaller components):Frontend/src/features/tickets/components/ticket-dashboard/TicketDashboard.jsx
-import { LuTicketCheck } from "react-icons/lu";
-import { Skeleton } from "../../../../components/ui/Skeleton";
-import { cn } from "../../../../utils/cn";
 import styles from "../../assets/styles/TicketDashboard.module.css";
 import { TicketCard } from "../TicketCard";
+import { LuTicketCheck } from "react-icons/lu";
+import { Skeleton } from "../../../../components/ui/Skeleton";
 import { TicketDashboardFilterBtn } from "./TicketDashboardFilter";
+import { cn } from "./../../../../utils/cn";
 
 const TicketDashboard = ({ dashboardState, className }) => {
 	const {

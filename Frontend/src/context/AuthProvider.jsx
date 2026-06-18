@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 
 const AUTH_STORAGE_KEYS = ["treeshop-auth-user", "currentUser"];
@@ -46,7 +45,8 @@ export function AuthProvider({ children }) {
 
 	const isAdmin = user?.roleName === "SYSTEM_ADMIN";
 	const isAuthenticated = Boolean(user);
-	const canManage = user?.roleName === "SYSTEM_ADMIN" || user?.roleName === "MANAGER";
+	const canManage =
+		user?.roleName === "SYSTEM_ADMIN" || user?.roleName === "MANAGER";
 
 	const login = async (emailOrCredentials, password) => {
 		const credentials =
@@ -96,7 +96,9 @@ export function AuthProvider({ children }) {
 		});
 		if (!response.ok) {
 			const registerError = new Error(
-				response.status === 409 ? "Email already registered" : "Registration failed",
+				response.status === 409
+					? "Email already registered"
+					: "Registration failed",
 			);
 			registerError.status = response.status;
 			setError(registerError.message);
@@ -109,12 +111,7 @@ export function AuthProvider({ children }) {
 		setUser((current) => normalizeUser({ ...current, ...updates }));
 	};
 
-	const logout = useCallback(() => {async () => {
-		const wasStaffSession =
-			user?.roleName === "SYSTEM_ADMIN" ||
-			location.pathname.startsWith("/admin") ||
-			location.pathname.startsWith("/staff-login");
-
+	const logout = async () => {
 		try {
 			const response = await fetch("/api/auth/logout", {
 				method: "POST",
@@ -129,7 +126,7 @@ export function AuthProvider({ children }) {
 		} catch (err) {
 			setError(err.message);
 		}
-	}}, [location.pathname, navigate, user?.roleName]);
+	};
 
 	return (
 		<AuthContext.Provider

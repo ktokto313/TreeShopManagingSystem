@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { Container } from './Container';
-import { useAuth } from '../../hooks/useAuth';
+import { AuthContext } from "../../context/AuthContext";
+import { useContext } from 'react';
 
 const linkClass = ({ isActive }) =>
   `text-sm font-medium transition-colors ${
@@ -27,7 +28,7 @@ const navItemsByRole = {
   ],
   SUPPORT_AGENT: [
     { label: 'Home', to: '/' },
-    { label: 'Tickets', to: '/tickets/dashboard' },
+    { label: 'Tickets', to: '/tickets/' },
     { label: 'Profile', to: '/profile' },
   ],
   SHIPPER: [
@@ -39,16 +40,14 @@ const navItemsByRole = {
     { label: 'Home', to: '/' },
     { label: 'User Management', to: '/admin/users' },
     { label: 'Manage', to: '/manage' },
-    { label: 'Tickets', to: '/tickets/dashboard' },
+    { label: 'Tickets', to: '/tickets/' },
     { label: 'Orders', to: '/orders' },
     { label: 'Profile', to: '/profile' },
   ],
 };
-import { AuthContext } from '../../context/AuthContext';
-import { useContext } from 'react';
 
 export function Header({ className = '', ...props }) {
-  const { user, logout } = useAuth();
+  const { user, logout } = useContext(AuthContext);
   const role = user?.roleName ?? user?.role;
   const navItems = navItemsByRole[role] ?? navItemsByRole.anonymous;
 
