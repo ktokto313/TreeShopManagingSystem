@@ -59,10 +59,6 @@ public class UserService {
         return convertToDTO(savedUser);
     }
 
-    private Role resolveRole(String roleName) {
-        return new Role();
-    }
-
     private void validateUserForCreate(UserDTO userDTO) {
         if (userDTO == null) {
             throw new IllegalArgumentException("User data is required");
@@ -200,7 +196,7 @@ public class UserService {
         user.setStatus(dto.getStatus() != null ? dto.getStatus() : true);
 
         user.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
-
+        
         return user;
     }
 
