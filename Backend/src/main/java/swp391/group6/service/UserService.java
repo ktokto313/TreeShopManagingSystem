@@ -59,10 +59,6 @@ public class UserService {
         return convertToDTO(savedUser);
     }
 
-    private Role resolveRole(String roleName) {
-        return new Role();
-    }
-
     private void validateUserForCreate(UserDTO userDTO) {
         if (userDTO == null) {
             throw new IllegalArgumentException("User data is required");
