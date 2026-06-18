@@ -171,7 +171,8 @@ public class UserService {
         dto.setEmail(user.getEmail());
         dto.setFullName(user.getFullName());
         dto.setPhone(user.getPhone());
-        dto.setHasPassword(user.getPassword() != null && !user.getPassword().isBlank());
+        // UserDTO stores this as a boxed Boolean and Lombok names its setter setIsHasPassword.
+        dto.setIsHasPassword(user.getPassword() != null && !user.getPassword().isBlank() ? Boolean.TRUE : Boolean.FALSE);
         if (user.getRole() != null) {
             dto.setRoleName(user.getRole().getName());
         }
@@ -196,15 +197,13 @@ public class UserService {
 
         user.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
 
-        String roleName = (dto.getRoleName() != null && !dto.getRoleName().isBlank()) ? dto.getRoleName() : DEFAULT_ROLE_NAME;
-        Role role = roleRepository.findByName(roleName).orElse(null);
-        if (role == null) {
-            role = new Role();
-            role.setId(1L);
-        }
-        user.setRole(role);
-
         return user;
+    }
+
+    private Role resolveRole(String roleName) {
+        String name = (roleName != null && !roleName.isBlank()) ? roleName : DEFAULT_ROLE_NAME;
+        return roleRepository.findByNameIgnoreCase(name)
+                .orElseThrow(() -> new IllegalStateException("Required role is not configured: " + name));
     }
 
     private boolean hasRole(User user, String roleName) {

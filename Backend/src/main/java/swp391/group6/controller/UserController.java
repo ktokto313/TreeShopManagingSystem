@@ -29,7 +29,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    // SYSTEM_ADMIN only
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers(HttpServletRequest request, @RequestParam(required = false) String role) {
         LoginResponse currentUser = JWTUtil.getUser(request);
@@ -50,7 +49,6 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    // Get by id (role-based)
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable long id, HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);
@@ -79,7 +77,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        // Allow users to view their own profile regardless of role protection
         return userService.getUserByEmailUnprotected(currentUser.getEmail())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -100,7 +97,6 @@ public class UserController {
         }
     }
 
-    // SYSTEM_ADMIN / MANAGER
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable long id,
                                               @RequestBody UserDTO userDTO,
@@ -156,11 +152,8 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
-
-        return ResponseEntity.ok(updatedUser);
     }
 
-    // SYSTEM_ADMIN only
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable long id, HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);

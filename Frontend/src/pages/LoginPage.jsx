@@ -6,7 +6,7 @@ import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
 import Form from '../components/ui/Form'
 import Input from '../components/ui/Input'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../hooks/useAuth'
 
 function canAccessManagement(role) {
   return role === 'MANAGER' || role === 'SYSTEM_ADMIN'

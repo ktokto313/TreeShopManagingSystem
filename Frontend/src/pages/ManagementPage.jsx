@@ -5,7 +5,7 @@ import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
 import Modal from '../components/ui/Modal'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../hooks/useAuth'
 import CategoryForm from '../features/categories/components/CategoryForm'
 import CategoryTable from '../features/categories/components/CategoryTable'
 import {

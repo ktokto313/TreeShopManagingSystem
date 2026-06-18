@@ -170,7 +170,16 @@ class UserServiceTest {
         when(userRepository.findByEmail("customer@example.com")).thenReturn(Optional.empty());
         when(roleRepository.findByNameIgnoreCase("UNKNOWN")).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(dto));
+        assertThrows(IllegalStateException.class, () -> userService.createUser(dto));
+    }
+
+    @Test
+    void createUser_ThrowsIfDefaultRoleIsNotConfigured() {
+        UserDTO dto = dto("customer@example.com", "password123", null);
+        when(userRepository.findByEmail("customer@example.com")).thenReturn(Optional.empty());
+        when(roleRepository.findByNameIgnoreCase("CUSTOMER")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalStateException.class, () -> userService.createUser(dto));
     }
 
     @Test

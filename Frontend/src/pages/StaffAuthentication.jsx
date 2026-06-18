@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Container } from '../components/global/Container';
 import { Form } from '../components/ui/Form';
 import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
+import { getDefaultRouteForRole } from '../utils/authRoutes';
 
 export default function StaffAuthentication() {
 	const navigate = useNavigate();
@@ -25,10 +25,8 @@ export default function StaffAuthentication() {
 		setError(null);
 
 		try {
-			const user = await login(form);
-			const destination =
-				user.roleName === 'SYSTEM_ADMIN' ? '/admin/users' : '/tickets';
-			navigate(destination, { replace: true });
+			const user = await login(form.email, form.password);
+			navigate(getDefaultRouteForRole(user), { replace: true });
 		} catch (err) {
 			setError(err.message);
 		} finally {
@@ -58,7 +56,7 @@ export default function StaffAuthentication() {
 						type="password"
 						value={form.password}
 						onChange={handleChange('password')}
-						placeholder="••••••••"
+						placeholder="Enter your password"
 						required
 					/>
 
@@ -68,9 +66,13 @@ export default function StaffAuthentication() {
 						</div>
 					)}
 
-					<Button type="submit" disabled={isLoading} className="w-full">
+					<button
+						type="submit"
+						disabled={isLoading}
+						className="w-full h-10 px-4 text-sm rounded-md font-medium bg-[#283C1D] text-white hover:opacity-90 disabled:opacity-50"
+					>
 						{isLoading ? 'Signing in...' : 'Sign In'}
-					</Button>
+					</button>
 				</Form>
 			</div>
 		</Container>

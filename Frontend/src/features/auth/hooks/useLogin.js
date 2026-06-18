@@ -1,10 +1,7 @@
 //6/8: Dao Hung: Separate the hook from the UI file
 import { useState } from 'react'
-import { useAuth } from '../../../context/AuthContext'
-
-function canAccessManagement(role) {
-    return role === 'MANAGER' || role === 'SYSTEM_ADMIN'
-}
+import { useAuth } from '../../../hooks/useAuth'
+import { getDefaultRouteForRole } from '../../../utils/authRoutes'
 
 export function useLogin() {
     const { login, loginWithGoogle } = useAuth()
@@ -19,7 +16,7 @@ export function useLogin() {
         setValues((prev) => ({ ...prev, [name]: value }))
     }
 
-    async function handleLogin(fromPath) {
+    async function handleLogin() {
         if (loading) return
 
         setLoading(true)
@@ -28,11 +25,7 @@ export function useLogin() {
         try {
             const user = await login(values.email, values.password)
 
-            const targetPath = canAccessManagement(user.role)
-                ? fromPath === '/login' ? '/manage' : fromPath
-                : '/catalog'
-
-            return { success: true, redirect: targetPath }
+            return { success: true, redirect: getDefaultRouteForRole(user) }
         } catch (err) {
             setError(err.message || 'Invalid email or password')
             return { success: false }
@@ -70,7 +63,7 @@ export function useLogin() {
 
             return {
                 success: true,
-                redirect: canAccessManagement(data.role) ? '/manage' : '/catalog',
+                redirect: getDefaultRouteForRole(data.role),
             }
         } catch {
             setError('Google login failed, please try again')

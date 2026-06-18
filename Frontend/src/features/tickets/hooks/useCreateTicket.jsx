@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createTicket } from "../data/createTicket";
+import { createTicket } from "../data/ticketApi";
 
 const useCreateTicket = () => {
     const [isCreateTicketLoading, setIsCreateTicketLoading] = useState(false);

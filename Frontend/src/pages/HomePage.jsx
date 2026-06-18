@@ -44,9 +44,6 @@ export default function HomePage() {
               <ActionLink to="/catalog" variant="primary">
                 Vào catalog
               </ActionLink>
-              <ActionLink to="/manage" variant="secondary">
-                Vào quản lý
-              </ActionLink>
             </div>
 
             <p className="max-w-2xl text-sm text-[var(--text)]">
@@ -61,14 +58,14 @@ export default function HomePage() {
           <div className="flex flex-col items-start justify-between gap-5 rounded-3xl bg-white p-8 shadow-xl lg:flex-row lg:items-center">
             <div className="space-y-2">
               <h2 className="text-2xl font-semibold text-[var(--text-h)]">
-                Mở catalog để xem cây, hoặc vào quản lý nếu cần cập nhật sản phẩm
+                Mở catalog để xem cây xanh phù hợp với không gian của bạn
               </h2>
               <p className="max-w-2xl text-sm text-[var(--text)]">
-                Trang đầu giữ vai trò dẫn hướng đơn giản cho khách xem cây và cho quản trị viên cập nhật dữ liệu.
+                Trang đầu giữ vai trò dẫn hướng nhẹ nhàng cho khách xem cây, khám phá danh mục và chọn sản phẩm phù hợp.
               </p>
             </div>
-            <ActionLink to="/manage" variant="primary">
-              Mở trang quản lý
+            <ActionLink to="/catalog" variant="primary">
+              Mở catalog
             </ActionLink>
           </div>
         </Container>

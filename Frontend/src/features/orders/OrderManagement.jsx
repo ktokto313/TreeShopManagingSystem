@@ -1,18 +1,16 @@
 import { useEffect } from 'react';
-import { Header } from '../../components/global/Header';
-import { Footer } from '../../components/global/Footer';
 import { Container } from '../../components/global/Container';
 import { OrderCard } from './OrderCard';
 import { Button } from '../../components/ui/Button';
-import { Skeleton } from '../../components/ui/Skeleton';
 import { useState } from 'react';
-import useAuthUser from '../../hooks/useAuthUser';
 import useFetchAllOrders from './hooks/useFetchAllOrders';
 import OrderModal from './OrderModal';
 
+function PulseBox({ className = '' }) {
+  return <div className={`animate-pulse rounded bg-stone-200 ${className}`} />;
+}
+
 export default function OrderManagement() {
-  //TODO remove use auth user when migrated to auth context approach
-  const { executeAuth } = useAuthUser();
   const {
     orders,
     isLoading,
@@ -25,10 +23,6 @@ export default function OrderManagement() {
   } = useFetchAllOrders();
 
   const [selectedOrderId, setSelectedOrderId] = useState(null);
-
-  useEffect(() => {
-    executeAuth();
-  }, []);
 
   useEffect(() => {
     fetchOrders();
@@ -47,8 +41,6 @@ export default function OrderManagement() {
 
   return (
     <div className="min-h-screen flex flex-col bg-bg-base font-main">
-      <Header />
-
       <main className="flex-grow py-8 bg-gradient-to-b from-bg-base to-bg-surface/30">
         <Container>
           {/* Header Title Section */}
@@ -79,7 +71,7 @@ export default function OrderManagement() {
             <div className="p-5 rounded-xl border border-border/60 bg-bg-surface/40 backdrop-blur-sm relative overflow-hidden group hover:border-interactive/40 transition-all duration-300">
               <span className="text-xs font-bold uppercase tracking-wider text-black/50">Total Orders</span>
               <div className="text-3xl font-black text-black mt-2">
-                {isLoading ? <Skeleton className="h-9 w-16 mt-1" /> : totalOrders}
+                {isLoading ? <PulseBox className="h-9 w-16 mt-1" /> : totalOrders}
               </div>
               <div className="absolute right-4 bottom-4 text-interactive/10 group-hover:text-interactive/20 transition-all duration-300">
                 <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,7 +83,7 @@ export default function OrderManagement() {
             <div className="p-5 rounded-xl border border-border/60 bg-bg-surface/40 backdrop-blur-sm relative overflow-hidden group hover:border-interactive/40 transition-all duration-300">
               <span className="text-xs font-bold uppercase tracking-wider text-black/50">Active Deliveries</span>
               <div className="text-3xl font-black text-black mt-2">
-                {isLoading ? <Skeleton className="h-9 w-16 mt-1" /> : totalOrders}
+                {isLoading ? <PulseBox className="h-9 w-16 mt-1" /> : totalOrders}
               </div>
               <div className="absolute right-4 bottom-4 text-interactive/10 group-hover:text-interactive/20 transition-all duration-300">
                 <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,7 +96,7 @@ export default function OrderManagement() {
               <span className="text-xs font-bold uppercase tracking-wider text-black/50">Total Revenue Generated</span>
               <div className="text-3xl font-black text-interactive mt-2">
                 {isLoading ? (
-                  <Skeleton className="h-9 w-32 mt-1" />
+                  <PulseBox className="h-9 w-32 mt-1" />
                 ) : (
                   `$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                 )}
@@ -167,19 +159,19 @@ export default function OrderManagement() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <div className="space-y-2">
-                        <Skeleton className="h-3 w-20" />
-                        <Skeleton className="h-4 w-32" />
+                        <PulseBox className="h-3 w-20" />
+                        <PulseBox className="h-4 w-32" />
                       </div>
-                      <Skeleton className="h-6 w-16 rounded-full" />
+                      <PulseBox className="h-6 w-16 rounded-full" />
                     </div>
                     <div className="space-y-2 pt-2">
-                      <Skeleton className="h-3 w-full" />
-                      <Skeleton className="h-3 w-5/6" />
+                      <PulseBox className="h-3 w-full" />
+                      <PulseBox className="h-3 w-5/6" />
                     </div>
                   </div>
                   <div className="flex justify-between items-center border-t border-border pt-4">
-                    <Skeleton className="h-3 w-16" />
-                    <Skeleton className="h-8 w-24 rounded-lg" />
+                    <PulseBox className="h-3 w-16" />
+                    <PulseBox className="h-8 w-24 rounded-lg" />
                   </div>
                 </div>
               ))}
@@ -253,8 +245,6 @@ export default function OrderManagement() {
           )}
         </Container>
       </main>
-
-      <Footer />
 
       {/* Order Detail Modal */}
       <OrderModal
