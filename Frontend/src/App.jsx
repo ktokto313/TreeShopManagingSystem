@@ -6,7 +6,7 @@ import LoginPage from "./features/auth/pages/LoginPage";
 import ProfilePage from "./features/auth/pages/ProfilePage";
 import RegisterPage from "./features/auth/pages/RegisterPage";
 import OrderManagement from "./features/orders/OrderManagement";
-import TicketDetail from "./features/tickets/components/ticket-detail/TicketDetail"
+import TicketDetail from "./features/tickets/components/ticket-detail/TicketDetail";
 import CatalogPage from "./pages/CatalogPage";
 import HomePage from "./pages/HomePage";
 import ManagementPage from "./pages/ManagementPage";
@@ -100,6 +100,7 @@ function AppRoutes() {
 					/>
 				}
 			/>
+
 			<Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>
 	);

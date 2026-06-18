@@ -1,7 +1,11 @@
 import { NavLink } from 'react-router-dom';
 import { Container } from './Container';
 import { AuthContext } from "../../context/AuthContext";
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
+import { Button } from '../ui/Button';
+import { HiMenuAlt3 } from "react-icons/hi";
+import { cn } from '../../utils/cn';
+import { RxCross1 } from "react-icons/rx";
 
 const linkClass = ({ isActive }) =>
   `text-sm font-medium transition-colors ${
@@ -19,6 +23,7 @@ const navItemsByRole = {
     { label: 'Home', to: '/' },
     { label: 'Catalog', to: '/catalog' },
     { label: 'Profile', to: '/profile' },
+    { label: 'Tickets', to: '/tickets/' },
   ],
   MANAGER: [
     { label: 'Home', to: '/' },
@@ -51,6 +56,8 @@ export function Header({ className = '', ...props }) {
   const role = user?.roleName ?? user?.role;
   const navItems = navItemsByRole[role] ?? navItemsByRole.anonymous;
 
+  const [isNavOpen, setIsNavOpen] = useState(false);
+
   return (
     <header
       className={`bg-bg-base border-b border-border sticky top-0 z-50 ${className}`}
@@ -73,18 +80,38 @@ export function Header({ className = '', ...props }) {
         </nav>
 
         {user && (
-          <div className="flex items-center gap-3">
+          <div className="md:flex flex items-center gap-5">
             <span className="text-sm text-stone-600 hidden sm:block">
               {user.fullName ?? user.email}
             </span>
             <button
               onClick={logout}
-              className="text-sm font-medium px-3 py-1.5 rounded-lg border border-stone-300 text-stone-600 hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
+              className="hidden sm:block text-sm font-medium px-3 py-1.5 rounded-lg border border-stone-300 text-stone-600 hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
             >
               Logout
             </button>
+
+            <Button className="text-lg sm:hidden inline-block" onClick={() => setIsNavOpen(true)}>
+              <HiMenuAlt3/>
+            </Button>
           </div>
         )}
+
+        <div className={cn("fixed h-screen w-screen left-full top-0 bottom-0", 
+          "bg-bg-surface/70 backdrop-blur-sm transition-[left] duration-300", 
+          {"left-0": isNavOpen})}
+          >
+            <div className="flex flex-col p-10 gap-15">
+              {navItems.map((item) => (
+                <NavLink key={item.to} to={item.to} className={cn(linkClass, "text-3xl")} onClick={() => setIsNavOpen(false)} end={item.to === '/'}>
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
+            <Button className="all-revert bg-transparent cursor-pointer p-3 absolute top-5 right-5" onClick={() => setIsNavOpen(false)}>
+              <RxCross1 className="text-3xl text-black"/>
+            </Button>
+        </div>
       </Container>
     </header>
   );
