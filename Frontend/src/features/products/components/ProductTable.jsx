@@ -24,7 +24,7 @@ function renderImagePreview(product) {
     <ProductImageFrame
       src={imageSource}
       alt={product.name}
-      className="h-12 w-12 rounded-md bg-[var(--social-bg)]"
+      className="h-12 w-12 rounded-md bg-blue-300"
       fallbackLabel={imageSource ? 'Ảnh lỗi' : 'Chưa có ảnh'}
     />
   )
@@ -32,22 +32,22 @@ function renderImagePreview(product) {
 
 export default function ProductTable({ products = [], onEdit, onDeactivate }) {
   return (
-    <div className="max-h-[70vh] overflow-auto rounded-lg border border-[var(--border)]">
+    <div className="max-h-[70vh] overflow-auto rounded-lg border border-green-500">
       <table className="min-w-[1120px] w-full border-collapse text-left text-sm">
-        <thead className="sticky top-0 z-10 bg-[var(--social-bg)] text-xs uppercase text-[var(--text)]">
+        <thead className="sticky top-0 z-10 bg-green-500 text-xs uppercase text-white">
           <tr>
-            <th className="px-4 py-3 font-medium">Ảnh</th>
-            <th className="px-4 py-3 font-medium">SKU</th>
-            <th className="px-4 py-3 font-medium">Sản phẩm</th>
-            <th className="px-4 py-3 font-medium">Danh mục</th>
-            <th className="px-4 py-3 font-medium">Chi tiết</th>
-            <th className="px-4 py-3 font-medium">Giá</th>
-            <th className="px-4 py-3 font-medium">Tồn kho</th>
-            <th className="px-4 py-3 font-medium">Tình trạng</th>
-            <th className="px-4 py-3 text-right font-medium">Thao tác</th>
+            <th className="px-4 py-3 font-semibold">Ảnh</th>
+            <th className="px-4 py-3 font-semibold">SKU</th>
+            <th className="px-4 py-3 font-semibold">Sản phẩm</th>
+            <th className="px-4 py-3 font-semibold">Danh mục</th>
+            <th className="px-4 py-3 font-semibold">Chi tiết</th>
+            <th className="px-4 py-3 font-semibold">Giá</th>
+            <th className="px-4 py-3 font-semibold">Tồn kho</th>
+            <th className="px-4 py-3 font-semibold">Tình trạng</th>
+            <th className="px-4 py-3 text-center font-semibold">Thao tác</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-[var(--border)]">
+        <tbody className="divide-y divide-green-500">
           {products.map((product) => {
             const variantGroups = summarizeVariantGroups(product.variants)
             const availability = getProductAvailability(product)
@@ -55,18 +55,18 @@ export default function ProductTable({ products = [], onEdit, onDeactivate }) {
             return (
               <tr key={product.id}>
                 <td className="px-4 py-3">{renderImagePreview(product)}</td>
-                <td className="px-4 py-3 font-medium text-[var(--text-h)]">{product.sku}</td>
-                <td className="px-4 py-3 text-[var(--text-h)]">{product.name}</td>
+                <td className="px-4 py-3 font-medium">{product.sku}</td>
+                <td className="px-4 py-3">{product.name}</td>
                 <td className="px-4 py-3">{product.categoryName || product.categoryId}</td>
                 <td className="px-4 py-3">
                   <div className="max-w-[24rem] space-y-1">
-                    <p className="text-[var(--text-h)]">{summarizeText(product.description, 64)}</p>
-                    <div className="flex flex-wrap gap-2 text-xs text-[var(--text)]">
-                      <span className="rounded-full bg-[var(--social-bg)] px-2 py-1">
+                    <p className="">{summarizeText(product.description, 64)}</p>
+                    <div className="flex gap-2 text-xs">
+                      <span className="rounded-full bg-blue-300 text-blue-800 px-2.5 py-1">
                         {variantGroups.length} nhóm biến thể
                       </span>
                       {variantGroups.map((group) => (
-                        <span key={group.name} className="rounded-full bg-[var(--social-bg)] px-2 py-1">
+                        <span key={group.name} className="rounded-full bg-blue-300 text-blue-800 px-2.5 py-1">
                           {group.name}: {group.count}
                         </span>
                       ))}
@@ -76,19 +76,19 @@ export default function ProductTable({ products = [], onEdit, onDeactivate }) {
                 <td className="px-4 py-3">{formatCurrency(product.price)}</td>
                 <td className="px-4 py-3">
                   <div className="space-y-1">
-                    <div className="font-medium text-[var(--text-h)]">{product.stock ?? 0}</div>
-                    <div className="text-xs text-[var(--text)]">{availability.helper}</div>
+                    <div className="font-semibold text-lg text-green-700 text-nowrap">{product.stock ?? 0}</div>
+                    <div className="text-xs text-nowrap">{availability.helper}</div>
                   </div>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 text-nowrap">
                   <ProductStatusBadge product={product} />
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 text-nowrap">
                   <div className="flex justify-end gap-2">
-                    <Button variant="secondary" size="sm" onClick={() => onEdit?.(product)}>
+                    <Button className="bg-blue-500 hover:bg-blue-400" onClick={() => onEdit?.(product)}>
                       Sửa
                     </Button>
-                    <Button variant="danger" size="sm" onClick={() => onDeactivate?.(product)}>
+                    <Button className="bg-red-500 hover:bg-red-400" onClick={() => onDeactivate?.(product)}>
                       Ngừng bán
                     </Button>
                   </div>
