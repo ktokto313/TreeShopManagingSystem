@@ -101,14 +101,14 @@ export function Header({ className = '', ...props }) {
           "bg-bg-surface/70 backdrop-blur-sm transition-[left] duration-300", 
           {"left-0": isNavOpen})}
           >
-            <div className="flex flex-col p-10 gap-15">
+            <div className="flex text-green-600 flex-col p-10 mt-10 gap-2">
               {navItems.map((item) => (
-                <NavLink key={item.to} to={item.to} className={cn(linkClass, "text-3xl")} onClick={() => setIsNavOpen(false)} end={item.to === '/'}>
+                <NavLink key={item.to} to={item.to} className={cn(linkClass, "bg-green-300/40 p-5 text-center hover:scale-125 text-3xl hover:w-full duration-500")} onClick={() => setIsNavOpen(false)} end={item.to === '/'}>
                   {item.label}
                 </NavLink>
               ))}
             </div>
-            <Button className="all-revert bg-transparent cursor-pointer p-3 absolute top-5 right-5" onClick={() => setIsNavOpen(false)}>
+            <Button className="all-revert hover:bg-green-300/50 bg-transparent cursor-pointer p-3 absolute top-5 right-5" onClick={() => setIsNavOpen(false)}>
               <RxCross1 className="text-3xl text-black"/>
             </Button>
         </div>
