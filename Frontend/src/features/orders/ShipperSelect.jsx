@@ -13,7 +13,7 @@ export default function ShipperSelect({ value, onChange, disabled = false }) {
 
     useEffect(() => {
         fetchShippers();
-    }, []);
+    }, [fetchShippers]);
 
     const options = [
         { value: '', label: isLoading ? 'Loading shippers...' : 'Unassigned' },
