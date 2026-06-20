@@ -67,7 +67,7 @@ const TicketDetailStatusWrapper = ({ detailState }) => {
 						<Select
 							className="w-48"
 							value={ticket.ticketState}
-							options={getSelectOption("status").filter(o => o.value != "")}
+							options={getSelectOption("status")}
 							onChange={(e) => {
 								setPendingStatus(e.target.value);
 

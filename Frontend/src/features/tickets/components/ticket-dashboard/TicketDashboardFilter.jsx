@@ -1,15 +1,16 @@
-import { cn } from "../../../utils/cn";
-import styles from "../assets/styles/TicketDashboardFilter.module.css";
-import { getSelectOption, ticketSelectList } from "../data/ticketSelectList";
-import { Select } from "../../../components/ui/Select";
-import { Button } from "../../../components/ui/Button";
-import ModalButton from "../../../components/ui/ModalButton";
-import { Form } from "../../../components/ui/Form";
-import { Input } from "../../../components/ui/Input";
-import { FaFilter, FaPlus, FaCheck } from "react-icons/fa";
-import { TbFilterSpark } from "react-icons/tb";
-import { IoReload } from "react-icons/io5";
-import { MdBlock } from "react-icons/md";
+import { IoReload } from 'react-icons/io5';
+import { TbFilterSpark } from 'react-icons/tb';
+import { FaCheck, FaFilter, FaPlus } from 'react-icons/fa';
+import { Select } from "../../../../components/ui/Select";
+import styles from "../../assets/styles/TicketDashboardFilter.module.css";
+import { Button } from './../../../../components/ui/Button';
+import { Form } from './../../../../components/ui/Form';
+import ModalButton from './../../../../components/ui/ModalButton';
+import { cn } from './../../../../utils/cn';
+import { getSelectOption, ticketSelectList } from './../../data/ticketSelectList';
+import { MdBlock } from 'react-icons/md';
+import { Input } from '../../../../components/ui/Input';
+
 
 export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 	const {
@@ -97,7 +98,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 								)}
 							>
 								<FaPlus></FaPlus>
-								<p className={cn(styles.createTicketBtnContent), "text-nowrap"}>Tạo Ticket</p>
+								<p className={cn(styles.createTicketBtnContent, "text-nowrap")}>Tạo Ticket</p>
 							</div>
 						}
 						modalTitle="Tạo Ticket"
