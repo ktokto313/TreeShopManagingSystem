@@ -45,7 +45,6 @@ const navItemsByRole = {
     { label: 'Home', to: '/' },
     { label: 'User Management', to: '/admin/users' },
     { label: 'Manage', to: '/manage' },
-    { label: 'Tickets', to: '/tickets/' },
     { label: 'Orders', to: '/orders' },
     { label: 'Profile', to: '/profile' },
   ],
