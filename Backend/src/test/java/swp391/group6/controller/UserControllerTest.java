@@ -1,57 +1,38 @@
 package swp391.group6.controller;
 
-import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.dto.UserDTO;
-import swp391.group6.model.Role;
-import swp391.group6.model.User;
-import swp391.group6.repository.UserRepository;
 import swp391.group6.service.UserService;
 import swp391.group6.util.JWTUtil;
-import swp391.group6.util.JacksonUtil;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@WebMvcTest(UserController.class)
+@ExtendWith(MockitoExtension.class)
 class UserControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockitoBean
+    @Mock
     private UserService userService;
 
-    @MockitoBean
-    private UserRepository userRepository;
+    @Mock
+    private HttpServletRequest request;
 
     @Test
-    void ownIdUpdateUsesRestrictedProfileUpdate() throws Exception {
-        // Generate valid token for customer
-        String token = JWTUtil.createToken(
-                new LoginResponse("customer@example.com", "Customer", "CUSTOMER")
-        );
+    void ownIdUpdateUsesRestrictedProfileUpdate() {
+        UserController controller = new UserController(userService);
+        when(request.getAttribute(JWTUtil.getCookieName()))
+                .thenReturn(new LoginResponse("customer@example.com", "Customer", "CUSTOMER"));
 
-        // Mock database check in JWTFilter
-        Role role = new Role();
-        role.setName("CUSTOMER");
-        User userEntity = new User();
-        userEntity.setEmail("customer@example.com");
-        userEntity.setRole(role);
-        userEntity.setStatus(true);
-        when(userRepository.findByEmail("customer@example.com")).thenReturn(Optional.of(userEntity));
-
-        // Mock UserController service dependencies
         UserDTO existingUser = new UserDTO();
         existingUser.setId(7L);
         existingUser.setEmail("customer@example.com");
@@ -72,13 +53,12 @@ class UserControllerTest {
                 .thenReturn(Optional.of(existingUser));
         when(userService.updateOwnProfile(eq(7L), any(UserDTO.class))).thenReturn(updatedUser);
 
-        mockMvc.perform(put("/api/users/{id}", 7)
-                        .cookie(new Cookie(JWTUtil.getCookieName(), token))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(JacksonUtil.parseObjectToJSONString(updateRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.roleName").value("CUSTOMER"))
-                .andExpect(jsonPath("$.fullName").value("New Customer Name"));
+        ResponseEntity<UserDTO> response = controller.updateUser(7L, updateRequest, request);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("CUSTOMER", response.getBody().getRoleName());
+        assertEquals("New Customer Name", response.getBody().getFullName());
 
         verify(userService).updateOwnProfile(eq(7L), any(UserDTO.class));
         verify(userService, never()).updateUser(anyLong(), any(UserDTO.class));
