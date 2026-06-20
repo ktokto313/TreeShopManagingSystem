@@ -7,6 +7,7 @@ import {Input} from '../components/ui/Input'
 import {Select} from '../components/ui/Select'
 import { AuthContext } from '../context/AuthContext'
 import CatalogProductCard from '../features/catalog/components/CatalogProductCard'
+import { addCartItem } from '../features/cart/cartApi'
 import { loadPublicJson } from '../features/catalog/utils/catalogApi'
 import { matchesCatalogFilters, sortCatalogProducts } from '../features/catalog/utils/catalogUtils'
 import { sortCategories } from '../utils/categorySort'
@@ -63,6 +64,7 @@ export default function CatalogPage() {
   }))
   const [showFilters, setShowFilters] = useState(true)
   const [notice, setNotice] = useState('')
+  const [addingProductId, setAddingProductId] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 12
 
@@ -187,9 +189,33 @@ export default function CatalogPage() {
     navigate('/manage', { state: { editProduct: product } })
   }
 
-  function previewAddToCart(product) {
-    setNotice(`${product.name} có thể thêm vào giỏ hàng khi luồng mua hàng được bật.`)
+  async function handleAddToCart(product) {
+  if (!product?.id || Number(product.stock) <= 0) return
+
+  if (!isAuthenticated) {
+    navigate('/login', { replace: true, state: { from: { pathname: '/catalog' } } })
+    return
   }
+
+  setAddingProductId(product.id)
+  setNotice('')
+
+  try {
+    await addCartItem(Number(product.id), 1)
+    window.dispatchEvent(new Event('cart-updated'))
+    setNotice(`${product.name} đã được thêm vào giỏ hàng.`)
+  } catch (error) {
+    if (error?.status === 401) {
+      logout()
+      navigate('/login', { replace: true, state: { from: { pathname: '/catalog' } } })
+      return
+    }
+
+    setNotice(error.message || 'Không thể thêm sản phẩm vào giỏ hàng.')
+  } finally {
+    setAddingProductId(null)
+  }
+}
 
   const displayStart = visibleProducts.length === 0 ? 0 : (effectiveCurrentPage - 1) * itemsPerPage + 1
   const displayEnd = Math.min(effectiveCurrentPage * itemsPerPage, visibleProducts.length)
@@ -368,7 +394,8 @@ export default function CatalogPage() {
                     onOpen={openDetail}
                     onEdit={canManage ? openEditProduct : undefined}
                     onCategoryOpen={selectCategory}
-                    onAdd={previewAddToCart}
+                    onAdd={handleAddToCart}
+                    isAdding={addingProductId === product.id}
                   />
                 ))}
               </div>

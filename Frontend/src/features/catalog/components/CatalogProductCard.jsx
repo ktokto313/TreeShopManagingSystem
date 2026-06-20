@@ -14,6 +14,7 @@ export default function CatalogProductCard({
   onOpen,
   onCategoryOpen,
   onAdd,
+  isAdding = false,
 }) {
   const images = parseCatalogImages(product.images)
   const imagePreview = resolveProductImageSource(images[0])
@@ -71,15 +72,19 @@ export default function CatalogProductCard({
         <Button className="text-nowrap flex-1 hover:bg-gray-200 bg-white text-green-600 border border-green-300" onClick={() => onOpen?.(product)}>
           Xem chi tiết
         </Button>
-        <Button
-          className="text-nowrap flex-1"
-          size="sm"
-          disabled={!availability.canPurchase}
-          onClick={() => onAdd?.(product)}
-          title={availability.canPurchase ? 'Thêm vào giỏ hàng' : availability.helper}
-        >
-          Thêm vào giỏ
-        </Button>
+  <button
+  type="button"
+  disabled={isAdding || !availability.canPurchase}
+  onClick={(event) => {
+    event.stopPropagation()
+    onAdd?.(product)
+  }}
+  title={availability.canPurchase ? 'Thêm vào giỏ hàng' : availability.helper}
+  aria-label="Thêm vào giỏ hàng"
+  className="flex h-11 w-11 items-center justify-center rounded-full bg-interactive text-xl font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+>
+  {isAdding ? '...' : '+'}
+</button>
       </div>
     </Card>
   )
