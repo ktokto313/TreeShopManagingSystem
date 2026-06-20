@@ -22,6 +22,14 @@ public class ShoppingCartEntry {
     @Column(nullable = false)
     private int quantity;
 
+    public ShoppingCartEntryId getId() {
+        return id;
+    }
+
+    public void setId(ShoppingCartEntryId id) {
+        this.id = id;
+    }
+
     public Product getProduct() {
         return product;
     }
