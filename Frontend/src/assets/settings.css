@@ -1,11 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
 @import "tailwindcss";
 /* Design Tokens & Variables */
 /* --------------------------------------------------------
    Rule: NO CSS selectors here (except :root and @import). 
    This file is purely for storing data and design tokens.
 -------------------------------------------------------- */
-
 
 @theme {
   /* =========================================
@@ -95,5 +94,6 @@
   /* =========================================
    3. TYPOGRAPHY
 ========================================= */
-  --font-main: "Montserrat", system-ui, sans-serif;
+  --font-main: "Varela Round", system-ui, sans-serif;
+  --font-sans: "Varela Round", system-ui, sans-serif;
 }
