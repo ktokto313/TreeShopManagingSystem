@@ -1,9 +1,8 @@
 import { useParams } from "react-router-dom";
-import { useTicketDetail } from "../hooks/useTicketDetail";
-
-import LoadingScreen from "../../../pages/LoadingScreen";
+import LoadingScreen from "./LoadingScreen";
 import TicketDetailLoadError from "../features/tickets/components/ticket-detail/TicketDetailLoadError";
 import TicketDetail from "../features/tickets/components/ticket-detail/TicketDetail";
+import { useTicketDetail } from './../features/tickets/hooks/useTicketDetail';
 
 const TicketDetailPage = () => {
 	const { id: ticketId } = useParams();

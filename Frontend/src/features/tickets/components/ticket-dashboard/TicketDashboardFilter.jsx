@@ -1,16 +1,19 @@
-import { IoReload } from 'react-icons/io5';
-import { TbFilterSpark } from 'react-icons/tb';
-import { FaCheck, FaFilter, FaPlus } from 'react-icons/fa';
+import { IoReload } from "react-icons/io5";
+import { TbFilterSpark } from "react-icons/tb";
+import { FaCheck, FaFilter, FaPlus } from "react-icons/fa";
 import { Select } from "../../../../components/ui/Select";
 import styles from "../../assets/styles/TicketDashboardFilter.module.css";
-import { Button } from './../../../../components/ui/Button';
-import { Form } from './../../../../components/ui/Form';
-import ModalButton from './../../../../components/ui/ModalButton';
-import { cn } from './../../../../utils/cn';
-import { getSelectOption, ticketSelectList } from './../../data/ticketSelectList';
-import { MdBlock } from 'react-icons/md';
-import { Input } from '../../../../components/ui/Input';
-
+import { Button } from "./../../../../components/ui/Button";
+import { Form } from "./../../../../components/ui/Form";
+import ModalButton from "./../../../../components/ui/ModalButton";
+import { cn } from "./../../../../utils/cn";
+import {
+	getSelectOption,
+	ticketSelectList,
+} from "./../../data/ticketSelectList";
+import { MdBlock } from "react-icons/md";
+import { Input } from "../../../../components/ui/Input";
+import { BsFillLightningFill } from "react-icons/bs";
 
 export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 	const {
@@ -82,7 +85,9 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 						className={cn("flex flex-row items-center justify-center gap-2")}
 					>
 						<IoReload
-							className={cn("text-xl", { "animate-spin": isFetchAllTicketsLoading })}
+							className={cn("text-xl", {
+								"animate-spin": isFetchAllTicketsLoading,
+							})}
 						></IoReload>
 						<p className={cn(styles.reloadTicketBtnContent)}>Tải Lại</p>
 					</div>
@@ -98,7 +103,9 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 								)}
 							>
 								<FaPlus></FaPlus>
-								<p className={cn(styles.createTicketBtnContent, "text-nowrap")}>Tạo Ticket</p>
+								<p className={cn(styles.createTicketBtnContent, "text-nowrap")}>
+									Tạo Ticket
+								</p>
 							</div>
 						}
 						modalTitle="Tạo Ticket"
@@ -108,59 +115,109 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 							styles.createTicketBtn,
 						)}
 					>
-						{({close}) => (
+						{({ close }) => (
+							<Form
+								onSubmit={async (e) => {
+									const isSuccess = await handleCreateTicketSubmit(e);
 
-						<Form
-							onSubmit={async (e) => {
-								const isSuccess = await handleCreateTicketSubmit(e);
+									if (isSuccess) {
+										close();
+									}
+								}}
+							>
+								{isCreateTicketSuccess && (
+									<span className="flex items-center gap-2 py-2 px-4 rounded-xl bg-bg-success text-white">
+										<FaCheck className="text-xl" />
+										<p>Ticket đã được khởi tạo xong!</p>
+									</span>
+								)}
 
-								if (isSuccess) {
-									close();
-								}
-							}}
-						>
-							{isCreateTicketSuccess && (
-								<span className="flex items-center gap-2 py-2 px-4 rounded-xl bg-bg-success text-white">
-									<FaCheck className="text-xl" />
-									<p>Ticket đã được khởi tạo xong!</p>
-								</span>
-							)}
+								{localValidationError && (
+									<span className="flex gap-2 py-2 px-4 rounded-xl bg-red-500 text-white">
+										<MdBlock className="text-2xl" />
+										<p>{localValidationError}</p>
+									</span>
+								)}
 
-							{localValidationError && (
-								<span className="flex gap-2 py-2 px-4 rounded-xl bg-red-500 text-white">
-									<MdBlock className="text-2xl" />
-									<p>{localValidationError}</p>
-								</span>
-							)}
+								{ticketCreateError && (
+									<span className="flex items-center gap-2 py-2 px-4 rounded-xl bg-red-500 text-white">
+										<MdBlock className="text-xl" />
+										<p>Lỗi khi khởi tạo Ticket, vui lòng thử lại sau.</p>
+									</span>
+								)}
 
-							{ticketCreateError && (
-								<span className="flex items-center gap-2 py-2 px-4 rounded-xl bg-red-500 text-white">
-									<MdBlock className="text-xl" />
-									<p>Lỗi khi khởi tạo Ticket, vui lòng thử lại sau.</p>
-								</span>
-							)}
+								<Input label="Tiêu đề" type="text" name="title"></Input>
+								<Input label="Chi tiết" type="text" name="detail"></Input>
+								<Select
+									name="priority"
+									label="Ưu tiên"
+									options={getSelectOption("priority")}
+								></Select>
 
-							<Input label="Tiêu đề" type="text" name="title"></Input>
-							<Input label="Chi tiết" type="text" name="detail"></Input>
-							<Select
-								name="priority"
-								label="Ưu tiên"
-								options={getSelectOption("priority")}
-							></Select>
-
-							<Button type="submit" disabled={isCreateTicketLoading}>
-								{isCreateTicketLoading ? <p>Đang Xử Lí...</p> : <p>Lưu</p>}
-							</Button>
-						</Form>
+								<Button type="submit" disabled={isCreateTicketLoading}>
+									{isCreateTicketLoading ? <p>Đang Xử Lí...</p> : <p>Lưu</p>}
+								</Button>
+							</Form>
 						)}
 					</ModalButton>
 				)}
+			</div>
+			<hr className="border-t-2 -mt-1 border-border" />
+			<StatusBoard dashboardState={dashboardState} />
+		</div>
+	);
+};
+
+export const StatusBoard = ({ dashboardState }) => {
+	const { getFilterValue, handleFilterChange } = dashboardState;
+	const currentStatus = getFilterValue("state") || "all";
+
+	return (
+		<div className="flex flex-col justify-start gap-3 w-full px-5 pb-6 pt-2">
+			<div className="flex items-center gap-2 text-green-600 font-bold mb-1">
+				<BsFillLightningFill className="text-lg" />
+				<h2 className="text-base uppercase">Lọc Nhanh</h2>
+			</div>
+
+			<p className="text-green-700 font-medium text-sm">
+				Chọn nhanh một trạng thái để lọc theo nhóm.
+			</p>
+
+			<div className="flex flex-wrap gap-2 mt-1">
+				{getSelectOption("status").map((status, index) => {
+					const isActive = currentStatus === status.value;
+					return (
+						<button
+							key={`status-btn-${status.value}-${index}`}
+							type="button"
+							onClick={() =>
+								handleFilterChange(
+									"state",
+									status.value === "all" ? "" : status.value,
+								)
+							}
+							className={cn(
+								"px-3 py-1.5 rounded-lg border transition-all duration-200 text-xs md:text-sm cursor-pointer font-medium",
+								isActive
+									? "bg-green-700 border-green-700 text-white"
+									: "bg-white border-green-600 text-green-900 hover:bg-green-200",
+							)}
+						>
+							{status.label} {status.count !== undefined && `(${status.count})`}
+						</button>
+					);
+				})}
 			</div>
 		</div>
 	);
 };
 
-export const TicketDashboardFilterBtn = ({ dashboardState, modalButtonClasses, reloadButtonClasses, reloadButtonContentClasses }) => {
+export const TicketDashboardFilterBtn = ({
+	dashboardState,
+	modalButtonClasses,
+	reloadButtonClasses,
+	reloadButtonContentClasses,
+}) => {
 	const {
 		isFetchAllTicketsLoading,
 		getFilterValue,
@@ -227,14 +284,21 @@ export const TicketDashboardFilterBtn = ({ dashboardState, modalButtonClasses, r
 				)}
 			</ModalButton>
 			<Button
-				className={cn("hover:bg-green-600! w-full"), reloadButtonClasses}
+				className={cn("hover:bg-green-600! w-full", reloadButtonClasses)}
 				onClick={() => {
 					executeFetchAllTickets(ticketState, ticketPriority, ticketSort);
 				}}
 			>
-				<div className={cn("flex flex-row items-center justify-center gap-2"), reloadButtonContentClasses}>
+				<div
+					className={cn(
+						"flex flex-row items-center justify-center gap-2",
+						reloadButtonContentClasses,
+					)}
+				>
 					<IoReload
-						className={cn("text-xl", { "animate-spin": isFetchAllTicketsLoading })}
+						className={cn("text-xl", {
+							"animate-spin": isFetchAllTicketsLoading,
+						})}
 					></IoReload>
 				</div>
 			</Button>
