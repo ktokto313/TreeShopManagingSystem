@@ -1,10 +1,9 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Container } from "../components/global/Container";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
-import { IoReload } from "react-icons/io5";
-import { FaPlus } from "react-icons/fa6";
+import { Card } from "../components/ui/Card";
 import { Modal } from "../components/ui/Modal";
 import {
 	createCategory,
@@ -24,10 +23,6 @@ import {
 	uploadProductImages,
 } from "../features/products/productApi";
 import { sortCategories } from "../utils/categorySort";
-import { AuthContext } from "../context/AuthContext";
-import { cn } from "../utils/cn";
-import { FaCheck } from "react-icons/fa";
-import { IoMdRemoveCircleOutline } from "react-icons/io";
 
 const emptyCategoryForm = { id: "", name: "", description: "" };
 const emptyProductForm = {
@@ -206,7 +201,7 @@ function isOutOfStockProduct(product) {
 export default function ManagementPage() {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { logout } = useContext(AuthContext);
+	const { logout } = useAuth();
 	const [categories, setCategories] = useState([]);
 	const [products, setProducts] = useState([]);
 	const [categoryForm, setCategoryForm] = useState(emptyCategoryForm);
@@ -541,26 +536,24 @@ export default function ManagementPage() {
 	}
 
 	return (
-		<main className="bg-white">
+		<main className="bg-[var(--social-bg)]/70">
 			<Container className="py-10">
 				<div className="mb-6 flex flex-wrap items-start justify-between gap-4">
 					<div className="space-y-2">
 						<Badge status="active" className="bg-emerald-100 text-emerald-700">
 							Khu vực quản lý
 						</Badge>
-						<h1 className="text-3xl font-semibold text-green-800">
+						<h1 className="text-3xl font-semibold text-[var(--text-h)]">
 							Quản lý danh mục và sản phẩm
 						</h1>
-						<p className="max-w-3xl text-sm text-green-800"></p>
+						<p className="max-w-3xl text-sm text-[var(--text)]"></p>
 					</div>
 
 					<div className="flex flex-wrap items-center gap-3">
-						<Button variant="secondary" className="hover:bg-gray-300 flex items-center gap-1" onClick={() => void loadCategories()}>
-							<IoReload></IoReload>
+						<Button variant="secondary" onClick={() => void loadCategories()}>
 							Tải lại danh mục
 						</Button>
-						<Button variant="secondary" className="hover:bg-gray-300 flex items-center gap-1" onClick={() => void loadProducts()}>
-							<IoReload></IoReload>
+						<Button variant="secondary" onClick={() => void loadProducts()}>
 							Tải lại sản phẩm
 						</Button>
 					</div>
@@ -574,13 +567,13 @@ export default function ManagementPage() {
 
 				<div className="mb-6 flex gap-2">
 					<Button
-						className={cn("hover:bg-blue-300", activeTab !== "categories" ? "bg-blue-200" : "text-white bg-blue-400")}
+						variant={activeTab === "categories" ? "primary" : "secondary"}
 						onClick={() => setActiveTab("categories")}
 					>
 						Danh mục
 					</Button>
 					<Button
-						className={cn("hover:bg-blue-300", activeTab !== "categories" ? "text-white bg-blue-400" : "bg-blue-200")}
+						variant={activeTab === "products" ? "primary" : "secondary"}
 						onClick={() => setActiveTab("products")}
 					>
 						Sản phẩm
@@ -589,16 +582,20 @@ export default function ManagementPage() {
 
 				<section className={activeTab === "categories" ? "block" : "hidden"}>
 					<div className="space-y-6">
-						<div className="">
-							<div className="flex flex-wrap items-center justify-between gap-4 pb-4">
+						<Card className="space-y-5">
+							<div className="flex flex-wrap items-center justify-between gap-4">
 								<div className="space-y-1">
-									<h2 className="font-semibold text-xl text-green-800">Bảng danh mục</h2>
+									<h2 className="text-xl font-semibold text-[var(--text-h)]">
+										Bảng danh mục
+									</h2>
 								</div>
-								<div className="flex flex-wrap items-center gap-3">
-									<span className="text-base bg-emerald-200 text-emerald-600 px-3 border-emerald-300 py-1.5 border-2 rounded-2xl">{categories.length} hàng</span>
+								<div className="flex flex-wrap items-center gap-2">
 									<Button onClick={openCreateCategoryModal}>
 										Thêm danh mục
 									</Button>
+									<span className="text-sm text-[var(--text)]">
+										{categories.length} hàng
+									</span>
 								</div>
 							</div>
 							<CategoryTable
@@ -606,32 +603,28 @@ export default function ManagementPage() {
 								onEdit={editCategory}
 								onDelete={removeCategory}
 							/>
-						</div>
+						</Card>
 					</div>
 				</section>
 
 				<section className={activeTab === "products" ? "block" : "hidden"}>
 					<div className="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)] lg:items-start">
-						<div className="space-y-5 self-start lg:sticky lg:top-6">
+						<Card className="space-y-5 self-start lg:sticky lg:top-6">
 							<div className="flex flex-wrap items-center justify-between gap-4">
 								<div className="space-y-1">
-									<h2 className="text-xl font-semibold text-green-800">
+									<h2 className="text-xl font-semibold text-[var(--text-h)]">
 										Bộ lọc sản phẩm
 									</h2>
 								</div>
-								<span className="text-base bg-emerald-200 text-emerald-600 px-3 border-emerald-300 py-1 border-2 rounded-2xl">
+								<span className="text-sm text-[var(--text)]">
 									{filteredProductsWithCategoryName.length} / {products.length}{" "}
 									hàng
 								</span>
 							</div>
 
 							<div className="flex flex-wrap gap-2">
-								<Button className="flex gap-1" onClick={openCreateProductModal}>
-									<FaPlus></FaPlus>
-									Thêm sản phẩm
-									</Button>
-								<Button variant="secondary" className="hover:bg-gray-300 flex items-center gap-1" onClick={() => void loadProducts()}>
-									<IoReload></IoReload>
+								<Button onClick={openCreateProductModal}>Thêm sản phẩm</Button>
+								<Button variant="secondary" onClick={() => void loadProducts()}>
 									Tải lại sản phẩm
 								</Button>
 							</div>
@@ -676,7 +669,7 @@ export default function ManagementPage() {
 											status: event.target.value,
 										}))
 									}
-									className="h-10 w-full rounded-md border border-green-500 bg-white px-3 text-sm text-green-800 outline-none"
+									className="h-10 w-full rounded-md border border-[var(--border)] bg-white px-3 text-sm text-[var(--text-h)] outline-none"
 								>
 									<option value="">Tất cả trạng thái</option>
 									<option value="true">Đang hoạt động</option>
@@ -690,37 +683,32 @@ export default function ManagementPage() {
 											stockState: event.target.value,
 										}))
 									}
-									className="h-10 w-full rounded-md border border-green-500 bg-white px-3 text-sm text-green-800 outline-none"
+									className="h-10 w-full rounded-md border border-[var(--border)] bg-white px-3 text-sm text-[var(--text-h)] outline-none"
 								>
 									<option value="">Tất cả tồn kho</option>
 									<option value="out-of-stock">Hết hàng / đã ẩn</option>
 								</select>
 								<div className="flex gap-2">
-									<Button className="flex gap-1 hover:bg-green-400" type="submit">
-										<FaCheck className="text-sm"/>
-										Áp dụng
-										</Button>
+									<Button type="submit">Áp dụng</Button>
 									<Button
 										type="button"
 										variant="secondary"
-										className="hover:bg-gray-300 flex gap-1 items-center"
 										onClick={clearFilters}
 									>
-										<IoMdRemoveCircleOutline className="-mb-0.5"></IoMdRemoveCircleOutline>
 										Xóa lọc
 									</Button>
 								</div>
 							</form>
-						</div>
+						</Card>
 
-						<div className="space-y-5 min-w-0">
+						<Card className="space-y-5 min-w-0">
 							<div className="flex items-center justify-between gap-4">
 								<div className="space-y-1">
-									<h2 className="text-xl font-semibold text-green-800">
+									<h2 className="text-xl font-semibold text-[var(--text-h)]">
 										Bảng sản phẩm
 									</h2>
 								</div>
-								<span className="text-base bg-emerald-200 text-emerald-600 px-3 border-emerald-300 py-1 border-2 rounded-2xl">
+								<span className="text-sm text-[var(--text)]">
 									{products.length} hàng
 								</span>
 							</div>
@@ -730,24 +718,26 @@ export default function ManagementPage() {
 								onEdit={openEditProductModal}
 								onDeactivate={deactivateSelectedProduct}
 							/>
-						</div>
+						</Card>
 					</div>
 				</section>
 			</Container>
 
 			<Modal
-				isOpen={isCategoryModalOpen}
+				open={isCategoryModalOpen}
 				onClose={() => {
 					closeCategoryModal();
 				}}
-				title={categoryForm.id ? "Sửa danh mục" : "Tạo danh mục"}
 			>
-				<div className="p-6 pt-0">
-					<div className="flex items-start justify-between gap-4 mb-4">
+				<div className="space-y-5 p-6">
+					<div className="flex items-start justify-between gap-4">
 						<div className="space-y-1">
-							<h2 className="text-2xl font-semibold text-green-700">
+							<h2 className="text-2xl font-semibold text-[var(--text-h)]">
 								{categoryForm.id ? "Sửa danh mục" : "Tạo danh mục"}
 							</h2>
+							<p className="text-sm text-[var(--text)]">
+								Cập nhật tên và mô tả danh mục trong một cửa sổ riêng gọn gàng.
+							</p>
 						</div>
 						{categoryForm.id ? (
 							<Badge
@@ -766,13 +756,12 @@ export default function ManagementPage() {
 						onSubmit={saveCategory}
 					/>
 
-					<div className="flex flex-wrap">
-						<Button variant="secondary" className={"grow bg-red-500 hover:bg-red-400 text-white"} onClick={resetProductForm}>
+					<div className="flex flex-wrap gap-2">
+						<Button variant="secondary" onClick={resetCategoryForm}>
 							Xóa
 						</Button>
 						<Button
 							variant="secondary"
-							className={"grow border-gray-400 text-black border hover:bg-gray-300/40"}
 							onClick={() => {
 								resetCategoryForm();
 								closeCategoryModal();
@@ -785,18 +774,21 @@ export default function ManagementPage() {
 			</Modal>
 
 			<Modal
-				isOpen={isProductModalOpen}
+				open={isProductModalOpen}
 				onClose={() => {
 					closeProductModal();
 				}}
-				title={productForm.id ? "Sửa sản phẩm" : "Tạo sản phẩm"}
 			>
-				<div className="px-6">
-					<div className="flex items-center justify-between gap-4 mb-5">
+				<div className="space-y-5 p-6">
+					<div className="flex items-start justify-between gap-4">
 						<div className="space-y-1">
-							<h2 className="text-2xl font-semibold text-green-700">
+							<h2 className="text-2xl font-semibold text-[var(--text-h)]">
 								{productForm.id ? "Sửa sản phẩm" : "Tạo sản phẩm"}
 							</h2>
+							<p className="text-sm text-[var(--text)]">
+								Cập nhật sản phẩm và chi tiết của nó trong một cửa sổ riêng gọn
+								gàng.
+							</p>
 						</div>
 						{productForm.id ? (
 							<Badge
@@ -822,13 +814,12 @@ export default function ManagementPage() {
 						onSubmit={saveProduct}
 					/>
 
-					<div className="flex flex-wrap">
-						<Button variant="secondary" className={"grow bg-red-500 hover:bg-red-400 text-white"} onClick={resetProductForm}>
+					<div className="flex flex-wrap gap-2">
+						<Button variant="secondary" onClick={resetProductForm}>
 							Xóa
 						</Button>
 						<Button
 							variant="secondary"
-							className={"grow border-gray-400 text-black border hover:bg-gray-300/40"}
 							onClick={() => {
 								resetProductForm();
 								closeProductModal();
