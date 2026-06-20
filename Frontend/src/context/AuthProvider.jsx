@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 
 const AUTH_STORAGE_KEYS = ["treeshop-auth-user", "currentUser"];
@@ -111,7 +112,12 @@ export function AuthProvider({ children }) {
 		setUser((current) => normalizeUser({ ...current, ...updates }));
 	};
 
-	const logout = async () => {
+	const logout = useCallback(() => {async () => {
+		const wasStaffSession =
+			user?.roleName === "SYSTEM_ADMIN" ||
+			location.pathname.startsWith("/admin") ||
+			location.pathname.startsWith("/staff-login");
+
 		try {
 			const response = await fetch("/api/auth/logout", {
 				method: "POST",
@@ -126,7 +132,7 @@ export function AuthProvider({ children }) {
 		} catch (err) {
 			setError(err.message);
 		}
-	};
+	}}, [location.pathname, navigate, user?.roleName]);
 
 	return (
 		<AuthContext.Provider

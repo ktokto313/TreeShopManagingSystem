@@ -1,7 +1,10 @@
 //6/8: Dao Hung: Separate the hook from the UI file
 import { useContext, useState } from 'react'
 import { AuthContext } from '../../../context/AuthContext'
-import {getDefaultRouteForRole} from "../../../utils/authRoutes"
+
+function canAccessManagement(role) {
+    return role === 'MANAGER' || role === 'SYSTEM_ADMIN'
+}
 
 export function useLogin() {
     const { login, loginWithGoogle } = useContext(AuthContext);
