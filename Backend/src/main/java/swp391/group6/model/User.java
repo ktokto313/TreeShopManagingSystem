@@ -48,21 +48,27 @@ public class User implements UserDetails {
     @Column(name = "created_at")
     private Timestamp createdAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "commentCreator")
     private List<Comment> commentList;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "ticketCreator")
     private List<Ticket> ticketList;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "assignee")
     private List<Ticket> assignedTicketList;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Review> reviewList;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Order> orderList;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "customer")
     private ShoppingCart shoppingCart;
 

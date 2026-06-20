@@ -97,7 +97,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 								)}
 							>
 								<FaPlus></FaPlus>
-								<p className={cn(styles.createTicketBtnContent)}>Tạo Ticket</p>
+								<p className={cn(styles.createTicketBtnContent), "text-nowrap"}>Tạo Ticket</p>
 							</div>
 						}
 						modalTitle="Tạo Ticket"
@@ -107,6 +107,8 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 							styles.createTicketBtn,
 						)}
 					>
+						{({close}) => (
+
 						<Form
 							onSubmit={async (e) => {
 								const isSuccess = await handleCreateTicketSubmit(e);
@@ -149,6 +151,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 								{isCreateTicketLoading ? <p>Đang Xử Lí...</p> : <p>Lưu</p>}
 							</Button>
 						</Form>
+						)}
 					</ModalButton>
 				)}
 			</div>

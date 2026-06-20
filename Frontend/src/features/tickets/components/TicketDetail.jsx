@@ -82,7 +82,7 @@ const TicketDetail = () => {
 					/>
 				</div>
 				<Button
-					onClick={() => navigate("/tickets/dashboard")}
+					onClick={() => navigate("/tickets/")}
 					className="w-fit mb-4 hover:bg-green-400 text-2xl mx-auto block mt-20 pr-8"
 				>
 					<h2>← Quay Lại</h2>
@@ -96,7 +96,7 @@ const TicketDetail = () => {
 	return (
 		<Container className="max-w-4xl mx-auto mt-10 p-5 flex flex-col gap-6">
 			<Button
-				onClick={() => navigate("/tickets/dashboard")}
+				onClick={() => navigate("/tickets/")}
 				className="w-fit mb-1 py-2 hover:bg-green-400 pr-6 text-xl"
 			>
 				← Quay Lại
@@ -155,7 +155,7 @@ const TicketDetail = () => {
 						</p>
 						<Button
 							className="bg-bg-success text-white hover:bg-emerald-600"
-							onClick={() => handleStatusChange("DONE")}
+							onClick={() => {handleStatusChange("DONE");console.log(ticket)}}
 							disabled={isStatusChangeLoading || isCommentSubmitLoading}
 						>
 							<span className="flex gap-4 items-center">
@@ -195,14 +195,19 @@ const TicketDetail = () => {
 								options={getSelectOption("status")}
 								onChange={(e) => {
 									setPendingStatus(e.target.value);
-									setIsConfirmOpen(true);
+
+									if(!ticket.assignee){
+										setIsConfirmOpen(true);
+									} else{
+										handleStatusChange(pendingStatus);
+									}
 								}}
 							/>
 						</div>
 					</div>
 				)}
 
-				<Modal title="Lưu ý" isOpen={isConfirmOpen}>
+				<Modal onClose={() => setIsConfirmOpen(false)} title="Lưu ý" isOpen={isConfirmOpen}>
 					<h1 className="mb-4 -mt-7">
 						Thay đổi trạng thái sẽ cho bạn thành người xử lí cho Ticket này, bạn
 						có chắc chắn không?

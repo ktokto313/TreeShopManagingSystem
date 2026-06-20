@@ -41,7 +41,7 @@ export function TicketCard({ ticket, variant = "default" }) {
 					<CardContent className={cn("py-2! w-full")}>
 						<p
 							className={cn(
-								"text-sm text-black opacity-80 line-clamp-2 leading-relaxed",
+								"text-sm text-gray-700 line-clamp-2 leading-relaxed",
 							)}
 						>
 							{ticket.detail}

@@ -3,6 +3,7 @@ package swp391.group6.service;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import swp391.group6.dto.LoginResponse;
 import swp391.group6.model.Ticket;
 import swp391.group6.dto.TicketRequest;
 import swp391.group6.model.*;
@@ -35,7 +36,7 @@ public class TicketService {
         User creator = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if(!creator.getRole().getName().equalsIgnoreCase("customer")) {
+        if (!creator.getRole().getName().equalsIgnoreCase("customer")) {
             throw new RuntimeException("User not allowed to create tickets.");
         }
 
@@ -71,9 +72,9 @@ public class TicketService {
 
         // Pass everything to the repository
         List<Ticket> ticketsResult = null;
-        if(user.getRole().getId() == 1){ // Id of customer
+        if (user.getRole().getId() == 1) { // Id of customer
             ticketsResult = ticketRepository.findTicketsByCreatorWithFilters(user.getId(), state, priority, sort);
-        } else if(user.getRole().getId() == 4){ // Id of support agent
+        } else if (user.getRole().getId() == 4) { // Id of support agent
             ticketsResult = ticketRepository.findAllWithFiltersAndIsAssigned(user.getId(), state, priority, sort);
         }
 
@@ -81,32 +82,49 @@ public class TicketService {
     }
 
     // UC 12 & 16: Update ticket status (Agent sets to Progress, Customer sets to Resolved)
-    public Ticket updateTicketStatus(long ticketId, String newStateStr, String agentEmail) {
+    public Ticket updateTicketStatus(long ticketId, String newStateStr, LoginResponse currentUser) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
         TicketState newState = TicketState.valueOf(newStateStr.toUpperCase());
-        ticket.setTicketState(newState);
+        TicketState originalState = ticket.getTicketState();
 
-        boolean notAssigned = ticket.getAssignee() == null && agentEmail != null;
-        boolean isTheAssignedAgent = ticket.getAssignee().getEmail().equals(agentEmail);
+        String userEmail = currentUser.getEmail();
 
-        // If the ticket is unassigned, assign the agent changing the ticket
-        if (notAssigned) {
-            User agent = userRepository.findByEmail(agentEmail).orElse(null);
-            ticket.setAssignee(agent);
+        boolean isAgent = currentUser.getRole().equals("SUPPORT_AGENT");
+        boolean isCustomer = currentUser.getRole().equals("CUSTOMER");
+
+        boolean isCreator = ticket.getTicketCreator().getEmail().equals(userEmail);
+        boolean notAssigned = ticket.getAssignee() == null && userEmail != null;
+        boolean isTheAssignedAgent = !notAssigned && ticket.getAssignee().getEmail().equals(userEmail);
+
+        if (isAgent) {
+            // If the ticket is unassigned, assign the agent changing the ticket
+            if (notAssigned) {
+                User agent = userRepository.findByEmail(userEmail).orElse(null);
+                ticket.setAssignee(agent);
+
+            } else if (!isTheAssignedAgent) {
+                throw new RuntimeException("Cannot assign to a ticket with an already assigned support agent");
+            }
+        } else if (isCustomer) {
+            if (!isCreator) throw new RuntimeException("Cannot accept/decline ticket status when user is not the creator");
+            if (newState != TicketState.DONE && newState != TicketState.PROCESSING) {
+                throw new RuntimeException("Cannot accept ticket into this state: " + newState);
+            }
+            if(originalState == TicketState.DONE){
+                throw new RuntimeException("Cannot accept ticket when ticket state is DONE");
+            }
         }
 
-        if(!notAssigned && !isTheAssignedAgent){
-            throw new RuntimeException("Cannot assign to a ticket with an already assigned support agent");
-        }
 
         if (newState == TicketState.RESOLVED || newState == TicketState.DONE) {
             ticket.setTimeResolved(new Timestamp(System.currentTimeMillis()));
-        } else{
+        } else {
             ticket.setTimeResolved(null);
         }
 
+        ticket.setTicketState(newState);
         ticketRepository.save(ticket);
         return ticket;
     }
