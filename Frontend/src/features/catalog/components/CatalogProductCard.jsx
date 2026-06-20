@@ -1,5 +1,5 @@
 // Created by minhlthe200133
-import Badge from '../../../components/ui/Badge'
+import {Badge} from '../../../components/ui/Badge'
 import {Button} from '../../../components/ui/Button'
 import {Card} from '../../../components/ui/Card'
 import { cn } from '../../../utils/cn'
@@ -93,7 +93,7 @@ export default function CatalogProductCard({
 
 function ProductBadge({ className, availability }) {
   return (
-    <Badge status={availability.badgeStatus} className={availability.badgeClassName, className}>
+    <Badge status={availability.badgeStatus} className={cn(availability.badgeClassName, className)}>
       {availability.label}
     </Badge>
   )
