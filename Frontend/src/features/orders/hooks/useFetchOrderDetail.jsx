@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { useCallback } from 'react';
 
 export default function useFetchOrderDetail() {
     const [orderDetail, setOrderDetail] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const fetchOrderDetail = async (orderId) => {
+    const fetchOrderDetail = useCallback(async (orderId) => {
         if (!orderId) {
             setOrderDetail(null);
             return false;
@@ -36,7 +37,7 @@ export default function useFetchOrderDetail() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
     return {
         orderDetail,

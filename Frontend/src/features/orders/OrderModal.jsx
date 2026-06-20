@@ -30,7 +30,7 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
 
   useEffect(() => {
     fetchOrderDetail(selectedOrderId);
-  }, [selectedOrderId]);
+  }, [selectedOrderId, fetchOrderDetail]);
 
   if (!selectedOrderId) return null;
 
