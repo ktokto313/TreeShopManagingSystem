@@ -1,10 +1,14 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import { Footer } from "./components/global/Footer";
+import Footer from "./components/global/Footer";
 import { Header } from "./components/global/Header";
-import ChangePasswordPage from "./features/auth/pages/ChangePasswordPage";
+import { useAuth } from "./hooks/useAuth";
+import { hasAllowedRole } from "./utils/authRoutes";
 import LoginPage from "./features/auth/pages/LoginPage";
-import ProfilePage from "./features/auth/pages/ProfilePage";
 import RegisterPage from "./features/auth/pages/RegisterPage";
+import ChangePasswordPage from "./features/auth/pages/ChangePasswordPage";
+import ProfilePage from "./features/auth/pages/ProfilePage";
+import TicketDashboard from "./features/tickets/components/TicketDashboard";
+import TicketDetail from "./features/tickets/components/TicketDetail";
 import OrderManagement from "./features/orders/OrderManagement";
 import CatalogPage from "./pages/CatalogPage";
 import HomePage from "./pages/HomePage";
@@ -12,16 +16,11 @@ import ManagementPage from "./pages/ManagementPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import StaffAuthentication from "./pages/StaffAuthentication";
 import UserManagement from "./pages/UserManagement";
-import LoadingScreen from "./pages/LoadingScreen";
 import TicketManagement from "./pages/TicketManagement";
-import { useContext } from "react";
-import { hasAllowedRole } from "./utils/authRoutes";
-import { AuthContext } from "./context/AuthContext";
-import TicketDetailPage from "./pages/TicketDetailPage";
 
 function ProtectedRoute({ element, roles = [] }) {
-	const { user, isLoading } = useContext(AuthContext);
-	if (isLoading) return <LoadingScreen></LoadingScreen>;
+	const { user, isLoading } = useAuth();
+	if (isLoading) return <div>Loading...</div>;
 	if (!hasAllowedRole(user, roles)) return <Navigate to="/login" replace />;
 	return element;
 }
@@ -29,28 +28,18 @@ function ProtectedRoute({ element, roles = [] }) {
 function AppRoutes() {
 	return (
 		<Routes>
-			{/* Others */}
 			<Route path="/" element={<HomePage />} />
-
-			{/* Auth and Account */}
 			<Route path="/login" element={<LoginPage />} />
 			<Route path="/register" element={<RegisterPage />} />
 			<Route path="/staff-login" element={<StaffAuthentication />} />
-			<Route
-				path="/profile"
-				element={<ProtectedRoute element={<ProfilePage />} />}
-			/>
+			<Route path="/catalog" element={<CatalogPage />} />
+			<Route path="/catalog/category/:categoryId" element={<CatalogPage />} />
+			<Route path="/catalog/:productId" element={<ProductDetailPage />} />
+			<Route path="/profile" element={<ProtectedRoute element={<ProfilePage />} />} />
 			<Route
 				path="/change-password"
 				element={<ProtectedRoute element={<ChangePasswordPage />} />}
 			/>
-
-			{/* Catalog */}
-			<Route path="/catalog" element={<CatalogPage />} />
-			<Route path="/catalog/category/:categoryId" element={<CatalogPage />} />
-			<Route path="/catalog/:productId" element={<ProductDetailPage />} />
-
-			{/* Admin and Manager */}
 			<Route
 				path="/manage"
 				element={
@@ -69,14 +58,13 @@ function AppRoutes() {
 					/>
 				}
 			/>
-
-			{/* Tickets */}
+			<Route path="/tickets" element={<Navigate to="/tickets/dashboard" replace />} />
 			<Route
-				path="/tickets/"
+				path="/tickets/dashboard"
 				element={
 					<ProtectedRoute
-						roles={["SUPPORT_AGENT", "CUSTOMER"]}
-						element={<TicketManagement />}
+						roles={["SUPPORT_AGENT", "CUSTOMER", "SYSTEM_ADMIN"]}
+						element={<TicketDashboard />}
 					/>
 				}
 			/>
@@ -85,12 +73,10 @@ function AppRoutes() {
 				element={
 					<ProtectedRoute
 						roles={["SUPPORT_AGENT", "CUSTOMER", "SYSTEM_ADMIN"]}
-						element={<TicketDetailPage />}
+						element={<TicketDetail />}
 					/>
 				}
 			/>
-
-			{/* Orders */}
 			<Route
 				path="/orders"
 				element={
@@ -100,7 +86,6 @@ function AppRoutes() {
 					/>
 				}
 			/>
-
 			<Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>
 	);
