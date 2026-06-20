@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { Navigate, NavLink, useNavigate } from 'react-router-dom';
 import { Container } from './Container';
 import { AuthContext } from "../../context/AuthContext";
 import { useContext, useState } from 'react';
@@ -6,6 +6,7 @@ import { Button } from '../ui/Button';
 import { HiMenuAlt3 } from "react-icons/hi";
 import { cn } from '../../utils/cn';
 import { RxCross1 } from "react-icons/rx";
+import { RiPlantFill } from "react-icons/ri";
 
 const linkClass = ({ isActive }) =>
   `text-sm font-medium transition-colors ${
@@ -55,6 +56,8 @@ export function Header({ className = '', ...props }) {
   const role = user?.roleName ?? user?.role;
   const navItems = navItemsByRole[role] ?? navItemsByRole.anonymous;
 
+  const navigate = useNavigate();
+
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   return (
@@ -63,11 +66,9 @@ export function Header({ className = '', ...props }) {
       {...props}
     >
       <Container className="flex items-center justify-between h-16 gap-4">
-        <div className="flex items-center gap-2 font-bold text-lg text-black">
-          <div className="w-8 h-8 rounded-md bg-interactive flex items-center justify-center text-white text-sm">
-            TS
-          </div>
-          <span>TreeShop</span>
+        <div className="flex items-center gap-1 font-bold text-lg select-none cursor-pointer" onClick={() => navigate("/")}>
+            <RiPlantFill className='text-xl -mt-0.5 text-green-500'></RiPlantFill>
+          <span className='text-green-600'>Greenshop</span>
         </div>
 
         <nav className="hidden lg:flex gap-5">
