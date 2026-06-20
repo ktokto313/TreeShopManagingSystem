@@ -736,20 +736,18 @@ export default function ManagementPage() {
 			</Container>
 
 			<Modal
-				open={isCategoryModalOpen}
+				isOpen={isCategoryModalOpen}
 				onClose={() => {
 					closeCategoryModal();
 				}}
+				title={categoryForm.id ? "Sửa danh mục" : "Tạo danh mục"}
 			>
-				<div className="space-y-5 p-6">
-					<div className="flex items-start justify-between gap-4">
+				<div className="p-6 pt-0">
+					<div className="flex items-start justify-between gap-4 mb-4">
 						<div className="space-y-1">
-							<h2 className="text-2xl font-semibold text-[var(--text-h)]">
+							<h2 className="text-2xl font-semibold text-green-700">
 								{categoryForm.id ? "Sửa danh mục" : "Tạo danh mục"}
 							</h2>
-							<p className="text-sm text-[var(--text)]">
-								Cập nhật tên và mô tả danh mục trong một cửa sổ riêng gọn gàng.
-							</p>
 						</div>
 						{categoryForm.id ? (
 							<Badge
@@ -768,12 +766,13 @@ export default function ManagementPage() {
 						onSubmit={saveCategory}
 					/>
 
-					<div className="flex flex-wrap gap-2">
-						<Button variant="secondary" onClick={resetCategoryForm}>
+					<div className="flex flex-wrap">
+						<Button variant="secondary" className={"grow bg-red-500 hover:bg-red-400 text-white"} onClick={resetProductForm}>
 							Xóa
 						</Button>
 						<Button
 							variant="secondary"
+							className={"grow border-gray-400 text-black border hover:bg-gray-300/40"}
 							onClick={() => {
 								resetCategoryForm();
 								closeCategoryModal();
@@ -786,21 +785,18 @@ export default function ManagementPage() {
 			</Modal>
 
 			<Modal
-				open={isProductModalOpen}
+				isOpen={isProductModalOpen}
 				onClose={() => {
 					closeProductModal();
 				}}
+				title={productForm.id ? "Sửa sản phẩm" : "Tạo sản phẩm"}
 			>
-				<div className="space-y-5 p-6">
-					<div className="flex items-start justify-between gap-4">
+				<div className="px-6">
+					<div className="flex items-center justify-between gap-4 mb-5">
 						<div className="space-y-1">
-							<h2 className="text-2xl font-semibold text-[var(--text-h)]">
+							<h2 className="text-2xl font-semibold text-green-700">
 								{productForm.id ? "Sửa sản phẩm" : "Tạo sản phẩm"}
 							</h2>
-							<p className="text-sm text-[var(--text)]">
-								Cập nhật sản phẩm và chi tiết của nó trong một cửa sổ riêng gọn
-								gàng.
-							</p>
 						</div>
 						{productForm.id ? (
 							<Badge
@@ -826,12 +822,13 @@ export default function ManagementPage() {
 						onSubmit={saveProduct}
 					/>
 
-					<div className="flex flex-wrap gap-2">
-						<Button variant="secondary" onClick={resetProductForm}>
+					<div className="flex flex-wrap">
+						<Button variant="secondary" className={"grow bg-red-500 hover:bg-red-400 text-white"} onClick={resetProductForm}>
 							Xóa
 						</Button>
 						<Button
 							variant="secondary"
+							className={"grow border-gray-400 text-black border hover:bg-gray-300/40"}
 							onClick={() => {
 								resetProductForm();
 								closeProductModal();
