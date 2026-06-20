@@ -79,7 +79,7 @@ export default function CheckoutPage() {
       return
     }
     if (!validateForm()) {
-      setError('Please complete all required delivery information.')
+      setError('Vui lòng điền vào tất cả các thông tin giao hàng.')
       return
     }
 
@@ -101,7 +101,7 @@ export default function CheckoutPage() {
       <Container className="max-w-[80rem] py-10">
         <div className="mb-6 space-y-1">
           <h1 className="text-3xl font-semibold text-[var(--text-h)]">Cart Checkout</h1>
-          <p className="text-sm text-[var(--text)]">Complete your delivery information and review your order.</p>
+          <p className="text-sm text-[var(--text)]">Điền vào các thông tin giao hàng.</p>
         </div>
 
         {error ? (
@@ -116,37 +116,37 @@ export default function CheckoutPage() {
           <form className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]" onSubmit={handleSubmit}>
             <section className="space-y-6">
               <Card className="space-y-4">
-                <h2 className="text-xl font-semibold text-[var(--text-h)]">Selected Products</h2>
+                <h2 className="text-xl font-semibold text-[var(--text-h)]">Sản phẩm đã chọn</h2>
                 {items.length ? (
                   <div className="divide-y divide-[var(--border)]">
                     {items.map((item) => (
                       <div key={item.productId} className="flex items-center justify-between gap-4 py-3 text-sm">
                         <div>
                           <div className="font-medium text-[var(--text-h)]">{item.name}</div>
-                          <div className="text-[var(--text)]">Qty {item.quantity} x {formatCurrency(item.price)}</div>
+                          <div className="text-[var(--text)]">Số lượng: {item.quantity} x {formatCurrency(item.price)}</div>
                         </div>
                         <div className="font-semibold text-[var(--text-h)]">{formatCurrency(item.lineTotal)}</div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-[var(--text)]">Your cart is empty.</p>
+                  <p className="text-sm text-[var(--text)]">Không có sản phẩm nào trong giỏ hàng.</p>
                 )}
               </Card>
 
               <Card className="space-y-4">
-                <h2 className="text-xl font-semibold text-[var(--text-h)]">Delivery Details</h2>
+                <h2 className="text-xl font-semibold text-[var(--text-h)]">Thông tin giao hàng</h2>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Input label="Full name*" value={form.fullName} onChange={(event) => updateField('fullName', event.target.value)} />
+                  <Input label="Họ và tên*" value={form.fullName} onChange={(event) => updateField('fullName', event.target.value)} />
                   <Input label="Email*" type="email" value={form.email} onChange={(event) => updateField('email', event.target.value)} />
-                  <Input label="Mobile*" value={form.phone} onChange={(event) => updateField('phone', event.target.value)} />
-                  <Input label="City/Province*" value={form.province} onChange={(event) => updateField('province', event.target.value)} />
-                  <Input label="District*" value={form.district} onChange={(event) => updateField('district', event.target.value)} />
-                  <Input label="Ward*" value={form.ward} onChange={(event) => updateField('ward', event.target.value)} />
+                  <Input label="Số điện thoại*" value={form.phone} onChange={(event) => updateField('phone', event.target.value)} />
+                  <Input label="Tỉnh/Thành phố*" value={form.province} onChange={(event) => updateField('province', event.target.value)} />
+                  <Input label="Quận/Huyện*" value={form.district} onChange={(event) => updateField('district', event.target.value)} />
+                  <Input label="Phường/Xã*" value={form.ward} onChange={(event) => updateField('ward', event.target.value)} />
                 </div>
-                <Input label="Address*" value={form.address} onChange={(event) => updateField('address', event.target.value)} />
+                <Input label="Địa chỉ*" value={form.address} onChange={(event) => updateField('address', event.target.value)} />
                 <label className="block text-left">
-                  <span className="mb-1 block text-sm font-medium text-[var(--text-h)]">Delivery Notes</span>
+                  <span className="mb-1 block text-sm font-medium text-[var(--text-h)]">Ghi chú giao hàng</span>
                   <textarea
                     className="min-h-24 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--text-h)] outline-none transition focus:border-[var(--accent)]"
                     value={form.deliveryNote}
@@ -157,13 +157,13 @@ export default function CheckoutPage() {
             </section>
 
             <Card className="h-fit space-y-4 lg:sticky lg:top-20">
-              <h2 className="text-xl font-semibold text-[var(--text-h)]">Order Summary</h2>
+              <h2 className="text-xl font-semibold text-[var(--text-h)]">Đơn hàng</h2>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span>Subtotal</span><span>{formatCurrency(subtotal)}</span></div>
-                <div className="flex justify-between"><span>Discount</span><span>{formatCurrency(0)}</span></div>
-                <div className="flex justify-between"><span>Shipping Fee</span><span>{items.length ? formatCurrency(SHIPPING_FEE) : formatCurrency(0)}</span></div>
+                <div className="flex justify-between"><span>Thành tiền</span><span>{formatCurrency(subtotal)}</span></div>
+                <div className="flex justify-between"><span>Giảm giá</span><span>{formatCurrency(0)}</span></div>
+                <div className="flex justify-between"><span>Phí vận chuyển</span><span>{items.length ? formatCurrency(SHIPPING_FEE) : formatCurrency(0)}</span></div>
                 <div className="border-t border-[var(--border)] pt-3 text-base font-semibold text-[var(--text-h)]">
-                  <div className="flex justify-between"><span>Total Cost</span><span>{formatCurrency(total)}</span></div>
+                  <div className="flex justify-between"><span>Tổng cộng</span><span>{formatCurrency(total)}</span></div>
                 </div>
               </div>
               <Button type="submit" className="w-full" disabled={submitting || !items.length}>
