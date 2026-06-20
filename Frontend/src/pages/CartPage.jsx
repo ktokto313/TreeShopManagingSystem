@@ -79,6 +79,7 @@ export default function CartPage() {
     setError('')
     try {
       setCart(await addCartItem(Number(selectedProductId), 1))
+      window.dispatchEvent(new Event('cart-updated'))
     } catch (err) {
       setError(err.message)
     } finally {
@@ -92,6 +93,7 @@ export default function CartPage() {
     setError('')
     try {
       setCart(await updateCartItem(item.productId, nextQuantity))
+      window.dispatchEvent(new Event('cart-updated'))
     } catch (err) {
       setError(err.message)
     } finally {
@@ -104,6 +106,7 @@ export default function CartPage() {
     setError('')
     try {
       setCart(await removeCartItem(productId))
+      window.dispatchEvent(new Event('cart-updated'))
     } catch (err) {
       setError(err.message)
     } finally {
@@ -124,7 +127,7 @@ export default function CartPage() {
     <main className="bg-[var(--social-bg)]/50">
       <Container className="max-w-[80rem] py-10">
         <div className="mb-6 space-y-1">
-          <p className="text-sm text-[var(--text)]">Home &gt; Your Cart</p>
+          <p className="text-sm text-[var(--text)]">Home &gt; Giỏ hàng</p>
           <h1 className="text-3xl font-semibold text-[var(--text-h)]">Your Green Cart</h1>
         </div>
 
@@ -135,11 +138,11 @@ export default function CartPage() {
         ) : null}
 
         {loading ? (
-          <Card className="p-6 text-sm text-[var(--text)]">Loading cart...</Card>
+          <Card className="p-6 text-sm text-[var(--text)]">Đang tải giỏ hàng...</Card>
         ) : (
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
             <section className="space-y-4">
-              <h2 className="text-xl font-semibold text-[var(--text-h)]">Your Plant Items</h2>
+              <h2 className="text-xl font-semibold text-[var(--text-h)]">Sản phẩm trong giỏ hàng</h2>
               <Card className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
                 <Select
                   label="Add a product"
@@ -152,15 +155,15 @@ export default function CartPage() {
                   disabled={!selectedProductId || isAddingProduct}
                   onClick={addSelectedProduct}
                 >
-                  {isAddingProduct ? 'Adding...' : 'Add to cart'}
+                  {isAddingProduct ? 'Adding...' : 'Thêm vào giỏ hàng'}
                 </Button>
               </Card>
               {items.length === 0 ? (
                 <Card className="p-8 text-center text-sm text-[var(--text)]">
-                  Your cart is empty.
+                  Không có sản phẩm nào trong giỏ hàng.
                   <div className="mt-4">
                     <Link to="/catalog">
-                      <Button>Continue Shopping</Button>
+                      <Button>Tiếp tục mua sắm</Button>
                     </Link>
                   </div>
                 </Card>
@@ -173,7 +176,7 @@ export default function CartPage() {
                       <ProductImageFrame src={image} alt={item.name} className="h-28 rounded-md" />
                       <div className="space-y-2">
                         <h3 className="font-semibold text-[var(--text-h)]">{item.name}</h3>
-                        <p className="text-sm text-[var(--text)]">Available: {item.stock}</p>
+                        <p className="text-sm text-[var(--text)]">Kho: {item.stock}</p>
                         <p className="font-medium text-[var(--accent)]">{formatCurrency(item.price)}</p>
                         <div className="inline-flex items-center overflow-hidden rounded-md border border-[var(--border)]">
                           <button
@@ -200,7 +203,7 @@ export default function CartPage() {
                           {formatCurrency(item.lineTotal)}
                         </div>
                         <Button variant="danger" size="sm" disabled={isBusy} onClick={() => removeItem(item.productId)}>
-                          Remove
+                          Xóa khỏi giỏ hàng
                         </Button>
                       </div>
                     </Card>
@@ -210,9 +213,9 @@ export default function CartPage() {
               {items.length ? (
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <Link to="/catalog">
-                    <Button variant="secondary">Continue Shopping</Button>
+                    <Button variant="secondary">Tiếp tục mua sắm</Button>
                   </Link>
-                  <Button variant="secondary" onClick={clearAll}>Clear cart</Button>
+                  <Button variant="secondary" onClick={clearAll}>Xóa giỏ hàng</Button>
                 </div>
               ) : null}
             </section>
@@ -221,22 +224,22 @@ export default function CartPage() {
               <h2 className="text-xl font-semibold text-[var(--text-h)]">Green Summary</h2>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span>Subtotal</span>
+                  <span>Thành tiền</span>
                   <span className="font-medium">{formatCurrency(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Estimated shipping</span>
+                  <span>Phí vận chuyển ước tính</span>
                   <span className="font-medium">{items.length ? formatCurrency(SHIPPING_FEE) : formatCurrency(0)}</span>
                 </div>
                 <div className="border-t border-[var(--border)] pt-3 text-base font-semibold text-[var(--text-h)]">
                   <div className="flex justify-between">
-                    <span>Total</span>
+                    <span>Tổng cộng</span>
                     <span>{formatCurrency(total)}</span>
                   </div>
                 </div>
               </div>
               <Button className="w-full" disabled={!items.length} onClick={() => navigate('/checkout')}>
-                Proceed to checkout
+                Tiến hành thanh toán
               </Button>
             </Card>
           </div>
