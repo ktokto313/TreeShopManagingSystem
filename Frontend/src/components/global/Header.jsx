@@ -70,7 +70,7 @@ export function Header({ className = '', ...props }) {
           <span>TreeShop</span>
         </div>
 
-        <nav className="hidden md:flex gap-5">
+        <nav className="hidden lg:flex gap-5">
           {navItems.map((item) => (
             <NavLink key={item.to} to={item.to} className={linkClass} end={item.to === '/'}>
               {item.label}
@@ -79,37 +79,51 @@ export function Header({ className = '', ...props }) {
         </nav>
 
         {user && (
-          <div className="md:flex flex items-center gap-5">
+          <div className="lg:flex flex items-center gap-5">
             <span className="text-sm text-stone-600 hidden sm:block">
               {user.fullName ?? user.email}
             </span>
             <button
               onClick={logout}
-              className="hidden sm:block text-sm font-medium px-3 py-1.5 rounded-lg border border-stone-300 text-stone-600 hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
+              className="hidden sm:block cursor-pointer text-sm font-medium px-3 py-1.5 rounded-lg border border-stone-300 text-stone-600 hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
             >
               Logout
             </button>
 
-            <Button className="text-lg sm:hidden inline-block" onClick={() => setIsNavOpen(true)}>
+            <Button className="text-lg lg:hidden inline-block" onClick={() => setIsNavOpen(true)}>
               <HiMenuAlt3/>
             </Button>
           </div>
         )}
 
-        <div className={cn("fixed h-screen w-screen left-full top-0 bottom-0", 
+        <div className={cn("fixed h-screen w-screen left-full top-0 bottom-0 overflow-y-scroll", 
           "bg-bg-surface/70 backdrop-blur-sm transition-[left] duration-300", 
           {"left-0": isNavOpen})}
           >
-            <div className="flex text-green-600 flex-col p-10 mt-10 gap-2">
+            <div className="flex text-green-600 flex-col p-10 mt-5 gap-2 max-w-125 m-auto relative">
               {navItems.map((item) => (
-                <NavLink key={item.to} to={item.to} className={cn(linkClass, "bg-green-300/40 p-5 text-center hover:scale-125 text-3xl hover:w-full duration-500")} onClick={() => setIsNavOpen(false)} end={item.to === '/'}>
+                <NavLink key={item.to} to={item.to} className={cn(linkClass, "p-5 text-left hover:translate-x-2 text-3xl hover:w-full duration-400")} onClick={() => setIsNavOpen(false)} end={item.to === '/'}>
                   {item.label}
                 </NavLink>
               ))}
-            </div>
-            <Button className="all-revert hover:bg-green-300/50 bg-transparent cursor-pointer p-3 absolute top-5 right-5" onClick={() => setIsNavOpen(false)}>
+
+              {user && (
+                <div className="ps-5 text-green-700 mt-2 flex flex-col items-start gap-3">
+                  <span className="text-2xl text-stone-600">
+                    {user.fullName ?? user.email}
+                  </span>
+                  <button
+                    onClick={logout}
+                    className="cursor-pointer text-2xl font-medium px-3 py-1.5 rounded-lg border-2 border-stone-400 text-stone-600 hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            <Button className="all-revert hover:bg-green-300/50 bg-transparent cursor-pointer p-3 absolute top-0 right-5" onClick={() => setIsNavOpen(false)}>
               <RxCross1 className="text-3xl text-black"/>
             </Button>
+            </div>
         </div>
       </Container>
     </header>
