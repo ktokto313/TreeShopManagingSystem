@@ -8,18 +8,21 @@ import RegisterPage from "./features/auth/pages/RegisterPage";
 import OrderManagement from "./features/orders/OrderManagement";
 import TicketDashboard from "./features/tickets/components/TicketDashboard";
 import TicketDetail from "./features/tickets/components/TicketDetail";
-import { useAuth } from "./hooks/useAuth";
 import CatalogPage from "./pages/CatalogPage";
 import HomePage from "./pages/HomePage";
 import ManagementPage from "./pages/ManagementPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import StaffAuthentication from "./pages/StaffAuthentication";
 import UserManagement from "./pages/UserManagement";
+import LoadingScreen from "./pages/LoadingScreen";
+import TicketManagement from "./pages/TicketManagement";
+import { useContext } from "react";
 import { hasAllowedRole } from "./utils/authRoutes";
+import { AuthContext } from "./context/AuthContext";
 
 function ProtectedRoute({ element, roles = [] }) {
-	const { user, isLoading } = useAuth();
-	if (isLoading) return <div>Loading...</div>;
+	const { user, isLoading } = useContext(AuthContext);
+	if (isLoading) return <LoadingScreen></LoadingScreen>;
 	if (!hasAllowedRole(user, roles)) return <Navigate to="/login" replace />;
 	return element;
 }
@@ -60,6 +63,12 @@ function AppRoutes() {
 					/>
 				}
 			/>
+
+			{/* Tickets */}
+			<Route path="/tickets" element={<TicketManagement />} />
+			<Route path="/tickets/:id" element={<TicketDetail />} />
+
+			{/* Orders */}
 			<Route
 				path="/tickets"
 				element={<Navigate to="/tickets/dashboard" replace />}
