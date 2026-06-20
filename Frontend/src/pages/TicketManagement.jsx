@@ -1,5 +1,5 @@
-import TicketDashboard from "../features/tickets/components/TicketDashboard";
-import { TicketDashboardFilterBoard } from "../features/tickets/components/TicketDashboardFilter";
+import TicketDashboard from "../features/tickets/components/ticket-dashboard/TicketDashboard";
+import { TicketDashboardFilterBoard } from "../features/tickets/components/ticket-dashboard/TicketDashboardFilter";
 import { useTicketDashboard } from "../features/tickets/hooks/useTicketDashboard";
 import { cn } from "../utils/cn";
 

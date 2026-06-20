@@ -1,5 +1,5 @@
 // Created by minhlthe200133
-import Badge from '../../../components/ui/Badge'
+import {Badge} from '../../../components/ui/Badge'
 import {Button} from '../../../components/ui/Button'
 import {Card} from '../../../components/ui/Card'
 import { cn } from '../../../utils/cn'
@@ -12,7 +12,6 @@ export default function CatalogProductCard({
   product,
   categoryName,
   onOpen,
-  onEdit,
   onCategoryOpen,
   onAdd,
 }) {
@@ -69,11 +68,6 @@ export default function CatalogProductCard({
       </div>
 
       <div className="mt-auto flex justify-center gap-2">
-        {onEdit ? (
-          <Button className="text-nowrap flex-1" onClick={() => onEdit?.(product)}>
-            Sửa
-          </Button>
-        ) : null}
         <Button className="text-nowrap flex-1 hover:bg-gray-200 bg-white text-green-600 border border-green-300" onClick={() => onOpen?.(product)}>
           Xem chi tiết
         </Button>
