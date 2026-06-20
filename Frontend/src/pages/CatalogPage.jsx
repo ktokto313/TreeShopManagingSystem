@@ -11,7 +11,7 @@ import { loadPublicJson } from '../features/catalog/utils/catalogApi'
 import { matchesCatalogFilters, sortCatalogProducts } from '../features/catalog/utils/catalogUtils'
 import { sortCategories } from '../utils/categorySort'
 import { cn } from '../utils/cn'
-import bg from "../features/catalog/images/catalog-bg.jpg"
+import bg from "../assets/images/catalog-bg.jpg"
 
 const emptyFilters = {
   keyword: '',
@@ -199,7 +199,7 @@ export default function CatalogPage() {
       <section className="bg-linear-to-br from-green-200 via-white to-green-200 relative">
         <img src={bg} className={cn("object-cover w-full absolute h-full")}></img>
         <Container className="max-w-384 py-14 lg:py-20 relative">
-          <div className="space-y-6 bg-linear-to-r from-white/85 via-white/30 to-white/10 w-full 2xl:p-10 lg:p-8 rounded-xl p-4">
+          <div className="space-y-6 bg-linear-to-r from-white/85 via-white/30 to-white/10 w-max rounded-xl p-4">
             <div className="space-y-4">
               <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-green-800 sm:text-5xl">
                 {selectedCategory
