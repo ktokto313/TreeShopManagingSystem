@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Container } from "../components/global/Container";
 import { Badge } from "../components/ui/Badge";
@@ -23,6 +23,7 @@ import {
 	uploadProductImages,
 } from "../features/products/productApi";
 import { sortCategories } from "../utils/categorySort";
+import { AuthContext } from "../context/AuthContext";
 
 const emptyCategoryForm = { id: "", name: "", description: "" };
 const emptyProductForm = {
@@ -201,7 +202,7 @@ function isOutOfStockProduct(product) {
 export default function ManagementPage() {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { logout } = useAuth();
+	const { logout } = useContext(AuthContext);
 	const [categories, setCategories] = useState([]);
 	const [products, setProducts] = useState([]);
 	const [categoryForm, setCategoryForm] = useState(emptyCategoryForm);

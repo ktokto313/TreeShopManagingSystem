@@ -11,7 +11,7 @@ import { loadPublicJson } from '../features/catalog/utils/catalogApi'
 import { matchesCatalogFilters, sortCatalogProducts } from '../features/catalog/utils/catalogUtils'
 import { sortCategories } from '../utils/categorySort'
 import { cn } from '../utils/cn'
-import bg from "../assets/images/catalog-bg.jpg"
+import bg from "../features/catalog/images/catalog-bg.jpg"
 
 const emptyFilters = {
   keyword: '',
