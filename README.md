@@ -2,7 +2,7 @@
 An FPTU SWP391 project to build a shop managing system which sell trees and additional items
 
 ## Tech Stack
-* **Frontend**: React 19, React Router DOM, Vite
+* **Frontend**: React 19, TailwindCSS, React Router DOM, Vite
 * **Backend**: Java 17, Spring Boot 4.x, Gradle, Java-JWT
 * **Database**: PostgreSQL (with pgAdmin4)
 * **Infrastructure**: Docker & Docker Compose, Makefile
