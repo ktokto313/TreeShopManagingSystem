@@ -1,46 +1,54 @@
-import { cn } from '../../utils/cn'
+import { useEffect } from 'react';
+import { cn } from '../../utils/cn';
+import { IoClose } from "react-icons/io5";
 
-export function Modal({ open, isOpen, title, children, onClose, className }) {
-  const shouldOpen = open ?? isOpen
+export function Modal({ isOpen, onClose, title, children, className }) {
+  // Prevent scrolling on the background page when the modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
-  if (!shouldOpen) {
-    return null
-  }
+  if (!isOpen) return null;
 
   return (
-    <div
-      className={cn(
-        'fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4 py-8',
-        className,
-      )}
-      role="presentation"
-      onClick={onClose}
-    >
-      <div
-        className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-[var(--bg)] shadow-2xl"
-        role="dialog"
+    // The dark background overlay
+    <div onClick={onClose} className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25 backdrop-blur-sm", className)}>
+      
+      {/* Modal box */}
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="bg-bg-surface w-full max-w-md rounded-xl shadow-xl border border-border overflow-hidden flex flex-col overflow-y-scroll min-h-30 max-h-[80vh] min-w-[40vw]"
+        role="dialog" 
         aria-modal="true"
-        onClick={(event) => event.stopPropagation()}
       >
-        {title ? (
-          <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
-            <h2 className="text-lg font-semibold text-[var(--text-h)]">{title}</h2>
-            <button
-              type="button"
-              onClick={onClose}
-              className="cursor-pointer rounded-md p-1 text-[var(--text-h)] opacity-60 transition hover:bg-[var(--social-bg)] hover:opacity-100"
-              aria-label="Close"
-            >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        ) : null}
-        <div className={title ? 'p-6' : ''}>{children}</div>
+        {/* Modal Header */}
+        <div className="justify-between sticky flex items-center py-7 px-8 border-b bg-green-500 border-border top-0 z-61">
+          <h2 className="text-xl font-semibold text-white relative">
+            {title}
+          </h2>
+
+          {/* Close button */}
+          <button 
+            onClick={onClose}
+            className="text-white text-4xl hover:opacity-100 transition-opacity p-1 cursor-pointer rounded-md hover:bg-white/20"
+            aria-label="Close"
+          >
+            <IoClose></IoClose>
+          </button>
+        </div>
+
+        {/* Modal content */}
+        <div className="p-6">
+          {children}
+        </div>
       </div>
     </div>
-  )
+  );
 }
-
-export default Modal

@@ -30,7 +30,7 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
 
   useEffect(() => {
     fetchOrderDetail(selectedOrderId);
-  }, [selectedOrderId]);
+  }, [selectedOrderId, fetchOrderDetail]);
 
   if (!selectedOrderId) return null;
 
@@ -65,9 +65,9 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
         <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
           {/* Status Banner */}
           <div className="rounded-lg bg-interactive/10 p-3 flex items-center justify-between border border-interactive/20">
-            <div>
-              <span className="text-[10px] uppercase font-bold text-black/55">Status</span>
-              <p className={`text-sm font-bold mt-0.5 ${statusConfig?.bg || ''} px-2 py-0.5 rounded-full inline-block`}>
+            <div className="flex gap-2 items-center">
+              <span className="text-sm uppercase font-bold text-black/55">Status</span>
+              <p className={`text-xs  font-bold ${statusConfig?.bg || ''} px-2 py-0.5 rounded-full inline-block`}>
                 {statusConfig?.label || selectedOrder.status}
               </p>
             </div>
@@ -158,7 +158,7 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
 
           {/* Close / Actions */}
           <div className="flex justify-end gap-3 mt-2">
-            <Button variant="secondary" className="px-4 py-2" onClick={onClose}>
+            <Button variant="secondary" className="px-4 py-2 bg-red-500 hover:bg-red-400 text-white" onClick={onClose}>
               Close
             </Button>
 

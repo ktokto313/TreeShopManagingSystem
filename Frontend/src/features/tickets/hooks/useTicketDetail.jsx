@@ -76,7 +76,7 @@ export const useTicketDetail = (ticketId) => {
 	const { user } = useContext(AuthContext);
 	const [state, dispatch] = useReducer(detailReducer, initialState);
 
-	const isAgent = user?.role?.toLowerCase() === "support_agent";
+	const isAgent = user?.roleName?.toLowerCase() === "support_agent";
 
 	useEffect(() => {
 		if (!ticketId) {

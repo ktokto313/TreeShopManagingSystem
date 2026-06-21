@@ -1,49 +1,45 @@
-import { cn } from '../../utils/cn'
+import { cn } from "../../utils/cn";
 
-export function Card({ className, children, ...props }) {
+// Card can contain CardHeader/CardTitle/... inside of it (children props) for more choices
+export function Card({ children, className = '', ...props }) {
   return (
-    <div
-      className={cn(
-        'rounded-lg border border-[var(--border)] bg-[var(--bg)] p-4 shadow-sm',
-        className,
-      )}
+    <div 
+      className={cn(`bg-bg-surface border border-border rounded-xl overflow-hidden`, className)} 
       {...props}
     >
       {children}
     </div>
-  )
+  );
 }
 
-export function CardHeader({ className, children, ...props }) {
+export function CardHeader({ children, className = '', ...props }) {
   return (
-    <div className={cn('mb-3', className)} {...props}>
+    <div className={cn(`px-6 py-4 border-b border-border`, className)} {...props}>
       {children}
     </div>
-  )
+  );
 }
 
-export function CardTitle({ className, children, ...props }) {
+export function CardTitle({ children, className = '', ...props }) {
   return (
-    <h3 className={cn('text-lg font-semibold text-[var(--text-h)]', className)} {...props}>
+    <h3 className={cn(`text-lg font-semibold text-black`, className)} {...props}>
       {children}
     </h3>
-  )
+  );
 }
 
-export function CardContent({ className, children, ...props }) {
+export function CardContent({ children, className = '', ...props }) {
   return (
-    <div className={cn('text-sm text-[var(--text)]', className)} {...props}>
+    <div className={cn(`px-6 py-4`, className)} {...props}>
       {children}
     </div>
-  )
+  );
 }
 
-export function CardFooter({ className, children, ...props }) {
+export function CardFooter({ children, className = '', ...props }) {
   return (
-    <div className={cn('mt-4', className)} {...props}>
+    <div className={cn(`px-6 py-4 bg-bg-base border-t border-border flex items-center`, className)} {...props}>
       {children}
     </div>
-  )
+  );
 }
-
-export default Card

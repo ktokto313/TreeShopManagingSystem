@@ -1,7 +1,8 @@
 // Created by minhlthe200133
-import Badge from '../../../components/ui/Badge'
-import Button from '../../../components/ui/Button'
-import Card from '../../../components/ui/Card'
+import {Badge} from '../../../components/ui/Badge'
+import {Button} from '../../../components/ui/Button'
+import {Card} from '../../../components/ui/Card'
+import { cn } from '../../../utils/cn'
 import ProductImageFrame from '../../products/components/ProductImageFrame'
 import { getProductAvailability } from '../../products/utils/productAvailability'
 import { resolveProductImageSource } from '../../products/utils/productImageResolver'
@@ -11,7 +12,6 @@ export default function CatalogProductCard({
   product,
   categoryName,
   onOpen,
-  onEdit,
   onCategoryOpen,
   onAdd,
 }) {
@@ -20,13 +20,12 @@ export default function CatalogProductCard({
   const availability = getProductAvailability(product)
 
   return (
-    <Card className="flex h-full flex-col gap-4 border-[var(--border)] bg-white/95 p-4 transition hover:-translate-y-0.5 hover:shadow-md">
+    <Card className="flex h-full flex-col gap-4 border-green-400 bg-white/40 p-4 transition hover:shadow-lg">
       <div className="space-y-3">
-        <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1">
           <div className="space-y-1">
-            <h3 className="text-lg font-semibold text-[var(--text-h)]">{product.name}</h3>
+            <h3 className="text-lg ms-1 truncate font-semibold text-green-800">{product.name}</h3>
           </div>
-          <ProductBadge availability={availability} />
         </div>
 
         <ProductImageFrame
@@ -37,40 +36,43 @@ export default function CatalogProductCard({
         />
       </div>
 
-      <div className="flex flex-wrap gap-2 text-xs text-[var(--text)]">
+      <div className="flex flex-wrap gap-2 text-xs text-green-800">
         <button
           type="button"
-          className="text-left"
+          className="flex gap-1"
           onClick={() => onCategoryOpen?.(product.categoryId)}
         >
-          <Badge status="active" className="bg-emerald-100 text-emerald-700">
+          <Badge status="active" className="bg-blue-100 text-blue-700 border-blue-300 border">
             {categoryName || `Danh mục ${product.categoryId ?? ''}`}
           </Badge>
+          <ProductBadge className={cn({
+            "bg-emerald-100 text-emerald-700 border-emerald-300 border": (availability.state === "in-stock"),
+            "bg-amber-100 text-amber-600 border-amber-400 border": (availability.state === "low-stock"),
+            "bg-red-100 text-red-500 border-red-300 border": (availability.state === "out-of-stock"),
+            "bg-gray-200 text-gray-500 border-gray-400 border": (availability.state === "inactive")
+            })} 
+            availability={availability} />
         </button>
       </div>
 
-      <div className="grid gap-2 rounded-2xl bg-[var(--social-bg)] px-4 py-3 text-sm text-[var(--text-h)]">
+      <div className="grid gap-2 rounded-2xl bg-bg-surface px-4 py-3 text-sm text-green-800">
         <div className="flex items-center justify-between gap-3">
-          <span className="text-[var(--text)]">Giá</span>
-          <span className="font-semibold text-[var(--accent)]">{formatCurrency(product.price)}</span>
+          <span className="text-green-800">Giá</span>
+          <span className="font-semibold text-bg-success">{formatCurrency(product.price)}</span>
         </div>
         <div className="flex items-center justify-between gap-3">
-          <span className="text-[var(--text)]">Tồn kho</span>
+          <span className="text-green-800">Tồn kho</span>
           <span className="font-medium">{product.stock ?? 0}</span>
         </div>
-        <div className="text-xs text-[var(--text)]">{availability.helper}</div>
+        <div className="text-xs text-green-800">{availability.helper}</div>
       </div>
 
-      <div className="mt-auto flex flex-wrap justify-end gap-2">
-        {onEdit ? (
-          <Button variant="secondary" size="sm" onClick={() => onEdit?.(product)}>
-            Sửa
-          </Button>
-        ) : null}
-        <Button variant="secondary" size="sm" onClick={() => onOpen?.(product)}>
+      <div className="mt-auto flex justify-center gap-2">
+        <Button className="text-nowrap flex-1 hover:bg-gray-200 bg-white text-green-600 border border-green-300" onClick={() => onOpen?.(product)}>
           Xem chi tiết
         </Button>
         <Button
+          className="text-nowrap flex-1"
           size="sm"
           disabled={!availability.canPurchase}
           onClick={() => onAdd?.(product)}
@@ -83,9 +85,9 @@ export default function CatalogProductCard({
   )
 }
 
-function ProductBadge({ availability }) {
+function ProductBadge({ className, availability }) {
   return (
-    <Badge status={availability.badgeStatus} className={availability.badgeClassName}>
+    <Badge status={availability.badgeStatus} className={availability.badgeClassName, className}>
       {availability.label}
     </Badge>
   )

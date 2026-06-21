@@ -9,6 +9,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import swp391.group6.dto.LoginResponse;
@@ -88,6 +91,10 @@ public class JWTFilter extends OncePerRequestFilter {
                     user.getFullName(),
                     role
             );
+
+            Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
             request.setAttribute(cookieName, currentUser);
         } catch (Exception e) {

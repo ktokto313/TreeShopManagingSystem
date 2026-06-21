@@ -196,7 +196,7 @@ public class UserService {
         user.setStatus(dto.getStatus() != null ? dto.getStatus() : true);
 
         user.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
-
+        
         return user;
     }
 

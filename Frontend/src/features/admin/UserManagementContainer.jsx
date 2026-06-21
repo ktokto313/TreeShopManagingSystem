@@ -12,6 +12,7 @@ import { UserSearchBar } from "./components/UserSearchBar";
 import { CreateUserModal } from "./components/CreateUserModal";
 import { EditUserModal } from "./components/EditUserModal";
 import { UserDetailModal } from "./components/UserDetailModal";
+import { FaPlus } from "react-icons/fa";
 
 const SORT_OPTIONS = {
   user_asc:    (a, b) => (a.fullName ?? "").localeCompare(b.fullName ?? ""),
@@ -106,10 +107,10 @@ export function UserManagementContainer() {
   );
 
   const thClass =
-    "px-4 py-3 text-xs font-medium text-stone-500 uppercase tracking-wide cursor-pointer select-none hover:text-stone-800";
+    "px-4 py-3 text-xs font-medium text-white uppercase tracking-wide cursor-pointer select-none hover:-translate-y-0.5 duration-200";
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 mt-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-stone-800">User Management</h1>
@@ -119,20 +120,23 @@ export function UserManagementContainer() {
               : `${users.length} total users`}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setIsCreateModalOpen(true)}
-          className="h-10 px-4 text-sm rounded-md font-medium bg-[#283C1D] text-white hover:opacity-90"
-        >
-          + Create User
-        </button>
       </div>
 
-      <UserSearchBar
-        onSearch={handleSearchWithPaginationReset}
-        onClear={handleClearWithPaginationReset}
-        isSearching={isSearching}
-      />
+      <div className="flex justify-between">
+        <UserSearchBar
+          onSearch={handleSearchWithPaginationReset}
+          onClear={handleClearWithPaginationReset}
+          isSearching={isSearching}
+        />
+        <button
+            type="button"
+            onClick={() => setIsCreateModalOpen(true)}
+            className="h-10 px-4 text-sm rounded-md font-medium bg-green-500 flex gap-1 cursor-pointer items-center text-white hover:opacity-90"
+          >
+          <FaPlus></FaPlus>
+          Create User
+        </button>
+      </div>
 
       <div className="rounded-xl border border-stone-200 overflow-hidden bg-white">
         {hasError ? (
@@ -148,9 +152,9 @@ export function UserManagementContainer() {
             </p>
           </div>
         ) : (
-          <table className="w-full text-left">
+          <table className="w-full text-left border-green-500 border-0.5">
             <thead>
-              <tr className="bg-stone-50 border-b border-stone-200">
+              <tr className="bg-green-500">
                 <th className={thClass} onClick={() => handleSort("user")}>
                   User <SortIcon active={sortKey === "user"} direction={sortDir} />
                 </th>
@@ -163,7 +167,7 @@ export function UserManagementContainer() {
                 <th className={thClass} onClick={() => handleSort("phone")}>
                   Phone <SortIcon active={sortKey === "phone"} direction={sortDir} />
                 </th>
-                <th className="px-4 py-3 text-xs font-medium text-stone-500 uppercase tracking-wide">
+                <th className="px-4 py-3 text-xs font-medium text-white uppercase tracking-wide">
                   Actions
                 </th>
               </tr>
@@ -207,7 +211,7 @@ export function UserManagementContainer() {
       </div>
 
       {!hasError && !isLoading && (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
           <p className="text-sm text-stone-500">
             Showing {firstUserIndex}-{lastUserIndex} of {totalUsers} users
           </p>
@@ -234,10 +238,10 @@ export function UserManagementContainer() {
                   key={page}
                   type="button"
                   onClick={() => setCurrentPage(page)}
-                  className={`h-9 min-w-9 rounded-md border px-3 text-sm font-medium ${
+                  className={`h-9 min-w-9 rounded-md cursor-pointer border px-3 text-sm font-medium ${
                     safeCurrentPage === page
-                      ? "border-[#283C1D] bg-[#283C1D] text-white"
-                      : "border-stone-200 text-stone-700 hover:bg-stone-50"
+                      ? "bg-green-500 text-white"
+                      : "border-border text-stone-700 hover:bg-stone-50"
                   }`}
                 >
                   {page}
@@ -248,7 +252,7 @@ export function UserManagementContainer() {
               type="button"
               onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
               disabled={safeCurrentPage === totalPages}
-              className="h-9 min-w-9 rounded-md border border-stone-200 px-3 text-sm font-medium text-stone-700 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="h-9 min-w-9 rounded-md border border-stone-200 px-3 text-sm font-medium cursor-pointer text-stone-700 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
               &gt;
             </button>

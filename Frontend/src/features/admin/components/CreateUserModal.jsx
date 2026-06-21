@@ -119,7 +119,7 @@ export function CreateUserModal({ isOpen, onClose, onCreated }) {
         {hasError && <p className="text-sm text-rose-600">Something went wrong. Please try again.</p>}
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button variant="outline" type="button" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" className="bg-red-500 hover:bg-red-400 text-white" type="button" onClick={onClose}>Cancel</Button>
           <Button type="submit" disabled={isLoading}>{isLoading ? "Creating..." : "Create User"}</Button>
         </div>
       </Form>

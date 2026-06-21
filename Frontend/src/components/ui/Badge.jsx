@@ -6,7 +6,7 @@ const statusStyles = {
   danger: 'bg-red-100 text-red-700',
 }
 
-export default function Badge({ status = 'active', className, children, ...props }) {
+export function Badge({ status = 'active', className, children, ...props }) {
   return (
     <span
       className={cn(

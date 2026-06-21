@@ -1,9 +1,9 @@
 // Created by minhlthe200133
-import Button from '../../../components/ui/Button'
-import Form from '../../../components/ui/Form'
-import Input from '../../../components/ui/Input'
-import Select from '../../../components/ui/Select'
-import Textarea from '../../../components/ui/Textarea'
+import {Button} from '../../../components/ui/Button'
+import {Form} from '../../../components/ui/Form'
+import {Input} from '../../../components/ui/Input'
+import {Select} from '../../../components/ui/Select'
+import {Textarea} from '../../../components/ui/Textarea'
 import ProductVariantsEditor from './ProductVariantsEditor'
 
 export default function ProductForm({

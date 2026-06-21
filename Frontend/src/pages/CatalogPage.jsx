@@ -1,15 +1,17 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+﻿import { useContext, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import Container from '../components/global/Container'
-import Button from '../components/ui/Button'
-import Card from '../components/ui/Card'
-import Input from '../components/ui/Input'
-import Select from '../components/ui/Select'
-import { useAuth } from '../hooks/useAuth'
+import {Container} from '../components/global/Container'
+import {Button} from '../components/ui/Button'
+import {Card} from '../components/ui/Card'
+import {Input} from '../components/ui/Input'
+import {Select} from '../components/ui/Select'
+import { AuthContext } from '../context/AuthContext'
 import CatalogProductCard from '../features/catalog/components/CatalogProductCard'
 import { loadPublicJson } from '../features/catalog/utils/catalogApi'
 import { matchesCatalogFilters, sortCatalogProducts } from '../features/catalog/utils/catalogUtils'
 import { sortCategories } from '../utils/categorySort'
+import { cn } from '../utils/cn'
+import bg from "../assets/images/catalog-bg.jpg"
 
 const emptyFilters = {
   keyword: '',
@@ -52,7 +54,7 @@ function getPageNumbers(currentPage, totalPages) {
 export default function CatalogPage() {
   const navigate = useNavigate()
   const { categoryId: routeCategoryId } = useParams()
-  const { logout, isAuthenticated, canManage } = useAuth()
+  const { logout, isAuthenticated, canManage } = useContext(AuthContext);
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
   const [filters, setFilters] = useState(() => ({
@@ -193,17 +195,18 @@ export default function CatalogPage() {
   const displayEnd = Math.min(effectiveCurrentPage * itemsPerPage, visibleProducts.length)
 
   return (
-    <main className="bg-[var(--social-bg)]/50">
-      <section className="bg-gradient-to-br from-emerald-50 via-white to-lime-50">
-        <Container className="max-w-[96rem] py-14 lg:py-20">
-          <div className="space-y-6">
+    <main className="bg-linear-to-r from-green-300/60 to-green-200/60">
+      <section className="bg-linear-to-br from-green-200 via-white to-green-200 relative">
+        <img src={bg} className={cn("object-cover w-full absolute h-full")}></img>
+        <Container className="max-w-384 py-14 lg:py-20 relative">
+          <div className="space-y-6 bg-linear-to-r from-white/85 via-white/30 to-white/10 w-max rounded-xl p-4">
             <div className="space-y-4">
-              <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-[var(--text-h)] sm:text-5xl">
+              <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-green-800 sm:text-5xl">
                 {selectedCategory
                   ? `Danh mục ${selectedCategory.name}`
                   : 'Khám phá cây xanh phù hợp cho nhà ở, bàn làm việc và góc thư giãn'}
               </h1>
-              <p className="max-w-2xl text-lg leading-8 text-[var(--text)]">
+              <p className="max-w-2xl text-lg leading-8 text-green-800">
                 {selectedCategory
                   ? `Đang xem ${visibleProducts.length} sản phẩm thuộc danh mục ${selectedCategory.name}.`
                   : 'Tìm cây theo nhu cầu, xem ảnh và mở chi tiết khi muốn biết thêm mô tả, biến thể hoặc thông tin mua hàng.'}
@@ -214,7 +217,7 @@ export default function CatalogPage() {
         </Container>
       </section>
 
-      <Container className="max-w-[96rem] py-10">
+      <Container className="max-w-384 py-10">
         {notice ? (
           <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
             {notice}
@@ -224,9 +227,9 @@ export default function CatalogPage() {
         <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
           {showFilters ? (
             <aside className="space-y-6">
-              <Card className="space-y-5">
+              <Card className="space-y-5 px-5 pt-8 pb-6 bg-white/80">
                 <div className="space-y-1">
-                  <h2 className="text-xl font-semibold text-[var(--text-h)]">Bộ lọc sản phẩm</h2>
+                  <h2 className="text-2xl font-semibold text-green-800">Bộ lọc sản phẩm</h2>
                 </div>
 
                 <Input
@@ -276,31 +279,28 @@ export default function CatalogPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="secondary" onClick={clearFilters}>
-                    Xóa lọc
+                  <Button className="flex-1 hover:bg-green-400" onClick={clearFilters}>
+                    Xoá lọc
                   </Button>
-                  <Button variant="secondary" onClick={() => setShowFilters(false)}>
+                  <Button className="flex-1 hover:bg-green-400" onClick={() => setShowFilters(false)}>
                     Ẩn bộ lọc
                   </Button>
                 </div>
               </Card>
 
-              <Card className="space-y-4">
+              <Card className="space-y-4 px-5 pt-4 pb-5 bg-white/80">
                 <div className="flex items-center justify-between gap-3">
                   <div className="space-y-1">
-                    <h2 className="text-lg font-semibold text-[var(--text-h)]">Danh mục</h2>
-                    <p className="text-sm text-[var(--text)]">Chọn nhanh một danh mục để lọc theo nhóm.</p>
+                    <h2 className="text-xl font-semibold text-green-800">Danh mục</h2>
+                    <p className="text-sm text-green-800">Chọn nhanh một danh mục để lọc theo nhóm.</p>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
                   {categoryCounts.map((category) => (
                     <Button
+                      className={cn("hover:bg-green-400", {"bg-surface border-green-400 border text-green-600 hover:bg-green-200/50": (String(filters.categoryId) !== String(category.id))})}
                       key={category.id || 'all'}
-                      variant={
-                        String(filters.categoryId) === String(category.id) ? 'primary' : 'secondary'
-                      }
-                      size="sm"
                       onClick={() =>
                         selectCategory(category.id ?? '')
                       }
@@ -313,11 +313,11 @@ export default function CatalogPage() {
             </aside>
           ) : (
             <aside className="space-y-4">
-              <Button variant="secondary" onClick={() => setShowFilters(true)}>
+              <Button onClick={() => setShowFilters(true)}>
                 Hiện bộ lọc
               </Button>
               <Card className="space-y-2">
-                <h2 className="text-lg font-semibold text-[var(--text-h)]">Danh mục</h2>
+                <h2 className="text-lg font-semibold text-green-800">Danh mục</h2>
                 <div className="flex flex-wrap gap-2">
                   {categoryCounts.map((category) => (
                     <Button
@@ -339,18 +339,19 @@ export default function CatalogPage() {
           )}
 
           <section className="space-y-6">
-            <Card className="space-y-5">
+            <div className="space-y-5 bg-white/80 p-7 rounded-xl">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <h2 className="text-xl font-semibold text-[var(--text-h)]">Danh sách sản phẩm</h2>
-                  <p className="text-sm text-[var(--text)]">
+                  <h2 className="text-2xl font-semibold text-green-800">Danh sách sản phẩm</h2>
+                  <p className="text-sm text-green-800">
                     Hiển thị {displayStart}-{displayEnd} trên {visibleProducts.length} sản phẩm phù hợp
                   </p>
                 </div>
 
                 <div className="min-w-56">
                   <Select
-                    label="Sắp xếp"
+                    label={<span className='text-base'>Sắp xếp</span>}
+                    className="flex-row items-center gap-2"
                     value={filters.sort}
                     onChange={(event) => updateFilter('sort', event.target.value)}
                     options={sortOptions}
@@ -373,19 +374,18 @@ export default function CatalogPage() {
               </div>
 
               {visibleProducts.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--social-bg)] px-4 py-10 text-center text-sm text-[var(--text)]">
+                <div className="rounded-xl border border-dashed border-border bg-green-300 px-4 py-10 text-center text-lg text-white">
                   Chưa tìm thấy sản phẩm phù hợp với bộ lọc hiện tại.
                 </div>
               ) : null}
 
               {visibleProducts.length > itemsPerPage ? (
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
-                  <div className="text-sm text-[var(--text)]">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+                  <div className="text-sm flex-1 text-green-800">
                     Trang {effectiveCurrentPage} / {totalPages}
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-nowrap flex-1 items-center gap-2">
                     <Button
-                      variant="secondary"
                       size="sm"
                       disabled={effectiveCurrentPage === 1}
                       onClick={() => setCurrentPage((value) => Math.max(1, value - 1))}
@@ -403,7 +403,7 @@ export default function CatalogPage() {
                       </Button>
                     ))}
                     <Button
-                      variant="secondary"
+                    
                       size="sm"
                       disabled={effectiveCurrentPage === totalPages}
                       onClick={() => setCurrentPage((value) => Math.min(totalPages, value + 1))}
@@ -411,9 +411,10 @@ export default function CatalogPage() {
                       Sau
                     </Button>
                   </div>
+                  <div className='flex-1'></div>
                 </div>
               ) : null}
-            </Card>
+            </div>
           </section>
         </div>
       </Container>

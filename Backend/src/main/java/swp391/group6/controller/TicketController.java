@@ -76,9 +76,10 @@ public class TicketController {
         LoginResponse currentUser = JWTUtil.getUser(request);
 
         try {
-            Ticket updatedTicket = ticketService.updateTicketStatus(id, newState, currentUser.getEmail());
+            Ticket updatedTicket = ticketService.updateTicketStatus(id, newState, currentUser);
             return ResponseEntity.ok(updatedTicket);
         } catch (RuntimeException e) {
+            System.out.println(e);
             return ResponseEntity.badRequest().build();
         }
     }

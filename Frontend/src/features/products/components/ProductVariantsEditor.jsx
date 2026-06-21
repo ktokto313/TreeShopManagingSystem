@@ -1,7 +1,7 @@
 // Created by minhlthe200133
 import { useEffect, useMemo, useState } from 'react'
-import Button from '../../../components/ui/Button'
-import Input from '../../../components/ui/Input'
+import {Button} from '../../../components/ui/Button'
+import {Input} from '../../../components/ui/Input'
 import {
   formatVariantGroupSummary,
   parseVariantGroups,

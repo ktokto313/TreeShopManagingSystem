@@ -1,6 +1,6 @@
 import { cn } from '../../utils/cn'
 
-export default function Textarea({ label, error, className, id, ...props }) {
+export function Textarea({ label, error, className, id, ...props }) {
   const textareaId = id || props.name
   const hasError = Boolean(error)
 

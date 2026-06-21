@@ -16,7 +16,7 @@ export default function ProductImageFrame({
   return (
     <div
       className={cn(
-        'flex items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-100 via-white to-lime-100 text-sm text-[var(--text)]',
+        'flex items-center justify-center overflow-hidden rounded-2xl bg-green-200/40 border-black/20 border text-sm text-green-600',
         className,
       )}
     >
