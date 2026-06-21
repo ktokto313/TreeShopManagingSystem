@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useCallback } from 'react';
 
 /**
  * Fetches all users with the SHIPPER role from the API.
@@ -10,7 +11,7 @@ export default function useFetchAllShippers() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const fetchShippers = async () => {
+    const fetchShippers = useCallback(async () => {
         setIsLoading(true);
         setError(null);
         try {
@@ -35,7 +36,7 @@ export default function useFetchAllShippers() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
     return {
         shippers,

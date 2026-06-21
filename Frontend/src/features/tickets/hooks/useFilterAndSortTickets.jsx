@@ -1,76 +1,43 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
-const FILTER_KEYS = {
-	status: "ticketState",
-	state: "ticketState",
-	priority: "ticketPriority",
-	sort: "ticketSort",
-};
-
-export default function useFilterAndSortTickets(executeFetchAllTickets) {
+const useFilterAndSortTickets = (executeFetchAllTickets) => {
 	const [ticketState, setTicketState] = useState("");
 	const [ticketPriority, setTicketPriority] = useState("");
 	const [ticketSort, setTicketSort] = useState("");
+
 	const [isSelectAutoFilterSort, setIsSelectAutoFilterSort] = useState(true);
 
-	const getFilterValue = useCallback(
-		(param) => {
-			switch (FILTER_KEYS[param] ?? param) {
-				case "ticketState":
-					return ticketState;
-				case "ticketPriority":
-					return ticketPriority;
-				case "ticketSort":
-					return ticketSort;
-				default:
-					return "";
-			}
-		},
-		[ticketPriority, ticketSort, ticketState],
-	);
+	const handleFilterChange = (ticketParam, value) => {
+		if (ticketParam === "status") setTicketState(value);
+		if (ticketParam === "priority") setTicketPriority(value);
+		if (ticketParam === "sort") setTicketSort(value);
 
-	const handleFilterChange = useCallback(
-		(param, value) => {
-			const filterKey = FILTER_KEYS[param] ?? param;
-			let nextState = ticketState;
-			let nextPriority = ticketPriority;
-			let nextSort = ticketSort;
+		if(isSelectAutoFilterSort){
+			console.log("first")
+			executeFetchAllTickets(
+				ticketParam === "status" ? value : ticketState,
+				ticketParam === "priority" ? value : ticketPriority,
+				ticketParam === "sort" ? value : ticketSort,
+			);
+		}
+	};
 
-			if (filterKey === "ticketState") {
-				nextState = value;
-				setTicketState(value);
-			}
-
-			if (filterKey === "ticketPriority") {
-				nextPriority = value;
-				setTicketPriority(value);
-			}
-
-			if (filterKey === "ticketSort") {
-				nextSort = value;
-				setTicketSort(value);
-			}
-
-			if (isSelectAutoFilterSort && executeFetchAllTickets) {
-				executeFetchAllTickets(nextState, nextPriority, nextSort);
-			}
-		},
-		[
-			executeFetchAllTickets,
-			isSelectAutoFilterSort,
-			ticketPriority,
-			ticketSort,
-			ticketState,
-		],
-	);
+	const getFilterValue = (ticketParam) => {
+		if (ticketParam === "status") return ticketState;
+		if (ticketParam === "priority") return ticketPriority;
+		if (ticketParam === "sort") return ticketSort;
+		return "";
+	};
 
 	return {
 		ticketState,
 		ticketPriority,
 		ticketSort,
 		isSelectAutoFilterSort,
-		setIsSelectAutoFilterSort,
-		getFilterValue,
 		handleFilterChange,
+		getFilterValue,
+		setIsSelectAutoFilterSort
 	};
-}
+};
+
+export default useFilterAndSortTickets;

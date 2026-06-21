@@ -1,11 +1,11 @@
-import { cn } from "../../../utils/cn";
-import styles from "../assets/styles/TicketDashboardFilter.module.css";
-import { getSelectOption, ticketSelectList } from "../data/ticketSelectList";
-import { Select } from "../../../components/ui/Select";
-import { Button } from "../../../components/ui/Button";
-import ModalButton from "../../../components/ui/ModalButton";
-import { Form } from "../../../components/ui/Form";
-import { Input } from "../../../components/ui/Input";
+import { cn } from './../../../../utils/cn';
+import styles from "../../assets/styles/TicketDashboardFilter.module.css";
+import { getSelectOption, ticketSelectList } from "../../data/ticketSelectList";
+import { Select } from "../../../../components/ui/Select";
+import { Button } from "../../../../components/ui/Button";
+import ModalButton from "../../../../components/ui/ModalButton";
+import { Form } from "../../../../components/ui/Form";
+import { Input } from "../../../../components/ui/Input";
 import { FaFilter, FaPlus, FaCheck } from "react-icons/fa";
 import { TbFilterSpark } from "react-icons/tb";
 import { IoReload } from "react-icons/io5";
@@ -97,7 +97,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 								)}
 							>
 								<FaPlus></FaPlus>
-								<p className={cn(styles.createTicketBtnContent)}>Tạo Ticket</p>
+								<p className={cn(styles.createTicketBtnContent), "text-nowrap"}>Tạo Ticket</p>
 							</div>
 						}
 						modalTitle="Tạo Ticket"
@@ -107,6 +107,8 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 							styles.createTicketBtn,
 						)}
 					>
+						{({close}) => (
+
 						<Form
 							onSubmit={async (e) => {
 								const isSuccess = await handleCreateTicketSubmit(e);
@@ -149,6 +151,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 								{isCreateTicketLoading ? <p>Đang Xử Lí...</p> : <p>Lưu</p>}
 							</Button>
 						</Form>
+						)}
 					</ModalButton>
 				)}
 			</div>
@@ -223,12 +226,12 @@ export const TicketDashboardFilterBtn = ({ dashboardState, modalButtonClasses, r
 				)}
 			</ModalButton>
 			<Button
-				className={cn("hover:bg-green-600! w-full", reloadButtonClasses)}
+				className={cn("hover:bg-green-600! w-full"), reloadButtonClasses}
 				onClick={() => {
 					executeFetchAllTickets(ticketState, ticketPriority, ticketSort);
 				}}
 			>
-				<div className={cn("flex flex-row items-center justify-center gap-2", reloadButtonContentClasses)}>
+				<div className={cn("flex flex-row items-center justify-center gap-2"), reloadButtonContentClasses}>
 					<IoReload
 						className={cn("text-xl", { "animate-spin": isFetchAllTicketsLoading })}
 					></IoReload>

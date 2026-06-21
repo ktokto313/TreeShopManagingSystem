@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import CompleteProfileModal from '../components/CompleteProfileModal.jsx'
 import { useLogin } from '../hooks/useLogin'
+import loginImg from "../assets/images/loginImg.jpg"
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -21,7 +22,7 @@ export default function LoginPage() {
   } = useLogin()
 
   return (
-      <div className="min-h-[calc(100vh-4rem)] flex">
+      <div className="flex flex-col-reverse md:flex-row min-h-screen bg-green-200/50">
 
         {pendingGoogle && (
             <CompleteProfileModal
@@ -35,21 +36,26 @@ export default function LoginPage() {
         )}
 
         {/* LEFT */}
-        <div className="w-[40%] bg-blue-500 flex flex-col items-center justify-center p-12 text-white">
-          <h2 className="text-xl font-bold uppercase tracking-widest mb-4">Register</h2>
-          <p className="mb-8 text-center text-sm">
-            Don't have an account? Register one!
-          </p>
-          <button
-              onClick={() => navigate('/register')}
-              className="px-6 py-2.5 text-xs font-bold uppercase border border-white hover:bg-white hover:text-blue-600 transition cursor-pointer"
-          >
-            Register an account
-          </button>
+        <div className="bg-blue-500 text-white relative flex-1 flex justify-center items-center flex-col">
+          <div className={"absolute inset-0"}>
+            <img src={loginImg} className={"object-cover w-full h-full"}></img>
+          </div>
+          <div className={"bg-blue-300/90 relative z-10 p-10"}>
+            <h2 className="text-2xl font-bold uppercase mb-4">Register</h2>
+            <p className="mb-8 text-left text-pretty w-[80%] text-lg font-semibold">
+              Don't have an account? Register one!
+            </p>
+            <button
+                onClick={() => navigate('/register')}
+                className="px-6 py-2.5 text-xs font-bold uppercase border border-white hover:bg-white hover:text-blue-600 transition cursor-pointer"
+            >
+              Register an account
+            </button>
+          </div>
         </div>
 
         {/* RIGHT */}
-        <div className="w-[60%] flex flex-col items-center justify-center px-16 py-12">
+        <div className="flex flex-col items-center justify-center px-16 md:px-12 lg:px-0 py-12 md:flex-1">
           <div className="w-full max-w-md">
 
             <h1 className="text-2xl font-bold uppercase tracking-widest mb-8 text-green-800">
@@ -78,7 +84,7 @@ export default function LoginPage() {
                     value={values.email}
                     onChange={handleChange}
                     disabled={loading}
-                    className="w-full border border-white-subtle px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 disabled:opacity-50"
+                    className="w-full border-[0.01rem] border-green-600 focus:border-[0.12rem] px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 disabled:opacity-50"
                 />
               </div>
 
@@ -93,7 +99,7 @@ export default function LoginPage() {
                       value={values.password}
                       onChange={handleChange}
                       disabled={loading}
-                      className="w-full border border-white-subtle px-3 py-2.5 pr-10 text-sm focus:outline-none focus:border-green-500 disabled:opacity-50"
+                      className="w-full border-[0.01rem] border-green-600 focus:border-[0.12rem] px-3 py-2.5 pr-10 text-sm focus:outline-none focus:border-green-500 disabled:opacity-50"
                   />
                   <button
                       type="button"
@@ -115,17 +121,23 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <div className="mb-6 flex items-center gap-2">
-                <input type="checkbox" id="remember" className="cursor-pointer" />
-                <label htmlFor="remember" className="text-sm text-green-800 cursor-pointer">
-                  Remember me
-                </label>
+              <div className="mb-6 flex items-center justify-between text-nowrap gap-2">
+                <div className='flex gap-2'>
+                  <input type="checkbox" id="remember" className="cursor-pointer" />
+                  <label htmlFor="remember" className="text-sm text-green-800 cursor-pointer">
+                    Remember me
+                  </label>
+                </div>
+
+                <a href="#" className="text-sm text-green-700 hover:underline">
+                  Lost your password?
+                </a>
               </div>
 
               <button
                   type="submit"
                   disabled={loading}
-                  className="px-8 py-3 text-xs font-bold uppercase bg-green-700 text-white hover:bg-green-600 disabled:opacity-50 transition cursor-pointer"
+                  className="px-8 py-3 text-xs w-full font-bold uppercase bg-green-600 text-white hover:bg-green-500 disabled:opacity-50 transition cursor-pointer"
               >
                 {loading ? 'Logging in...' : 'Log in'}
               </button>
@@ -144,12 +156,6 @@ export default function LoginPage() {
                 }}
                 onError={() => {}}
             />
-
-            <div className="mt-4">
-              <a href="#" className="text-sm text-green-700 hover:underline">
-                Lost your password?
-              </a>
-            </div>
           </div>
         </div>
       </div>

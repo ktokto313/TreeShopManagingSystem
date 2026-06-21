@@ -45,7 +45,8 @@ export function AuthProvider({ children }) {
 
 	const isAdmin = user?.roleName === "SYSTEM_ADMIN";
 	const isAuthenticated = Boolean(user);
-	const canManage = user?.roleName === "SYSTEM_ADMIN" || user?.roleName === "MANAGER";
+	const canManage =
+		user?.roleName === "SYSTEM_ADMIN" || user?.roleName === "MANAGER";
 
 	const login = async (emailOrCredentials, password) => {
 		const credentials =
@@ -95,7 +96,9 @@ export function AuthProvider({ children }) {
 		});
 		if (!response.ok) {
 			const registerError = new Error(
-				response.status === 409 ? "Email already registered" : "Registration failed",
+				response.status === 409
+					? "Email already registered"
+					: "Registration failed",
 			);
 			registerError.status = response.status;
 			setError(registerError.message);

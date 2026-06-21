@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import Container from '../../../components/global/Container'
-import Card from '../../../components/ui/Card'
-import Input from '../../../components/ui/Input'
+import {Container} from '../../../components/global/Container'
+import {Card} from '../../../components/ui/Card'
+import {Input} from '../../../components/ui/Input'
 import { useProfile } from '../hooks/useProfile'
 
 export default function ProfilePage() {
@@ -36,17 +36,17 @@ export default function ProfilePage() {
           <Card className="space-y-6 p-6">
             <div className="flex justify-between items-center">
               <h1 className="text-2xl font-semibold">Thông tin cá nhân</h1>
-              <div className="space-x-2">
+              <div className="flex-col-reverse gap-2 flex sm:flex-row text-nowrap">
                 <button
                     onClick={handleChangePassword}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 cursor-pointer text-sm font-medium transition"
+                    className="px-4 flex-1 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 cursor-pointer text-sm font-medium transition"
                 >
                   Đổi mật khẩu
                 </button>
                 {!isEditing ? (
                     <button
                         onClick={() => setIsEditing(true)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer text-sm font-medium transition"
+                        className="px-4 flex-1 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer text-sm font-medium transition"
                     >
                       Chỉnh sửa
                     </button>

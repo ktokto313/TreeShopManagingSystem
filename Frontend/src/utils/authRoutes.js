@@ -1,7 +1,7 @@
 export const ROLE_HOME_ROUTES = {
 	SYSTEM_ADMIN: "/admin/users",
 	MANAGER: "/manage",
-	SUPPORT_AGENT: "/tickets/dashboard",
+	SUPPORT_AGENT: "/tickets/",
 	SHIPPER: "/orders",
 	CUSTOMER: "/",
 };

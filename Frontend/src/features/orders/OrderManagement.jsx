@@ -5,10 +5,7 @@ import { Button } from '../../components/ui/Button';
 import { useState } from 'react';
 import useFetchAllOrders from './hooks/useFetchAllOrders';
 import OrderModal from './OrderModal';
-
-function PulseBox({ className = '' }) {
-  return <div className={`animate-pulse rounded bg-stone-200 ${className}`} />;
-}
+import { Skeleton } from '../../components/ui/Skeleton';
 
 export default function OrderManagement() {
   const {
@@ -26,7 +23,7 @@ export default function OrderManagement() {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [fetchOrders]);
 
   // Compute metrics
   const totalOrders = orders.length;
@@ -41,7 +38,7 @@ export default function OrderManagement() {
 
   return (
     <div className="min-h-screen flex flex-col bg-bg-base font-main">
-      <main className="flex-grow py-8 bg-gradient-to-b from-bg-base to-bg-surface/30">
+      <main className="grow py-8 bg-linear-to-b from-bg-base to-bg-surface/30">
         <Container>
           {/* Header Title Section */}
           <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -71,7 +68,7 @@ export default function OrderManagement() {
             <div className="p-5 rounded-xl border border-border/60 bg-bg-surface/40 backdrop-blur-sm relative overflow-hidden group hover:border-interactive/40 transition-all duration-300">
               <span className="text-xs font-bold uppercase tracking-wider text-black/50">Total Orders</span>
               <div className="text-3xl font-black text-black mt-2">
-                {isLoading ? <PulseBox className="h-9 w-16 mt-1" /> : totalOrders}
+                {isLoading ? <Skeleton className="h-9 w-16 mt-1" /> : totalOrders}
               </div>
               <div className="absolute right-4 bottom-4 text-interactive/10 group-hover:text-interactive/20 transition-all duration-300">
                 <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,7 +80,7 @@ export default function OrderManagement() {
             <div className="p-5 rounded-xl border border-border/60 bg-bg-surface/40 backdrop-blur-sm relative overflow-hidden group hover:border-interactive/40 transition-all duration-300">
               <span className="text-xs font-bold uppercase tracking-wider text-black/50">Active Deliveries</span>
               <div className="text-3xl font-black text-black mt-2">
-                {isLoading ? <PulseBox className="h-9 w-16 mt-1" /> : totalOrders}
+                {isLoading ? <Skeleton className="h-9 w-16 mt-1" /> : totalOrders}
               </div>
               <div className="absolute right-4 bottom-4 text-interactive/10 group-hover:text-interactive/20 transition-all duration-300">
                 <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,7 +93,7 @@ export default function OrderManagement() {
               <span className="text-xs font-bold uppercase tracking-wider text-black/50">Total Revenue Generated</span>
               <div className="text-3xl font-black text-interactive mt-2">
                 {isLoading ? (
-                  <PulseBox className="h-9 w-32 mt-1" />
+                  <Skeleton className="h-9 w-32 mt-1" />
                 ) : (
                   `$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                 )}
@@ -112,7 +109,7 @@ export default function OrderManagement() {
           {/* Search and Filters controls panel */}
           <div className="bg-bg-surface/40 border border-border/60 rounded-2xl p-4 mb-8 backdrop-blur-sm flex flex-col gap-4 lg:flex-row lg:items-center justify-between">
             {/* Search */}
-            <div className="relative flex-grow max-w-md">
+            <div className="relative grow max-w-md">
               <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-black/40">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -155,23 +152,23 @@ export default function OrderManagement() {
           {isLoading && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="min-h-[16rem] p-6 rounded-xl border border-border bg-bg-surface/20 flex flex-col justify-between">
+                <div key={i} className="min-h-64 p-6 rounded-xl border border-border bg-bg-surface/20 flex flex-col justify-between">
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <div className="space-y-2">
-                        <PulseBox className="h-3 w-20" />
-                        <PulseBox className="h-4 w-32" />
+                        <Skeleton className="h-3 w-20" />
+                        <Skeleton className="h-4 w-32" />
                       </div>
-                      <PulseBox className="h-6 w-16 rounded-full" />
+                      <Skeleton className="h-6 w-16 rounded-full" />
                     </div>
                     <div className="space-y-2 pt-2">
-                      <PulseBox className="h-3 w-full" />
-                      <PulseBox className="h-3 w-5/6" />
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-3 w-5/6" />
                     </div>
                   </div>
                   <div className="flex justify-between items-center border-t border-border pt-4">
-                    <PulseBox className="h-3 w-16" />
-                    <PulseBox className="h-8 w-24 rounded-lg" />
+                    <Skeleton className="h-3 w-16" />
+                    <Skeleton className="h-8 w-24 rounded-lg" />
                   </div>
                 </div>
               ))}

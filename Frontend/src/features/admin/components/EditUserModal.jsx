@@ -108,7 +108,7 @@ export function EditUserModal({ user, isOpen, onClose, onUpdated }) {
         {hasError && <p className="text-sm text-rose-600">Something went wrong. Please try again.</p>}
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button variant="outline" type="button" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" type="button" className="bg-red-500 hover:bg-red-400 text-white" onClick={onClose}>Cancel</Button>
           <Button type="submit" disabled={isLoading}>{isLoading ? "Saving…" : "Save Changes"}</Button>
         </div>
       </Form>

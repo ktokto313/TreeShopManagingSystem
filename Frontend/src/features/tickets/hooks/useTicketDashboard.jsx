@@ -7,8 +7,8 @@ import useCreateTicket from "./useCreateTicket";
 
 export const useTicketDashboard = () => {
 	const navigate = useNavigate();
-	const { user, executeAuth } = useContext(AuthContext);
-	const isAgent = user?.role?.toLowerCase() === "support_agent";
+	const { user } = useContext(AuthContext);
+	const isAgent = user?.roleName?.toLowerCase() === "support_agent";
 
 	const {
 		fetchAllTicketsError,
@@ -49,7 +49,6 @@ export const useTicketDashboard = () => {
 		isAgent,
 
 		// Actions
-		executeAuth,
 		navigate,
 		executeFetchAllTickets,
 

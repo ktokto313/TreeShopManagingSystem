@@ -139,8 +139,9 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
+        UserDTO updatedUser;
         try {
-            UserDTO updatedUser = userService.getUserByEmailUnprotected(currentUser.getEmail())
+            updatedUser = userService.getUserByEmailUnprotected(currentUser.getEmail())
                     .map(u -> userService.updateOwnProfile(u.getId(), userDTO))
                     .orElse(null);
 

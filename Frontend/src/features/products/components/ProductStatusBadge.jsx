@@ -1,5 +1,5 @@
 // Created by minhlthe200133
-import Badge from '../../../components/ui/Badge'
+import {Badge} from '../../../components/ui/Badge'
 import { getProductAvailability } from '../utils/productAvailability'
 
 export default function ProductStatusBadge({ product, isActive }) {

@@ -1,6 +1,6 @@
-import Container from './Container'
+import {Container} from './Container'
 
-export default function Footer() {
+export function Footer() {
     return (
         <footer className="border-t border-border bg-bg">
             <Container className="flex flex-col gap-2 py-6 text-sm text-text sm:flex-row sm:items-center sm:justify-between">

@@ -1,11 +1,21 @@
-import { cn } from '../../utils/cn'
+import { cn } from "../../utils/cn";
 
-export function Form({ className, children, ...props }) {
+export function Form({ onSubmit, children, className = '', ...props }) {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (onSubmit) {
+      onSubmit(e);
+    }
+  };
+
   return (
-    <form className={cn('space-y-4', className)} noValidate {...props}>
+    <form 
+      onSubmit={handleSubmit} 
+      className={cn(`flex flex-col gap-4`, className)} 
+      noValidate 
+      {...props}
+    >
       {children}
     </form>
-  )
+  );
 }
-
-export default Form
