@@ -10,6 +10,7 @@ import { FaFilter, FaPlus, FaCheck } from "react-icons/fa";
 import { TbFilterSpark } from "react-icons/tb";
 import { IoReload } from "react-icons/io5";
 import { MdBlock } from "react-icons/md";
+import { BsLightningFill } from "react-icons/bs";
 
 export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 	const {
@@ -31,7 +32,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 	return (
 		<div
 			className={cn(
-				"flex flex-col justify-start gap-4 bg-white border-2 border-border rounded-2xl h-fit sticky top-0",
+				"flex flex-col justify-start gap-4 bg-white border-2 border-border rounded-2xl h-fit pb-5",
 				styles.ticketSelectList,
 				classNames,
 			)}
@@ -46,7 +47,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 				<h1 className="text-lg">Bộ Lọc</h1>
 			</div>
 
-			<div className={"px-4 pb-6 space-y-3"}>
+			<div className={"px-4 pb-2 space-y-3"}>
 				{ticketSelectList.map((select, index) => {
 					return (
 						<Select
@@ -155,9 +156,40 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 					</ModalButton>
 				)}
 			</div>
+			
+			<hr className="w-[85%] mx-auto border-green-300"></hr>
+
+			<StatusFilter dashboardState={dashboardState} className={"pt-1"}></StatusFilter>
 		</div>
 	);
 };
+
+const StatusFilter = ({dashboardState, className}) => {
+	return (
+		<div className={cn("px-5", className)}>
+			<div className="flex gap-1 pb-2.5 text-green-600 items-center">
+				<BsLightningFill className="text-lg"></BsLightningFill>
+				<h1 className="text-lg font-semibold">Lọc Nhanh</h1>
+			</div>
+
+			<div className="flex flex-wrap gap-1">
+				{getSelectOption("status").map(
+					s => (
+						<Button 
+						onClick={() => {dashboardState.handleFilterChange("status", s.value)}}
+
+						className={cn(
+							"border border-green-500 w-max bg-green-400",
+							{"bg-white text-green-700 hover:text-white": s.value !== dashboardState.ticketState}
+						)}>
+							{s.label}
+						</Button>
+					)
+				)}
+			</div>
+		</div>
+	)
+}
 
 export const TicketDashboardFilterBtn = ({ dashboardState, modalButtonClasses, reloadButtonClasses, reloadButtonContentClasses }) => {
 	const {

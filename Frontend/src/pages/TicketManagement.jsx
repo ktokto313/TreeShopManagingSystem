@@ -7,14 +7,14 @@ const TicketManagement = () => {
 	const dashboardState = useTicketDashboard();
 
 	return (
-		<div className="flex flex-row gap-2 w-full p-4">
+		<div className="flex flex-row gap-2 w-full px-4 mt-5 relative">
 			<TicketDashboardFilterBoard
-				classNames="hidden lg:flex flex-1 top-4"
+				classNames="hidden md:flex flex-2 max-w-60 top-20 sticky"
 				dashboardState={dashboardState}
 			/>
 			<TicketDashboard
 				className={cn(
-					"border-2 border-border mx-auto w-full rounded-2xl min-h-180 flex flex-col flex-6",
+					"border-2 border-border mx-auto w-full rounded-2xl min-h-180 flex flex-col flex-5",
 				)}
 				dashboardState={dashboardState}
 			/>
