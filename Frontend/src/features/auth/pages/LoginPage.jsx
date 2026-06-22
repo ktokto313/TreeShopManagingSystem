@@ -4,6 +4,7 @@ import { GoogleLogin } from '@react-oauth/google'
 import CompleteProfileModal from '../components/CompleteProfileModal.jsx'
 import { useLogin } from '../hooks/useLogin'
 import loginImg from "../assets/images/loginImg.jpg"
+import { Link } from "react-router-dom";
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -129,9 +130,12 @@ export default function LoginPage() {
                   </label>
                 </div>
 
-                <a href="#" className="text-sm text-green-700 hover:underline">
+                <Link
+                    to="/reset-password"
+                    className="text-sm text-green-700 hover:underline"
+                >
                   Lost your password?
-                </a>
+                </Link>
               </div>
 
               <button

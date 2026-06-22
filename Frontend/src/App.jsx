@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { Footer } from "./components/global/Footer";
 import { Header } from "./components/global/Header";
 import ChangePasswordPage from "./features/auth/pages/ChangePasswordPage";
+import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
 import LoginPage from "./features/auth/pages/LoginPage";
 import ProfilePage from "./features/auth/pages/ProfilePage";
 import RegisterPage from "./features/auth/pages/RegisterPage";
@@ -43,6 +44,10 @@ function AppRoutes() {
 			<Route
 				path="/change-password"
 				element={<ProtectedRoute element={<ChangePasswordPage />} />}
+			/>
+			<Route
+				path="/reset-password"
+				element={<ResetPasswordPage />}
 			/>
 
 			{/* Catalog */}
