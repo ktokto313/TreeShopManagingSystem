@@ -1,14 +1,14 @@
 import { useContext, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import Container from '../components/global/Container'
-import Button from '../components/ui/Button'
-import Card from '../components/ui/Card'
-import Input from '../components/ui/Input'
+import { Container } from '../components/global/Container'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { Input } from '../components/ui/Input'
 import { AuthContext } from '../context/AuthContext'
 import { fetchCart, submitCheckout } from '../features/cart/cartApi'
 import { formatCurrency } from '../features/catalog/utils/catalogUtils'
 
-const SHIPPING_FEE = 50000
+const SHIPPING_FEE = 30000
 
 const initialForm = {
   fullName: '',
@@ -75,7 +75,7 @@ export default function CheckoutPage() {
   async function handleSubmit(event) {
     event.preventDefault()
     if (!items.length) {
-      setError('Your cart is empty.')
+      setError('Giỏ hàng của bạn đang trống.')
       return
     }
     if (!validateForm()) {
@@ -100,7 +100,7 @@ export default function CheckoutPage() {
     <main className="bg-[var(--social-bg)]/50">
       <Container className="max-w-[80rem] py-10">
         <div className="mb-6 space-y-1">
-          <h1 className="text-3xl font-semibold text-[var(--text-h)]">Cart Checkout</h1>
+          <h1 className="text-3xl font-semibold text-[var(--text-h)]">Thanh Toán</h1>
           <p className="text-sm text-[var(--text)]">Điền vào các thông tin giao hàng.</p>
         </div>
 
@@ -111,7 +111,7 @@ export default function CheckoutPage() {
         ) : null}
 
         {loading ? (
-          <Card className="p-6 text-sm text-[var(--text)]">Loading checkout...</Card>
+          <Card className="p-6 text-sm text-[var(--text)]">Đang tải thông tin thanh toán...</Card>
         ) : (
           <form className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]" onSubmit={handleSubmit}>
             <section className="space-y-6">
@@ -167,10 +167,10 @@ export default function CheckoutPage() {
                 </div>
               </div>
               <Button type="submit" className="w-full" disabled={submitting || !items.length}>
-                {submitting ? 'Submitting...' : 'Submit'}
+                {submitting ? 'Đang xử lý...' : 'Đặt hàng ngay'}
               </Button>
               <Link to="/cart" className="block text-center text-sm text-[var(--accent)] hover:underline">
-                Back to cart
+                Quay lại giỏ hàng
               </Link>
             </Card>
           </form>

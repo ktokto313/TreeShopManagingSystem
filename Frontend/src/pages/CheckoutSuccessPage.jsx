@@ -1,7 +1,7 @@
 import { Link, useLocation, useParams } from 'react-router-dom'
-import Container from '../components/global/Container'
-import Button from '../components/ui/Button'
-import Card from '../components/ui/Card'
+import { Container } from '../components/global/Container'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
 import { formatCurrency } from '../features/catalog/utils/catalogUtils'
 
 function loadStoredCheckout(orderId, stateCheckout) {
@@ -24,10 +24,10 @@ export default function CheckoutSuccessPage() {
       <Container className="max-w-[70rem] py-10">
         <Card className="space-y-6 p-6">
           <div className="text-center">
-            <p className="text-sm uppercase tracking-[0.2em] text-[var(--accent)]">Checkout complete</p>
-            <h1 className="mt-2 text-3xl font-semibold text-[var(--text-h)]">Dat hang thanh cong</h1>
+            <p className="text-sm uppercase tracking-[0.2em] text-[var(--accent)]">Hoàn tất thanh toán</p>
+            <h1 className="mt-2 text-3xl font-semibold text-[var(--text-h)]">Đặt hàng thành công</h1>
             <p className="mt-2 text-sm text-[var(--text)]">
-              Your order is created with status PROCESSING and will be handled after payment is confirmed.
+              Đơn hàng của bạn đã được tạo và sẽ được xử lý sau khi thanh toán được xác nhận.
             </p>
           </div>
 
@@ -38,30 +38,30 @@ export default function CheckoutSuccessPage() {
               </div>
               <div className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Info label="Order code" value={checkout.orderCode} />
-                  <Info label="Status" value={checkout.status} />
-                  <Info label="Amount" value={formatCurrency(checkout.total)} />
-                  <Info label="Transfer content" value={checkout.transferContent} />
-                  <Info label="Account number" value={checkout.bankAccountNumber} />
-                  <Info label="Account name" value={checkout.bankAccountName} />
+                  <Info label="Mã đơn hàng" value={checkout.orderCode} />
+                  <Info label="Trạng thái" value={checkout.status} />
+                  <Info label="Số tiền" value={formatCurrency(checkout.total)} />
+                  <Info label="Nội dung chuyển khoản" value={checkout.transferContent} />
+                  <Info label="Số tài khoản" value={checkout.bankAccountNumber} />
+                  <Info label="Tên tài khoản" value={checkout.bankAccountName} />
                 </div>
                 <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-                  Please transfer the exact amount with the exact transfer content. Staff will confirm the payment manually.
+                  Vui lòng chuyển khoản đúng số tiền với nội dung chuyển khoản chính xác. Nhân viên sẽ xác nhận thanh toán thủ công.
                 </div>
               </div>
             </div>
           ) : (
             <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              Checkout was completed, but the QR details are no longer available in this browser session. Please check your orders.
+              Thanh toán đã hoàn tất, nhưng thông tin QR không còn trong phiên trình duyệt này. Vui lòng kiểm tra đơn hàng của bạn.
             </div>
           )}
 
           <div className="flex flex-wrap justify-center gap-3">
             <Link to="/orders">
-              <Button>View my orders</Button>
+              <Button>Xem đơn hàng</Button>
             </Link>
             <Link to="/catalog">
-              <Button variant="secondary">Continue shopping</Button>
+              <Button variant="secondary">Tiếp tục mua sắm</Button>
             </Link>
           </div>
         </Card>
