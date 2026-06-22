@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import Container from '../components/global/Container'
-import Button from '../components/ui/Button'
-import Card from '../components/ui/Card'
-import Select from '../components/ui/Select'
+import { Container } from '../components/global/Container'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { Select } from '../components/ui/Select'
 import ProductImageFrame from '../features/products/components/ProductImageFrame'
 import { addCartItem, fetchCart, updateCartItem, removeCartItem, clearCart } from '../features/cart/cartApi'
 import { loadPublicJson } from '../features/catalog/utils/catalogApi'
@@ -64,10 +64,10 @@ export default function CartPage() {
   const total = useMemo(() => (items.length ? subtotal + SHIPPING_FEE : 0), [items.length, subtotal])
   const productOptions = useMemo(
     () => [
-      { value: '', label: products.length ? 'Select a product' : 'No products available' },
+      { value: '', label: products.length ? 'Chọn sản phẩm' : 'Không có sản phẩm nào' },
       ...products.map((product) => ({
         value: String(product.id),
-        label: `${product.name} - ${formatCurrency(product.price)} (${product.stock} available)`,
+        label: `${product.name} - ${formatCurrency(product.price)} (${product.stock} có sẵn)`,
       })),
     ],
     [products],
@@ -128,7 +128,7 @@ export default function CartPage() {
       <Container className="max-w-[80rem] py-10">
         <div className="mb-6 space-y-1">
           <p className="text-sm text-[var(--text)]">Home &gt; Giỏ hàng</p>
-          <h1 className="text-3xl font-semibold text-[var(--text-h)]">Your Green Cart</h1>
+          <h1 className="text-3xl font-semibold text-[var(--text-h)]">Giỏ Hàng Của Bạn</h1>
         </div>
 
         {error ? (
@@ -145,7 +145,7 @@ export default function CartPage() {
               <h2 className="text-xl font-semibold text-[var(--text-h)]">Sản phẩm trong giỏ hàng</h2>
               <Card className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
                 <Select
-                  label="Add a product"
+                  label="Thêm sản phẩm"
                   value={selectedProductId}
                   options={productOptions}
                   disabled={!products.length || isAddingProduct}
@@ -155,7 +155,7 @@ export default function CartPage() {
                   disabled={!selectedProductId || isAddingProduct}
                   onClick={addSelectedProduct}
                 >
-                  {isAddingProduct ? 'Adding...' : 'Thêm vào giỏ hàng'}
+                  {isAddingProduct ? 'Đang thêm...' : 'Thêm vào giỏ hàng'}
                 </Button>
               </Card>
               {items.length === 0 ? (
@@ -221,7 +221,7 @@ export default function CartPage() {
             </section>
 
             <Card className="h-fit space-y-4 lg:sticky lg:top-20">
-              <h2 className="text-xl font-semibold text-[var(--text-h)]">Green Summary</h2>
+              <h2 className="text-xl font-semibold text-[var(--text-h)]">Tổng Quan Giỏ Hàng</h2>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>Thành tiền</span>
