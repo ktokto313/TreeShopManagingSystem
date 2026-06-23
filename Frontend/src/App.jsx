@@ -23,6 +23,7 @@ import BlogPage from './features/blog/pages/BlogPage';
 import MyBlogPage from './features/blog/pages/MyBlogPage';
 import BlogDetailPage from './features/blog/pages/BlogDetailPage';
 import BlogPendingPage from './features/blog/pages/BlogPendingPage';
+import WishlistPage from "./pages/WishlistPage";
 
 function ProtectedRoute({ element, roles = [] }) {
 	const { user, isLoading } = useContext(AuthContext);
@@ -58,6 +59,15 @@ function AppRoutes() {
 			<Route path="/catalog" element={<CatalogPage />} />
 			<Route path="/catalog/category/:categoryId" element={<CatalogPage />} />
 			<Route path="/catalog/:productId" element={<ProductDetailPage />} />
+			<Route
+				path="/wishlist"
+				element={
+					<ProtectedRoute
+						roles={["CUSTOMER"]}
+						element={<WishlistPage />}
+					/>
+				}
+			/>
 
 			{/* Admin and Manager */}
 			<Route
