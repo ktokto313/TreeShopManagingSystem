@@ -80,8 +80,8 @@ public class OrderService {
                 existingOrder.setShipper(newShipper);
                 if (existingOrder.getStatus() == OrderStatus.PROCESSING) {
                     tryToChangeState(existingOrder, user, OrderStatus.PENDING);
-                } else if (existingOrder.getStatus() == OrderStatus.RETURN_PENDING) {
-                    tryToChangeState(existingOrder, user, OrderStatus.RETURNING);
+                } else if (existingOrder.getStatus() == OrderStatus.RETURN_PROCESSING) {
+                    tryToChangeState(existingOrder, user, OrderStatus.RETURN_PENDING);
                 }
                 orderRepository.save(existingOrder);
                 return true;
@@ -96,13 +96,15 @@ public class OrderService {
         if (order == null) {
             return false;
         }
-        if (!canModifyAllOrder(loginResponse)) {
-            if (!order.getUser().equals(user) && !order.getShipper().equals(user)) {
-                return false;
-            }
-
-            tryToChangeState(order, user, orderStatus);
+        if (!canModifyAllOrder(loginResponse) && !order.getUser().equals(user) && !order.getShipper().equals(user)) {
+            return false;
         }
+
+        if (order.getUser().equals(user) && orderStatus == OrderStatus.RETURN_PROCESSING) {
+            order.setShipper(null);
+        }
+
+        tryToChangeState(order, user, orderStatus);
 
         orderRepository.save(order);
         return true;
@@ -116,7 +118,7 @@ public class OrderService {
             throw new InvalidStateTransitionException(
                 "Cannot transition order from " + currentStatus + " to " + targetStatus
                     + " with role " + roleName);
-        } else if (order.getShipper() == null) {
+        } else if (targetStatus != OrderStatus.RETURN_PROCESSING && order.getShipper() == null) {
             throw new InvalidStateTransitionException(
                 "Cannot transition order from " + currentStatus + " to " + targetStatus
                     + " without shipper");
@@ -144,9 +146,10 @@ public class OrderService {
             case DELIVERING ->
                 (to == OrderStatus.ARRIVED || to == OrderStatus.RETURNING) && "SHIPPER".equals(roleName);
             case ARRIVED ->
-                (to == OrderStatus.RECEIVED || to == OrderStatus.RETURN_PENDING) && "CUSTOMER".equals(roleName);
-            case RETURN_PENDING -> to == OrderStatus.RETURNING && "MANAGER".equals(roleName);
-            case RETURNING -> to == OrderStatus.FAILED && "SHIPPER".equals(roleName);
+                (to == OrderStatus.RECEIVED || to == OrderStatus.RETURN_PROCESSING) && "CUSTOMER".equals(roleName);
+            case RETURN_PROCESSING -> to == OrderStatus.RETURN_PENDING && "MANAGER".equals(roleName);
+            case RETURN_PENDING -> to == OrderStatus.RETURNING && "SHIPPER".equals(roleName);
+            case RETURNING -> to == OrderStatus.FAILED && "MANAGER".equals(roleName);
             default -> false;
         };
     }
@@ -157,6 +160,6 @@ public class OrderService {
     }
 
     public boolean canModifyAllOrder(LoginResponse user) {
-        return user.getRole().equals("SYSTEM_ADMIN");
+        return (user.getRole().equals("MANAGER"));
     }
 }
