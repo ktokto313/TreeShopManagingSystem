@@ -43,40 +43,65 @@ export function formatCurrency(value) {
   }).format(numberValue)
 }
 
-function normalize(value) {
-  return String(value ?? '').toLowerCase().trim()
+function normalizeSearchText(value) {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ')
 }
 
-function matchesText(product, keyword, categoryName) {
-  if (!keyword) {
+function compactSearchText(value) {
+  return normalizeSearchText(value).replace(/\s+/g, '')
+}
+
+//check filter keyword search
+function matchesText(product, keyword, categoryName, searchAliases = []) {
+  const searchValue = normalizeSearchText(keyword)
+
+  if (!searchValue) {
     return true
   }
 
-  const searchValue = normalize(keyword)
+  const compactSearchValue = compactSearchText(searchValue)
   const searchableText = [
     product.name,
     product.sku,
     product.description,
     categoryName,
+    ...searchAliases,
     summarizeVariantGroups(product.variants)
       .map((group) => `${group.name}:${group.values.join(', ')}`)
       .join(' '),
   ]
-    .map(normalize)
+    .map(normalizeSearchText)
     .join(' ')
+  const compactSearchableText = compactSearchText(searchableText)
 
-  return searchableText.includes(searchValue)
+  return searchableText.includes(searchValue) || compactSearchableText.includes(compactSearchValue)
 }
 
-export function matchesCatalogFilters(product, filters, categoryName) {
-  const keyword = normalize(filters.keyword)
+//check filter data
+export function matchesCatalogFilters(product, filters, categoryName, options = {}) {
+  const keyword = filters.keyword
   const selectedCategoryId = String(filters.categoryId ?? '')
   const selectedStatus = String(filters.status ?? '')
   const minPrice = filters.minPrice === '' ? null : Number(filters.minPrice)
   const maxPrice = filters.maxPrice === '' ? null : Number(filters.maxPrice)
   const isPurchasable = getProductAvailability(product).canPurchase
+  const otherCategoryId = options.otherCategoryId ?? 'other'
+  const smallCategoryIds = options.smallCategoryIds ?? new Set()
+  const productCategoryId = String(product.categoryId ?? '')
 
-  if (selectedCategoryId && String(product.categoryId) !== selectedCategoryId) {
+  if (selectedCategoryId === otherCategoryId && !smallCategoryIds.has(productCategoryId)) {
+    return false
+  }
+
+  if (selectedCategoryId && selectedCategoryId !== otherCategoryId && productCategoryId !== selectedCategoryId) {
     return false
   }
 
@@ -97,9 +122,10 @@ export function matchesCatalogFilters(product, filters, categoryName) {
     return false
   }
 
-  return matchesText(product, keyword, categoryName)
+  return matchesText(product, keyword, categoryName, options.searchAliases)
 }
 
+//sort products
 export function sortCatalogProducts(products, sortKey) {
   const sortedProducts = [...products]
 

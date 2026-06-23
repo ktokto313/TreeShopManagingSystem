@@ -100,6 +100,12 @@ CREATE TABLE shopping_cart_entry (
    PRIMARY KEY (cart_id, product_id)
 );
 
+CREATE TABLE wishlist_items (
+   customer_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+   product_id  BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+   PRIMARY KEY (customer_id, product_id)
+);
+
 -- ============================================================
 
 CREATE TABLE reviews (

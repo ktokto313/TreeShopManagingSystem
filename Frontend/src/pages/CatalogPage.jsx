@@ -9,11 +9,15 @@ import { AuthContext } from '../context/AuthContext'
 import CatalogProductCard from '../features/catalog/components/CatalogProductCard'
 import { loadPublicJson } from '../features/catalog/utils/catalogApi'
 import { matchesCatalogFilters, sortCatalogProducts } from '../features/catalog/utils/catalogUtils'
+import { addWishlistProduct, getWishlistProducts } from '../features/wishlist/wishlistApi'
 import { sortCategories } from '../utils/categorySort'
 import { cn } from '../utils/cn'
 import bg from "../assets/images/catalog-bg.jpg"
 
-const emptyFilters = {
+const OTHER_CATEGORY_ID = 'other'
+const SMALL_CATEGORY_LIMIT = 10
+
+const emptyFilters = { //criteria for filter
   keyword: '',
   categoryId: '',
   status: '',
@@ -57,13 +61,14 @@ export default function CatalogPage() {
   const { logout, isAuthenticated, canManage } = useContext(AuthContext);
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
-  const [filters, setFilters] = useState(() => ({
+  const [filters, setFilters] = useState(() => ({ //load filter data
     ...emptyFilters,
     categoryId: routeCategoryId ?? '',
   }))
   const [showFilters, setShowFilters] = useState(true)
   const [notice, setNotice] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [wishlistIds, setWishlistIds] = useState(new Set())
   const itemsPerPage = 12
 
   function handleAuthError(error) {
@@ -99,12 +104,31 @@ export default function CatalogPage() {
     }
   }
 
+  async function loadWishlistData() { //get wishlist data from user
+    if (!isAuthenticated) {
+      setWishlistIds(new Set())
+      return
+    }
+
+    try {
+      const wishlistProducts = await getWishlistProducts()
+      setWishlistIds(
+        new Set((Array.isArray(wishlistProducts) ? wishlistProducts : []).map((product) => product.id)),
+      )
+    } catch (error) {
+      if (handleAuthError(error)) {
+        return
+      }
+      setWishlistIds(new Set())
+    }
+  }
+
   function updateFilter(name, value) {
     setCurrentPage(1)
     setFilters((current) => ({ ...current, [name]: value }))
   }
 
-  function selectCategory(categoryId) {
+  function selectCategory(categoryId) { //update filter data
     const nextCategoryId = String(categoryId ?? '')
     setCurrentPage(1)
     setFilters((current) => ({ ...current, categoryId: nextCategoryId }))
@@ -118,6 +142,12 @@ export default function CatalogPage() {
   }, [])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadWishlistData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated])
+
+  useEffect(() => { //synchronize filter data with routeCategoryId
     const nextCategoryId = routeCategoryId ?? ''
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setFilters((current) => (
@@ -140,13 +170,34 @@ export default function CatalogPage() {
     }))
   }, [products, categoryLookup])
 
+  const baseCategoryCounts = useMemo(() => {
+    return categories.map((category) => ({
+      ...category,
+      count: productsWithCategoryName.filter(
+        (product) => String(product.categoryId) === String(category.id),
+      ).length,
+    }))
+  }, [categories, productsWithCategoryName])
+
+  const smallCategoryIds = useMemo(() => {
+    return new Set(
+      baseCategoryCounts
+        .filter((category) => category.count > 0 && category.count <= SMALL_CATEGORY_LIMIT)
+        .map((category) => String(category.id)),
+    )
+  }, [baseCategoryCounts])
+
   const visibleProducts = useMemo(() => {
     const filteredProducts = productsWithCategoryName.filter((product) =>
-      matchesCatalogFilters(product, filters, product.categoryName),
+      matchesCatalogFilters(product, filters, product.categoryName, {
+        otherCategoryId: OTHER_CATEGORY_ID,
+        smallCategoryIds,
+        searchAliases: smallCategoryIds.has(String(product.categoryId)) ? ['Khác', 'Other'] : [],
+      }),
     )
 
     return sortCatalogProducts(filteredProducts, filters.sort)
-  }, [filters, productsWithCategoryName])
+  }, [filters, productsWithCategoryName, smallCategoryIds])
 
   const totalPages = Math.max(1, Math.ceil(visibleProducts.length / itemsPerPage))
   const effectiveCurrentPage = Math.min(currentPage, totalPages)
@@ -157,21 +208,26 @@ export default function CatalogPage() {
   }, [effectiveCurrentPage, visibleProducts])
 
   const categoryCounts = useMemo(() => {
+    const visibleCategoryCounts = baseCategoryCounts.filter(
+      (category) => !smallCategoryIds.has(String(category.id)),
+    )
+    const otherCount = baseCategoryCounts
+      .filter((category) => smallCategoryIds.has(String(category.id)))
+      .reduce((total, category) => total + category.count, 0)
+
     return [
       { id: '', name: 'Tất cả', count: productsWithCategoryName.length },
-      ...categories.map((category) => ({
-        ...category,
-        count: productsWithCategoryName.filter(
-          (product) => String(product.categoryId) === String(category.id),
-        ).length,
-      })),
+      ...visibleCategoryCounts,
+      ...(otherCount > 0 ? [{ id: OTHER_CATEGORY_ID, name: 'Khác', count: otherCount, isVirtual: true }] : []),
     ]
-  }, [categories, productsWithCategoryName])
+  }, [baseCategoryCounts, productsWithCategoryName.length, smallCategoryIds])
 
   const pageNumbers = getPageNumbers(effectiveCurrentPage, totalPages)
-  const selectedCategory = categories.find(
-    (category) => String(category.id) === String(filters.categoryId),
-  )
+  const selectedCategory = filters.categoryId === OTHER_CATEGORY_ID
+    ? { id: OTHER_CATEGORY_ID, name: 'Khác' }
+    : categories.find(
+      (category) => String(category.id) === String(filters.categoryId),
+    )
 
   function clearFilters() {
     setFilters(emptyFilters)
@@ -183,12 +239,41 @@ export default function CatalogPage() {
     navigate(`/catalog/${product.id}`, { state: { product } })
   }
 
+  function selectProductCategory(categoryId) {
+    const nextCategoryId = smallCategoryIds.has(String(categoryId)) ? OTHER_CATEGORY_ID : categoryId
+    selectCategory(nextCategoryId)
+  }
+
   function openEditProduct(product) {
     navigate('/manage', { state: { editProduct: product } })
   }
 
   function previewAddToCart(product) {
     setNotice(`${product.name} có thể thêm vào giỏ hàng khi luồng mua hàng được bật.`)
+  }
+
+  async function handleWishlistAction(product) {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: { pathname: `/catalog/${product.id}` } } })
+      return
+    }
+
+    if (wishlistIds.has(product.id)) {
+      navigate('/wishlist')
+      return
+    }
+
+    setNotice('')
+    try {
+      await addWishlistProduct(product.id)
+      setWishlistIds((current) => new Set([...current, product.id]))
+      setNotice(`${product.name} đã được thêm vào danh sách yêu thích.`)
+    } catch (error) {
+      if (handleAuthError(error)) {
+        return
+      }
+      setNotice(error.message)
+    }
   }
 
   const displayStart = visibleProducts.length === 0 ? 0 : (effectiveCurrentPage - 1) * itemsPerPage + 1
@@ -235,7 +320,7 @@ export default function CatalogPage() {
                 <Input
                   label="Từ khóa"
                   value={filters.keyword}
-                  placeholder="Tên, mô tả, danh mục..."
+                  placeholder="Tên sản phẩm, danh mục, caydeban..."
                   onChange={(event) => updateFilter('keyword', event.target.value)}
                 />
 
@@ -243,13 +328,10 @@ export default function CatalogPage() {
                   label="Danh mục"
                   value={filters.categoryId}
                   onChange={(event) => selectCategory(event.target.value)}
-                  options={[
-                    { value: '', label: 'Tất cả danh mục' },
-                    ...categories.map((category) => ({
-                      value: String(category.id),
-                      label: category.name,
-                    })),
-                  ]}
+                  options={categoryCounts.map((category) => ({
+                    value: String(category.id),
+                    label: category.name,
+                  }))}
                 />
 
                 <Select
@@ -367,8 +449,10 @@ export default function CatalogPage() {
                     categoryName={product.categoryName}
                     onOpen={openDetail}
                     onEdit={canManage ? openEditProduct : undefined}
-                    onCategoryOpen={selectCategory}
+                    onCategoryOpen={selectProductCategory}
                     onAdd={previewAddToCart}
+                    onWishlist={handleWishlistAction}
+                    isWishlisted={wishlistIds.has(product.id)}
                   />
                 ))}
               </div>
