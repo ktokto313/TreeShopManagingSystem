@@ -18,6 +18,7 @@ import { useContext } from "react";
 import { hasAllowedRole } from "./utils/authRoutes";
 import { AuthContext } from "./context/AuthContext";
 import TicketDetailPage from "./pages/TicketDetailPage";
+import WishlistPage from "./pages/WishlistPage";
 
 function ProtectedRoute({ element, roles = [] }) {
 	const { user, isLoading } = useContext(AuthContext);
@@ -49,6 +50,15 @@ function AppRoutes() {
 			<Route path="/catalog" element={<CatalogPage />} />
 			<Route path="/catalog/category/:categoryId" element={<CatalogPage />} />
 			<Route path="/catalog/:productId" element={<ProductDetailPage />} />
+			<Route
+				path="/wishlist"
+				element={
+					<ProtectedRoute
+						roles={["CUSTOMER"]}
+						element={<WishlistPage />}
+					/>
+				}
+			/>
 
 			{/* Admin and Manager */}
 			<Route

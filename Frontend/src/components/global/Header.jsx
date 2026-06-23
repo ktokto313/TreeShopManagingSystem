@@ -23,6 +23,7 @@ const navItemsByRole = {
   CUSTOMER: [
     { label: 'Home', to: '/' },
     { label: 'Catalog', to: '/catalog' },
+    { label: 'Yêu thích', to: '/wishlist' },
     { label: 'Profile', to: '/profile' },
     { label: 'Tickets', to: '/tickets/' },
   ],
