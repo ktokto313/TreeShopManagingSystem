@@ -1,8 +1,10 @@
 import { Link, useLocation, useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { Container } from '../components/global/Container'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { formatCurrency } from '../features/catalog/utils/catalogUtils'
+import { requestJson } from '../features/cart/cartApi'
 
 function loadStoredCheckout(orderId, stateCheckout) {
   if (stateCheckout) return stateCheckout
@@ -17,7 +19,33 @@ function loadStoredCheckout(orderId, stateCheckout) {
 export default function CheckoutSuccessPage() {
   const { orderId } = useParams()
   const location = useLocation()
+  const [verifiedOrder, setVerifiedOrder] = useState(null)
+  const [verifyError, setVerifyError] = useState(false)
   const checkout = loadStoredCheckout(orderId, location.state?.checkout)
+
+  useEffect(() => {
+    if (!orderId) return
+    let cancelled = false
+    async function verify() {
+      try {
+        const order = await requestJson(`/api/orders/${orderId}`)
+        if (!cancelled) setVerifiedOrder(order)
+      } catch {
+        if (!cancelled) setVerifyError(true)
+      }
+    }
+    verify()
+    return () => { cancelled = true }
+  }, [orderId])
+
+  const displayData = verifiedOrder ? {
+    orderCode: verifiedOrder.orderCode || verifiedOrder.id,
+    status: verifiedOrder.status,
+    total: verifiedOrder.total,
+    transferContent: checkout?.transferContent,
+    bankAccountNumber: checkout?.bankAccountNumber,
+    bankAccountName: checkout?.bankAccountName,
+  } : null
 
   return (
     <main className="bg-[var(--social-bg)]/50">
@@ -31,19 +59,25 @@ export default function CheckoutSuccessPage() {
             </p>
           </div>
 
-          {checkout ? (
+          {verifyError ? (
+            <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              Không thể xác minh đơn hàng từ máy chủ. Vui lòng kiểm tra đơn hàng của bạn.
+            </div>
+          ) : displayData ? (
             <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
               <div className="rounded-lg border border-[var(--border)] bg-white p-4">
-                <img className="mx-auto w-full max-w-72 rounded-md" src={checkout.qrImageUrl} alt="VietQR payment code" />
+                {checkout?.qrImageUrl && (
+                  <img className="mx-auto w-full max-w-72 rounded-md" src={checkout.qrImageUrl} alt="VietQR payment code" />
+                )}
               </div>
               <div className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Info label="Mã đơn hàng" value={checkout.orderCode} />
-                  <Info label="Trạng thái" value={checkout.status} />
-                  <Info label="Số tiền" value={formatCurrency(checkout.total)} />
-                  <Info label="Nội dung chuyển khoản" value={checkout.transferContent} />
-                  <Info label="Số tài khoản" value={checkout.bankAccountNumber} />
-                  <Info label="Tên tài khoản" value={checkout.bankAccountName} />
+                  <Info label="Mã đơn hàng" value={displayData.orderCode} />
+                  <Info label="Trạng thái" value={displayData.status} />
+                  <Info label="Số tiền" value={formatCurrency(displayData.total)} />
+                  <Info label="Nội dung chuyển khoản" value={displayData.transferContent} />
+                  <Info label="Số tài khoản" value={displayData.bankAccountNumber} />
+                  <Info label="Tên tài khoản" value={displayData.bankAccountName} />
                 </div>
                 <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
                   Vui lòng chuyển khoản đúng số tiền với nội dung chuyển khoản chính xác. Nhân viên sẽ xác nhận thanh toán thủ công.
@@ -51,8 +85,8 @@ export default function CheckoutSuccessPage() {
               </div>
             </div>
           ) : (
-            <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              Thanh toán đã hoàn tất, nhưng thông tin QR không còn trong phiên trình duyệt này. Vui lòng kiểm tra đơn hàng của bạn.
+            <div className="flex items-center justify-center py-8">
+              <span className="text-sm text-[var(--text)]">Đang xác minh đơn hàng...</span>
             </div>
           )}
 
