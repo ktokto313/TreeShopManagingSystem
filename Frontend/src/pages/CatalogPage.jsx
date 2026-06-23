@@ -294,7 +294,7 @@ export default function CatalogPage() {
               <p className="max-w-2xl text-lg leading-8 text-green-800">
                 {selectedCategory
                   ? `Đang xem ${visibleProducts.length} sản phẩm thuộc danh mục ${selectedCategory.name}.`
-                  : 'Tìm cây theo nhu cầu, xem ảnh và mở chi tiết khi muốn biết thêm mô tả, biến thể hoặc thông tin mua hàng.'}
+                  : 'Tìm cây theo nhu cầu, xem ảnh và mở chi tiết khi muốn biết thêm mô tả hoặc thông tin mua hàng.'}
               </p>
             </div>
 

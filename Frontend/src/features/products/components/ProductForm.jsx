@@ -4,7 +4,6 @@ import {Form} from '../../../components/ui/Form'
 import {Input} from '../../../components/ui/Input'
 import {Select} from '../../../components/ui/Select'
 import {Textarea} from '../../../components/ui/Textarea'
-import ProductVariantsEditor from './ProductVariantsEditor'
 
 export default function ProductForm({
   values,
@@ -67,7 +66,6 @@ export default function ProductForm({
         placeholder="Mô tả chi tiết sản phẩm"
         onChange={handleInputChange}
       />
-      <ProductVariantsEditor value={values.variants} error={errors.variants} onChange={onChange} />
       <div className="grid gap-4 sm:grid-cols-2">
         <Input
           label="Giá"

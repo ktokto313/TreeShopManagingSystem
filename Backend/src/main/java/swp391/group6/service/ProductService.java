@@ -127,9 +127,8 @@ public class ProductService {
         product.setSku(sku);
 
         String description = trimToNull(request.getDescription());
-        String variants = trimToNull(request.getVariants());
         String images = trimToNull(request.getImages());
-        boolean hasDetail = description != null || variants != null || images != null;
+        boolean hasDetail = description != null || images != null;
 
         ProductDetail detail = product.getProductDetail();
         if (detail == null && hasDetail) {
@@ -140,7 +139,6 @@ public class ProductService {
         if (detail != null) {
             detail.setProduct(product);
             detail.setDescription(description);
-            detail.setVariants(variants);
             detail.setImages(images);
             product.setProductDetail(detail);
         } else {
@@ -160,7 +158,6 @@ public class ProductService {
         ProductDetail detail = resolveProductDetail(product);
         if (detail != null) {
             response.setDescription(detail.getDescription());
-            response.setVariants(detail.getVariants());
             response.setImages(detail.getImages());
         }
         return response;
