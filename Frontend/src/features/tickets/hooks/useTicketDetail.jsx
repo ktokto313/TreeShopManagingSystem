@@ -77,6 +77,8 @@ export const useTicketDetail = (ticketId) => {
 	const [state, dispatch] = useReducer(detailReducer, initialState);
 
 	const isAgent = user?.roleName?.toLowerCase() === "support_agent";
+	const isCreator = user?.email === state.ticket?.ticketCreator?.email;
+	const isResolved = state.ticket?.ticketState?.toLowerCase() === "resolved";
 
 	useEffect(() => {
 		if (!ticketId) {
@@ -151,6 +153,8 @@ export const useTicketDetail = (ticketId) => {
 		...state,
 		user,
 		isAgent,
+		isCreator,
+		isResolved,
 		handleStatusChange,
 		handleCommentSubmit,
 		setNewCommentDetail,
