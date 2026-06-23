@@ -12,7 +12,6 @@ public class ProductResponse {
     private boolean status;
     private String sku;
     private String description;
-    private String variants;
     private String images;
 
     public Long getId() {
@@ -77,14 +76,6 @@ public class ProductResponse {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getVariants() {
-        return variants;
-    }
-
-    public void setVariants(String variants) {
-        this.variants = variants;
     }
 
     public String getImages() {
