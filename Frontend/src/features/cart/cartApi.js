@@ -1,4 +1,4 @@
-async function requestJson(path, options = {}) {
+export async function requestJson(path, options = {}) {
   const response = await fetch(path, {
     credentials: 'include',
     headers: {

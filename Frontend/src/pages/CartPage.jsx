@@ -118,6 +118,7 @@ export default function CartPage() {
     setError('')
     try {
       setCart(await clearCart())
+      window.dispatchEvent(new Event('cart-updated'))
     } catch (err) {
       setError(err.message)
     }

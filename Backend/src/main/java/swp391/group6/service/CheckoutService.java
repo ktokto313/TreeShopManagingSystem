@@ -14,6 +14,7 @@ import swp391.group6.model.ShoppingCart;
 import swp391.group6.model.ShoppingCartEntry;
 import swp391.group6.model.User;
 import swp391.group6.repository.OrderRepository;
+import swp391.group6.repository.ProductRepository;
 import swp391.group6.repository.ShoppingCartRepository;
 import swp391.group6.repository.UserRepository;
 
@@ -36,6 +37,7 @@ public class CheckoutService {
     private final ShoppingCartRepository shoppingCartRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final ProductRepository productRepository;
 
     @Value("${checkout.bank-id:${CHECKOUT_BANK_ID:}}")
     private String bankId;
@@ -55,10 +57,12 @@ public class CheckoutService {
     public CheckoutService(
             ShoppingCartRepository shoppingCartRepository,
             OrderRepository orderRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            ProductRepository productRepository) {
         this.shoppingCartRepository = shoppingCartRepository;
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
+        this.productRepository = productRepository;
     }
 
     @Transactional
@@ -98,6 +102,7 @@ public class CheckoutService {
             details.add(detail);
 
             product.setStock(product.getStock() - entry.getQuantity());
+            productRepository.save(product);
         }
 
         order.setOrderDetailList(details);
