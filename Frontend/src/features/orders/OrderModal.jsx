@@ -92,7 +92,8 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
           </div>
 
           {/* Shipper Assignment */}
-          {selectedOrder.status === "PROCESSING" && user?.role === "MANAGER" && (
+          {(selectedOrder.status === "PROCESSING" || selectedOrder.status === "RETURN_PROCESSING")
+           && user?.role === "MANAGER" && (
             <div className="p-3 rounded-lg bg-bg-base border border-border/55">
               <ShipperSelect
                 value={selectedOrder.shipperId ?? ''}
@@ -222,6 +223,23 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
               </Button>
             )}
 
+            {selectedOrder.status === "RETURNING" && user?.role === "MANAGER" && (
+              <Button
+                variant="primary"
+                className="px-4 py-2"
+                disabled={isChangingStatus}
+                onClick={async () => {
+                  const success = await changeOrderStatus(selectedOrder.id, "FAILED");
+                  if (success) {
+                    fetchOrderDetail(selectedOrderId);
+                    onOrderChange?.();
+                  }
+                }}
+              >
+                Confirm cargo returned
+              </Button>
+            )}
+
             {selectedOrder.status === "RECEIVED" && user?.role === "MANAGER" && (
               <Button
                 variant="primary"
@@ -252,6 +270,23 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
               </Button>
             )}
 
+            {selectedOrder.status === "RETURN_PENDING" && user?.role === "SHIPPER" && (
+              <Button
+                variant="primary"
+                className="px-4 py-2"
+                disabled={isChangingStatus}
+                onClick={async () => {
+                  const success = await changeOrderStatus(selectedOrder.id, "RETURNING");
+                  if (success) {
+                    fetchOrderDetail(selectedOrderId);
+                    onOrderChange?.();
+                  }
+                }}
+              >
+                Confirm cargo received & returning
+              </Button>
+            )}
+
             {/* CUSTOMER Actions */}
             {selectedOrder.status === "ARRIVED" && user?.role === "CUSTOMER" && (
               <>
@@ -274,7 +309,7 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
                   className="px-4 py-2 bg-red-500 hover:bg-red-600 border-none"
                   disabled={isChangingStatus}
                   onClick={async () => {
-                    const success = await changeOrderStatus(selectedOrder.id, "RETURN_PENDING");
+                    const success = await changeOrderStatus(selectedOrder.id, "RETURN_PROCESSING");
                     if (success) {
                       fetchOrderDetail(selectedOrderId);
                       onOrderChange?.();

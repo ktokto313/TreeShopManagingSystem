@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
+    @Query("SELECT o FROM Order o WHERE (CAST(o.id AS string) = :orderId) AND ((CAST(o.user.id AS string) = :userID) OR (CAST(o.shipper.id AS string) = :shipperID))")
     Optional<Order> findOrderByIdAndUser_IdOrShipper_Id(long orderId, long userID, long shipperID);
     boolean existsByShipper_Id(long shipperID);
     
