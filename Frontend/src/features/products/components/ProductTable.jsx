@@ -5,7 +5,6 @@ import ProductImageFrame from './ProductImageFrame'
 import ProductStatusBadge from './ProductStatusBadge'
 import { getProductAvailability } from '../utils/productAvailability'
 import { resolveProductImageSource } from '../utils/productImageResolver'
-import { summarizeVariantGroups } from '../utils/variantUtils'
 
 function summarizeText(value, maxLength = 80) {
   if (!value) {
@@ -49,7 +48,6 @@ export default function ProductTable({ products = [], onEdit, onDeactivate }) {
         </thead>
         <tbody className="divide-y divide-green-500">
           {products.map((product) => {
-            const variantGroups = summarizeVariantGroups(product.variants)
             const availability = getProductAvailability(product)
 
             return (
@@ -61,16 +59,6 @@ export default function ProductTable({ products = [], onEdit, onDeactivate }) {
                 <td className="px-4 py-3">
                   <div className="max-w-[24rem] space-y-1">
                     <p className="">{summarizeText(product.description, 64)}</p>
-                    <div className="flex gap-2 text-xs">
-                      <span className="rounded-full bg-blue-300 text-blue-800 px-2.5 py-1">
-                        {variantGroups.length} nhóm biến thể
-                      </span>
-                      {variantGroups.map((group) => (
-                        <span key={group.name} className="rounded-full bg-blue-300 text-blue-800 px-2.5 py-1">
-                          {group.name}: {group.count}
-                        </span>
-                      ))}
-                    </div>
                   </div>
                 </td>
                 <td className="px-4 py-3">{formatCurrency(product.price)}</td>

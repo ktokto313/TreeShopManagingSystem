@@ -11,7 +11,6 @@ import { formatCurrency } from '../features/catalog/utils/catalogUtils'
 import ProductImageFrame from '../features/products/components/ProductImageFrame'
 import { getProductAvailability } from '../features/products/utils/productAvailability'
 import { resolveProductImages } from '../features/products/utils/productImageResolver'
-import { parseVariantGroups } from '../features/products/utils/variantUtils'
 import { addWishlistProduct, checkWishlistProduct } from '../features/wishlist/wishlistApi'
 
 function summarizeDescription(value) {
@@ -144,7 +143,6 @@ export default function ProductDetailPage() {
 		: "-";
 
 	const productImages = resolveProductImages(product?.images);
-	const variantGroups = parseVariantGroups(product?.variants);
 	const imagePreview = productImages.includes(activeImageSource)
 		? activeImageSource
 		: productImages[0];
@@ -294,10 +292,6 @@ export default function ProductDetailPage() {
 									label="Tồn kho"
 									value={`${product.stock ?? 0} - ${availability.label}`}
 								/>
-								<InfoBox
-									label="Biến thể"
-									value={`${variantGroups.length} nhóm`}
-								/>
 							</div>
 						</Card>
 
@@ -305,44 +299,10 @@ export default function ProductDetailPage() {
 							<Card className="space-y-4 border-[var(--border)] bg-white/95 p-5">
 								<div className="space-y-2">
 									<p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">
-										Mô tả & biến thể
+										Mô tả
 									</p>
 									<div className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--bg)] p-4 text-sm leading-7 text-[var(--text)]">
 										<p>{summarizeDescription(product.description)}</p>
-
-										<div className="space-y-3 border-t border-[var(--border)] pt-4">
-											<div className="text-xs uppercase tracking-[0.18em] text-[var(--accent)]">
-												Biến thể
-											</div>
-											{variantGroups.length ? (
-												<div className="grid gap-3">
-													{variantGroups.map((group) => (
-														<div
-															key={group.name}
-															className="rounded-xl border border-[var(--border)] bg-white px-4 py-3"
-														>
-															<div className="text-sm font-semibold text-[var(--text-h)]">
-																{group.name}
-															</div>
-															<div className="mt-2 flex flex-wrap gap-2">
-																{group.values.map((value) => (
-																	<span
-																		key={`${group.name}-${value}`}
-																		className="rounded-full bg-[var(--social-bg)] px-3 py-1.5 text-xs font-medium text-[var(--text-h)]"
-																	>
-																		{value}
-																	</span>
-																))}
-															</div>
-														</div>
-													))}
-												</div>
-											) : (
-												<div className="rounded-xl bg-[var(--social-bg)] px-3 py-2 text-sm text-[var(--text)]">
-													Chưa có biến thể nào.
-												</div>
-											)}
-										</div>
 									</div>
 								</div>
 							</Card>

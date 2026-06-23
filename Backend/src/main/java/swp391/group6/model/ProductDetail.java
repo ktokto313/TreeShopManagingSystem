@@ -16,10 +16,6 @@ public class ProductDetail {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")
-    private String variants;
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "json")
     private String images;
 
     @OneToOne
@@ -40,14 +36,6 @@ public class ProductDetail {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getVariants() {
-        return variants;
-    }
-
-    public void setVariants(String variants) {
-        this.variants = variants;
     }
 
     public String getImages() {

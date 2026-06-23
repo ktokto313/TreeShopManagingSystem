@@ -1,5 +1,4 @@
 // Created by minhlthe200133
-import { summarizeVariantGroups } from '../../products/utils/variantUtils'
 import { getProductAvailability } from '../../products/utils/productAvailability'
 
 export function parseCatalogImages(value) {
@@ -74,9 +73,6 @@ function matchesText(product, keyword, categoryName, searchAliases = []) {
     product.description,
     categoryName,
     ...searchAliases,
-    summarizeVariantGroups(product.variants)
-      .map((group) => `${group.name}:${group.values.join(', ')}`)
-      .join(' '),
   ]
     .map(normalizeSearchText)
     .join(' ')
@@ -134,12 +130,10 @@ export function sortCatalogProducts(products, sortKey) {
       return sortedProducts.sort((left, right) => {
         const leftScore =
           Number(left.stock ?? 0) * 2 +
-          parseCatalogImages(left.images).length * 3 +
-          summarizeVariantGroups(left.variants).length
+          parseCatalogImages(left.images).length * 3
         const rightScore =
           Number(right.stock ?? 0) * 2 +
-          parseCatalogImages(right.images).length * 3 +
-          summarizeVariantGroups(right.variants).length
+          parseCatalogImages(right.images).length * 3
 
         if (rightScore !== leftScore) {
           return rightScore - leftScore
@@ -149,10 +143,8 @@ export function sortCatalogProducts(products, sortKey) {
       })
     case 'rating':
       return sortedProducts.sort((left, right) => {
-        const leftScore =
-          summarizeVariantGroups(left.variants).length * 2 + parseCatalogImages(left.images).length
-        const rightScore =
-          summarizeVariantGroups(right.variants).length * 2 + parseCatalogImages(right.images).length
+        const leftScore = parseCatalogImages(left.images).length
+        const rightScore = parseCatalogImages(right.images).length
 
         if (rightScore !== leftScore) {
           return rightScore - leftScore
