@@ -43,7 +43,7 @@ export async function register(fullName, email, password) {
 }
 
 export async function sendOtp(email) {
-  const res = await fetch(`${BASE}/send-otp`, {
+  const res = await fetch(`${BASE}/register/send-otp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email }),
@@ -61,7 +61,7 @@ export async function sendOtp(email) {
 }
 
 export async function verifyOtp(email, otp) {
-  const res = await fetch(`${BASE}/verify-otp`, {
+  const res = await fetch(`${BASE}/register/verify-otp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, otp }),
