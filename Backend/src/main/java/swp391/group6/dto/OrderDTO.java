@@ -19,7 +19,7 @@ public class OrderDTO {
     private BigDecimal discount;
     private Timestamp createdAt;
     private OrderStatus status;
-    private List<OrderDetailDTO> orderDetailList;
+    private List<OrderDetail> orderDetailList;
 
     public OrderDTO() {}
 
@@ -33,7 +33,7 @@ public class OrderDTO {
         this.discount = order.getDiscount();
         this.createdAt = order.getCreatedAt();
         this.status = order.getStatus();
-        // The service should set orderDetailList since it needs review status
+        this.orderDetailList = order.getOrderDetailList();
     }
 
     public long getId() { return id; }
@@ -68,6 +68,6 @@ public class OrderDTO {
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }
 
-    public List<OrderDetailDTO> getOrderDetailList() { return orderDetailList; }
-    public void setOrderDetailList(List<OrderDetailDTO> orderDetailList) { this.orderDetailList = orderDetailList; }
+    public List<OrderDetail> getOrderDetailList() { return orderDetailList; }
+    public void setOrderDetailList(List<OrderDetail> orderDetailList) { this.orderDetailList = orderDetailList; }
 }
