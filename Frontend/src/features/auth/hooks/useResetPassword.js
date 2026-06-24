@@ -41,7 +41,6 @@ export function useResetPassword() {
         }
     }
 
-    // RESEND OTP
     const handleResendOtp = async () => {
         try {
             setLoading(true)
@@ -55,7 +54,6 @@ export function useResetPassword() {
         }
     }
 
-    // STEP 2
     const handleVerifyOtp = async () => {
         try {
             setLoading(true)

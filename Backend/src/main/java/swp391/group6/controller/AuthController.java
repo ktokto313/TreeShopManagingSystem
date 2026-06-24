@@ -34,8 +34,6 @@ public class AuthController {
     private final GoogleAuthService googleAuthService;
     private final OtpService otpService;
     private final ChangePasswordService changePasswordService;
-
-    // lưu trạng thái đã verify OTP reset password
     private final Map<String, Boolean> verifiedReset = new ConcurrentHashMap<>();
 
     public AuthController(AuthService authService,
@@ -79,6 +77,33 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @PostMapping("/register/send-otp")
+    public ResponseEntity<?> sendRegisterOtp(@RequestBody OtpRequest request) {
+        if (authService.emailExists(request.getEmail())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", "Email already exists"));
+        }
+
+        otpService.generateAndSend(request.getEmail(), OtpType.REGISTER);
+        return ResponseEntity.ok(Map.of("message", "OTP sent"));
+    }
+
+
+    @PostMapping("/register/verify-otp")
+    public ResponseEntity<?> verifyRegisterOtp(@RequestBody OtpRequest request) {
+        boolean valid = otpService.verify(
+                request.getEmail(),
+                request.getOtp(),
+                OtpType.REGISTER
+        );
+
+        if (!valid) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Invalid or expired OTP"));
+        }
+
+        return ResponseEntity.ok(Map.of("message", "OTP verified"));
+    }
     @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@RequestBody GoogleAuthRequest request,
                                          HttpServletResponse response) {
@@ -99,7 +124,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("success", true));
     }
 
-    // ================= FORGOT PASSWORD =================
+    //FORGOT PASSWORD
 
     @PostMapping("/forgot-password/send-otp")
     public ResponseEntity<?> sendResetOtp(@RequestBody OtpRequest request) {
