@@ -47,6 +47,11 @@ function AppRoutes() {
 			<Route path="/staff-login" element={<StaffAuthentication />} />
 
 			<Route
+				path="/profile"
+				element={<ProtectedRoute element={<ProfilePage />} />}
+			/>
+
+			<Route
 				path="/change-password"
 				element={<ProtectedRoute element={<ChangePasswordPage />} />}
 			/>
