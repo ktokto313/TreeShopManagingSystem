@@ -61,7 +61,7 @@ export default function CartPage() {
 
   const items = cart?.items || []
   const subtotal = Number(cart?.subtotal || 0)
-  const total = useMemo(() => (items.length ? subtotal + SHIPPING_FEE : 0), [items.length, subtotal])
+  const total = items.length ? subtotal + SHIPPING_FEE : 0
   const productOptions = useMemo(
     () => [
       { value: '', label: products.length ? 'Chọn sản phẩm' : 'Không có sản phẩm nào' },
