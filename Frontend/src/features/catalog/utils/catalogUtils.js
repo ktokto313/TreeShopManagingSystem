@@ -42,7 +42,7 @@ export function formatCurrency(value) {
   }).format(numberValue)
 }
 
-function normalizeSearchText(value) {
+function normalizeSearchText(value) { //dieu chinh de co tim duoc nhung san pham chua unicode
   return String(value ?? '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -122,7 +122,7 @@ export function matchesCatalogFilters(product, filters, categoryName, options = 
 }
 
 //sort products
-export function sortCatalogProducts(products, sortKey) {
+export function sortCatalogProducts(products, sortKey) { //sap xap theo vai thu tu nhat dinh
   const sortedProducts = [...products]
 
   switch (sortKey) {

@@ -53,14 +53,14 @@ export default function ProductDetailPage() {
 
 		try {
 			const [categoryData, productData] = await Promise.all([
-				loadPublicJson("/api/categories"),
-				loadPublicJson(`/api/products/${productId}`),
+				loadPublicJson("/api/categories"), //lay danh sanh category
+				loadPublicJson(`/api/products/${productId}`), //lay thong tin san pham tu id cua san pham
 			]);
 
 			setCategories(Array.isArray(categoryData) ? categoryData : []);
 			if (!canManage && productData && !isProductActive(productData.status)) {
 				setProduct(null);
-				setNotice("KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m phÃ¹ há»£p.");
+				setNotice("Không tìm thấy sản phẩm phù hợp.");
 				return;
 			}
 			setProduct(productData ?? null);

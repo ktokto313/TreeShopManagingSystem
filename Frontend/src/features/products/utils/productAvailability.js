@@ -5,7 +5,7 @@ export function isProductActive(status) {
   return status !== false && status !== 0 && String(status).toLowerCase() !== 'false'
 }
 
-export function getProductAvailability(product, lowStockThreshold = LOW_STOCK_THRESHOLD) {
+export function getProductAvailability(product, lowStockThreshold = LOW_STOCK_THRESHOLD) { //hien trang thai cua san pham
   const stock = Number(product?.stock ?? 0)
   const active = isProductActive(product?.status)
 
