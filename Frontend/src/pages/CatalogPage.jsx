@@ -92,7 +92,7 @@ export default function CatalogPage() {
     try {
       const [categoryData, productData] = await Promise.all([
         loadPublicJson('/api/categories'),
-        loadPublicJson('/api/products'),
+        loadPublicJson('/api/products?status=true'),
       ])
       setCategories(Array.isArray(categoryData) ? sortCategories(categoryData) : [])
       setProducts(Array.isArray(productData) ? productData : [])
