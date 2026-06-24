@@ -41,7 +41,8 @@ export default function CheckoutSuccessPage() {
   const displayData = verifiedOrder ? {
     orderCode: verifiedOrder.orderCode || verifiedOrder.id,
     status: verifiedOrder.status,
-    total: verifiedOrder.total,
+    total: checkout?.total || (Number(verifiedOrder.subtotal || 0) + Number(verifiedOrder.shippingFee || 0) - Number(verifiedOrder.discount || 0)),
+    shippingFee: verifiedOrder.shippingFee,
     transferContent: checkout?.transferContent,
     bankAccountNumber: checkout?.bankAccountNumber,
     bankAccountName: checkout?.bankAccountName,
