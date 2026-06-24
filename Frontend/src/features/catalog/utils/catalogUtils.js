@@ -88,7 +88,7 @@ export function matchesCatalogFilters(product, filters, categoryName, options = 
   const selectedStatus = String(filters.status ?? '')
   const minPrice = filters.minPrice === '' ? null : Number(filters.minPrice)
   const maxPrice = filters.maxPrice === '' ? null : Number(filters.maxPrice)
-  const isPurchasable = getProductAvailability(product).canPurchase
+  const availability = getProductAvailability(product)
   const otherCategoryId = options.otherCategoryId ?? 'other'
   const smallCategoryIds = options.smallCategoryIds ?? new Set()
   const productCategoryId = String(product.categoryId ?? '')
@@ -101,11 +101,11 @@ export function matchesCatalogFilters(product, filters, categoryName, options = 
     return false
   }
 
-  if (selectedStatus === 'true' && !isPurchasable) {
+  if (selectedStatus === 'true' && !availability.canPurchase) {
     return false
   }
 
-  if (selectedStatus === 'false' && isPurchasable) {
+  if (selectedStatus === 'false' && availability.state !== 'out-of-stock') {
     return false
   }
 

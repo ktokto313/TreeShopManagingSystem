@@ -9,7 +9,7 @@ import { AuthContext } from '../context/AuthContext'
 import { loadPublicJson } from '../features/catalog/utils/catalogApi'
 import { formatCurrency } from '../features/catalog/utils/catalogUtils'
 import ProductImageFrame from '../features/products/components/ProductImageFrame'
-import { getProductAvailability } from '../features/products/utils/productAvailability'
+import { getProductAvailability, isProductActive } from '../features/products/utils/productAvailability'
 import { resolveProductImages } from '../features/products/utils/productImageResolver'
 import { addWishlistProduct, checkWishlistProduct } from '../features/wishlist/wishlistApi'
 
@@ -58,6 +58,11 @@ export default function ProductDetailPage() {
 			]);
 
 			setCategories(Array.isArray(categoryData) ? categoryData : []);
+			if (!canManage && productData && !isProductActive(productData.status)) {
+				setProduct(null);
+				setNotice("KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m phÃ¹ há»£p.");
+				return;
+			}
 			setProduct(productData ?? null);
 		} catch (error) {
 			if (error?.status === 401 && isAuthenticated) {
@@ -99,7 +104,7 @@ export default function ProductDetailPage() {
 		void loadWishlistState();
 	}, [isAuthenticated, productId]);
 
-	async function handleWishlistAction() {
+	async function handleWishlistAction() {  //wishlist routing
 		if (!product) {
 			return;
 		}
