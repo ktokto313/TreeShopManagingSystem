@@ -12,6 +12,8 @@ import ProductImageFrame from '../features/products/components/ProductImageFrame
 import { getProductAvailability, isProductActive } from '../features/products/utils/productAvailability'
 import { resolveProductImages } from '../features/products/utils/productImageResolver'
 import { addWishlistProduct, checkWishlistProduct } from '../features/wishlist/wishlistApi'
+import { parseVariantGroups } from '../features/products/utils/variantUtils'
+import ReviewSection from '../features/products/components/Review/ReviewSection'
 
 function summarizeDescription(value) {
 	if (!value) {
@@ -319,7 +321,12 @@ export default function ProductDetailPage() {
 						Không tìm thấy sản phẩm phù hợp.
 					</Card>
 				) : null}
+
+				<hr className="my-8 w-[98%] mx-auto"></hr>
+
+				<ReviewSection className={"w-[75%]"} productId={productId}></ReviewSection>
 			</Container>
+
 		</main>
 	);
 }
