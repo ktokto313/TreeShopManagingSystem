@@ -61,7 +61,7 @@ export default function CheckoutPage() {
 
   const items = cart?.items || []
   const subtotal = Number(cart?.subtotal || 0)
-  const total = useMemo(() => (items.length ? subtotal + SHIPPING_FEE : 0), [items.length, subtotal])
+  const total = items.length ? subtotal + SHIPPING_FEE : 0
 
   function updateField(name, value) {
     setForm((current) => ({ ...current, [name]: value }))
