@@ -2,7 +2,7 @@ import { useCallback, useContext, useState } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import { createProductReview, getProductReviews } from "../reviewApi";
 
-export const useProductReview = (productId) => {
+export const useProductReview = (productId, onSuccess) => {
 	const [starValue, setStarValue] = useState(null);
 	const [reviews, setReviews] = useState([]);
 	const [reviewValidationError, setReviewValidationError] = useState("");
@@ -20,7 +20,7 @@ export const useProductReview = (productId) => {
 		setStarValue(starValue);
 	};
 
-	const handleReviewForm = async (e) => {
+	const handleReviewForm = async (e, orderId) => {
 		e.preventDefault();
 
 		setReviewValidationError("");
@@ -36,16 +36,16 @@ export const useProductReview = (productId) => {
 			setIsReviewSubmitLoading(true);
 
 			const payload = {
-				user: {id: user.id, fullName: user.fullName},
 				rating: parseInt(rating, 10),
 				comment: comment,
 			};
 
-			await createProductReview(productId, payload);
+			await createProductReview(orderId, productId, payload);
 			await loadReviews();
 
 			e.target.reset();
 			setStarValue(null);
+			if (onSuccess) onSuccess();
 		} catch (error) {
 			setReviewValidationError(
 				error.message || "Có lỗi xảy ra khi gửi đánh giá.",

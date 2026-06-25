@@ -90,22 +90,4 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/review")
-    public ResponseEntity<List<Review>> getProductReviews(@PathVariable Long id){
-        List<Review> reviews = productService.getProductReviews(id);
-        return ResponseEntity.ok(reviews);
-    }
-
-    @PostMapping("/{id}/review")
-    public ResponseEntity<Review> createProductReview(@PathVariable Long id, @RequestBody ReviewRequest reviewRequest){
-        reviewRequest.setProductId(id);
-
-        Optional<ProductResponse> product = productService.getProduct(id);
-        if(product.isEmpty()){
-            return ResponseEntity.notFound().build();
-        } else{
-            Review review = productService.createProductReview(reviewRequest);
-            return ResponseEntity.ok(review);
-        }
-    }
 }

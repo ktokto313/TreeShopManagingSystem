@@ -8,6 +8,7 @@ import useFetchOrderDetail from "./hooks/useFetchOrderDetail";
 import { useEffect, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import useChangeOrderStatus from "./hooks/useChangeOrderStatus";
+import ReviewModal from "../review/components/ReviewModal";
 
 /**
  * @param {{ selectedOrderId: number|string|null, onClose: () => void, onOrderChange?: () => void|Promise<void> }} props
@@ -111,6 +112,14 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
                     <span className="text-[10px] text-black/45 mt-0.5">
                       SKU: {item.product?.sku || 'N/A'}
                     </span>
+                    {selectedOrder.status === 'RECEIVED' && user?.role === 'CUSTOMER' && (
+                        <ReviewModal 
+                          orderId={selectedOrder.id} 
+                          productId={item.product?.id || item.productId} 
+                          hasReviewed={item.hasReviewed} 
+                          onReviewSubmitted={() => fetchOrderDetail(selectedOrderId)}
+                        />
+                    )}
                   </div>
                   <div className="text-right flex flex-col">
                     <span className="text-sm font-bold text-black/85">

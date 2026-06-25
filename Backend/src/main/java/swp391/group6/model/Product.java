@@ -42,9 +42,6 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ShoppingCartEntry> shoppingCartEntryList;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<Review> reviewList;
 
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
@@ -67,13 +64,6 @@ public class Product {
     public String getSku() { return sku; }
     public void setSku(String sku) { this.sku = sku; }
 
-    public List<Review> getReviewList() {
-        return reviewList;
-    }
-
-    public void setReviewList(List<Review> reviewList) {
-        this.reviewList = reviewList;
-    }
 
     public ProductDetail getProductDetail() { return productDetail; }
     public void setProductDetail(ProductDetail productDetail) { this.productDetail = productDetail; }

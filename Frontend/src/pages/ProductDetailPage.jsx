@@ -11,7 +11,7 @@ import ProductImageFrame from '../features/products/components/ProductImageFrame
 import { getProductAvailability } from '../features/products/utils/productAvailability'
 import { resolveProductImages } from '../features/products/utils/productImageResolver'
 import { parseVariantGroups } from '../features/products/utils/variantUtils'
-import ReviewSection from '../features/products/components/Review/ReviewSection'
+import ReviewSection from '../features/review/components/ReviewSection'
 
 function summarizeDescription(value) {
 	if (!value) {
