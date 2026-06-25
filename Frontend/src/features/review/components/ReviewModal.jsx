@@ -1,7 +1,7 @@
 import ModalButton from "../../../components/ui/ModalButton";
 import ReviewSection from "./ReviewSection";
 
-export default function ReviewModal({ orderId, productId, hasReviewed, onReviewSubmitted }) {
+export default function ReviewModal({orderId, productId, hasReviewed, onReviewSubmitted}) {
     if (hasReviewed) {
         return <span className="text-sm font-semibold text-gray-500 italic mt-1">Đã đánh giá</span>;
     }
@@ -13,11 +13,10 @@ export default function ReviewModal({ orderId, productId, hasReviewed, onReviewS
             modalTitle="Đánh giá sản phẩm"
             modalClasses="max-w-2xl w-full"
         >
-            {({ close }) => (
-                <div className="p-4 max-h-[70vh] overflow-y-auto">
-                    <ReviewSection productId={productId} orderId={orderId} onReviewSubmitted={onReviewSubmitted} />
-                </div>
-            )}
+            <div className="p-4 max-h-[70vh] overflow-y-auto">
+                <ReviewSection productId={productId} orderId={orderId} onReviewSubmitted={onReviewSubmitted}/>
+            </div>
+
         </ModalButton>
     );
 }
