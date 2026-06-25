@@ -1,13 +1,16 @@
+import { useState } from "react";
 import { IoReload, IoStarSharp } from "react-icons/io5";
 import { MdBlock } from "react-icons/md";
 import { Button } from "../../../components/ui/Button";
 import { Form } from "../../../components/ui/Form";
-import { Input } from "../../../components/ui/Input";
+import { Textarea } from "../../../components/ui/Textarea";
 import { cn } from "../../../utils/cn";
 import styles from "../assets/styles/review-form.module.css";
 
 const ReviewForm = ({className, reviewState, orderId}) => {
 	const placeholder = "Bạn thích hoặc không thích gì về sản phẩm này?";
+	const [charCount, setCharCount] = useState(0);
+	const MAX_CHARS = 500;
 
 	const {
 		handleReviewForm,
@@ -30,6 +33,7 @@ const ReviewForm = ({className, reviewState, orderId}) => {
 	return (
 		<Form
 			onSubmit={(e) => {handleReviewForm(e, orderId)}}
+			onReset={() => setCharCount(0)}
 			className={cn(
 				"border border-gray-400 p-6 rounded-2xl",
 				className,
@@ -59,9 +63,18 @@ const ReviewForm = ({className, reviewState, orderId}) => {
 			</div>
 
 			{/* Comment */}
-			<h5 className="1">Bình luận đánh giá của bạn</h5>
-			<Input type="text" name="comment" placeholder={placeholder} />
-			<Button type="submit" className="hover:bg-green-400 flex gap-1">
+			<h5>Bình luận đánh giá của bạn</h5>
+			<Textarea
+				name="comment"
+				placeholder={placeholder}
+				maxLength={MAX_CHARS}
+				onChange={(e) => setCharCount(e.target.value.length)}
+				className="bg-bg-base text-black border-border focus:border-interactive focus:ring-1 focus:ring-interactive focus-visible:border-interactive focus-visible:ring-interactive min-h-[120px] resize-y"
+			/>
+			<div className="text-right text-xs text-gray-500 -mt-2.5">
+				{charCount} / {MAX_CHARS} ký tự
+			</div>
+			<Button type="submit" className="hover:bg-green-400 flex gap-1 mt-1">
 				{isReviewSubmitLoading && (
 					<IoReload className="animate-spin text-white text-base"></IoReload>
 				)}
