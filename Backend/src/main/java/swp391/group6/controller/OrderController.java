@@ -52,7 +52,14 @@ public class OrderController {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(new OrderDTO(order));
+        OrderDTO orderDTO = new OrderDTO(order);
+        List<swp391.group6.dto.OrderDetailDTO> detailDTOs = order.getOrderDetailList().stream().map(od -> {
+            boolean hasReviewed = orderService.hasReviewed(od.getOrder().getId(), od.getProduct().getId());
+            return new swp391.group6.dto.OrderDetailDTO(od, hasReviewed);
+        }).toList();
+        orderDTO.setOrderDetailList(detailDTOs);
+
+        return ResponseEntity.ok(orderDTO);
     }
 
     @PostMapping
@@ -86,5 +93,27 @@ public class OrderController {
         }
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/products/{productId}/reviews")
+    public ResponseEntity<List<swp391.group6.model.Review>> getProductReviews(@PathVariable Long productId) {
+        List<swp391.group6.model.Review> reviews = orderService.getProductReviews(productId);
+        return ResponseEntity.ok(reviews);
+    }
+
+    @PostMapping("/{orderId}/details/{productId}/review")
+    public ResponseEntity<?> createProductReview(
+            HttpServletRequest request,
+            @PathVariable Long orderId,
+            @PathVariable Long productId,
+            @RequestBody swp391.group6.dto.ReviewRequest reviewRequest) {
+        
+        LoginResponse loggedInUser = JWTUtil.getUser(request);
+        try {
+            swp391.group6.model.Review review = orderService.createProductReview(orderId, productId, reviewRequest, loggedInUser);
+            return ResponseEntity.ok(review);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage() != null ? e.getMessage() : "Unknown error"));
+        }
     }
 }

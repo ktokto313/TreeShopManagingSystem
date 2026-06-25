@@ -1,5 +1,5 @@
-import { cn } from "../../../../utils/cn";
-import styles from "../../assets/styles/commentSection.module.css";
+import { cn } from "../../../utils/cn";
+import styles from "../assets/styles/commentSection.module.css";
 
 const ReviewCommentSection = ({ className, children }) => {
 	return (
