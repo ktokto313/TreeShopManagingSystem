@@ -92,11 +92,12 @@ export function Header({ className = '', ...props }) {
               Logout
             </button>
 
-            <Button className="text-lg lg:hidden inline-block" onClick={() => setIsNavOpen(true)}>
-              <HiMenuAlt3/>
-            </Button>
           </div>
         )}
+        
+        <Button className="text-lg lg:hidden inline-block" onClick={() => setIsNavOpen(true)}>
+          <HiMenuAlt3/>
+        </Button>
 
         <div className={cn("fixed h-screen w-screen left-full top-0 bottom-0 overflow-y-scroll", 
           "bg-bg-surface/70 backdrop-blur-sm transition-[left] duration-300", 
