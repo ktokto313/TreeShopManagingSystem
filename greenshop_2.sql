@@ -585,3 +585,14 @@ SET status = CASE
 END;
 
 CREATE INDEX IF NOT EXISTS idx_blog_status ON blog_posts(status);
+
+-- ==============================================================
+-- BLOG IMAGE - bảng lưu trữ ảnh cho blog post
+-- ==============================================================
+CREATE TABLE IF NOT EXISTS blog_images (
+    id BIGSERIAL PRIMARY KEY,
+    post_id BIGINT NOT NULL REFERENCES blog_posts(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL
+    );
+
+CREATE INDEX IF NOT EXISTS idx_blog_images_post ON blog_images(post_id);
