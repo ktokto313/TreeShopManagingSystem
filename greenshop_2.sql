@@ -560,3 +560,28 @@ INSERT INTO comments (ticket_id, creator_id, detail) VALUES
 (2, 4, 'Xin lỗi bạn vì sự cố này. Mình đã kiểm tra đơn hàng và xác nhận có nhầm lẫn. Shop sẽ giao đúng sản phẩm Monstera cho bạn trong 1-2 ngày tới, hoàn toàn miễn phí.'),
 (4, 4, 'Sen đá cần ít nước hơn bạn nghĩ. Nguyên tắc là: để đất khô hoàn toàn rồi mới tưới, mỗi lần tưới đẫm. Nên đặt nơi có nhiều ánh sáng, tối thiểu 4-6 tiếng nắng mỗi ngày.'),
 (4, 8, 'Cảm ơn shop đã tư vấn chi tiết, tôi đã hiểu rồi. Chắc trước giờ tôi tưới nhiều quá nên cây bị úng.');
+
+-- ============================================================
+--  BLOG VOTES — bảng vote cho blog posts
+-- ============================================================
+CREATE TABLE IF NOT EXISTS blog_votes (
+   user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+   post_id BIGINT NOT NULL REFERENCES blog_posts(id) ON DELETE CASCADE,
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   PRIMARY KEY (user_id, post_id)
+);
+
+-- ============================================================
+--  BLOG POSTS — chuyển is_published sang status
+-- ============================================================
+ALTER TABLE blog_posts
+   ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'DRAFT'
+   CHECK (status IN ('DRAFT','PENDING','REJECTED','PUBLISHED'));
+
+UPDATE blog_posts
+SET status = CASE
+   WHEN is_published = TRUE THEN 'PUBLISHED'
+   ELSE 'DRAFT'
+END;
+
+CREATE INDEX IF NOT EXISTS idx_blog_status ON blog_posts(status);
