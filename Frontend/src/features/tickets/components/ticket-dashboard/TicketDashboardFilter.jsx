@@ -98,7 +98,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 								)}
 							>
 								<FaPlus></FaPlus>
-								<p className={cn(styles.createTicketBtnContent), "text-nowrap"}>Tạo Ticket</p>
+								<p className={cn(styles.createTicketBtnContent, "text-nowrap")}>Tạo Ticket</p>
 							</div>
 						}
 						modalTitle="Tạo Ticket"
@@ -258,12 +258,12 @@ export const TicketDashboardFilterBtn = ({ dashboardState, modalButtonClasses, r
 				)}
 			</ModalButton>
 			<Button
-				className={cn("hover:bg-green-600! w-full"), reloadButtonClasses}
+				className={cn("hover:bg-green-600! w-full", reloadButtonClasses)}
 				onClick={() => {
 					executeFetchAllTickets(ticketState, ticketPriority, ticketSort);
 				}}
 			>
-				<div className={cn("flex flex-row items-center justify-center gap-2"), reloadButtonContentClasses}>
+				<div className={cn("flex flex-row items-center justify-center gap-2", reloadButtonContentClasses)}>
 					<IoReload
 						className={cn("text-xl", { "animate-spin": isFetchAllTicketsLoading })}
 					></IoReload>
