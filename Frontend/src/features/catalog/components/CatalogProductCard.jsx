@@ -106,7 +106,7 @@ export default function CatalogProductCard({
 
 function ProductBadge({ className, availability }) {
   return (
-    <Badge status={availability.badgeStatus} className={availability.badgeClassName, className}>
+    <Badge status={availability.badgeStatus} className={`${availability.badgeClassName} ${className || ""}`.trim()}>
       {availability.label}
     </Badge>
   )

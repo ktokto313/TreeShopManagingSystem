@@ -1,12 +1,12 @@
 import { useEffect } from "react";
-import { cn } from "../../../../utils/cn";
+import { cn } from "../../../utils/cn";
 import ReviewCommentCard from "./ReviewCommentCard";
 import ReviewCommentSection from "./ReviewCommentSection";
 import ReviewForm from "./ReviewForm";
-import { useProductReview } from "../../hooks/useProductReview";
+import { useProductReview } from "../hooks/useProductReview";
 
-const ReviewSection = ({ className, productId }) => {
-	const reviewState = useProductReview(productId);
+const ReviewSection = ({ className, productId, orderId, onReviewSubmitted }) => {
+	const reviewState = useProductReview(productId, onReviewSubmitted);
 
 	const {
 		reviews,
@@ -21,6 +21,7 @@ const ReviewSection = ({ className, productId }) => {
 		<div className={cn(className)}>
 			<ReviewForm
 				reviewState={reviewState}
+				orderId={orderId}
 			></ReviewForm>
 
 			<ReviewCommentSection className="mt-5">

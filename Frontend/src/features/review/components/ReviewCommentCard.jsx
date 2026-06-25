@@ -4,10 +4,10 @@ import {
 	CardContent,
 	CardFooter,
 	CardHeader,
-} from "../../../../components/ui/Card";
-import { cn } from "../../../../utils/cn";
-import { timeFormat } from "../../../../utils/timeFormat";
-import plantPfp from "../../assets/images/plantPfp.png";
+} from "../../../components/ui/Card";
+import { cn } from "../../../utils/cn";
+import { timeFormat } from "../../../utils/timeFormat";
+import plantPfp from "../../products/assets/images/plantPfp.png";
 
 const ReviewCommentCard = ({ review = {}, className }) => {
 	const { user, rating = null, comment = null, createdAt = null } = review;

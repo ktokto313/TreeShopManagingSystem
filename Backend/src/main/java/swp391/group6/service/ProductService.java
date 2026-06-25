@@ -210,35 +210,4 @@ public class ProductService {
                 && (description == null || description.length() <= MAX_DESCRIPTION_LENGTH);
     }
 
-    public List<Review> getProductReviews(Long productId) {
-        return reviewRepository.findByProduct_Id(productId);
-    }
-
-    public Review createProductReview(ReviewRequest request) {
-        Review review = new Review();
-
-        User user = userRepository.findById(request.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + request.getUser().getId()));
-
-        Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found with ID: " + request.getProductId()));
-
-        List<Order> pastOrders = orderRepository.findOrdersByUserAndProduct(request.getUser().getId(), request.getProductId());
-
-        if (pastOrders.isEmpty()) {
-            throw new RuntimeException("User cannot review a product they did not purchase.");
-        }
-
-        Order order = pastOrders.get(0);
-
-        // 4. Set the actual objects into the review
-        review.setUser(user);
-        review.setProduct(product);
-        review.setOrder(order);
-        review.setComment(request.getComment());
-        review.setRating((short) request.getRating());
-        review.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-
-        return reviewRepository.save(review);
-    }
 }

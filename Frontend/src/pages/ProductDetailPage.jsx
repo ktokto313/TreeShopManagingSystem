@@ -13,7 +13,7 @@ import { getProductAvailability, isProductActive } from '../features/products/ut
 import { resolveProductImages } from '../features/products/utils/productImageResolver'
 import { addWishlistProduct, checkWishlistProduct } from '../features/wishlist/wishlistApi'
 import { parseVariantGroups } from '../features/products/utils/variantUtils'
-import ReviewSection from '../features/products/components/Review/ReviewSection'
+import ReviewSection from '../features/review/components/ReviewSection'
 
 function summarizeDescription(value) {
 	if (!value) {

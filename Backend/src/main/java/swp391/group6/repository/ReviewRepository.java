@@ -6,5 +6,6 @@ import swp391.group6.model.Review;
 import java.util.List;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    List<Review> findByProduct_Id(Long id);
+    List<Review> findByOrderDetail_Product_Id(Long id);
+    boolean existsByOrderDetail_Order_IdAndOrderDetail_Product_Id(Long orderId, Long productId);
 }

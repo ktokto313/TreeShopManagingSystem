@@ -1,12 +1,12 @@
 import { IoReload, IoStarSharp } from "react-icons/io5";
 import { MdBlock } from "react-icons/md";
-import { Button } from "../../../../components/ui/Button";
-import { Form } from "../../../../components/ui/Form";
-import { Input } from "../../../../components/ui/Input";
-import { cn } from "../../../../utils/cn";
-import styles from "../../assets/styles/review-form.module.css";
+import { Button } from "../../../components/ui/Button";
+import { Form } from "../../../components/ui/Form";
+import { Input } from "../../../components/ui/Input";
+import { cn } from "../../../utils/cn";
+import styles from "../assets/styles/review-form.module.css";
 
-const ReviewForm = ({className, reviewState}) => {
+const ReviewForm = ({className, reviewState, orderId}) => {
 	const placeholder = "Bạn thích hoặc không thích gì về sản phẩm này?";
 
 	const {
@@ -17,9 +17,19 @@ const ReviewForm = ({className, reviewState}) => {
 		isReviewSubmitLoading,
 	} = reviewState;
 
+	if (!orderId) {
+		return (
+			<div className={cn("border border-gray-400 p-6 rounded-2xl", className)}>
+				<h1 className="text-2xl font-semibold">Viết Đánh Giá</h1>
+				<hr className="my-4" />
+				<p className="text-gray-600 font-medium">Bạn có thể đánh giá sản phẩm trong lịch sử lí đơn hàng!</p>
+			</div>
+		);
+	}
+
 	return (
 		<Form
-			onSubmit={(e) => {handleReviewForm(e)}}
+			onSubmit={(e) => {handleReviewForm(e, orderId)}}
 			className={cn(
 				"border border-gray-400 p-6 rounded-2xl",
 				className,

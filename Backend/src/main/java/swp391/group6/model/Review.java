@@ -12,15 +12,14 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
-
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
-    
+    @JoinColumns({
+        @JoinColumn(name = "order_id", referencedColumnName = "order_id", nullable = false),
+        @JoinColumn(name = "product_id", referencedColumnName = "product_id", nullable = false)
+    })
+    private OrderDetail orderDetail;
+
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private User user;
@@ -42,20 +41,12 @@ public class Review {
         this.id = id;
     }
 
-    public Order getOrder() {
-        return order;
+    public OrderDetail getOrderDetail() {
+        return orderDetail;
     }
 
-    public void setOrder(Order order) {
-        this.order = order;
-    }
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
+    public void setOrderDetail(OrderDetail orderDetail) {
+        this.orderDetail = orderDetail;
     }
 
     public User getUser() {
