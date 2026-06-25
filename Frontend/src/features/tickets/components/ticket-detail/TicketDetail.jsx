@@ -1,24 +1,17 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import LoadingScreen from "../../../../pages/LoadingScreen";
 import { Container } from "../../../../components/global/Container";
 import { Button } from "../../../../components/ui/Button";
-import { useTicketDetail } from './../../hooks/useTicketDetail';
-import TicketDetailLoadError from './TicketDetailLoadError';
 import TicketDetailHeader from './TicketDetailHeader';
 import TicketDetailStatusWrapper from './TicketDetailStatusWrapper';
 import TicketDetailCommentSection from './TicketDetailCommentSection';
 
-const TicketDetail = () => {
-	const { id: ticketId } = useParams();
+const TicketDetail = ({detailState}) => {
 	const navigate = useNavigate();
 
-	const detailState = useTicketDetail(ticketId);
-
-	const { ticket, isFetchDetailLoading } = detailState;
+	const { isFetchDetailLoading } = detailState;
 
 	if (isFetchDetailLoading) return <LoadingScreen></LoadingScreen>;
-
-	if (!ticket) return <TicketDetailLoadError></TicketDetailLoadError>;
 
 	return (
 		<Container className="max-w-4xl mx-auto mt-10 p-5 flex flex-col gap-6">
