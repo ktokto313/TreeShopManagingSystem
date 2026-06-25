@@ -61,11 +61,8 @@ export function Header({ className = '', ...props }) {
   const navItems = navItemsByRole[role] ?? navItemsByRole.anonymous;
   const [cartCount, setCartCount] = useState(0);
 
-useEffect(() => {
-  if (role !== 'CUSTOMER') {
-    setCartCount(0);
-    return;
-  }
+  useEffect(() => {
+    if (role !== 'CUSTOMER') return;
 
   let cancelled = false;
 
