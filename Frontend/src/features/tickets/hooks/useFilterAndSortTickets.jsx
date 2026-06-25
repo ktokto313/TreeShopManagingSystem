@@ -13,7 +13,6 @@ const useFilterAndSortTickets = (executeFetchAllTickets) => {
 		if (ticketParam === "sort") setTicketSort(value);
 
 		if(isSelectAutoFilterSort){
-			console.log("first")
 			executeFetchAllTickets(
 				ticketParam === "status" ? value : ticketState,
 				ticketParam === "priority" ? value : ticketPriority,

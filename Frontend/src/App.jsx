@@ -84,7 +84,7 @@ function AppRoutes() {
 				path="/tickets/:id"
 				element={
 					<ProtectedRoute
-						roles={["SUPPORT_AGENT", "CUSTOMER", "SYSTEM_ADMIN"]}
+						roles={["SUPPORT_AGENT", "CUSTOMER"]}
 						element={<TicketDetailPage />}
 					/>
 				}

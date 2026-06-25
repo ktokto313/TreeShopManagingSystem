@@ -22,7 +22,11 @@ const initialState = {
 const detailReducer = (state, action) => {
 	switch (action.type) {
 		case "FETCH_START":
-			return { ...state, isFetchDetailLoadingError: false, isFetchDetailLoading: true };
+			return {
+				...state,
+				isFetchDetailLoadingError: false,
+				isFetchDetailLoading: true,
+			};
 		case "FETCH_SUCCESS":
 			return {
 				...state,
@@ -77,6 +81,8 @@ export const useTicketDetail = (ticketId) => {
 	const [state, dispatch] = useReducer(detailReducer, initialState);
 
 	const isAgent = user?.roleName?.toLowerCase() === "support_agent";
+	const isCreator = user?.email === state.ticket?.ticketCreator?.email;
+	const isResolved = state.ticket?.ticketState?.toLowerCase() === "resolved";
 
 	useEffect(() => {
 		if (!ticketId) {
@@ -100,26 +106,113 @@ export const useTicketDetail = (ticketId) => {
 				dispatch({ type: "FETCH_ERROR" });
 			}
 		};
-		
+
 		loadData();
 	}, [ticketId]);
 
 	const handleStatusChange = async (newState) => {
 		dispatch({ type: "STATUS_UPDATE_START" });
+
+		// Get agent email in case its an agent, if not provided then its a customer
+		const agentEmail = isAgent ? user.email : null;
+
 		try {
-			const agentEmail = isAgent ? user.email : null;
-			const updatedTicket = await updateTicketStatus(
-				ticketId,
-				newState,
-				agentEmail,
-			);
-			dispatch({ type: "STATUS_UPDATE_SUCCESS", payload: updatedTicket });
+			const valid = validateTicketState(newState);
+			if (valid) {
+				const updatedTicket = await updateTicketStatus(ticketId, newState, agentEmail);
+				dispatch({ type: "STATUS_UPDATE_SUCCESS", payload: updatedTicket });
+			}
 		} catch {
 			dispatch({
 				type: "STATUS_UPDATE_ERROR",
 				payload: "Không thể cập nhật trạng thái",
 			});
 		}
+	};
+
+	const validateTicketState = (newState) => {
+		const currentTicketState = state.ticket?.ticketState?.toUpperCase();
+		const targetState = newState?.toUpperCase();
+
+		// Role Authorization Check
+		if (!isAgent && !isCreator) {
+			dispatch({
+				type: "STATUS_UPDATE_ERROR",
+				payload: "Bạn không phải là chủ Ticket hay Agent",
+			});
+			return false;
+		}
+
+		// Global State Validation
+		if (targetState === "CREATED") {
+			dispatch({
+				type: "STATUS_UPDATE_ERROR",
+				payload: "Ticket không thể trở lại trạng thái đã khởi tạo",
+			});
+			return false;
+		}
+
+		if (currentTicketState === "DONE") {
+			dispatch({
+				type: "STATUS_UPDATE_ERROR",
+				payload: "Ticket đã hoàn thành, không thể chỉnh sửa",
+			});
+			return false;
+		}
+
+		// Independent validation matrix for Support Agents
+		if (isAgent) {
+			if (currentTicketState === "CREATED" && targetState !== "PROCESSING") {
+				dispatch({
+					type: "STATUS_UPDATE_ERROR",
+					payload:
+						"Agent chỉ có thể chuyển từ trạng thái khởi tạo sang đang xử lý",
+				});
+				return false;
+			}
+			if (
+				currentTicketState === "PROCESSING" &&
+				targetState !== "RESOLVED" &&
+				targetState !== "DONE"
+			) {
+				dispatch({
+					type: "STATUS_UPDATE_ERROR",
+					payload:
+						"Agent chỉ có thể chuyển đổi sang trạng thái Giải quyết hoặc Xong",
+				});
+				return false;
+			}
+			if (currentTicketState === "RESOLVED") {
+				dispatch({
+					type: "STATUS_UPDATE_ERROR",
+					payload:
+						"Agent không thể sửa đổi Ticket đang chờ khách hàng xác nhận",
+				});
+				return false;
+			}
+		}
+
+		// Independent validation matrix for Ticket Creators (Customers)
+		if (isCreator && !isAgent) {
+			if (currentTicketState !== "RESOLVED") {
+				dispatch({
+					type: "STATUS_UPDATE_ERROR",
+					payload:
+						"Khách hàng chỉ có thể cập nhật trạng thái khi Ticket ở trạng thái đã xử lí",
+				});
+				return false;
+			}
+			if (targetState !== "DONE" && targetState !== "PROCESSING") {
+				dispatch({
+					type: "STATUS_UPDATE_ERROR",
+					payload:
+						"Khách hàng chỉ có quyền xác nhận Đồng ý hoặc Từ chối giải quyết",
+				});
+				return false;
+			}
+		}
+
+		return true;
 	};
 
 	const handleCommentSubmit = async (e, closeModal) => {
@@ -151,6 +244,8 @@ export const useTicketDetail = (ticketId) => {
 		...state,
 		user,
 		isAgent,
+		isCreator,
+		isResolved,
 		handleStatusChange,
 		handleCommentSubmit,
 		setNewCommentDetail,
