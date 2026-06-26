@@ -106,10 +106,10 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
                 <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg bg-bg-base border border-border/55">
                   <div className="flex flex-col max-w-[200px]">
                     <span className="text-sm font-semibold text-black/90 truncate">
-                      {item.product?.name || 'Unknown Product'}
+                      {item.productName || 'Unknown Product'}
                     </span>
                     <span className="text-[10px] text-black/45 mt-0.5">
-                      SKU: {item.product?.sku || 'N/A'}
+                      SKU: {item.sku || 'N/A'}
                     </span>
                   </div>
                   <div className="text-right flex flex-col">
