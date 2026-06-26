@@ -28,14 +28,6 @@ export default function OrderManagement() {
   // Compute metrics
   const totalOrders = orders.length;
 
-  const totalRevenue = orders.reduce((sum, order) => {
-    const orderDetails = order.orderDetailList || [];
-    const itemsTotal = orderDetails.reduce((iSum, item) => iSum + (Number(item.pricePaid || 0) * (item.quantity || 0)), 0);
-    const shippingFee = Number(order.shippingFee || 0);
-    const discount = Number(order.discount || 0);
-    return sum + Math.max(0, itemsTotal + shippingFee - discount);
-  }, 0);
-
   return (
     <div className="min-h-screen flex flex-col bg-bg-base font-main">
       <main className="grow py-8 bg-linear-to-b from-bg-base to-bg-surface/30">
@@ -64,7 +56,7 @@ export default function OrderManagement() {
           </div>
 
           {/* Statistics/Metrics Ribbon */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
             <div className="p-5 rounded-xl border border-border/60 bg-bg-surface/40 backdrop-blur-sm relative overflow-hidden group hover:border-interactive/40 transition-all duration-300">
               <span className="text-xs font-bold uppercase tracking-wider text-black/50">Total Orders</span>
               <div className="text-3xl font-black text-black mt-2">
@@ -85,22 +77,6 @@ export default function OrderManagement() {
               <div className="absolute right-4 bottom-4 text-interactive/10 group-hover:text-interactive/20 transition-all duration-300">
                 <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-            </div>
-
-            <div className="p-5 rounded-xl border border-border/60 bg-bg-surface/40 backdrop-blur-sm relative overflow-hidden group hover:border-interactive/40 transition-all duration-300">
-              <span className="text-xs font-bold uppercase tracking-wider text-black/50">Total Revenue Generated</span>
-              <div className="text-3xl font-black text-interactive mt-2">
-                {isLoading ? (
-                  <Skeleton className="h-9 w-32 mt-1" />
-                ) : (
-                  `$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                )}
-              </div>
-              <div className="absolute right-4 bottom-4 text-interactive/10 group-hover:text-interactive/20 transition-all duration-300">
-                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 16V5" />
                 </svg>
               </div>
             </div>
