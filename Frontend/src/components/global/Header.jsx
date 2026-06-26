@@ -19,18 +19,21 @@ const navItemsByRole = {
     { label: 'Catalog', to: '/catalog' },
     { label: 'Login', to: '/login' },
     { label: 'Register', to: '/register' },
+    { label: 'Blog', to: '/blogs' },
   ],
   CUSTOMER: [
     { label: 'Home', to: '/' },
     { label: 'Catalog', to: '/catalog' },
     { label: 'Profile', to: '/profile' },
     { label: 'Tickets', to: '/tickets/' },
+    { label: 'Blog', to: '/blogs' },
   ],
   MANAGER: [
     { label: 'Home', to: '/' },
     { label: 'Manage', to: '/manage' },
     { label: 'Orders', to: '/orders' },
     { label: 'Profile', to: '/profile' },
+    { label: 'Blog', to: '/blogs' },
   ],
   SUPPORT_AGENT: [
     { label: 'Home', to: '/' },
