@@ -41,7 +41,7 @@ JWT_SECRET: a-string-for-testing
 * Make (optional)
 #### Additional requirement for dev build
 * Java 17
-* Node 22 (optional)
+* Node 22
 
 ### Running the Application
 
@@ -59,18 +59,24 @@ without make
 
 
 Once running, the application services will be exposed at:
-* **Frontend**: [http://localhost:4173](http://localhost:4173)
-* **pgAdmin**: [http://localhost:80](http://localhost:80)
+* **Frontend**: [http://localhost:3000](http://localhost:3000)
+* **pgAdmin**: [http://localhost:81](http://localhost:81)
 * **Backend API**: running within the docker container
 * **PostgreSQL Database**: running within the docker container
 
 ### Building with dev configuration
+
+**Disclaimer: This is taken from the configuration we usually run locally, there could be something missing, run at your own discretion**
+
 Running in docker:
 ```bash
 make dev
 ```
 
-Running frontend and backend manually
+Running frontend and backend manually:
+
+*Database and dbms not included*
+
 ```bash
 cd Backend
 gradlew.bat bootRun
