@@ -1,27 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Container } from '../../components/global/Container';
 import { Button } from '../../components/ui/Button';
 import useFetchProfit from './hooks/useFetchProfit';
 import { Skeleton } from '../../components/ui/Skeleton';
 
 export default function ProfitDashboard() {
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
+    const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+    const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
     const { profit, isLoading, error, fetchProfit } = useFetchProfit();
 
     useEffect(() => {
-        // Default to last 30 days
-        const end = new Date();
-        const start = new Date();
-        start.setDate(end.getDate() - 30);
-        
-        const startStr = start.toISOString().split('T')[0];
-        const endStr = end.toISOString().split('T')[0];
-        
-        setStartDate(startStr);
-        setEndDate(endStr);
-        
-        fetchProfit(startStr, endStr);
+        fetchProfit(startDate, endDate)
     }, [fetchProfit]);
 
     const handleFilter = () => {
