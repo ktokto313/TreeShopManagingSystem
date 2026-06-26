@@ -18,6 +18,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o JOIN o.orderDetailList od WHERE o.user.id = :userId AND od.product.id = :productId")
     List<Order> findOrdersByUserAndProduct(@Param("userId") long userId, @Param("productId") long productId);
 
+    List<Order> findByCreatedAtBetweenAndStatus(java.util.Date startDate, java.util.Date endDate, OrderStatus status);
+
     @Query("SELECT o FROM Order o WHERE (CAST(o.id AS string) LIKE %:query% OR LOWER(o.shippingAddress) LIKE LOWER(CONCAT('%', :query, '%')))")
     List<Order> searchAll(@Param("query") String query);
 
