@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findOrderByIdAndUser_IdOrShipper_Id(long orderId, long userID, long shipperID);
     boolean existsByShipper_Id(long shipperID);
+    List<Order> findByCreatedAtBetweenAndStatus(java.util.Date startDate, java.util.Date endDate, OrderStatus status);
 
     @Query("SELECT o FROM Order o WHERE (CAST(o.id AS string) LIKE %:query% OR LOWER(o.shippingAddress) LIKE LOWER(CONCAT('%', :query, '%')))")
     List<Order> searchAll(@Param("query") String query);
