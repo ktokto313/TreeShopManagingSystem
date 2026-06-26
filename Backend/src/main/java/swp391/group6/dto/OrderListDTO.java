@@ -5,6 +5,7 @@ import swp391.group6.model.OrderStatus;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 public class OrderListDTO {
 
@@ -14,6 +15,7 @@ public class OrderListDTO {
     private BigDecimal discount;
     private Timestamp createdAt;
     private OrderStatus status;
+    private List<OrderDetailDTO> orderDetailList;
 
     public OrderListDTO() {}
 
@@ -24,6 +26,7 @@ public class OrderListDTO {
         this.discount = order.getDiscount();
         this.createdAt = order.getCreatedAt();
         this.status = order.getStatus();
+        this.orderDetailList = order.getOrderDetailList().stream().map(OrderDetailDTO::new).toList();
     }
 
     public long getId() { return id; }
@@ -43,4 +46,12 @@ public class OrderListDTO {
 
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }
+
+    public List<OrderDetailDTO> getOrderDetailList() {
+        return orderDetailList;
+    }
+
+    public void setOrderDetailList(List<OrderDetailDTO> orderDetailList) {
+        this.orderDetailList = orderDetailList;
+    }
 }

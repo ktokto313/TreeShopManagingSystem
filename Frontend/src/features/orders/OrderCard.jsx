@@ -50,7 +50,7 @@ export function OrderCard({ order, onViewDetails }) {
               {orderDetails.slice(0, 2).map((item, idx) => (
                 <div key={idx} className="flex justify-between text-sm text-black/85">
                   <span className="truncate max-w-[180px]">
-                    {item.product?.name || 'Unknown Product'}
+                    {item.productName || 'Unknown Product'}
                   </span>
                   <span className="font-semibold text-black/60">
                     x{item.quantity}

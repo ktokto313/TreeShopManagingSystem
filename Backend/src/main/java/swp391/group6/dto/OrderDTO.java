@@ -1,7 +1,6 @@
 package swp391.group6.dto;
 
 import swp391.group6.model.Order;
-import swp391.group6.model.OrderDetail;
 import swp391.group6.model.OrderStatus;
 
 import java.math.BigDecimal;
@@ -19,7 +18,7 @@ public class OrderDTO {
     private BigDecimal discount;
     private Timestamp createdAt;
     private OrderStatus status;
-    private List<OrderDetail> orderDetailList;
+    private List<OrderDetailDTO> orderDetailList;
 
     public OrderDTO() {}
 
@@ -33,7 +32,7 @@ public class OrderDTO {
         this.discount = order.getDiscount();
         this.createdAt = order.getCreatedAt();
         this.status = order.getStatus();
-        this.orderDetailList = order.getOrderDetailList();
+        this.orderDetailList = order.getOrderDetailList().stream().map(OrderDetailDTO::new).toList();
     }
 
     public long getId() { return id; }
@@ -68,6 +67,6 @@ public class OrderDTO {
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }
 
-    public List<OrderDetail> getOrderDetailList() { return orderDetailList; }
-    public void setOrderDetailList(List<OrderDetail> orderDetailList) { this.orderDetailList = orderDetailList; }
+    public List<OrderDetailDTO> getOrderDetailList() { return orderDetailList; }
+    public void setOrderDetailList(List<OrderDetailDTO> orderDetailList) { this.orderDetailList = orderDetailList; }
 }
