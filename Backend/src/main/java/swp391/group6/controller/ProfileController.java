@@ -53,7 +53,7 @@ public class ProfileController {
     }
 
     private ProfileResponse toProfileResponse(UserDTO user) {
-        boolean hasPassword = user.getPassword() != null && !user.getPassword().isBlank();
+        boolean hasPassword = user.getIsHasPassword();
 
         return new ProfileResponse(
                 user.getEmail(),
