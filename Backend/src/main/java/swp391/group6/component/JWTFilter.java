@@ -63,8 +63,21 @@ public class JWTFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
+
+        String requestUri = request.getRequestURI();
+        String method = request.getMethod();
+
+        boolean isPublicBlogRead = "GET".equalsIgnoreCase(method)
+                && (requestUri.equals("/api/blogs") || requestUri.matches("/api/blogs/\\d+"));
+
         Cookie cookie = CookieUtil.getJWTCookie(request.getCookies());
+
         if (cookie == null) {
+            if (isPublicBlogRead) {
+                // Guest được xem, không set userId
+                filterChain.doFilter(request, response);
+                return;
+            }
             ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
             return;
         }
@@ -87,17 +100,21 @@ public class JWTFilter extends OncePerRequestFilter {
 
             String role = user.getRole() == null ? "CUSTOMER" : user.getRole().getName();
             LoginResponse currentUser = new LoginResponse(
+                    user.getId(),
                     user.getEmail(),
                     user.getFullName(),
                     role
             );
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
             request.setAttribute(cookieName, currentUser);
+
         } catch (Exception e) {
+            if (isPublicBlogRead) {
+                filterChain.doFilter(request, response);
+                return;
+            }
             ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
             return;
         }
