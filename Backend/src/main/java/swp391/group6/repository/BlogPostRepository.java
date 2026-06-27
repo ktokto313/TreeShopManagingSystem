@@ -1,3 +1,5 @@
+//Create: HungDLM on 26/06/2026
+//Lastest update: HungDLM on 27/06/2026
 package swp391.group6.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +14,7 @@ import java.util.List;
 public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
 
     List<BlogPost> findByStatusOrderByCreatedAtDesc(BlogStatus status);
+    List<BlogPost> findByAuthorIdOrderByCreatedAtDesc(Long authorId);
 
     BlogPost findByIdAndAuthorId(long id, long authorId);
 

@@ -1,3 +1,5 @@
+//Create: HungDLM on 26/06/2026
+//Lastest update: HungDLM on 27/06/2026
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container } from '../../../components/global/Container';
@@ -10,7 +12,8 @@ export default function BlogPendingPage() {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [acting, setActing] = useState(null); // postId đang xử lý
+    const [acting, setActing] = useState(null);
+    const [preview, setPreview] = useState(null);
 
     async function load() {
         setLoading(true);
@@ -32,6 +35,7 @@ export default function BlogPendingPage() {
         try {
             action === 'approve' ? await approveBlog(id) : await rejectBlog(id);
             setPosts(p => p.filter(b => b.id !== id));
+            if (preview?.id === id) setPreview(null);
         } catch {
             setError('Thao tác thất bại, thử lại.');
         } finally {
@@ -107,7 +111,7 @@ export default function BlogPendingPage() {
                                 <HiX /> Từ chối
                             </Button>
                             <Button
-                                onClick={() => navigate(`/blogs/${post.id}`)}
+                                onClick={() => setPreview(post)}
                                 className="hover:bg-stone-100 bg-stone-50 text-stone-600 border border-stone-200"
                             >
                                 Xem chi tiết
@@ -116,6 +120,86 @@ export default function BlogPendingPage() {
                     </div>
                 ))}
             </Container>
+
+            {/* Preview Modal */}
+            {preview && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="p-6 space-y-5">
+                            {/* Header modal */}
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
+                                    Chờ duyệt
+                                </span>
+                                <button
+                                    onClick={() => setPreview(null)}
+                                    className="text-stone-400 hover:text-stone-600 text-2xl leading-none"
+                                >
+                                    &times;
+                                </button>
+                            </div>
+
+                            {/* Thumbnail */}
+                            {preview.thumbnail && (
+                                <div className="rounded-xl overflow-hidden h-56">
+                                    <img src={preview.thumbnail} alt="" className="w-full h-full object-cover" />
+                                </div>
+                            )}
+
+                            {/* Title + meta */}
+                            <div className="space-y-1">
+                                <h2 className="text-2xl font-bold text-green-800">{preview.title}</h2>
+                                <p className="text-sm text-stone-500">
+                                    bởi <span className="font-medium text-stone-700">{preview.authorName}</span>
+                                    {preview.createdAt && (
+                                        <> · {new Date(preview.createdAt).toLocaleDateString('vi-VN')}</>
+                                    )}
+                                </p>
+                            </div>
+
+                            {/* Content */}
+                            <div className="text-stone-700 leading-relaxed whitespace-pre-wrap text-sm">
+                                {preview.content}
+                            </div>
+
+                            {/* Gallery */}
+                            {preview.images?.length > 0 && (
+                                <div className="grid grid-cols-2 gap-3">
+                                    {preview.images.map((url, i) => (
+                                        <div key={i} className="rounded-xl overflow-hidden h-40 border border-stone-200">
+                                            <img src={url} alt="" className="w-full h-full object-cover" />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Actions */}
+                            <div className="flex gap-3 pt-2 border-t border-stone-100">
+                                <Button
+                                    disabled={acting === preview.id}
+                                    onClick={() => handle(preview.id, 'approve')}
+                                    className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white flex-1"
+                                >
+                                    <HiCheck /> Duyệt
+                                </Button>
+                                <Button
+                                    disabled={acting === preview.id}
+                                    onClick={() => handle(preview.id, 'reject')}
+                                    className="flex items-center gap-1.5 bg-red-500 hover:bg-red-600 text-white flex-1"
+                                >
+                                    <HiX /> Từ chối
+                                </Button>
+                                <Button
+                                    onClick={() => setPreview(null)}
+                                    className="bg-stone-100 hover:bg-stone-200 text-stone-700"
+                                >
+                                    Đóng
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }
