@@ -3,6 +3,7 @@ package swp391.group6.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +40,7 @@ public class CategoryController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
     public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryRequest request) {
         return categoryService.createCategory(request)
                 .map(category -> ResponseEntity.status(HttpStatus.CREATED).body(category))
@@ -46,6 +48,7 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
     public ResponseEntity<CategoryResponse> updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request) {
         return categoryService.updateCategory(id, request)
                 .map(ResponseEntity::ok)
@@ -53,6 +56,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         boolean result = categoryService.deleteCategory(id);
 

@@ -8,9 +8,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -19,7 +19,6 @@ import swp391.group6.model.User;
 import swp391.group6.repository.UserRepository;
 import swp391.group6.util.CookieUtil;
 import swp391.group6.util.JWTUtil;
-import swp391.group6.util.ResponseUtil;
 
 import java.io.IOException;
 
@@ -78,24 +77,21 @@ public class JWTFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
                 return;
             }
-            ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
-            return;
+            throw new AuthenticationException("No JWT cookie found") {};
         }
 
         try {
             DecodedJWT decodedJWT = JWTUtil.verify(cookie.getValue());
             LoginResponse tokenUser = JWTUtil.getUser(decodedJWT);
             if (tokenUser == null || tokenUser.getEmail() == null) {
-                ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
-                return;
+                throw new AuthenticationException("Invalid JWT token") {};
             }
 
             User user = userRepository.findByEmail(tokenUser.getEmail())
                     .filter(User::isStatus)
                     .orElse(null);
             if (user == null) {
-                ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
-                return;
+                throw new AuthenticationException("User not found or inactive") {};
             }
 
             String role = user.getRole() == null ? "CUSTOMER" : user.getRole().getName();
@@ -115,8 +111,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
                 return;
             }
-            ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
-            return;
+            throw new AuthenticationException("JWT verification failed") {};
         }
 
         filterChain.doFilter(request, response);
