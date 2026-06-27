@@ -596,3 +596,9 @@ CREATE TABLE IF NOT EXISTS blog_images (
     );
 
 CREATE INDEX IF NOT EXISTS idx_blog_images_post ON blog_images(post_id);
+
+ALTER TABLE blog_images
+    ADD COLUMN IF NOT EXISTS image_data BYTEA,
+    ADD COLUMN IF NOT EXISTS file_name  VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS content_type VARCHAR(100),
+    ALTER COLUMN post_id DROP NOT NULL;

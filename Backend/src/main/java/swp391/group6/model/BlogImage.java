@@ -1,9 +1,14 @@
+//Create: HungDLM
+//Lastest update: HungDLM on 27/06/2026
 package swp391.group6.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "blog_images")
+@Getter
+@Setter
 public class BlogImage {
 
     @Id
@@ -17,7 +22,9 @@ public class BlogImage {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String imageUrl;
 
-    public void setPost(BlogPost post) { this.post = post; }
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    @Column(columnDefinition = "BYTEA")
+    private byte[] imageData;
+
+    private String fileName;
+    private String contentType;
 }

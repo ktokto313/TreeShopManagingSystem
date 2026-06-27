@@ -9,6 +9,7 @@ export default function BlogFormModal({ initial = null, onSubmit, onClose, role 
     const [imageInput, setImageInput] = useState('');
     const [error, setError] = useState('');
     const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState(false);
 
     function set(field, value) {
         setForm(f => ({ ...f, [field]: value }));
@@ -16,10 +17,64 @@ export default function BlogFormModal({ initial = null, onSubmit, onClose, role 
 
     function addImage() {
         const url = imageInput.trim();
-        if (!url) return;
+        if (!url) { setError('Vui lòng nhập URL ảnh.'); return; }
         if (form.images.length >= 4) { setError('Tối đa 4 ảnh.'); return; }
+        setError('');
         set('images', [...form.images, url]);
         setImageInput('');
+    }
+
+    async function handleThumbnailUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploading(true);
+        setError('');
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const res = await fetch('/api/blogs/images/upload', {
+                method: 'POST',
+                credentials: 'include',
+                body: formData,
+            });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            set('thumbnail', data.url);
+        } catch {
+            setError('Upload thumbnail thất bại.');
+        } finally {
+            setUploading(false);
+            e.target.value = '';
+        }
+    }
+
+    async function handleImageUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (form.images.length >= 4) { setError('Tối đa 4 ảnh.'); return; }
+
+        setUploading(true);
+        setError('');
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const res = await fetch('/api/blogs/images/upload', {
+                method: 'POST',
+                credentials: 'include',
+                body: formData,
+            });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            set('images', [...form.images, data.url]);
+        } catch {
+            setError('Upload ảnh thất bại.');
+        } finally {
+            setUploading(false);
+            e.target.value = ''; // reset input để chọn lại cùng file nếu cần
+        }
     }
 
     function removeImage(idx) {
@@ -73,25 +128,67 @@ export default function BlogFormModal({ initial = null, onSubmit, onClose, role 
                         />
                     </div>
 
-                    <Input
-                        label="Thumbnail URL"
-                        value={form.thumbnail}
-                        onChange={e => set('thumbnail', e.target.value)}
-                        placeholder="https://..."
-                    />
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium text-stone-700">Thumbnail</label>
+                        <div className="flex gap-2">
+                            <input
+                                className="flex-1 border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                                value={form.thumbnail}
+                                onChange={e => set('thumbnail', e.target.value)}
+                                placeholder="Dán URL thumbnail..."
+                            />
+                            <label className={`cursor-pointer inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors shrink-0
+            ${uploading ? 'bg-stone-100 text-stone-400 pointer-events-none' : 'bg-stone-100 hover:bg-stone-200 text-stone-700'}`}>
+                                {uploading ? 'Đang tải...' : 'Chọn file'}
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleThumbnailUpload}
+                                    disabled={uploading}
+                                />
+                            </label>
+                        </div>
+                        {form.thumbnail && (
+                            <img
+                                src={form.thumbnail}
+                                alt="thumbnail preview"
+                                className="w-full h-40 object-cover rounded-lg border border-stone-200 mt-1"
+                            />
+                        )}
+                    </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-stone-700">Ảnh gallery (tối đa 4)</label>
+                        <label className="text-sm font-medium text-stone-700">
+                            Ảnh gallery (tối đa 4) — còn {4 - form.images.length} slot
+                        </label>
                         <div className="flex gap-2">
                             <input
                                 className="flex-1 border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
                                 value={imageInput}
                                 onChange={e => setImageInput(e.target.value)}
-                                placeholder="URL ảnh..."
+                                placeholder="Dán URL ảnh..."
                                 onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addImage())}
                             />
-                            {/* <Button onClick={addImage} className="hover:bg-green-400 shrink-0">Thêm</Button> */}
+                            <Button
+                                onClick={addImage}
+                                className="bg-green-400 hover:bg-green-500 text-white shrink-0"
+                            >
+                                Thêm URL
+                            </Button>
+                            <label className={`cursor-pointer inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors shrink-0
+                                ${uploading ? 'bg-stone-100 text-stone-400 pointer-events-none' : 'bg-stone-100 hover:bg-stone-200 text-stone-700'}`}>
+                                {uploading ? 'Đang tải...' : 'Chọn file'}
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleImageUpload}
+                                    disabled={uploading || form.images.length >= 4}
+                                />
+                            </label>
                         </div>
+
                         {form.images.length > 0 && (
                             <div className="grid grid-cols-2 gap-2">
                                 {form.images.map((url, i) => (
@@ -108,18 +205,7 @@ export default function BlogFormModal({ initial = null, onSubmit, onClose, role 
                     </div>
 
                     <div className="flex gap-3 pt-2 border-t border-stone-100">
-                        {/* Manager có thể save draft */}
-                        {role === 'MANAGER' && (
-                            <Button
-                                disabled={saving}
-                                onClick={() => handleSubmit('DRAFT')}
-                                className="hover:bg-stone-200 bg-stone-100 text-stone-700"
-                            >
-                                Lưu nháp
-                            </Button>
-                        )}
-                        {/* Customer cũng có thể save draft */}
-                        {role === 'CUSTOMER' && (
+                        {(role === 'MANAGER' || role === 'CUSTOMER') && (
                             <Button
                                 disabled={saving}
                                 onClick={() => handleSubmit('DRAFT')}
@@ -129,7 +215,7 @@ export default function BlogFormModal({ initial = null, onSubmit, onClose, role 
                             </Button>
                         )}
                         <Button
-                            disabled={saving}
+                            disabled={saving || uploading}
                             onClick={() => handleSubmit('PUBLISHED')}
                             className="hover:bg-green-500 bg-green-400 text-white flex-1"
                         >
