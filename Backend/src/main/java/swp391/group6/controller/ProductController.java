@@ -3,6 +3,7 @@ package swp391.group6.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,6 +50,7 @@ public class ProductController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
     public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest request) {
         return productService.createProduct(request)
                 .map(product -> ResponseEntity.status(HttpStatus.CREATED).body(product))
@@ -56,6 +58,7 @@ public class ProductController {
     }
 
     @PostMapping("/images")
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
     public ResponseEntity<List<String>> uploadProductImages(@RequestParam("files") List<MultipartFile> files) {
         try {
             List<String> storedFileNames = productImageStorageService.storeAll(files);
@@ -69,6 +72,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
     public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id, @RequestBody ProductRequest request) {
         return productService.updateProduct(id, request)
                 .map(ResponseEntity::ok)
@@ -76,6 +80,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         if (!productService.deactivateProduct(id)) {
             return ResponseEntity.notFound().build();

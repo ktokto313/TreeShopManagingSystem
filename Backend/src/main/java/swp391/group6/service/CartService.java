@@ -121,13 +121,10 @@ public class CartService {
 
     private User resolveCustomer(LoginResponse loginResponse) {
         if (loginResponse == null || loginResponse.getEmail() == null) {
-            throw new SecurityException("Authentication is required.");
-        }
-        if (!"CUSTOMER".equals(loginResponse.getRole())) {
-            throw new SecurityException("Only customers can use the cart.");
+            throw new IllegalArgumentException("Authentication is required.");
         }
         return userRepository.findByEmail(loginResponse.getEmail())
-                .orElseThrow(() -> new SecurityException("Customer account was not found."));
+                .orElseThrow(() -> new IllegalArgumentException("Customer account was not found."));
     }
 
     private Product resolvePurchasableProduct(Long productId) {
