@@ -3,14 +3,8 @@ package swp391.group6.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 import swp391.group6.dto.CartDTO;
 import swp391.group6.dto.CartItemRequest;
 import swp391.group6.dto.LoginResponse;
@@ -29,68 +23,55 @@ public class CartController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<?> getCart(HttpServletRequest request) {
-        try {
-            LoginResponse loginResponse = JWTUtil.getUser(request);
-            return ResponseEntity.ok(cartService.toDTO(cartService.getOrCreateCart(loginResponse)));
-        } catch (SecurityException exception) {
-            return error(HttpStatus.UNAUTHORIZED, exception.getMessage());
-        }
+        LoginResponse loginResponse = JWTUtil.getUser(request);
+        return ResponseEntity.ok(cartService.toDTO(cartService.getOrCreateCart(loginResponse)));
     }
 
     @PostMapping("/items")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<?> addItem(HttpServletRequest request, @RequestBody CartItemRequest itemRequest) {
-        try {
-            LoginResponse loginResponse = JWTUtil.getUser(request);
-            CartDTO cart = cartService.toDTO(cartService.addItem(
-                    loginResponse,
-                    itemRequest == null ? null : itemRequest.getProductId(),
-                    itemRequest == null ? null : itemRequest.getQuantity()));
-            return ResponseEntity.ok(cart);
-        } catch (SecurityException exception) {
-            return error(HttpStatus.UNAUTHORIZED, exception.getMessage());
-        } catch (IllegalArgumentException exception) {
-            return error(HttpStatus.BAD_REQUEST, exception.getMessage());
+        if (itemRequest == null || itemRequest.getProductId() == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Product ID is required."));
         }
+        LoginResponse loginResponse = JWTUtil.getUser(request);
+        CartDTO cart = cartService.toDTO(cartService.addItem(
+                loginResponse,
+                itemRequest.getProductId(),
+                itemRequest.getQuantity()));
+        return ResponseEntity.ok(cart);
     }
 
     @PatchMapping("/items/{productId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<?> updateItem(
             HttpServletRequest request,
             @PathVariable Long productId,
             @RequestBody CartItemRequest itemRequest) {
-        try {
-            LoginResponse loginResponse = JWTUtil.getUser(request);
-            CartDTO cart = cartService.toDTO(cartService.updateItem(
-                    loginResponse,
-                    productId,
-                    itemRequest == null ? null : itemRequest.getQuantity()));
-            return ResponseEntity.ok(cart);
-        } catch (SecurityException exception) {
-            return error(HttpStatus.UNAUTHORIZED, exception.getMessage());
-        } catch (IllegalArgumentException exception) {
-            return error(HttpStatus.BAD_REQUEST, exception.getMessage());
+        if (itemRequest == null || itemRequest.getQuantity() == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Quantity is required."));
         }
+        LoginResponse loginResponse = JWTUtil.getUser(request);
+        CartDTO cart = cartService.toDTO(cartService.updateItem(
+                loginResponse,
+                productId,
+                itemRequest.getQuantity()));
+        return ResponseEntity.ok(cart);
     }
 
     @DeleteMapping("/items/{productId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<?> removeItem(HttpServletRequest request, @PathVariable Long productId) {
-        try {
-            LoginResponse loginResponse = JWTUtil.getUser(request);
-            return ResponseEntity.ok(cartService.toDTO(cartService.removeItem(loginResponse, productId)));
-        } catch (SecurityException exception) {
-            return error(HttpStatus.UNAUTHORIZED, exception.getMessage());
-        }
+        LoginResponse loginResponse = JWTUtil.getUser(request);
+        return ResponseEntity.ok(cartService.toDTO(cartService.removeItem(loginResponse, productId)));
     }
 
     @DeleteMapping
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<?> clearCart(HttpServletRequest request) {
-        try {
-            LoginResponse loginResponse = JWTUtil.getUser(request);
-            return ResponseEntity.ok(cartService.toDTO(cartService.clearCart(loginResponse)));
-        } catch (SecurityException exception) {
-            return error(HttpStatus.UNAUTHORIZED, exception.getMessage());
-        }
+        LoginResponse loginResponse = JWTUtil.getUser(request);
+        return ResponseEntity.ok(cartService.toDTO(cartService.clearCart(loginResponse)));
     }
 
     private ResponseEntity<Map<String, String>> error(HttpStatus status, String message) {

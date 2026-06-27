@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.model.Ticket;
@@ -24,39 +25,33 @@ public class TicketController {
         this.ticketService = ticketService;
     }
 
-    // Customer creates a ticket
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Ticket> createTicket(@RequestBody TicketRequest ticketRequest, HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);
-
         Ticket ticket = ticketService.createTicket(ticketRequest, currentUser.getEmail());
-
         if (ticket == null) {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(ticket);
     }
 
-    // Agent & Customer views their own tickets
     @GetMapping("/")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Ticket>> getAuthorizedTickets(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String priority,
-            Sort sort, // Since the system doesn't know what to do with a comma, I leave it without RequestParam for now.
+            Sort sort,
             HttpServletRequest request) {
 
         LoginResponse currentUser = JWTUtil.getUser(request);
-
         String email = currentUser.getEmail();
-
-        // Pass everything down the chain
         List<Ticket> tickets = ticketService.getAuthorizedTicketsByEmail(email, status, priority, sort);
-
         return ResponseEntity.ok(tickets);
     }
 
-    // View specific ticket details
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Ticket> getTicketById(@PathVariable long id) {
         Optional<Ticket> ticket = ticketService.getTicketById(id);
         if (ticket.isPresent()) {
@@ -66,21 +61,18 @@ public class TicketController {
         }
     }
 
-    // Update ticket status
     @PutMapping("/{id}/status")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Ticket> updateTicketStatus(
             @PathVariable long id,
             @RequestParam String newState,
             HttpServletRequest request) {
 
         LoginResponse currentUser = JWTUtil.getUser(request);
-
-        try {
-            Ticket updatedTicket = ticketService.updateTicketStatus(id, newState, currentUser);
-            return ResponseEntity.ok(updatedTicket);
-        } catch (RuntimeException e) {
-            System.out.println(e);
+        Ticket updatedTicket = ticketService.updateTicketStatus(id, newState, currentUser);
+        if (updatedTicket == null) {
             return ResponseEntity.badRequest().build();
         }
+        return ResponseEntity.ok(updatedTicket);
     }
 }
