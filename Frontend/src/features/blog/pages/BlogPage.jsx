@@ -1,3 +1,5 @@
+//Create: HungDLM on 26/06/2026
+//Lastest update: HungDLM on 27/06/2026
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container } from '../../../components/global/Container';
@@ -52,6 +54,14 @@ export default function BlogPage() {
                                 onClick={() => setShowForm(true)}
                             >
                                 + Tạo bài viết
+                            </Button>
+                        )}
+                        {(role === 'CUSTOMER' || role === 'MANAGER') && (
+                            <Button
+                                className="bg-stone-100 hover:bg-stone-200 text-stone-700"
+                                onClick={() => navigate('/blogs/my')}
+                            >
+                                Bài viết của tôi
                             </Button>
                         )}
                         {role === 'MANAGER' && (

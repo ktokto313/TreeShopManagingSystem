@@ -20,6 +20,7 @@ import { hasAllowedRole } from "./utils/authRoutes";
 import { AuthContext } from "./context/AuthContext";
 import TicketDetailPage from "./pages/TicketDetailPage";
 import BlogPage from './features/blog/pages/BlogPage';
+import MyBlogPage from './features/blog/pages/MyBlogPage';
 import BlogDetailPage from './features/blog/pages/BlogDetailPage';
 import BlogPendingPage from './features/blog/pages/BlogPendingPage';
 
@@ -114,10 +115,15 @@ function AppRoutes() {
 				path="/blogs"
 				element={<BlogPage />} />
 			<Route
+				path="/blogs/my"
+				element={<ProtectedRoute roles={['CUSTOMER', 'MANAGER']} element={<MyBlogPage />} />}
+			/>
+			<Route
 				path="/blogs/pending"
 				element={<ProtectedRoute roles={['MANAGER']} element={<BlogPendingPage />} />}
 			/>
-			<Route path="/blogs/:id" element={<BlogDetailPage />} />
+			<Route path="/blogs/:id"
+				   element={<BlogDetailPage />} />
 
 			<Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>

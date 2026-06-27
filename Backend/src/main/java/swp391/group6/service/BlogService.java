@@ -1,3 +1,5 @@
+//Create: HungDLM on 26/06/2026
+//Lastest update: HungDLM on 27/06/2026
 package swp391.group6.service;
 
 import lombok.RequiredArgsConstructor;
@@ -109,6 +111,9 @@ public class BlogService {
                 post.setStatus(BlogStatus.PENDING);
             }
             if (post.getStatus() == BlogStatus.DRAFT && !"DRAFT".equals(req.getStatus())) {
+                post.setStatus(BlogStatus.PENDING);
+            }
+            if (post.getStatus() == BlogStatus.REJECTED && !"DRAFT".equals(req.getStatus())) {
                 post.setStatus(BlogStatus.PENDING);
             }
         }
@@ -245,5 +250,14 @@ public class BlogService {
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .build();
+    }
+
+    // OWN BLOGS
+    public List<BlogResponse> getMyPosts(String email) {
+        User user = userRepo.findByEmail(email).orElseThrow();
+        return postRepo.findByAuthorIdOrderByCreatedAtDesc(user.getId())
+                .stream()
+                .map(p -> toResponse(p, user.getId()))
+                .toList();
     }
 }
