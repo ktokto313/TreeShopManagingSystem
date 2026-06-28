@@ -17,6 +17,7 @@ import swp391.group6.model.ShoppingCart;
 import swp391.group6.model.ShoppingCartEntry;
 import swp391.group6.model.User;
 import swp391.group6.repository.OrderRepository;
+import swp391.group6.repository.ProductRepository;
 import swp391.group6.repository.ShoppingCartRepository;
 import swp391.group6.repository.UserRepository;
 
@@ -43,11 +44,14 @@ class CheckoutServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private ProductRepository productRepository;
+
     private CheckoutService checkoutService;
 
     @BeforeEach
     void setUp() {
-        checkoutService = new CheckoutService(shoppingCartRepository, orderRepository, userRepository);
+        checkoutService = new CheckoutService(shoppingCartRepository, orderRepository, userRepository, productRepository);
         ReflectionTestUtils.setField(checkoutService, "bankId", "mbbank");
         ReflectionTestUtils.setField(checkoutService, "bankAccountNo", "123456789");
         ReflectionTestUtils.setField(checkoutService, "bankAccountName", "TREE SHOP");
@@ -57,7 +61,16 @@ class CheckoutServiceTest {
 
     @Test
     void checkout_rejectsNonCustomerRole() {
-        assertThrows(SecurityException.class, () -> checkoutService.checkout(login("MANAGER"), validRequest()));
+        Role managerRole = new Role();
+        managerRole.setName("MANAGER");
+        User managerUser = new User();
+        managerUser.setId(5L);
+        managerUser.setEmail("customer@example.com");
+        managerUser.setRole(managerRole);
+
+        when(userRepository.findByEmail("customer@example.com")).thenReturn(Optional.of(managerUser));
+
+        assertThrows(IllegalArgumentException.class, () -> checkoutService.checkout(login("MANAGER"), validRequest()));
     }
 
     @Test

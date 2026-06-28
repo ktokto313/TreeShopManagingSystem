@@ -81,17 +81,25 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         try {
+            Cookie cookie = CookieUtil.getJWTCookie(request.getCookies());
+            if (cookie == null) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
             DecodedJWT decodedJWT = JWTUtil.verify(cookie.getValue());
             LoginResponse tokenUser = JWTUtil.getUser(decodedJWT);
             if (tokenUser == null || tokenUser.getEmail() == null) {
-                throw new AuthenticationException("Invalid JWT token") {};
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
             }
 
             User user = userRepository.findByEmail(tokenUser.getEmail())
                     .filter(User::isStatus)
                     .orElse(null);
             if (user == null) {
-                throw new AuthenticationException("User not found or inactive") {};
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
             }
 
             String role = user.getRole() == null ? "CUSTOMER" : user.getRole().getName();
