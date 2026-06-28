@@ -1,4 +1,5 @@
 // Created by minhlthe200133
+import { FaHeart, FaRegHeart } from 'react-icons/fa'
 import {Badge} from '../../../components/ui/Badge'
 import {Button} from '../../../components/ui/Button'
 import {Card} from '../../../components/ui/Card'
@@ -14,6 +15,8 @@ export default function CatalogProductCard({
   onOpen,
   onCategoryOpen,
   onAdd,
+  onWishlist,
+  isWishlisted = false,
 }) {
   const images = parseCatalogImages(product.images)
   const imagePreview = resolveProductImageSource(images[0])
@@ -28,12 +31,28 @@ export default function CatalogProductCard({
           </div>
         </div>
 
-        <ProductImageFrame
-          src={imagePreview}
-          alt={product.name}
-          className="h-52"
-          fallbackLabel="Chưa có ảnh"
-        />
+        <div className="relative">
+          <ProductImageFrame
+            src={imagePreview}
+            alt={product.name}
+            className="h-52"
+            fallbackLabel="Chưa có ảnh"
+          />
+          <button
+            type="button"
+            className={`absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full border bg-white/95 text-lg shadow-md transition hover:-translate-y-0.5 ${
+              isWishlisted
+                ? 'border-red-200 text-red-600 hover:bg-red-50'
+                : 'border-green-100 text-green-700 hover:bg-green-50'
+            }`}
+            disabled={availability.state === 'inactive'}
+            onClick={() => onWishlist?.(product)}
+            aria-label={isWishlisted ? 'Đến danh sách yêu thích' : 'Thêm vào yêu thích'}
+            title={isWishlisted ? 'Đến danh sách yêu thích' : 'Thêm vào yêu thích'}
+          >
+            {isWishlisted ? <FaHeart /> : <FaRegHeart />}
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 text-xs text-green-800">

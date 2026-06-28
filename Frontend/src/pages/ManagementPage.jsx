@@ -39,7 +39,6 @@ const emptyProductForm = {
 	status: true,
 	sku: "",
 	description: "",
-	variants: "",
 	images: [],
 	imageFiles: [],
 };
@@ -59,19 +58,6 @@ function hasErrors(errors) {
 
 function isBlank(value) {
 	return String(value ?? "").trim() === "";
-}
-
-function isJsonObject(value) {
-	if (isBlank(value)) {
-		return true;
-	}
-
-	try {
-		const parsed = JSON.parse(value);
-		return parsed && typeof parsed === "object" && !Array.isArray(parsed);
-	} catch {
-		return false;
-	}
 }
 
 function validateCategoryForm(values) {
@@ -160,10 +146,6 @@ function validateProductForm(values) {
 
 	if (description.length > 1000) {
 		errors.description = "Mô tả tối đa 1000 ký tự.";
-	}
-
-	if (!isJsonObject(values.variants)) {
-		errors.variants = "Biến thể phải là JSON object hợp lệ.";
 	}
 
 	const imageError = validateProductImages(values.imageFiles);
@@ -391,7 +373,6 @@ export default function ManagementPage() {
 			status: Boolean(product.status),
 			sku: product.sku ?? "",
 			description: product.description ?? "",
-			variants: product.variants ?? "",
 			images: parseImageList(product.images),
 			imageFiles: [],
 		});
@@ -466,7 +447,6 @@ export default function ManagementPage() {
 				status: productForm.status,
 				sku: productForm.sku.trim(),
 				description: productForm.description.trim(),
-				variants: productForm.variants,
 				images: imageNames.length ? JSON.stringify(imageNames) : null,
 			};
 
