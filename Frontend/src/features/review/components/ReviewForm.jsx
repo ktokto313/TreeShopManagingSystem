@@ -69,7 +69,6 @@ const ReviewForm = ({className, reviewState, orderId}) => {
 				placeholder={placeholder}
 				maxLength={MAX_CHARS}
 				onChange={(e) => setCharCount(e.target.value.length)}
-				className="bg-bg-base text-black border-border focus:border-interactive focus:ring-1 focus:ring-interactive focus-visible:border-interactive focus-visible:ring-interactive min-h-[120px] resize-y"
 			/>
 			<div className="text-right text-xs text-gray-500 -mt-2.5">
 				{charCount} / {MAX_CHARS} ký tự
