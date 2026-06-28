@@ -6,6 +6,10 @@ import lombok.extern.java.Log;
 import org.antlr.v4.runtime.atn.SemanticContext;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import swp391.group6.dto.LoginResponse;
@@ -96,8 +100,10 @@ public class OrderController {
     }
 
     @GetMapping("/products/{productId}/reviews")
-    public ResponseEntity<List<swp391.group6.model.Review>> getProductReviews(@PathVariable Long productId) {
-        List<swp391.group6.model.Review> reviews = orderService.getProductReviews(productId);
+    public ResponseEntity<Page<swp391.group6.model.Review>> getProductReviews(
+            @PathVariable Long productId,
+            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<swp391.group6.model.Review> reviews = orderService.getProductReviews(productId, pageable);
         return ResponseEntity.ok(reviews);
     }
 

@@ -1,6 +1,8 @@
 package swp391.group6.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.dto.OrderDTO;
 import swp391.group6.exception.InvalidStateTransitionException;
@@ -168,6 +170,10 @@ public class OrderService {
 
     public List<Review> getProductReviews(Long productId) {
         return reviewRepository.findByOrderDetail_Product_Id(productId);
+    }
+
+    public Page<Review> getProductReviews(Long productId, Pageable pageable) {
+        return reviewRepository.findByOrderDetail_Product_Id(productId, pageable);
     }
 
     public Review createProductReview(long orderId, long productId, swp391.group6.dto.ReviewRequest request, LoginResponse loginResponse) {
