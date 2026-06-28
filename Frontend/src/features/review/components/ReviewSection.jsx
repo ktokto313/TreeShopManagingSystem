@@ -23,6 +23,7 @@ const ReviewSection = ({ className, productId, orderId, onReviewSubmitted }) => 
 		currentPage,
 		totalPages,
 		isReviewsLoading,
+		pageSize,
 	} = reviewState;
 
 	useEffect(() => {
@@ -41,7 +42,7 @@ const ReviewSection = ({ className, productId, orderId, onReviewSubmitted }) => 
 			<ReviewCommentSection className="mt-5">
 				<div className="space-y-3">
 					{isReviewsLoading ? (
-						Array.from({ length: 3 }).map((_, idx) => (
+						Array.from({ length: pageSize }).map((_, idx) => (
 							<div key={idx} className="p-4 border border-gray-200 rounded-xl bg-white space-y-3">
 								<div className="flex justify-between items-center">
 									<div className="flex items-center gap-2">
