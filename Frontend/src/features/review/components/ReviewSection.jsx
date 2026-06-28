@@ -1,49 +1,55 @@
 import { useEffect } from "react";
+import { Button } from "../../../components/ui/Button";
+import { Select } from "../../../components/ui/Select";
+import { Skeleton } from "../../../components/ui/Skeleton";
 import { cn } from "../../../utils/cn";
+import { getRatingsOptions } from "../data/reviewsData";
+import { useProductReview } from "../hooks/useProductReview";
+import { getPageNumbers } from "../data/reviewsData";
 import ReviewCommentCard from "./ReviewCommentCard";
 import ReviewCommentSection from "./ReviewCommentSection";
 import ReviewForm from "./ReviewForm";
-import { useProductReview } from "../hooks/useProductReview";
-import { Button } from "../../../components/ui/Button";
-import { Skeleton } from "../../../components/ui/Skeleton";
 
-function getPageNumbers(currentPage, totalPages) {
-	const startPage = Math.max(1, currentPage - 2);
-	const endPage = Math.min(totalPages, currentPage + 2);
-
-	return Array.from({ length: Math.max(0, endPage - startPage + 1) }, (_, index) => startPage + index);
-}
-
-const ReviewSection = ({ className, productId, orderId, onReviewSubmitted }) => {
+const ReviewSection = ({
+	className,
+	productId,
+	orderId,
+	onReviewSubmitted,
+}) => {
 	const reviewState = useProductReview(productId, onReviewSubmitted);
 
 	const {
 		reviews,
 		loadReviews,
+		setRatingFilter,
 		currentPage,
 		totalPages,
 		isReviewsLoading,
 		pageSize,
+		ratingFilter,
 	} = reviewState;
 
 	useEffect(() => {
 		loadReviews(1);
-	}, [productId, loadReviews]);
+	}, [productId, loadReviews, ratingFilter]);
 
 	const pageNumbers = getPageNumbers(currentPage, totalPages);
 
 	return (
 		<div className={cn(className)}>
-			<ReviewForm
-				reviewState={reviewState}
-				orderId={orderId}
-			></ReviewForm>
+			<ReviewForm reviewState={reviewState} orderId={orderId}></ReviewForm>
 
 			<ReviewCommentSection className="mt-5">
+				<div className="w-full mb-3">
+					<Select label="Số sao" options={getRatingsOptions()} onChange={(e) => setRatingFilter(e.target.value)} className="w-23"></Select>
+				</div>
 				<div className="space-y-3">
 					{isReviewsLoading ? (
 						Array.from({ length: pageSize }).map((_, idx) => (
-							<div key={idx} className="p-4 border border-gray-200 rounded-xl bg-white space-y-3">
+							<div
+								key={idx}
+								className="p-4 border border-gray-200 rounded-xl bg-white space-y-3"
+							>
 								<div className="flex justify-between items-center">
 									<div className="flex items-center gap-2">
 										<Skeleton className="w-7 h-7 rounded-full" />
@@ -82,7 +88,7 @@ const ReviewSection = ({ className, productId, orderId, onReviewSubmitted }) => 
 							{pageNumbers.map((pageNumber) => (
 								<Button
 									key={pageNumber}
-									variant={pageNumber === currentPage ? 'primary' : 'secondary'}
+									variant={pageNumber === currentPage ? "primary" : "secondary"}
 									className="px-3 py-1 text-xs"
 									onClick={() => loadReviews(pageNumber)}
 								>
