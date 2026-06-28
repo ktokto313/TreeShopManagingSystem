@@ -12,13 +12,14 @@ export const useProductReview = (productId, onSuccess) => {
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalElements, setTotalElements] = useState(0);
 
+	const pageSize = 5;
 	const { user } = useContext(AuthContext);
 
 	const loadReviews = useCallback(async (page = 1) => {
 		try {
 			setIsReviewsLoading(true);
 			const backendPage = Math.max(0, page - 1);
-			const result = await getProductReviews(productId, backendPage, 5);
+			const result = await getProductReviews(productId, backendPage, pageSize);
 
 			setReviews(result.content || []);
 			setTotalPages(result.totalPages || 1);
@@ -100,5 +101,6 @@ export const useProductReview = (productId, onSuccess) => {
 		totalPages,
 		totalElements,
 		isReviewsLoading,
+		pageSize,
 	};
 };
