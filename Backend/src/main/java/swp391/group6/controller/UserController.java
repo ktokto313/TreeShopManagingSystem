@@ -55,9 +55,6 @@ public class UserController {
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDTO> getMyProfile(@AuthenticationPrincipal User user) {
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
         return userService.getUserByEmailUnprotected(user.getEmail())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -75,18 +72,12 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("#id == #user.id or hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
     public ResponseEntity<UserDTO> updateUser(@PathVariable long id,
                                               @RequestBody UserDTO userDTO,
                                               @AuthenticationPrincipal User user) {
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         String role = user.getRole() == null ? "CUSTOMER" : user.getRole().getName();
-        boolean isOwnProfile = userService.getUserByEmailUnprotected(user.getEmail())
-                .map(u -> u.getId() == id)
-                .orElse(false);
+        boolean isOwnProfile = user.getId() == id;
         boolean canManageUsers = "SYSTEM_ADMIN".equalsIgnoreCase(role)
                 || "MANAGER".equalsIgnoreCase(role);
         if (!isOwnProfile && !canManageUsers) {
@@ -110,10 +101,6 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDTO> updateMyProfile(@RequestBody UserDTO userDTO,
                                                    @AuthenticationPrincipal User user) {
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         UserDTO updatedUser;
         try {
             updatedUser = userService.getUserByEmailUnprotected(user.getEmail())
