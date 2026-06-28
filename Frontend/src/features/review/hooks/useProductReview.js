@@ -3,7 +3,17 @@ import { AuthContext } from "../../../context/AuthContext";
 import { createProductReview, getProductReviews } from "../reviewApi";
 
 export const useProductReview = (productId, onSuccess) => {
-	const [starValue, setStarValue] = useState(null);
+	const {
+		isReviewsLoading,
+		setIsReviewsLoading,
+		starValue,
+		setStarValue,
+		reviewValidationError,
+		setReviewValidationError,
+		isReviewSubmitLoading,
+		setIsReviewSubmitLoading
+	} = useReviewForm();
+
 	const [reviews, setReviews] = useState([]);
 	const [reviewValidationError, setReviewValidationError] = useState("");
 	const [isReviewSubmitLoading, setIsReviewSubmitLoading] = useState(false);
