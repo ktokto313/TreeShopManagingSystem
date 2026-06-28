@@ -102,8 +102,10 @@ public class OrderController {
     @GetMapping("/products/{productId}/reviews")
     public ResponseEntity<Page<swp391.group6.model.Review>> getProductReviews(
             @PathVariable Long productId,
+            @RequestParam(required = false) Short rating,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<swp391.group6.model.Review> reviews = orderService.getProductReviews(productId, pageable);
+        System.out.println(rating);
+        Page<swp391.group6.model.Review> reviews = orderService.getProductReviews(productId, rating, pageable);
         return ResponseEntity.ok(reviews);
     }
 

@@ -10,5 +10,6 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByOrderDetail_Product_Id(Long id);
     Page<Review> findByOrderDetail_Product_Id(Long id, Pageable pageable);
+    Page<Review> findByOrderDetail_Product_IdAndRating(Long id, Short rating, Pageable pageable);
     boolean existsByOrderDetail_Order_IdAndOrderDetail_Product_Id(Long orderId, Long productId);
 }
