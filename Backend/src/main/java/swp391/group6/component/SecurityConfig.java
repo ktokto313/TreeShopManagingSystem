@@ -59,10 +59,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of(
-            "http://localhost:5173",
-            "http://127.0.0.1:5173"
-        ));
+        config.setAllowedOriginPatterns(Arrays.asList(
+              "http://localhost:[*]", 
+              "https://localhost:[*]"
+       ));
         config.setAllowedMethods("*");
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Set-Cookie"));
