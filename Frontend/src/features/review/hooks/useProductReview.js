@@ -1,6 +1,8 @@
 import { useCallback, useContext, useState } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import { createProductReview, getProductReviews } from "../reviewApi";
+import { useReviewForm } from "./useReviewForm";
+import { REVIEWS_PER_PAGE } from './../data/reviewsData';
 
 export const useProductReview = (productId, onSuccess) => {
 	const {
@@ -15,21 +17,24 @@ export const useProductReview = (productId, onSuccess) => {
 	} = useReviewForm();
 
 	const [reviews, setReviews] = useState([]);
-	const [reviewValidationError, setReviewValidationError] = useState("");
-	const [isReviewSubmitLoading, setIsReviewSubmitLoading] = useState(false);
-	const [isReviewsLoading, setIsReviewsLoading] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalElements, setTotalElements] = useState(0);
-
-	const pageSize = 5;
+	const [ratingFilter, setRatingFilter] = useState(null);
+	
 	const { user } = useContext(AuthContext);
 
 	const loadReviews = useCallback(async (page = 1) => {
 		try {
 			setIsReviewsLoading(true);
 			const backendPage = Math.max(0, page - 1);
-			const result = await getProductReviews(productId, backendPage, pageSize);
+			
+			let cleanRating = null;
+			if (ratingFilter !== undefined && ratingFilter !== null && ratingFilter !== "" && ratingFilter !== "null") {
+				cleanRating = Number(ratingFilter);
+			}
+			
+			const result = await getProductReviews(productId, backendPage, REVIEWS_PER_PAGE, cleanRating);
 
 			setReviews(result.content || []);
 			setTotalPages(result.totalPages || 1);
@@ -40,7 +45,7 @@ export const useProductReview = (productId, onSuccess) => {
 		} finally {
 			setIsReviewsLoading(false);
 		}
-	}, [productId]);
+	}, [productId, setIsReviewsLoading, ratingFilter]);
 
 	const handleStarOnClick = (starValue) => {
 		setStarValue(starValue);
@@ -103,14 +108,17 @@ export const useProductReview = (productId, onSuccess) => {
 		handleStarOnClick,
 		setIsReviewSubmitLoading,
 		loadReviews,
+		setRatingFilter,
+		ratingFilter,
 		reviews,
-		isReviewSubmitLoading,
-		starValue,
-		reviewValidationError,
 		currentPage,
 		totalPages,
 		totalElements,
+		REVIEWS_PER_PAGE,
 		isReviewsLoading,
-		pageSize,
+		starValue,
+		reviewValidationError,
+		isReviewSubmitLoading,
+		pageSize: REVIEWS_PER_PAGE,
 	};
 };

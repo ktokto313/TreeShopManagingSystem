@@ -172,7 +172,11 @@ public class OrderService {
         return reviewRepository.findByOrderDetail_Product_Id(productId);
     }
 
-    public Page<Review> getProductReviews(Long productId, Pageable pageable) {
+    public Page<Review> getProductReviews(Long productId, Short rating, Pageable pageable) {
+        if (rating != null) {
+            return reviewRepository.findByOrderDetail_Product_IdAndRating(productId, rating, pageable);
+        }
+
         return reviewRepository.findByOrderDetail_Product_Id(productId, pageable);
     }
 
