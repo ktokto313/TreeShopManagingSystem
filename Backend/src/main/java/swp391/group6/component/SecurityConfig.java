@@ -58,7 +58,7 @@ public class SecurityConfig {
             "http://localhost:5173",
             "http://127.0.0.1:5173"
         ));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT","PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedMethods("*");
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Set-Cookie"));
         config.setAllowCredentials(true);
