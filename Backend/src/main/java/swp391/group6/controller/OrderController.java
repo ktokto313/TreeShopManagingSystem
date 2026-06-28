@@ -33,7 +33,6 @@ public class OrderController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<OrderListDTO>> getOrders(
             HttpServletRequest request,
             @RequestParam(name = "statusList", required = false) List<OrderStatus> statusList,
@@ -47,7 +46,6 @@ public class OrderController {
     }
 
     @GetMapping("{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<OrderDTO> getOrder(HttpServletRequest request, @PathVariable long id) {
         LoginResponse loggedInUser = JWTUtil.getUser(request);
         Order order = orderService.getOrder(id, loggedInUser);
@@ -66,7 +64,6 @@ public class OrderController {
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> addOrder(@RequestBody ShoppingCart shoppingCart) {
         if (orderService.addOrder(shoppingCart)) {
             return ResponseEntity.ok().build();
@@ -76,7 +73,6 @@ public class OrderController {
     }
 
     @PutMapping("{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> changeOrder(HttpServletRequest request, @PathVariable long id, @RequestBody OrderDTO order) {
         LoginResponse loginResponse = JWTUtil.getUser(request);
         try {
