@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '../../utils/cn';
 import { IoClose } from "react-icons/io5";
 
@@ -17,14 +18,14 @@ export function Modal({ isOpen, onClose, title, children, className }) {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     // The dark background overlay
-    <div onClick={onClose} className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25 backdrop-blur-sm", className)}>
+    <div onClick={onClose} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       
       {/* Modal box */}
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="bg-bg-surface w-full max-w-md rounded-xl shadow-xl border border-border overflow-hidden flex flex-col overflow-y-scroll min-h-30 max-h-[80vh] min-w-[40vw]"
+        className={cn("bg-bg-surface w-full max-w-md rounded-xl shadow-xl border border-border overflow-hidden flex flex-col overflow-y-scroll min-h-30 max-h-[80vh] min-w-[40vw]", className)}
         role="dialog" 
         aria-modal="true"
       >
@@ -49,6 +50,7 @@ export function Modal({ isOpen, onClose, title, children, className }) {
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

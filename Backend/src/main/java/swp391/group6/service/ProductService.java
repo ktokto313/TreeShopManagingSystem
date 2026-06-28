@@ -5,14 +5,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 import swp391.group6.dto.ProductRequest;
 import swp391.group6.dto.ProductResponse;
-import swp391.group6.model.Category;
-import swp391.group6.model.Product;
-import swp391.group6.model.ProductDetail;
-import swp391.group6.repository.CategoryRepository;
-import swp391.group6.repository.ProductDetailRepository;
-import swp391.group6.repository.ProductRepository;
+import swp391.group6.dto.ReviewRequest;
+import swp391.group6.model.*;
+import swp391.group6.repository.*;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -27,11 +25,24 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductDetailRepository productDetailRepository;
+    private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository; // 1. Add this!
+    private final OrderRepository orderRepository;
 
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository, ProductDetailRepository productDetailRepository) {
+    // 2. Add UserRepository to your constructor
+    public ProductService(ProductRepository productRepository,
+                          CategoryRepository categoryRepository,
+                          ProductDetailRepository productDetailRepository,
+                          ReviewRepository reviewRepository,
+                          UserRepository userRepository,
+                          OrderRepository orderRepository
+    ) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.productDetailRepository = productDetailRepository;
+        this.reviewRepository = reviewRepository;
+        this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
     }
 
     public List<ProductResponse> listProducts(String keyword, Long categoryId, Boolean status) {
@@ -198,4 +209,5 @@ public class ProductService {
                 && stock >= 0
                 && (description == null || description.length() <= MAX_DESCRIPTION_LENGTH);
     }
+
 }

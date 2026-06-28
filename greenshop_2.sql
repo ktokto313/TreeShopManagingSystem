@@ -1,4 +1,19 @@
-﻿
+DROP TABLE IF EXISTS blog_votes CASCADE;
+DROP TABLE IF EXISTS blog_posts CASCADE;
+DROP TABLE IF EXISTS comments CASCADE;
+DROP TABLE IF EXISTS tickets CASCADE;
+DROP TABLE IF EXISTS reviews CASCADE;
+DROP TABLE IF EXISTS shopping_cart_entry CASCADE;
+DROP TABLE IF EXISTS shopping_carts CASCADE;
+DROP TABLE IF EXISTS order_detail CASCADE;
+DROP TABLE IF EXISTS orders CASCADE;
+DROP TABLE IF EXISTS product_details CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
+DROP TABLE IF EXISTS categories CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS role CASCADE;
+DROP TABLE IF EXISTS wishlist_items CASCADE;
+
 CREATE TABLE role (
    id      BIGSERIAL PRIMARY KEY,
    name    VARCHAR(50) NOT NULL UNIQUE
@@ -152,18 +167,6 @@ CREATE TABLE comments (
 
 CREATE INDEX idx_comments_ticket ON comments(ticket_id);
 
---DROP TABLE IF EXISTS comments CASCADE;
---DROP TABLE IF EXISTS tickets CASCADE;
---DROP TABLE IF EXISTS reviews CASCADE;
---DROP TABLE IF EXISTS shopping_cart_entry CASCADE;
---DROP TABLE IF EXISTS shopping_carts CASCADE;
---DROP TABLE IF EXISTS order_detail CASCADE;
---DROP TABLE IF EXISTS orders CASCADE;
---DROP TABLE IF EXISTS product_details CASCADE;
---DROP TABLE IF EXISTS products CASCADE;
---DROP TABLE IF EXISTS categories CASCADE;
---DROP TABLE IF EXISTS users CASCADE;
---DROP TABLE IF EXISTS role CASCADE;
 
 -- ============================================================
 --  THÊM BẢNG BLOG
@@ -514,7 +517,14 @@ INSERT INTO orders (customer_id, shipper_id, shipping_address, shipping_fee, dis
 (9,  NULL,'55 Lý Thường Kiệt, Huế',                 30000, 20000,  'PENDING'),
 (10, NULL,'99 Nguyễn Huệ, Cần Thơ',                 30000, 0,      'PENDING'),
 (5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 0,      'DELIVERING'),
-(6,  NULL,'45 Lê Lợi, Quận Hải Châu, Đà Nẵng',      30000, 10000,  'PROCESSING');
+(6,  NULL,'45 Lê Lợi, Quận Hải Châu, Đà Nẵng',      30000, 10000,  'PROCESSING'),
+-- Extra orders for khach1 (customer_id 5)
+(5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 5000,   'RECEIVED'),
+(5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 0,      'RECEIVED'),
+(5,  NULL,'123 Nguyễn Trãi, Quận 1, TP.HCM',        30000, 0,      'PENDING'),
+(5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 15000,  'ARRIVED'),
+(5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 0,      'RETURN_PENDING'),
+(5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 10000,  'RECEIVED');
 
 -- ============================================================
 --  ORDER DETAILS
@@ -532,15 +542,28 @@ INSERT INTO order_detail (order_id, product_id, quantity, price_paid) VALUES
 (6, 22,  3,  95000),
 (7, 3,   1, 120000),
 (7, 51,  2,  45000),
-(8, 64,  1, 150000),
-(8, 98,  1,  65000);
+(8,  64,  1, 150000),
+(8,  98,  1,  65000),
+-- Extra order_details for khach1
+(9,  11,  2, 130000),
+(9,  12,  1, 220000),
+(10, 24,  1, 150000),
+(10, 25,  2, 380000),
+(11, 31,  1, 450000),
+(11, 32,  1, 520000),
+(12, 44,  5,  70000),
+(12, 45,  3,  90000),
+(13, 58,  2,  75000),
+(13, 59,  1,  55000),
+(14, 76,  4,  25000),
+(14, 77,  2,  45000);
 
 -- ============================================================
 --  REVIEWS
 -- ============================================================
 INSERT INTO reviews (order_id, product_id, customer_id, rating, comment) VALUES
-(1, 1, 5, 5, 'Cây đẹp đúng như mô tả, đóng gói cẩn thận, giao hàng nhanh. Rất hài lòng!'),
-(1, 2, 5, 4, 'Chậu đẹp, chất lượng tốt, giá hợp lý. Sẽ mua lại lần sau.'),
+(1, 3, 5, 5, 'Cây đẹp đúng như mô tả, đóng gói cẩn thận, giao hàng nhanh. Rất hài lòng!'),
+(1, 76, 5, 4, 'Chậu đẹp, chất lượng tốt, giá hợp lý. Sẽ mua lại lần sau.'),
 (2, 3, 6, 5, 'Monstera đẹp lắm, lá to khỏe, không bị dập nát khi vận chuyển. 5 sao!'),
 (3, 4, 7, 4, 'ZZ Plant khỏe mạnh, đúng size, tuy nhiên chậu hơi nhỏ so với cây.'),
 (7, 5, 5, 5, 'Mua lần 2 vẫn rất hài lòng, kim tiền lên nhanh tốt lắm!');

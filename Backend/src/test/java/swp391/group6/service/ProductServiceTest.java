@@ -2,9 +2,7 @@ package swp391.group6.service;
 
 import org.junit.jupiter.api.Test;
 import swp391.group6.dto.ProductRequest;
-import swp391.group6.repository.CategoryRepository;
-import swp391.group6.repository.ProductDetailRepository;
-import swp391.group6.repository.ProductRepository;
+import swp391.group6.repository.*;
 
 import java.math.BigDecimal;
 
@@ -19,7 +17,11 @@ class ProductServiceTest {
         ProductRepository productRepository = mock(ProductRepository.class);
         CategoryRepository categoryRepository = mock(CategoryRepository.class);
         ProductDetailRepository productDetailRepository = mock(ProductDetailRepository.class);
-        ProductService productService = new ProductService(productRepository, categoryRepository, productDetailRepository);
+        ReviewRepository reviewRepository = mock(ReviewRepository.class);
+        UserRepository userRepository = mock(UserRepository.class);
+        OrderRepository orderRepository = mock(OrderRepository.class);
+
+        ProductService productService = new ProductService(productRepository, categoryRepository, productDetailRepository, reviewRepository, userRepository, orderRepository);
 
         ProductRequest request = validProductRequest();
         request.setPrice(BigDecimal.ZERO);

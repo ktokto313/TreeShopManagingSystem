@@ -1,6 +1,8 @@
 package swp391.group6.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.dto.OrderDTO;
 import swp391.group6.exception.InvalidStateTransitionException;
@@ -17,10 +19,12 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final swp391.group6.repository.ReviewRepository reviewRepository;
 
-    public OrderService(OrderRepository orderRepository, UserRepository userRepository) {
+    public OrderService(OrderRepository orderRepository, UserRepository userRepository, swp391.group6.repository.ReviewRepository reviewRepository) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     public List<Order> getOrders(LoginResponse loginResponse, List<OrderStatus> statuses, String query) {
@@ -158,5 +162,58 @@ public class OrderService {
 
     public boolean canModifyAllOrder(LoginResponse user) {
         return user.getRole().equals("SYSTEM_ADMIN");
+    }
+
+    public boolean hasReviewed(long orderId, long productId) {
+        return reviewRepository.existsByOrderDetail_Order_IdAndOrderDetail_Product_Id(orderId, productId);
+    }
+
+    public List<Review> getProductReviews(Long productId) {
+        return reviewRepository.findByOrderDetail_Product_Id(productId);
+    }
+
+    public Page<Review> getProductReviews(Long productId, Short rating, Pageable pageable) {
+        if (rating != null) {
+            return reviewRepository.findByOrderDetail_Product_IdAndRating(productId, rating, pageable);
+        }
+
+        return reviewRepository.findByOrderDetail_Product_Id(productId, pageable);
+    }
+
+    public Review createProductReview(long orderId, long productId, swp391.group6.dto.ReviewRequest request, LoginResponse loginResponse) {
+        User user = userRepository.findByEmail(loginResponse.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+
+        if (order.getUser().getId() != user.getId()) {
+            throw new RuntimeException("Bạn chỉ có thể đánh giá sản phẩm của đơn hàng của mình");
+        }
+
+        if (order.getStatus() != OrderStatus.RECEIVED) {
+            throw new RuntimeException("Order must be RECEIVED to review");
+        }
+
+        OrderDetail targetDetail = order.getOrderDetailList().stream()
+                .filter(od -> od.getProduct().getId() == productId)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Order Detail not found for product ID: " + productId));
+
+        // Check if this specific order detail already has a review
+        boolean alreadyReviewed = reviewRepository.existsByOrderDetail_Order_IdAndOrderDetail_Product_Id(orderId, productId);
+
+        if (alreadyReviewed) {
+            throw new RuntimeException("You have already reviewed this item in this order.");
+        }
+
+        Review review = new Review();
+        review.setUser(user);
+        review.setOrderDetail(targetDetail);
+        review.setComment(request.getComment());
+        review.setRating((short) request.getRating());
+        review.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
+
+        return reviewRepository.save(review);
     }
 }

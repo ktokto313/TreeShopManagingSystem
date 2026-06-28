@@ -7,14 +7,14 @@ export function Textarea({ label, error, className, id, ...props }) {
   return (
     <label className="block text-left" htmlFor={textareaId}>
       {label && (
-        <span className="mb-1 block text-sm font-medium text-[var(--text-h)]">
+        <span className="mb-1 block text-sm font-medium">
           {label}
         </span>
       )}
       <textarea
         id={textareaId}
         className={cn(
-          'min-h-24 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--text-h)] outline-none transition placeholder:text-[var(--text)] focus:border-[var(--accent)]',
+          'min-h-24 w-full rounded-md border px-3 py-2 text-sm outline-none transition placeholder:text-gray-500 focus:border-gray-600',
           hasError && 'border-red-500 focus:border-red-500',
           className,
         )}

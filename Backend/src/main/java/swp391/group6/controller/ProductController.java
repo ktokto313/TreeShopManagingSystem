@@ -1,6 +1,8 @@
 // Created by minhlthe200133
 package swp391.group6.controller;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,12 +17,17 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import swp391.group6.dto.ProductRequest;
 import swp391.group6.dto.ProductResponse;
+import swp391.group6.dto.ReviewRequest;
+import swp391.group6.model.Product;
+import swp391.group6.model.Review;
 import swp391.group6.service.ProductImageStorageService;
 import swp391.group6.service.ProductService;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -82,4 +89,5 @@ public class ProductController {
         }
         return ResponseEntity.noContent().build();
     }
+
 }

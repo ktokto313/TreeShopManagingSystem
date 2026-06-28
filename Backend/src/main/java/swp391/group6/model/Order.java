@@ -39,11 +39,10 @@ public class Order {
     @Column(nullable = false)
     private OrderStatus status;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetailList;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review> reviewList;
 
     public long getId() {
         return id;
@@ -117,11 +116,4 @@ public class Order {
         this.orderDetailList = orderDetailList;
     }
 
-    public List<Review> getReviewList() {
-        return reviewList;
-    }
-
-    public void setReviewList(List<Review> reviewList) {
-        this.reviewList = reviewList;
-    }
 }
