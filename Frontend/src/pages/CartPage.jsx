@@ -88,7 +88,9 @@ export default function CartPage() {
   }
 
   async function changeQuantity(item, nextQuantity) {
-    if (nextQuantity < 1 || nextQuantity > item.stock) return
+    const stock = item.stock ?? 1
+    const minQty = 1
+    if (nextQuantity < minQty || nextQuantity > stock) return
     setBusyProductId(item.productId)
     setError('')
     try {
@@ -99,6 +101,17 @@ export default function CartPage() {
     } finally {
       setBusyProductId(null)
     }
+  }
+
+  function handleQuantityInput(item, rawValue) {
+    const stock = item.stock ?? 1
+    const minQty = 1
+    let value = rawValue.replace(/\D/g, '')
+    if (!value) return
+    let num = parseInt(value, 10)
+    if (isNaN(num)) return
+    num = Math.max(minQty, Math.min(stock, num))
+    void changeQuantity(item, num)
   }
 
   async function removeItem(productId) {
@@ -188,7 +201,23 @@ export default function CartPage() {
                           >
                             -
                           </button>
-                          <span className="h-9 min-w-12 px-4 text-center leading-9">{item.quantity}</span>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            className="h-9 w-14 border-x border-[var(--border)] bg-[var(--bg)] px-1 text-center text-sm focus:border-[var(--accent)] focus:outline-none"
+                            value={isBusy ? '...' : item.quantity}
+                            disabled={isBusy}
+                            onChange={(event) => handleQuantityInput(item, event.target.value)}
+                            onBlur={(event) => handleQuantityInput(item, event.target.value)}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Enter') {
+                                handleQuantityInput(item, event.target.value)
+                                event.target.blur()
+                              }
+                            }}
+                            aria-label="Số lượng"
+                          />
                           <button
                             type="button"
                             className="h-9 w-9 bg-[var(--social-bg)] text-lg disabled:opacity-40"
