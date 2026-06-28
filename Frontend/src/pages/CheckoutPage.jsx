@@ -72,6 +72,19 @@ export default function CheckoutPage() {
     return requiredFields.every((field) => String(form[field] || '').trim())
   }
 
+  function handlePhoneInput(event) {
+    const raw = event.target.value.replace(/\D/g, '')
+    if (raw.length <= 10) {
+      updateField('phone', raw)
+    }
+  }
+
+  function handleAddressOnlyFields(event, fieldName) {
+    const value = event.target.value
+    const textOnly = value.replace(/[0-9]/g, '')
+    updateField(fieldName, textOnly)
+  }
+
   async function handleSubmit(event) {
     event.preventDefault()
     if (!items.length) {
@@ -139,10 +152,10 @@ export default function CheckoutPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Input label="Họ và tên*" value={form.fullName} onChange={(event) => updateField('fullName', event.target.value)} />
                   <Input label="Email*" type="email" value={form.email} onChange={(event) => updateField('email', event.target.value)} />
-                  <Input label="Số điện thoại*" value={form.phone} onChange={(event) => updateField('phone', event.target.value)} />
-                  <Input label="Tỉnh/Thành phố*" value={form.province} onChange={(event) => updateField('province', event.target.value)} />
-                  <Input label="Quận/Huyện*" value={form.district} onChange={(event) => updateField('district', event.target.value)} />
-                  <Input label="Phường/Xã*" value={form.ward} onChange={(event) => updateField('ward', event.target.value)} />
+                  <Input label="Số điện thoại*" type="tel" inputMode="numeric" pattern="[0-9]*" value={form.phone} onChange={handlePhoneInput} />
+                  <Input label="Tỉnh/Thành phố*" value={form.province} onChange={(event) => handleAddressOnlyFields(event, 'province')} />
+                  <Input label="Quận/Huyện*" value={form.district} onChange={(event) => handleAddressOnlyFields(event, 'district')} />
+                  <Input label="Phường/Xã*" value={form.ward} onChange={(event) => handleAddressOnlyFields(event, 'ward')} />
                 </div>
                 <Input label="Địa chỉ*" value={form.address} onChange={(event) => updateField('address', event.target.value)} />
                 <label className="block text-left">
