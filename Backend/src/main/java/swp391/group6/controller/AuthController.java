@@ -1,12 +1,11 @@
 /*
  * Name: Authentication Controller
- * @Author: DucLM
+ * @Author: HungDLM
  * Date: 2026-06-05
  * Version: 2.0
  * Description: Handles login and secure logout via JWT HTTP cookies using CookieUtil.
  */
 package swp391.group6.controller;
-
 
 import swp391.group6.dto.*;
 import swp391.group6.model.User;
@@ -20,10 +19,12 @@ import org.springframework.web.bind.annotation.*;
 import swp391.group6.service.ChangePasswordService;
 import swp391.group6.service.GoogleAuthService;
 import swp391.group6.service.OtpService;
+import swp391.group6.service.OtpService.OtpType;
 import swp391.group6.util.CookieUtil;
 import swp391.group6.util.JWTUtil;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -33,8 +34,12 @@ public class AuthController {
     private final GoogleAuthService googleAuthService;
     private final OtpService otpService;
     private final ChangePasswordService changePasswordService;
+    private final Map<String, Boolean> verifiedReset = new ConcurrentHashMap<>();
 
-    public AuthController(AuthService authService, GoogleAuthService googleAuthService, OtpService otpService, ChangePasswordService changePasswordService) {
+    public AuthController(AuthService authService,
+                          GoogleAuthService googleAuthService,
+                          OtpService otpService,
+                          ChangePasswordService changePasswordService) {
         this.authService = authService;
         this.googleAuthService = googleAuthService;
         this.otpService = otpService;
@@ -45,19 +50,21 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request,
                                                HttpServletResponse response) {
         if (authService.isGoogleAccount(request.getEmail())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         LoginResponse loginResponse = authService.login(request);
         if (loginResponse == null)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         String jwt = JWTUtil.createToken(loginResponse);
         ResponseCookie cookie = CookieUtil.makeCookieFromJWT(jwt);
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(loginResponse);
     }
+
     @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody RegisterRequest request) {
 
@@ -70,11 +77,40 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @PostMapping("/register/send-otp")
+    public ResponseEntity<?> sendRegisterOtp(@RequestBody OtpRequest request) {
+        if (authService.emailExists(request.getEmail())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", "Email already exists"));
+        }
+
+        otpService.generateAndSend(request.getEmail(), OtpType.REGISTER);
+        return ResponseEntity.ok(Map.of("message", "OTP sent"));
+    }
+
+
+    @PostMapping("/register/verify-otp")
+    public ResponseEntity<?> verifyRegisterOtp(@RequestBody OtpRequest request) {
+        boolean valid = otpService.verify(
+                request.getEmail(),
+                request.getOtp(),
+                OtpType.REGISTER
+        );
+
+        if (!valid) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Invalid or expired OTP"));
+        }
+
+        return ResponseEntity.ok(Map.of("message", "OTP verified"));
+    }
     @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@RequestBody GoogleAuthRequest request,
                                          HttpServletResponse response) {
         try {
-            return ResponseEntity.ok(googleAuthService.handleGoogleLogin(request.getCredential(), response));
+            return ResponseEntity.ok(
+                    googleAuthService.handleGoogleLogin(request.getCredential(), response)
+            );
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("message", e.getMessage()));
@@ -88,26 +124,68 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("success", true));
     }
 
-    @PostMapping("/send-otp")
-    public ResponseEntity<?> sendOtp(@RequestBody OtpRequest request) {
-        // check if email already exists
-        if (authService.emailExists(request.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("message", "Email already registered"));
+    //FORGOT PASSWORD
+
+    @PostMapping("/forgot-password/send-otp")
+    public ResponseEntity<?> sendResetOtp(@RequestBody OtpRequest request) {
+        if (authService.isGoogleAccount(request.getEmail())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "This account uses Google login"));
         }
-        otpService.generateAndSend(request.getEmail());
+
+        if (!authService.emailExists(request.getEmail())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Email not found"));
+        }
+
+        otpService.generateAndSend(request.getEmail(), OtpType.RESET_PASSWORD);
+
         return ResponseEntity.ok(Map.of("message", "OTP sent"));
     }
 
-    @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@RequestBody OtpRequest request) {
-        boolean valid = otpService.verify(request.getEmail(), request.getOtp());
+    @PostMapping("/forgot-password/verify-otp")
+    public ResponseEntity<?> verifyResetOtp(@RequestBody OtpRequest request) {
+
+        boolean valid = otpService.verify(
+                request.getEmail(),
+                request.getOtp(),
+                OtpType.RESET_PASSWORD
+        );
+
         if (!valid) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("message", "Invalid or expired OTP"));
         }
+
+        verifiedReset.put(request.getEmail(), true);
+
         return ResponseEntity.ok(Map.of("message", "OTP verified"));
     }
+
+    @PostMapping("/forgot-password/reset")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+
+        if (!verifiedReset.getOrDefault(request.getEmail(), false)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "OTP not verified"));
+        }
+
+        boolean success = changePasswordService.resetPassword(
+                request.getEmail(),
+                request.getNewPassword()
+        );
+
+        if (!success) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Reset password failed"));
+        }
+
+        verifiedReset.remove(request.getEmail());
+
+        return ResponseEntity.ok(Map.of("message", "Password reset successful"));
+    }
+
+    //LOGOUT
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {

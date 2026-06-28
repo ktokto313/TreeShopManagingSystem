@@ -19,6 +19,7 @@ public class ChangePasswordService {
 
     public enum Result { SUCCESS, NO_PASSWORD, WRONG_OLD_PASSWORD, INVALID_INPUT }
 
+    //CHANGE PASSWORD
     public Result changePassword(String email, ChangePasswordRequest req) {
         if (req.getOldPassword() == null || req.getOldPassword().isBlank()
                 || req.getNewPassword() == null || req.getNewPassword().isBlank()) {
@@ -38,5 +39,25 @@ public class ChangePasswordService {
         user.setPassword(passwordEncoder.encode(req.getNewPassword()));
         userRepository.save(user);
         return Result.SUCCESS;
+    }
+
+    //RESET PASSWORD (forgot password)
+    public boolean resetPassword(String email, String newPassword) {
+
+        if (newPassword == null || newPassword.isBlank()) {
+            return false;
+        }
+
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) return false;
+
+        if (user.getPassword() == null) {
+            return false;
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        return true;
     }
 }

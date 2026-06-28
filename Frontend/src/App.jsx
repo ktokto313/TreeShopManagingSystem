@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { Footer } from "./components/global/Footer";
 import { Header } from "./components/global/Header";
 import ChangePasswordPage from "./features/auth/pages/ChangePasswordPage";
+import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
 import LoginPage from "./features/auth/pages/LoginPage";
 import ProfilePage from "./features/auth/pages/ProfilePage";
 import RegisterPage from "./features/auth/pages/RegisterPage";
@@ -18,6 +19,10 @@ import { useContext } from "react";
 import { hasAllowedRole } from "./utils/authRoutes";
 import { AuthContext } from "./context/AuthContext";
 import TicketDetailPage from "./pages/TicketDetailPage";
+import BlogPage from './features/blog/pages/BlogPage';
+import MyBlogPage from './features/blog/pages/MyBlogPage';
+import BlogDetailPage from './features/blog/pages/BlogDetailPage';
+import BlogPendingPage from './features/blog/pages/BlogPendingPage';
 
 function ProtectedRoute({ element, roles = [] }) {
 	const { user, isLoading } = useContext(AuthContext);
@@ -43,6 +48,10 @@ function AppRoutes() {
 			<Route
 				path="/change-password"
 				element={<ProtectedRoute element={<ChangePasswordPage />} />}
+			/>
+			<Route
+				path="/reset-password"
+				element={<ResetPasswordPage />}
 			/>
 
 			{/* Catalog */}
@@ -100,6 +109,21 @@ function AppRoutes() {
 					/>
 				}
 			/>
+
+			{/* Blogs */}
+			<Route
+				path="/blogs"
+				element={<BlogPage />} />
+			<Route
+				path="/blogs/my"
+				element={<ProtectedRoute roles={['CUSTOMER', 'MANAGER']} element={<MyBlogPage />} />}
+			/>
+			<Route
+				path="/blogs/pending"
+				element={<ProtectedRoute roles={['MANAGER']} element={<BlogPendingPage />} />}
+			/>
+			<Route path="/blogs/:id"
+				   element={<BlogDetailPage />} />
 
 			<Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>
