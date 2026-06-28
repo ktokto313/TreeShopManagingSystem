@@ -14,6 +14,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import swp391.group6.util.ResponseUtil;
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -58,7 +59,7 @@ public class SecurityConfig {
               "http://localhost:[*]", 
               "https://localhost:[*]"
        ));
-        config.setAllowedMethods("*");
+        config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Set-Cookie"));
         config.setAllowCredentials(true);

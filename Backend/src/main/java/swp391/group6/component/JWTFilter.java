@@ -62,23 +62,26 @@ public class JWTFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-        Cookie cookie = CookieUtil.getJWTCookie(request.getCookies());
-        if (cookie == null) {
-            throw new AuthenticationException("No JWT cookie found") {};
-        }
-
         try {
+            Cookie cookie = CookieUtil.getJWTCookie(request.getCookies());
+            if (cookie == null) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
             DecodedJWT decodedJWT = JWTUtil.verify(cookie.getValue());
             LoginResponse tokenUser = JWTUtil.getUser(decodedJWT);
             if (tokenUser == null || tokenUser.getEmail() == null) {
-                throw new AuthenticationException("Invalid JWT token") {};
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
             }
 
             User user = userRepository.findByEmail(tokenUser.getEmail())
                     .filter(User::isStatus)
                     .orElse(null);
             if (user == null) {
-                throw new AuthenticationException("User not found or inactive") {};
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
             }
 
             String role = user.getRole() == null ? "CUSTOMER" : user.getRole().getName();
@@ -93,10 +96,10 @@ public class JWTFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             request.setAttribute(cookieName, currentUser);
-        } catch (Exception e) {
-            throw new AuthenticationException("JWT verification failed") {};
-        }
 
-        filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        }
     }
 }
