@@ -7,13 +7,28 @@ export const useProductReview = (productId, onSuccess) => {
 	const [reviews, setReviews] = useState([]);
 	const [reviewValidationError, setReviewValidationError] = useState("");
 	const [isReviewSubmitLoading, setIsReviewSubmitLoading] = useState(false);
+	const [isReviewsLoading, setIsReviewsLoading] = useState(false);
+	const [currentPage, setCurrentPage] = useState(1);
+	const [totalPages, setTotalPages] = useState(1);
+	const [totalElements, setTotalElements] = useState(0);
 
 	const { user } = useContext(AuthContext);
 
-	const loadReviews = useCallback(async () => {
-		const loadedReviews = await getProductReviews(productId);
+	const loadReviews = useCallback(async (page = 1) => {
+		try {
+			setIsReviewsLoading(true);
+			const backendPage = Math.max(0, page - 1);
+			const result = await getProductReviews(productId, backendPage, 5);
 
-		setReviews(loadedReviews);
+			setReviews(result.content || []);
+			setTotalPages(result.totalPages || 1);
+			setTotalElements(result.totalElements || 0);
+			setCurrentPage((result.number ?? 0) + 1);
+		} catch (error) {
+			console.error("Lỗi tải đánh giá:", error);
+		} finally {
+			setIsReviewsLoading(false);
+		}
 	}, [productId]);
 
 	const handleStarOnClick = (starValue) => {
@@ -41,7 +56,7 @@ export const useProductReview = (productId, onSuccess) => {
 			};
 
 			await createProductReview(orderId, productId, payload);
-			await loadReviews();
+			await loadReviews(1);
 
 			e.target.reset();
 			setStarValue(null);
@@ -81,5 +96,9 @@ export const useProductReview = (productId, onSuccess) => {
 		isReviewSubmitLoading,
 		starValue,
 		reviewValidationError,
+		currentPage,
+		totalPages,
+		totalElements,
+		isReviewsLoading,
 	};
 };
