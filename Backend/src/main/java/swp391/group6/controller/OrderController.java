@@ -73,6 +73,7 @@ public class OrderController {
     }
 
     @PutMapping("{id}")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<Void> changeOrder(HttpServletRequest request, @PathVariable long id, @RequestBody OrderDTO order) {
         LoginResponse loginResponse = JWTUtil.getUser(request);
         try {
@@ -87,7 +88,7 @@ public class OrderController {
     }
 
     @PutMapping("{id}/status")
-    @PreAuthorize("hasAnyRole('MANAGER', 'SHIPPER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'SHIPPER', 'CUSTOMER')")
     public ResponseEntity<Void> changeOrderStatus(HttpServletRequest request, @PathVariable long id, @RequestParam(name = "status") OrderStatus orderStatus) {
         LoginResponse loginResponse = JWTUtil.getUser(request);
         if (!orderService.changeOrderStatus(id, orderStatus, loginResponse)) {
