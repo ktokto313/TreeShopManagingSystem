@@ -12,7 +12,6 @@ import ProductImageFrame from '../features/products/components/ProductImageFrame
 import { getProductAvailability, isProductActive } from '../features/products/utils/productAvailability'
 import { resolveProductImages } from '../features/products/utils/productImageResolver'
 import { addWishlistProduct, checkWishlistProduct } from '../features/wishlist/wishlistApi'
-import { parseVariantGroups } from '../features/products/utils/variantUtils'
 import ReviewSection from '../features/review/components/ReviewSection'
 
 function summarizeDescription(value) {
