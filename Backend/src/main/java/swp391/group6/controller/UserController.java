@@ -2,17 +2,20 @@
  * Name: User REST Controller
  * @Author: DucLM
  * Date: 2026-06-05
- * Version: 2.0
- * Description: Exposes /api/users CRUD, search, ban/unban, and profile endpoints with JWT role-based access control.
+ * Version: 2.1
+ * Description: Exposes /api/users CRUD, search, ban/unban, and profile endpoints with @PreAuthorize role-based access control.
  */
 package swp391.group6.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.dto.UserDTO;
+import swp391.group6.model.User;
 import swp391.group6.service.UserService;
 import swp391.group6.util.JWTUtil;
 
@@ -30,16 +33,8 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserDTO>> getAllUsers(HttpServletRequest request, @RequestParam(required = false) String role) {
-        LoginResponse currentUser = JWTUtil.getUser(request);
-//        if (currentUser == null || !"SYSTEM_ADMIN".equalsIgnoreCase(currentUser.getRole())) {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-//        }
-
-//        if ("SHIPPER".equalsIgnoreCase(role) && !"MANAGER".equalsIgnoreCase(currentUser.getRole())) {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-//        }
-
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
+    public ResponseEntity<List<UserDTO>> getAllUsers(@RequestParam(required = false) String role) {
         List<UserDTO> users;
         if (role != null && !role.isBlank()) {
             users = userService.searchUsersByRole(role);
@@ -50,45 +45,24 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable long id, HttpServletRequest request) {
-        LoginResponse currentUser = JWTUtil.getUser(request);
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String role = currentUser.getRole();
-
-        if (!"SYSTEM_ADMIN".equalsIgnoreCase(role)
-                && !"MANAGER".equalsIgnoreCase(role)
-                && !"SUPPORT_AGENT".equalsIgnoreCase(role)
-                && !"SHIPPER".equalsIgnoreCase(role)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER', 'SUPPORT_AGENT', 'SHIPPER')")
+    public ResponseEntity<UserDTO> getUserById(@PathVariable long id) {
         return userService.getUserById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDTO> getMyProfile(HttpServletRequest request) {
-        LoginResponse currentUser = JWTUtil.getUser(request);
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        return userService.getUserByEmailUnprotected(currentUser.getEmail())
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserDTO> getMyProfile(@AuthenticationPrincipal User user) {
+        return userService.getUserByEmailUnprotected(user.getEmail())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO, HttpServletRequest request) {
-        LoginResponse currentUser = JWTUtil.getUser(request);
-        if (currentUser == null || !"SYSTEM_ADMIN".equalsIgnoreCase(currentUser.getRole())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
         try {
             UserDTO createdUser = userService.createUser(userDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
@@ -98,20 +72,12 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("#id == #user.id or hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
     public ResponseEntity<UserDTO> updateUser(@PathVariable long id,
                                               @RequestBody UserDTO userDTO,
-                                              HttpServletRequest request) {
-        LoginResponse currentUser = JWTUtil.getUser(request);
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String role = currentUser.getRole();
-
-        boolean isOwnProfile = userService.getUserByEmailUnprotected(currentUser.getEmail())
-                .map(u -> u.getId() == id)
-                .orElse(false);
-
+                                              @AuthenticationPrincipal User user) {
+        String role = user.getRole() == null ? "CUSTOMER" : user.getRole().getName();
+        boolean isOwnProfile = user.getId() == id;
         boolean canManageUsers = "SYSTEM_ADMIN".equalsIgnoreCase(role)
                 || "MANAGER".equalsIgnoreCase(role);
         if (!isOwnProfile && !canManageUsers) {
@@ -132,16 +98,12 @@ public class UserController {
     }
 
     @PutMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDTO> updateMyProfile(@RequestBody UserDTO userDTO,
-                                                   HttpServletRequest request) {
-        LoginResponse currentUser = JWTUtil.getUser(request);
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
+                                                   @AuthenticationPrincipal User user) {
         UserDTO updatedUser;
         try {
-            updatedUser = userService.getUserByEmailUnprotected(currentUser.getEmail())
+            updatedUser = userService.getUserByEmailUnprotected(user.getEmail())
                     .map(u -> userService.updateOwnProfile(u.getId(), userDTO))
                     .orElse(null);
 
@@ -156,68 +118,39 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable long id, HttpServletRequest request) {
-        LoginResponse currentUser = JWTUtil.getUser(request);
-        if (currentUser == null || !"SYSTEM_ADMIN".equalsIgnoreCase(currentUser.getRole())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public ResponseEntity<Void> deleteUser(@PathVariable long id) {
         boolean deleted = userService.deleteUser(id);
         if (!deleted) {
             return ResponseEntity.notFound().build();
         }
-
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/ban")
-    public ResponseEntity<UserDTO> banUser(@PathVariable long id, HttpServletRequest request) {
-        LoginResponse currentUser = JWTUtil.getUser(request);
-        if (currentUser == null || !"SYSTEM_ADMIN".equalsIgnoreCase(currentUser.getRole())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public ResponseEntity<UserDTO> banUser(@PathVariable long id) {
         UserDTO bannedUser = userService.banUser(id);
         if (bannedUser == null) {
             return ResponseEntity.notFound().build();
         }
-
         return ResponseEntity.ok(bannedUser);
     }
 
     @PatchMapping("/{id}/unban")
-    public ResponseEntity<UserDTO> unbanUser(@PathVariable long id, HttpServletRequest request) {
-        LoginResponse currentUser = JWTUtil.getUser(request);
-        if (currentUser == null || !"SYSTEM_ADMIN".equalsIgnoreCase(currentUser.getRole())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public ResponseEntity<UserDTO> unbanUser(@PathVariable long id) {
         UserDTO user = userService.unbanUser(id);
         if (user == null) {
             return ResponseEntity.notFound().build();
         }
-
         return ResponseEntity.ok(user);
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER', 'SUPPORT_AGENT', 'SHIPPER')")
     public ResponseEntity<?> searchUsers(@RequestParam(required = false) String query,
-                                         @RequestParam(required = false) String email,
-                                         HttpServletRequest request) {
-
-        LoginResponse currentUser = JWTUtil.getUser(request);
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String role = currentUser.getRole();
-
-        if (!"SYSTEM_ADMIN".equalsIgnoreCase(role)
-                && !"MANAGER".equalsIgnoreCase(role)
-                && !"SUPPORT_AGENT".equalsIgnoreCase(role)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
+                                         @RequestParam(required = false) String email) {
         if (email != null && !email.isBlank()) {
             Optional<UserDTO> user = userService.getUserByEmail(email);
             return user.<ResponseEntity<?>>map(ResponseEntity::ok)

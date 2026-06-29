@@ -10,6 +10,19 @@ import { AuthContext } from "../../context/AuthContext";
 import useChangeOrderStatus from "./hooks/useChangeOrderStatus";
 import ReviewModal from "../review/components/ReviewModal";
 
+function buildVietQrUrl(orderId, amount) {
+  const bankId = import.meta.env.VITE_CHECKOUT_BANK_ID || 'MB';
+  const accountNo = import.meta.env.VITE_CHECKOUT_BANK_ACCOUNT_NO || '9704229201538581841';
+  const accountName = import.meta.env.VITE_CHECKOUT_BANK_ACCOUNT_NAME || 'LE MINH DUC';
+  const template = import.meta.env.VITE_CHECKOUT_QR_TEMPLATE || 'compact2';
+  const transferContent = import.meta.env.VITE_CHECKOUT_TRANSFER_PREFIX + orderId;
+  const encoded = (v) => encodeURIComponent(v);
+  return `https://img.vietqr.io/image/${bankId}-${accountNo}-${template}.png`
+    + `?amount=${amount}`
+    + `&addInfo=${encoded(transferContent)}`
+    + `&accountName=${encoded(accountName)}`;
+}
+
 /**
  * @param {{ selectedOrderId: number|string|null, onClose: () => void, onOrderChange?: () => void|Promise<void> }} props
  */
@@ -165,6 +178,26 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
               <span className="text-interactive">${finalTotal.toFixed(2)}</span>
             </div>
           </div>
+
+          {/* Payment QR */}
+          {selectedOrder.status === 'PROCESSING' && (
+            <div className="rounded-lg bg-bg-base border border-border/55 p-3">
+              <h4 className="text-xs font-bold text-black/60 uppercase tracking-wider mb-2">
+                Payment QR Code
+              </h4>
+              <p className="text-xs text-black/70 mb-2">
+                Transfer <span className="font-bold">${finalTotal.toFixed(2)}</span> with content: <span className="font-bold">TS{selectedOrder.id}</span>
+              </p>
+              <img
+                src={buildVietQrUrl(selectedOrder.id, finalTotal)}
+                alt="Payment QR"
+                className="mx-auto max-w-52 rounded-md"
+              />
+              <p className="text-[10px] text-black/45 mt-1.5 text-center">
+                Scan QR with your banking app
+              </p>
+            </div>
+          )}
 
           {/* Close / Actions */}
           <div className="flex justify-end gap-3 mt-2">

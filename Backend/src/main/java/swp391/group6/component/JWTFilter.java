@@ -8,9 +8,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -19,7 +19,6 @@ import swp391.group6.model.User;
 import swp391.group6.repository.UserRepository;
 import swp391.group6.util.CookieUtil;
 import swp391.group6.util.JWTUtil;
-import swp391.group6.util.ResponseUtil;
 
 import java.io.IOException;
 
@@ -78,15 +77,15 @@ public class JWTFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
                 return;
             }
-            ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
+try {
 
-        try {
             DecodedJWT decodedJWT = JWTUtil.verify(cookie.getValue());
             LoginResponse tokenUser = JWTUtil.getUser(decodedJWT);
             if (tokenUser == null || tokenUser.getEmail() == null) {
-                ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
 
@@ -94,7 +93,7 @@ public class JWTFilter extends OncePerRequestFilter {
                     .filter(User::isStatus)
                     .orElse(null);
             if (user == null) {
-                ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
 
@@ -110,15 +109,16 @@ public class JWTFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             request.setAttribute(cookieName, currentUser);
 
+            filterChain.doFilter(request, response);
+
         } catch (Exception e) {
             if (isPublicBlogRead) {
                 filterChain.doFilter(request, response);
                 return;
             }
-            ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
-
-        filterChain.doFilter(request, response);
     }
 }
+

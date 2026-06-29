@@ -1,17 +1,14 @@
 package swp391.group6.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.websocket.server.PathParam;
 import lombok.extern.java.Log;
-import org.antlr.v4.runtime.atn.SemanticContext;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.dto.OrderDTO;
 import swp391.group6.dto.OrderListDTO;
@@ -76,6 +73,7 @@ public class OrderController {
     }
 
     @PutMapping("{id}")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<Void> changeOrder(HttpServletRequest request, @PathVariable long id, @RequestBody OrderDTO order) {
         LoginResponse loginResponse = JWTUtil.getUser(request);
         try {
@@ -90,6 +88,7 @@ public class OrderController {
     }
 
     @PutMapping("{id}/status")
+    @PreAuthorize("hasAnyRole('MANAGER', 'SHIPPER', 'CUSTOMER')")
     public ResponseEntity<Void> changeOrderStatus(HttpServletRequest request, @PathVariable long id, @RequestParam(name = "status") OrderStatus orderStatus) {
         LoginResponse loginResponse = JWTUtil.getUser(request);
         if (!orderService.changeOrderStatus(id, orderStatus, loginResponse)) {

@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Container } from './Container';
 import { AuthContext } from "../../context/AuthContext";
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Button } from '../ui/Button';
 import { HiMenuAlt3 } from "react-icons/hi";
 import { cn } from '../../utils/cn';
@@ -24,6 +24,7 @@ const navItemsByRole = {
     { label: 'Home', to: '/' },
     { label: 'Catalog', to: '/catalog' },
     { label: 'Yêu thích', to: '/wishlist' },
+    { label: 'Orders', to: '/orders' },
     { label: 'Profile', to: '/profile' },
     { label: 'Orders', to: '/orders' },
     { label: 'Tickets', to: '/tickets/' },
@@ -61,6 +62,47 @@ export function Header({ className = '', ...props }) {
   const { user, logout } = useContext(AuthContext);
   const role = user?.roleName ?? user?.role;
   const navItems = navItemsByRole[role] ?? navItemsByRole.anonymous;
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    if (role !== 'CUSTOMER') return;
+
+  let cancelled = false;
+
+  const loadCartCount = async () => {
+    try {
+      const response = await fetch('/api/cart', {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        setCartCount(0);
+        return;
+      }
+
+      const cart = await response.json();
+      const totalQuantity =
+        cart.items?.reduce((sum, item) => sum + Number(item.quantity ?? 0), 0) ?? 0;
+
+      if (!cancelled) {
+        setCartCount(totalQuantity);
+      }
+    } catch {
+      if (!cancelled) {
+        setCartCount(0);
+      }
+    }
+  };
+
+  loadCartCount();
+
+  window.addEventListener('cart-updated', loadCartCount);
+
+  return () => {
+    cancelled = true;
+    window.removeEventListener('cart-updated', loadCartCount);
+  };
+}, [role]);
 
   const navigate = useNavigate();
 
@@ -86,7 +128,15 @@ export function Header({ className = '', ...props }) {
         </nav>
 
         {user && (
-          <div className="lg:flex flex items-center gap-5">
+          <div className="flex items-center gap-3">
+              {role === 'CUSTOMER' && (
+      <NavLink
+        to="/cart"
+        className="text-sm font-medium px-3 py-1.5 rounded-lg border border-stone-300 text-stone-600 hover:bg-green-50 hover:text-interactive hover:border-interactive transition-colors"
+      >
+         Giỏ hàng{cartCount > 0 ? ` (${cartCount})` : ''}
+      </NavLink>
+    )}
             <span className="text-sm text-stone-600 hidden sm:block">
               {user.fullName ?? user.email}
             </span>
