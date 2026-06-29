@@ -8,6 +8,7 @@ import { getProductAvailability } from '../features/products/utils/productAvaila
 import { resolveProductImageSource } from '../features/products/utils/productImageResolver'
 import { formatCurrency, parseCatalogImages } from '../features/catalog/utils/catalogUtils'
 import { getWishlistProducts, removeWishlistProduct } from '../features/wishlist/wishlistApi'
+import { addCartItem } from '../features/cart/cartApi'
 
 function getProductImage(product) {
   const images = parseCatalogImages(product.images)
@@ -47,6 +48,21 @@ export default function WishlistPage() {
       setNotice(`${product.name} đã được xóa khỏi danh sách yêu thích.`)
     } catch (error) {
       setNotice(error.message)
+    }
+  }
+
+  async function addToCart(product) {
+    setNotice('')
+
+    try {
+      await addCartItem(product.id, 1)
+      setNotice(`${product.name} đã được thêm vào giỏ hàng.`)
+    } catch (error) {
+      if (error.status === 401) {
+        navigate('/login', { replace: true, state: { from: { pathname: '/wishlist' } } })
+        return
+      }
+      setNotice(error.message || 'Không thể thêm vào giỏ hàng.')
     }
   }
 
@@ -142,13 +158,7 @@ export default function WishlistPage() {
                         <td className="px-5 py-4 text-right">
                           <Button
                             disabled={!availability.canPurchase}
-                            onClick={() =>
-                              setNotice(
-                                availability.canPurchase
-                                  ? `${product.name} có thể thêm vào giỏ hàng khi luồng mua hàng được bật.`
-                                  : availability.helper,
-                              )
-                            }
+                            onClick={() => void addToCart(product)}
                           >
                             Thêm vào giỏ
                           </Button>

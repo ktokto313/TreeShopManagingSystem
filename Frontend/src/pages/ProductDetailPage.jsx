@@ -12,6 +12,8 @@ import ProductImageFrame from '../features/products/components/ProductImageFrame
 import { getProductAvailability, isProductActive } from '../features/products/utils/productAvailability'
 import { resolveProductImages } from '../features/products/utils/productImageResolver'
 import { addWishlistProduct, checkWishlistProduct } from '../features/wishlist/wishlistApi'
+import { addCartItem } from '../features/cart/cartApi'
+import { FaCartPlus } from 'react-icons/fa'
 import ReviewSection from '../features/review/components/ReviewSection'
 
 
@@ -138,6 +140,35 @@ export default function ProductDetailPage() {
 				return;
 			}
 			setNotice(error?.status === 403 ? "Tính năng yêu thích dành cho tài khoản khách hàng." : error.message);
+		}
+	}
+
+	async function handleAddToCart() {
+		if (!product) {
+			return;
+		}
+
+		if (!isAuthenticated) {
+			navigate("/login", {
+				state: { from: { pathname: `/catalog/${productId}` } },
+			});
+			return;
+		}
+
+		setNotice("");
+		try {
+			await addCartItem(product.id, 1);
+			setNotice(`${product.name} đã được thêm vào giỏ hàng.`);
+		} catch (error) {
+			if (error?.status === 401 && isAuthenticated) {
+				logout();
+				navigate("/login", {
+					replace: true,
+					state: { from: { pathname: `/catalog/${productId}` } },
+				});
+				return;
+			}
+			setNotice(error?.status === 403 ? "Bạn cần đăng nhập để thêm vào giỏ hàng." : error.message);
 		}
 	}
 
@@ -300,6 +331,16 @@ export default function ProductDetailPage() {
 									value={`${product.stock ?? 0} - ${availability.label}`}
 								/>
 							</div>
+
+							{availability.canPurchase && (
+								<Button
+									className="w-full gap-2 bg-green-600 hover:bg-green-500"
+									onClick={() => void handleAddToCart()}
+								>
+									<FaCartPlus />
+									Thêm vào giỏ hàng
+								</Button>
+							)}
 						</Card>
 
 						<div className="space-y-6">

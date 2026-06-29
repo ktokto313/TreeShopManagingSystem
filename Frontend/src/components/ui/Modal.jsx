@@ -25,7 +25,7 @@ export function Modal({ isOpen, onClose, title, children, className }) {
       {/* Modal box */}
       <div 
         onClick={(e) => e.stopPropagation()}
-        className={cn("bg-bg-surface w-full max-w-md rounded-xl shadow-xl border border-border overflow-hidden flex flex-col overflow-y-scroll min-h-30 max-h-[80vh] min-w-[40vw]", className)}
+        className={cn("bg-bg-surface w-full max-w-md rounded-xl shadow-xl border border-border overflow-hidden flex flex-col min-h-30 max-h-[80vh] min-w-[40vw]", className)}
         role="dialog" 
         aria-modal="true"
       >
