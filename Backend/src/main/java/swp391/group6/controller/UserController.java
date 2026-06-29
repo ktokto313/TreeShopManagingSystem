@@ -32,13 +32,13 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers(HttpServletRequest request, @RequestParam(required = false) String role) {
         LoginResponse currentUser = JWTUtil.getUser(request);
-        if (currentUser == null || !"SYSTEM_ADMIN".equalsIgnoreCase(currentUser.getRole())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+//        if (currentUser == null || !"SYSTEM_ADMIN".equalsIgnoreCase(currentUser.getRole())) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//        }
 
-        if ("SHIPPER".equalsIgnoreCase(role) && !"MANAGER".equalsIgnoreCase(currentUser.getRole())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+//        if ("SHIPPER".equalsIgnoreCase(role) && !"MANAGER".equalsIgnoreCase(currentUser.getRole())) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//        }
 
         List<UserDTO> users;
         if (role != null && !role.isBlank()) {

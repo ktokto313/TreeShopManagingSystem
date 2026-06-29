@@ -6,6 +6,7 @@ public enum OrderStatus {
     DELIVERING,
     ARRIVED,
     RECEIVED,
+    RETURN_PROCESSING,
     RETURN_PENDING,
     RETURNING,
     FAILED

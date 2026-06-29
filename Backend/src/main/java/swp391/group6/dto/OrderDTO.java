@@ -1,7 +1,6 @@
 package swp391.group6.dto;
 
 import swp391.group6.model.Order;
-import swp391.group6.model.OrderDetail;
 import swp391.group6.model.OrderStatus;
 
 import java.math.BigDecimal;

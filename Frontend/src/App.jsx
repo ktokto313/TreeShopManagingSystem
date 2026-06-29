@@ -24,6 +24,7 @@ import MyBlogPage from './features/blog/pages/MyBlogPage';
 import BlogDetailPage from './features/blog/pages/BlogDetailPage';
 import BlogPendingPage from './features/blog/pages/BlogPendingPage';
 import WishlistPage from "./pages/WishlistPage";
+import ProfitDashboard from "./features/statistic/ProfitDashboard";
 
 function ProtectedRoute({ element, roles = [] }) {
 	const { user, isLoading } = useContext(AuthContext);
@@ -134,6 +135,16 @@ function AppRoutes() {
 			/>
 			<Route path="/blogs/:id"
 				   element={<BlogDetailPage />} />
+			{/* Statistics */}
+			<Route
+				path="/statistic"
+				element={
+					<ProtectedRoute
+						roles={["MANAGER"]}
+						element={<ProfitDashboard />}
+					/>
+				}
+			/>
 
 			<Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>
