@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { HiThumbUp, HiOutlineThumbUp } from 'react-icons/hi';
+import { HiThumbUp, HiOutlineThumbUp, HiTrash } from 'react-icons/hi';
 
-export default function BlogCard({ blog, onVote }) {
+export default function BlogCard({ blog, onVote, onDelete, currentUser }) {
     const navigate = useNavigate();
+    const isManager = currentUser?.role === 'MANAGER';
 
     const date = blog.createdAt
         ? new Date(blog.createdAt).toLocaleDateString('vi-VN')
@@ -38,15 +39,33 @@ export default function BlogCard({ blog, onVote }) {
                         {date && <span> · {date}</span>}
                     </div>
 
-                    <button
-                        className="flex items-center gap-1 text-sm text-stone-500 hover:text-green-600 transition-colors"
-                        onClick={e => { e.stopPropagation(); onVote?.(blog.id); }}
-                    >
-                        {blog.votedByCurrentUser
-                            ? <HiThumbUp className="text-green-500 text-base" />
-                            : <HiOutlineThumbUp className="text-base" />}
-                        <span>{blog.voteCount}</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {isManager && (
+                            <button
+                                className="flex items-center gap-1 text-sm text-stone-400 hover:text-red-500 transition-colors"
+                                onClick={e => {
+                                    e.stopPropagation();
+                                    if (window.confirm(`Xóa bài "${blog.title}"?`)) {
+                                        onDelete?.(blog.id);
+                                    }
+                                }}
+                            >
+                                <HiTrash className="text-base" />
+                            </button>
+                        )}
+
+                        {!isManager && (
+                            <button
+                                className="flex items-center gap-1 text-sm text-stone-500 hover:text-green-600 transition-colors"
+                                onClick={e => { e.stopPropagation(); onVote?.(blog.id); }}
+                            >
+                                {blog.votedByCurrentUser
+                                    ? <HiThumbUp className="text-green-500 text-base" />
+                                    : <HiOutlineThumbUp className="text-base" />}
+                                <span>{blog.voteCount}</span>
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
