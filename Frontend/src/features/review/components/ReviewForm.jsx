@@ -55,10 +55,10 @@ const ReviewForm = ({ className, reviewState, orderId }) => {
 			{/* Ratings */}
 			<h5>Số sao</h5>
 			<div className={cn("gap-1 text-2xl -mt-3", styles.starsContainer)}>
-				{MAX_REVIEWS_RATINGS.map((_, index) => (
+				{Array.from({ length: MAX_REVIEWS_RATINGS }, (_, index) => (
 					<span
 						className={cn(index === starValue - 1 && styles.selectedStar)}
-						key={crypto.randomUUID()}
+						key={index}
 					>
 						<IoStarSharp
 							onClick={() => handleStarOnClick(index + 1)}
