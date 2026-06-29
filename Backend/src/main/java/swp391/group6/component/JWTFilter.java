@@ -52,9 +52,7 @@ public class JWTFilter extends OncePerRequestFilter {
             return requestUri.equals("/api/categories")
                     || requestUri.startsWith("/api/categories/")
                     || requestUri.equals("/api/products")
-                    || requestUri.startsWith("/api/products/")
-                    || requestUri.equals("/api/blogs")
-                    || requestUri.startsWith("/api/blogs/");
+                    || requestUri.startsWith("/api/products/");
         }
 
         return false;
