@@ -1,5 +1,5 @@
 //Create: HungDLM on 26/06/2026
-//Lastest update: HungDLM on 27/06/2026
+//Lastest update: HungDLM on 29/06/2026
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container } from '../../../components/global/Container';
@@ -7,7 +7,7 @@ import { Button } from '../../../components/ui/Button';
 import { AuthContext } from '../../../context/AuthContext';
 import BlogCard from '../components/BlogCard';
 import BlogFormModal from '../components/BlogFormModal';
-import { useBlogs, toggleVote, createBlog } from '../hooks/useBlog';
+import { useBlogs, toggleVote, createBlog, deleteBlog } from '../hooks/useBlog';
 
 export default function BlogPage() {
     const { user } = useContext(AuthContext);
@@ -25,6 +25,11 @@ export default function BlogPage() {
 
     async function handleCreate(body) {
         await createBlog(body);
+        reload();
+    }
+
+    async function handleDelete(id) {
+        await deleteBlog(id);
         reload();
     }
 
@@ -97,7 +102,13 @@ export default function BlogPage() {
                 {!loading && !error && blogs.length > 0 && (
                     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                         {blogs.map(blog => (
-                            <BlogCard key={blog.id} blog={blog} onVote={handleVote} />
+                            <BlogCard
+                                key={blog.id}
+                                blog={blog}
+                                onVote={handleVote}
+                                onDelete={handleDelete}
+                                currentUser={user}
+                            />
                         ))}
                     </div>
                 )}
