@@ -26,7 +26,6 @@ const navItemsByRole = {
     { label: 'Yêu thích', to: '/wishlist' },
     { label: 'Orders', to: '/orders' },
     { label: 'Profile', to: '/profile' },
-    { label: 'Orders', to: '/orders' },
     { label: 'Tickets', to: '/tickets/' },
     { label: 'Blog', to: '/blogs' },
   ],
@@ -152,10 +151,6 @@ export function Header({ className = '', ...props }) {
         
         <Button className="text-lg lg:hidden inline-block" onClick={() => setIsNavOpen(true)}>
           <HiMenuAlt3/>
-        </Button>
-
-        <Button className="text-lg lg:hidden inline-block" onClick={() => setIsNavOpen(true)}>
-          <HiMenuAlt3 />
         </Button>
 
         <div className={cn("fixed h-screen w-screen left-full top-0 bottom-0 overflow-y-scroll",
