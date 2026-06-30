@@ -1,5 +1,6 @@
 package swp391.group6.service;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,7 @@ public class OrderService {
         this.reviewRepository = reviewRepository;
     }
 
+    @PreAuthorize("isAuthenticated()")
     public List<Order> getOrders(LoginResponse loginResponse, List<OrderStatus> statuses, String query) {
         if (query == null) query = "";
         boolean hasStatusFilter = statuses != null && !statuses.isEmpty();
@@ -49,6 +51,7 @@ public class OrderService {
         }
     }
 
+    @PreAuthorize("isAuthenticated()")
     public Order getOrder(long id, LoginResponse user) {
         Optional<Order> order;
         if (canAccessAllOrder(user)) {
@@ -69,6 +72,7 @@ public class OrderService {
         return true;
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public boolean changeOrder(LoginResponse loginResponse, long id, OrderDTO order) {
         User user = userRepository.findByEmail(loginResponse.getEmail()).orElse(null);
         if (user == null || !user.getRole().getName().equals("MANAGER")) {
@@ -94,6 +98,7 @@ public class OrderService {
         return false;
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'SHIPPER', 'CUSTOMER')")
     public boolean changeOrderStatus(long id, OrderStatus orderStatus, LoginResponse loginResponse) {
         User user = userRepository.findByEmail(loginResponse.getEmail()).orElse(null);
         Order order = orderRepository.findById(id).orElse(null);

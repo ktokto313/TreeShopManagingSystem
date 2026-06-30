@@ -18,7 +18,7 @@ public class StatisticService {
     @Autowired
     private OrderRepository orderRepository;
 
-    // @PreAuthorize("hasAuthority('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public BigDecimal getProfit(Date startDate, Date endDate) {
         List<Order> orders = orderRepository.findByCreatedAtBetweenAndStatus(startDate, endDate, OrderStatus.RECEIVED);
         
