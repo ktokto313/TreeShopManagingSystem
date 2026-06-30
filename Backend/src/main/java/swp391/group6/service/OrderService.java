@@ -100,7 +100,7 @@ public class OrderService {
         if (order == null) {
             return false;
         }
-        if (!canModifyAllOrder(loginResponse) && !order.getUser().equals(user) && !order.getShipper().equals(user)) {
+        if (!canAccessAllOrder(loginResponse) && !order.getUser().equals(user) && !order.getShipper().equals(user)) {
             return false;
         }
 
@@ -161,10 +161,6 @@ public class OrderService {
     public boolean canAccessAllOrder(LoginResponse user) {
         return (user.getRole().equals("MANAGER")
             || user.getRole().equals("SYSTEM_ADMIN"));
-    }
-
-    public boolean canModifyAllOrder(LoginResponse user) {
-        return (user.getRole().equals("MANAGER"));
     }
 
     public boolean hasReviewed(long orderId, long productId) {
