@@ -81,12 +81,6 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         try {
-            Cookie cookie = CookieUtil.getJWTCookie(request.getCookies());
-            if (cookie == null) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
-
             DecodedJWT decodedJWT = JWTUtil.verify(cookie.getValue());
             LoginResponse tokenUser = JWTUtil.getUser(decodedJWT);
             if (tokenUser == null || tokenUser.getEmail() == null) {

@@ -26,7 +26,7 @@ public class OrderListDTO {
         this.discount = order.getDiscount();
         this.createdAt = order.getCreatedAt();
         this.status = order.getStatus();
-        this.orderDetailList = order.getOrderDetailList().stream().map(OrderDetailDTO::new).toList();
+        this.orderDetailList = order.getOrderDetailList().stream().map(orderDetail -> new OrderDetailDTO(orderDetail, false)).toList();
     }
 
     public long getId() { return id; }
