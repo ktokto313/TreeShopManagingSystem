@@ -32,7 +32,6 @@ public class OrderDTO {
         this.discount = order.getDiscount();
         this.createdAt = order.getCreatedAt();
         this.status = order.getStatus();
-        this.orderDetailList = order.getOrderDetailList().stream().map(OrderDetailDTO::new).toList();
     }
 
     public long getId() { return id; }
