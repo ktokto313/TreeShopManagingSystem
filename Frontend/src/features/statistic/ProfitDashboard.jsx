@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Container } from '../../components/global/Container';
-import { Button } from '../../components/ui/Button';
 import useFetchProfit from './hooks/useFetchProfit';
 import useFetchProducts from './hooks/useFetchOrders';
 import { Skeleton } from '../../components/ui/Skeleton';
@@ -25,7 +24,7 @@ export default function ProfitDashboard() {
                     <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
                             <h1 className="text-2xl md:text-3xl font-extrabold text-black tracking-tight">
-                                Profit Dashboard
+                                Bảng Thống Kê Lợi Nhuận
                             </h1>
                             <p className="text-sm text-black/60 mt-1">
                                 Thống kê doanh số bán hàng
@@ -56,7 +55,7 @@ export default function ProfitDashboard() {
 
                     {error && (
                         <div className="p-8 rounded-xl border border-red-500/20 bg-red-500/5 text-center mb-8">
-                            <p className="text-sm text-red-600 font-medium">{error === 'UNAUTHORIZED' ? 'You need to be signed in as a manager to view this data.' : error}</p>
+                            <p className="text-sm text-red-600 font-medium">{error === 'UNAUTHORIZED' ? 'Bạn cần đăng nhập bằng tài khoản quản lý để xem dữ liệu này.' : error}</p>
                         </div>
                     )}
 
@@ -68,7 +67,7 @@ export default function ProfitDashboard() {
                                     {isLoading ? (
                                         <Skeleton className="h-16 w-64 mx-auto" />
                                     ) : (
-                                        profit !== null ? `${Number(profit).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}đ` : '0đ'
+                                        profit !== null ? `${Number(profit).toLocaleString('vi-VN')}đ` : "0đ"
                                     )}
                                 </div>
                             </div>

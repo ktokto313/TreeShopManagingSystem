@@ -16,7 +16,7 @@ export default function ShipperSelect({ value, onChange, disabled = false }) {
     }, [fetchShippers]);
 
     const options = [
-        { value: '', label: isLoading ? 'Loading shippers...' : 'Unassigned' },
+        { value: '', label: isLoading ? 'Đang tải danh sách shipper...' : 'Chưa phân công' },
         ...shippers.map((shipper) => ({
             value: shipper.id,
             label: shipper.fullName || shipper.username || `Shipper #${shipper.id}`,
@@ -25,12 +25,12 @@ export default function ShipperSelect({ value, onChange, disabled = false }) {
 
     return (
         <Select
-            label="Assign Shipper"
+            label="Phân công Shipper"
             options={options}
             value={value ?? ''}
             onChange={(e) => onChange(e.target.value)}
             disabled={disabled || isLoading}
-            error={error && error !== 'UNAUTHORIZED' ? 'Failed to load shippers' : undefined}
+            error={error && error !== 'UNAUTHORIZED' ? 'Lỗi tải danh sách shipper' : undefined}
         />
     );
 }
