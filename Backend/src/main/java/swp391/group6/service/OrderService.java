@@ -11,6 +11,7 @@ import swp391.group6.model.*;
 import swp391.group6.repository.OrderRepository;
 import swp391.group6.repository.UserRepository;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -131,6 +132,10 @@ public class OrderService {
             throw new InvalidStateTransitionException(
                 "Cannot transition order from " + currentStatus + " to " + targetStatus
                     + " without shipper");
+        }
+
+        if (targetStatus == OrderStatus.ARRIVED) {
+            order.setDeliveryDate(new Timestamp(System.currentTimeMillis()));
         }
 
         order.setStatus(targetStatus);

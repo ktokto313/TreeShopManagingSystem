@@ -17,11 +17,17 @@ public class OrderStatusScheduler {
         this.orderRepository = orderRepository;
     }
 
-    @Scheduled(fixedDelay = 3, timeUnit = TimeUnit.DAYS)
+    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.DAYS)
     @Transactional
     public void setArrivedOrderStatus() {
         List<Order> orderList = orderRepository.findByStatus(OrderStatus.ARRIVED);
+        long threeDaysInMillis = TimeUnit.DAYS.toMillis(3);
+        long currentTime = System.currentTimeMillis();
         for (Order order : orderList) {
+            if (order.getDeliveryDate() != null && (currentTime - order.getDeliveryDate().getTime() >= threeDaysInMillis)) {
+                order.setStatus(OrderStatus.RECEIVED);
+                orderRepository.save(order);
+            }
         }
     }
 }
