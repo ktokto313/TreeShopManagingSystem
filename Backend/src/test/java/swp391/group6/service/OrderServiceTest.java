@@ -62,12 +62,12 @@ class OrderServiceTest {
         LoginResponse manager = login("manager@example.com", "MANAGER");
         List<OrderStatus> statuses = List.of(OrderStatus.PENDING);
         List<Order> expected = List.of(order(1L, customer(), shipper(), OrderStatus.PENDING));
-        when(orderRepository.searchByStatusIn(statuses, "")).thenReturn(expected);
+        when(orderRepository.searchByStatusInOrderByStatusAscThenCreatedAtDesc(statuses, "")).thenReturn(expected);
 
         List<Order> actual = orderService.getOrders(manager, statuses, null);
 
         assertSame(expected, actual);
-        verify(orderRepository).searchByStatusIn(statuses, "");
+        verify(orderRepository).searchByStatusInOrderByStatusAscThenCreatedAtDesc(statuses, "");
         verifyNoInteractions(userRepository);
     }
 
@@ -75,12 +75,12 @@ class OrderServiceTest {
     void getOrders_systemAdminWithoutStatusFilter_searchesAllOrders() {
         LoginResponse admin = login("admin@example.com", "SYSTEM_ADMIN");
         List<Order> expected = List.of(order(1L, customer(), shipper(), OrderStatus.PENDING));
-        when(orderRepository.searchAll("tree")).thenReturn(expected);
+        when(orderRepository.searchAllOrderByStatusAscThenCreatedAtDesc("tree")).thenReturn(expected);
 
         List<Order> actual = orderService.getOrders(admin, List.of(), "tree");
 
         assertSame(expected, actual);
-        verify(orderRepository).searchAll("tree");
+        verify(orderRepository).searchAllOrderByStatusAscThenCreatedAtDesc("tree");
         verifyNoInteractions(userRepository);
     }
 
@@ -102,13 +102,13 @@ class OrderServiceTest {
         List<OrderStatus> statuses = List.of(OrderStatus.PENDING, OrderStatus.DELIVERING);
         List<Order> expected = List.of(order(1L, user, shipper(), OrderStatus.PENDING));
         when(userRepository.findByEmail("customer@example.com")).thenReturn(Optional.of(user));
-        when(orderRepository.searchByStatusInAndUserIdOrShipperId(statuses, "tree", 10L, 10L))
-                .thenReturn(expected);
+        when(orderRepository.searchByStatusInAndUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(statuses, "tree", 10L, 10L))
+            .thenReturn(expected);
 
         List<Order> actual = orderService.getOrders(customerLogin, statuses, "tree");
 
         assertSame(expected, actual);
-        verify(orderRepository).searchByStatusInAndUserIdOrShipperId(statuses, "tree", 10L, 10L);
+        verify(orderRepository).searchByStatusInAndUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(statuses, "tree", 10L, 10L);
     }
 
     @Test
@@ -117,12 +117,12 @@ class OrderServiceTest {
         User user = customer();
         List<Order> expected = List.of(order(1L, user, shipper(), OrderStatus.PENDING));
         when(userRepository.findByEmail("customer@example.com")).thenReturn(Optional.of(user));
-        when(orderRepository.searchByUserIdOrShipperId("tree", 10L, 10L)).thenReturn(expected);
+        when(orderRepository.searchByUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc("tree", 10L, 10L)).thenReturn(expected);
 
         List<Order> actual = orderService.getOrders(customerLogin, null, "tree");
 
         assertSame(expected, actual);
-        verify(orderRepository).searchByUserIdOrShipperId("tree", 10L, 10L);
+        verify(orderRepository).searchByUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc("tree", 10L, 10L);
     }
 
     @Test
@@ -485,6 +485,12 @@ class OrderServiceTest {
         assertTrue(orderService.canAccessAllOrder(login("manager@example.com", "MANAGER")));
         assertTrue(orderService.canAccessAllOrder(login("admin@example.com", "SYSTEM_ADMIN")));
         assertFalse(orderService.canAccessAllOrder(login("customer@example.com", "CUSTOMER")));
+    }
+
+    @Test
+    void canModifyAllOrder_isTrueOnlyForSystemAdmin() {
+        assertTrue(orderService.canAccessAllOrder(login("admin@example.com", "SYSTEM_ADMIN")));
+        assertFalse(orderService.canAccessAllOrder(login("manager@example.com", "MANAGER")));
     }
 
     private static Stream<Arguments> allowedTransitions() {

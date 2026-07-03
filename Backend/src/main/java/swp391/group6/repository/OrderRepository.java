@@ -30,22 +30,38 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByStatus(OrderStatus status);
 
-    @Query("SELECT o FROM Order o WHERE (CAST(o.id AS string) LIKE %:query% OR LOWER(o.shippingAddress) LIKE LOWER(CONCAT('%', :query, '%')))")
-    List<Order> searchAll(@Param("query") String query);
+    @Query("SELECT o " +
+            "FROM Order o " +
+            "WHERE (CAST(o.id AS string) LIKE %:query% OR LOWER(o.shippingAddress) LIKE LOWER(CONCAT('%', :query, '%')))" +
+            "ORDER BY o.status asc, o.createdAt desc")
+    List<Order> searchAllOrderByStatusAscThenCreatedAtDesc(@Param("query") String query);
 
-    @Query("SELECT o FROM Order o WHERE (CAST(o.id AS string) LIKE %:query% OR LOWER(o.shippingAddress) LIKE LOWER(CONCAT('%', :query, '%'))) AND (o.user.id = :userId OR o.shipper.id = :shipperId)")
-    List<Order> searchByUserIdOrShipperId(
+    @Query("SELECT o " +
+            "FROM Order o " +
+            "WHERE (CAST(o.id AS string) LIKE %:query% OR LOWER(o.shippingAddress) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+            "AND (o.user.id = :userId OR o.shipper.id = :shipperId)" +
+            "ORDER BY o.status asc, o.createdAt desc")
+    List<Order> searchByUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(
             @Param("query") String query,
             @Param("userId") long userId,
             @Param("shipperId") long shipperId);
 
-    @Query("SELECT o FROM Order o WHERE o.status IN :statuses AND (CAST(o.id AS string) LIKE %:query% OR LOWER(o.shippingAddress) LIKE LOWER(CONCAT('%', :query, '%')))")
-    List<Order> searchByStatusIn(
+    @Query("SELECT o " +
+            "FROM Order o " +
+            "WHERE o.status IN :statuses " +
+            "AND (CAST(o.id AS string) LIKE %:query% OR LOWER(o.shippingAddress) LIKE LOWER(CONCAT('%', :query, '%')))" +
+            "ORDER BY o.status asc, o.createdAt desc")
+    List<Order> searchByStatusInOrderByStatusAscThenCreatedAtDesc(
             @Param("statuses") List<OrderStatus> statuses,
             @Param("query") String query);
 
-    @Query("SELECT o FROM Order o WHERE o.status IN :statuses AND (CAST(o.id AS string) LIKE %:query% OR LOWER(o.shippingAddress) LIKE LOWER(CONCAT('%', :query, '%'))) AND (o.user.id = :userId OR o.shipper.id = :shipperId)")
-    List<Order> searchByStatusInAndUserIdOrShipperId(
+    @Query("SELECT o " +
+            "FROM Order o " +
+            "WHERE o.status IN :statuses " +
+            "   AND (CAST(o.id AS string) LIKE %:query% OR LOWER(o.shippingAddress) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+            "   AND (o.user.id = :userId OR o.shipper.id = :shipperId)" +
+            "ORDER BY o.status asc, o.createdAt desc")
+    List<Order> searchByStatusInAndUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(
             @Param("statuses") List<OrderStatus> statuses,
             @Param("query") String query,
             @Param("userId") long userId,

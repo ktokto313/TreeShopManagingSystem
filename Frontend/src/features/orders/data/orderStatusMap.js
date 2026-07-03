@@ -4,7 +4,7 @@ const makeStyle = (color) =>
 /** @type {Record<string, { bg: string, label: string }>} */
 const ORDER_STATUS_MAP = {
   PENDING:        { bg: makeStyle('yellow'), label: 'Chờ xử lý' },
-  PROCESSING:     { bg: makeStyle('blue'),   label: 'Đang xử lý' },
+  PROCESSING:     { bg: makeStyle('blue'),   label: 'Chờ lấy hàng' },
   DELIVERING:     { bg: makeStyle('cyan'),   label: 'Đang giao' },
   ARRIVED:        { bg: makeStyle('emerald'),label: 'Đã đến nơi' },
   RECEIVED:       { bg: makeStyle('green'),  label: 'Đã nhận' },

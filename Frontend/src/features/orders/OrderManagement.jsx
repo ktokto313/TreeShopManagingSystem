@@ -104,8 +104,9 @@ export default function OrderManagement() {
               {[
                 { id: 'ALL', label: 'Tất cả' },
                 { id: 'PENDING', label: 'Chờ xử lý' },
-                { id: 'PROCESSING', label: 'Đang xử lý' },
+                { id: 'PROCESSING', label: 'Chờ lấy hàng' },
                 { id: 'DELIVERING', label: 'Đang giao' },
+                { id: 'TORECEIVE', label: 'Chờ nhận'},
                 { id: 'COMPLETED', label: 'Hoàn thành' },
                 { id: 'FAILED', label: 'Thất bại & Hoàn trả' },
               ].map((tab) => (

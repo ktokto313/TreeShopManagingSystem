@@ -14,10 +14,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.dto.OrderDTO;
+import swp391.group6.dto.ReviewRequest;
 import swp391.group6.exception.InvalidStateTransitionException;
 import swp391.group6.model.*;
 import swp391.group6.model.NotificationType;
 import swp391.group6.repository.OrderRepository;
+import swp391.group6.repository.ReviewRepository;
 import swp391.group6.repository.UserRepository;
 
 import java.sql.Timestamp;
@@ -30,8 +32,8 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
-    private final swp391.group6.repository.ReviewRepository reviewRepository;
     private final NotificationService notificationService; // added for order notification triggers
+    private final ReviewRepository reviewRepository;
 
     public OrderService(OrderRepository orderRepository, UserRepository userRepository,
                         swp391.group6.repository.ReviewRepository reviewRepository,
@@ -49,18 +51,18 @@ public class OrderService {
 
         if (canAccessAllOrder(loginResponse)) {
             if (hasStatusFilter) {
-                return orderRepository.searchByStatusIn(statuses, query);
+                return orderRepository.searchByStatusInOrderByStatusAscThenCreatedAtDesc(statuses, query);
             } else {
-                return orderRepository.searchAll(query);
+                return orderRepository.searchAllOrderByStatusAscThenCreatedAtDesc(query);
             }
         } else {
             User fullUser = userRepository.findByEmail(loginResponse.getEmail()).orElse(null);
             if (fullUser == null) return new ArrayList<>();
             long uid = fullUser.getId();
             if (hasStatusFilter) {
-                return orderRepository.searchByStatusInAndUserIdOrShipperId(statuses, query, uid, uid);
+                return orderRepository.searchByStatusInAndUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(statuses, query, uid, uid);
             } else {
-                return orderRepository.searchByUserIdOrShipperId(query, uid, uid);
+                return orderRepository.searchByUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(query, uid, uid);
             }
         }
     }
@@ -274,7 +276,7 @@ public class OrderService {
         return true;
     }
 
-    public Review createProductReview(long orderId, long productId, swp391.group6.dto.ReviewRequest request, LoginResponse loginResponse) {
+    public Review createProductReview(long orderId, long productId, ReviewRequest request, LoginResponse loginResponse) {
         User user = userRepository.findByEmail(loginResponse.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 

@@ -17,6 +17,7 @@ DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS role CASCADE;
 DROP TABLE IF EXISTS wishlist_items CASCADE;
 DROP TABLE IF EXISTS policies CASCADE;
+DROP TYPE IF EXISTS order_status;
 
 CREATE TABLE role
 (
@@ -97,20 +98,19 @@ ALTER TABLE product_details
 
 -- ============================================================
 
+CREATE TYPE order_status as ENUM ('PROCESSING', 'PENDING', 'DELIVERING', 'ARRIVED', 'RETURN_PROCESSING', 'RETURN_PENDING', 'RETURNING', 'RECEIVED', 'FAILED');
+
 CREATE TABLE orders
 (
-    id               BIGSERIAL PRIMARY KEY,
-    customer_id      BIGINT         NOT NULL REFERENCES users (id),
-    shipper_id       BIGINT REFERENCES users (id),
-    shipping_address TEXT,
-    shipping_fee     DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
-    discount         DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
-    status           VARCHAR(20)    NOT NULL DEFAULT 'PENDING'
-        CHECK (status IN
-               ('PROCESSING', 'PENDING', 'DELIVERING', 'ARRIVED', 'RECEIVED', 'RETURN_PROCESSING', 'RETURN_PENDING',
-                'RETURNING', 'FAILED')),
-    created_at       TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    delivery_date    TIMESTAMP
+   id               BIGSERIAL PRIMARY KEY,
+   customer_id      BIGINT NOT NULL REFERENCES users(id),
+   shipper_id       BIGINT REFERENCES users(id),
+   shipping_address TEXT,
+   shipping_fee     DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+   discount         DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+   status           order_status NOT NULL DEFAULT 'PROCESSING',
+   created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   delivery_date    TIMESTAMP
 );
 
 CREATE INDEX idx_orders_customer_id ON orders (customer_id);
