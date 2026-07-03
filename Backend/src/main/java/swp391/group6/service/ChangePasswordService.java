@@ -1,3 +1,11 @@
+/*
+ * Author: Hung Dao
+ * Created Date: 2026-06-10
+ * Name: ChangePasswordService.java
+ * Description: 
+ * Last Change Author: Hung Dao
+ * Last Change Date: 2026-06-22
+ */
 package swp391.group6.service;
 
 import swp391.group6.dto.ChangePasswordRequest;

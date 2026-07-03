@@ -1,9 +1,10 @@
 /*
- * Name: Authentication Controller
- * @Author: HungDLM
- * Date: 2026-06-05
- * Version: 2.0
+ * Author: Hung Dao
+ * Created Date: 2026-05-30
+ * Name: AuthController.java
  * Description: Handles login and secure logout via JWT HTTP cookies using CookieUtil.
+ * Last Change Author: Hung Dao
+ * Last Change Date: 2026-06-24
  */
 package swp391.group6.controller;
 

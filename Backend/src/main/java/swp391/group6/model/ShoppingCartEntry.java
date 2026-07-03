@@ -1,3 +1,11 @@
+/*
+ * Author: ktokto313
+ * Created Date: 2026-05-29
+ * Name: ShoppingCartEntry.java
+ * Description: 
+ * Last Change Author: lmd100
+ * Last Change Date: 2026-06-20
+ */
 package swp391.group6.model;
 
 import jakarta.persistence.*;

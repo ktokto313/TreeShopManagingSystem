@@ -1,9 +1,10 @@
 /*
+ * Author: DucLM
+ * Created Date: 2026-05-29
  * Name: User Service
- * @Author: DucLM
- * Date: 2026-06-05
- * Version: 2.0
  * Description: Business logic for user CRUD, ban/unban, role validation, and DTO conversion; protects SYSTEM_ADMIN accounts.
+ * Last Change Author: lmd100
+ * Last Change Date: 2026-06-28
  */
 package swp391.group6.service;
 

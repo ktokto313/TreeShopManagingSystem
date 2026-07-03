@@ -1,4 +1,11 @@
-// Created by minhlthe200133
+/*
+ * Author: minhlthe200133
+ * Created Date: 2026-05-30
+ * Name: ProductController.java
+ * Description: 
+ * Last Change Author: lmd100
+ * Last Change Date: 2026-06-27
+ */
 package swp391.group6.controller;
 
 import lombok.extern.slf4j.Slf4j;

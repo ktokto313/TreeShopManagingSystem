@@ -1,9 +1,10 @@
 /*
+ * Author: DucLM
+ * Created Date: 2026-05-29
  * Name: User Entity
- * @Author: DucLM
- * Date: 2026-06-02
- * Version: 2.0
- * Description: JPA entity mapping the users table, including role, status, and related domain associations.
+ * Description: 
+ * Last Change Author: Hung Dao
+ * Last Change Date: 2026-06-26
  */
 package swp391.group6.model;
 

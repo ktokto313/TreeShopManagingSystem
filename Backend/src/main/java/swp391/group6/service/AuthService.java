@@ -1,3 +1,11 @@
+/*
+ * Author: Hung Dao
+ * Created Date: 2026-05-30
+ * Name: AuthService.java
+ * Description: 
+ * Last Change Author: Hung Dao
+ * Last Change Date: 2026-06-07
+ */
 //6/7: Hung Dao: Add handler for user who create account via GoogleSSO try to log in normally
 package swp391.group6.service;
 
