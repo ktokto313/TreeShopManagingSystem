@@ -1,9 +1,10 @@
 /*
+ * Author: DucLM
+ * Created Date: 2026-05-29
  * Name: User REST Controller
- * @Author: DucLM
- * Date: 2026-06-05
- * Version: 2.1
  * Description: Exposes /api/users CRUD, search, ban/unban, and profile endpoints with @PreAuthorize role-based access control.
+ * Last Change Author: lmd100
+ * Last Change Date: 2026-06-28
  */
 package swp391.group6.controller;
 

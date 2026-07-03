@@ -1,4 +1,11 @@
-// Created by minhlthe200133
+/*
+ * Author: minhlthe200133
+ * Created Date: 2026-05-30
+ * Name: ProductService.java
+ * Description: 
+ * Last Change Author: Aiden
+ * Last Change Date: 2026-06-25
+ */
 package swp391.group6.service;
 
 import org.springframework.stereotype.Service;

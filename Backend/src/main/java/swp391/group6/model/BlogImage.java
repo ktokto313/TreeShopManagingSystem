@@ -1,5 +1,11 @@
-//Create: HungDLM
-//Lastest update: HungDLM on 27/06/2026
+/*
+ * Author: HungDLM
+ * Created Date: 2026-06-26
+ * Name: BlogImage.java
+ * Description: 
+ * Last Change Author: Hung Dao
+ * Last Change Date: 2026-06-27
+ */
 package swp391.group6.model;
 
 import jakarta.persistence.*;

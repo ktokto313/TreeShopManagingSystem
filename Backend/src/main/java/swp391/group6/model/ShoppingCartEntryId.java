@@ -1,3 +1,11 @@
+/*
+ * Author: Hung Dao
+ * Created Date: 2026-05-30
+ * Name: ShoppingCartEntryId.java
+ * Description: 
+ * Last Change Author: Hung Dao
+ * Last Change Date: 2026-05-30
+ */
 package swp391.group6.model;
 
 import jakarta.persistence.Embeddable;

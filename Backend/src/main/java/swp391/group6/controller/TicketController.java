@@ -1,3 +1,11 @@
+/*
+ * Author: PlotChat
+ * Created Date: 2026-06-01
+ * Name: TicketController.java
+ * Description: 
+ * Last Change Author: lmd100
+ * Last Change Date: 2026-06-27
+ */
 package swp391.group6.controller;
 
 import jakarta.servlet.http.HttpServletRequest;

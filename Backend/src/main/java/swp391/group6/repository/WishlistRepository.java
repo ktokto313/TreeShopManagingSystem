@@ -1,3 +1,11 @@
+/*
+ * Author: minhlthe200133
+ * Created Date: 2026-06-23
+ * Name: WishlistRepository.java
+ * Description: 
+ * Last Change Author: minhlthe200133
+ * Last Change Date: 2026-06-23
+ */
 package swp391.group6.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,5 +1,11 @@
-//Create: HungDLM on 26/06/2026
-//Lastest update: HungDLM on 27/06/2026
+/*
+ * Author: Hung Dao
+ * Created Date: 2026-06-26
+ * Name: BlogController.java
+ * Description: 
+ * Last Change Author: Hung Dao
+ * Last Change Date: 2026-06-27
+ */
 package swp391.group6.controller;
 
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,3 +1,11 @@
+/*
+ * Author: PlotChat
+ * Created Date: 2026-06-01
+ * Name: TicketService.java
+ * Description: 
+ * Last Change Author: Aiden
+ * Last Change Date: 2026-06-18
+ */
 package swp391.group6.service;
 
 import jakarta.transaction.Transactional;

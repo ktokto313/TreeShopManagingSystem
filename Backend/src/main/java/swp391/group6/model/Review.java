@@ -1,3 +1,11 @@
+/*
+ * Author: ktokto313
+ * Created Date: 2026-05-29
+ * Name: Review.java
+ * Description: 
+ * Last Change Author: Aiden
+ * Last Change Date: 2026-06-25
+ */
 package swp391.group6.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
