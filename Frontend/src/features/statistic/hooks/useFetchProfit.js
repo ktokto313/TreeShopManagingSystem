@@ -10,8 +10,16 @@ export default function useFetchProfit() {
         setError(null);
         try {
             const params = new URLSearchParams();
-            if (startDate) params.append("startDate", startDate);
-            if (endDate) params.append("endDate", endDate);
+            if (startDate) {
+                const start = new Date(startDate);
+                start.setHours(0, 0, 0, 0);
+                params.append("startDate", start.toISOString().substring(0, 19));
+            }
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                params.append("endDate", end.toISOString().substring(0, 19));
+            }
 
             const url = `/api/statistic/profit?${params.toString()}`;
 

@@ -9,7 +9,7 @@ import swp391.group6.model.OrderStatus;
 import swp391.group6.repository.OrderRepository;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -18,8 +18,8 @@ public class StatisticService {
     @Autowired
     private OrderRepository orderRepository;
 
-    @PreAuthorize("hasAuthority('MANAGER')")
-    public BigDecimal getProfit(Date startDate, Date endDate) {
+    @PreAuthorize("hasRole('MANAGER')")
+    public BigDecimal getProfit(LocalDateTime startDate, LocalDateTime endDate) {
         List<Order> orders = orderRepository.findByCreatedAtBetweenAndStatus(startDate, endDate, OrderStatus.RECEIVED);
         
         BigDecimal totalProfit = BigDecimal.ZERO;
@@ -42,5 +42,9 @@ public class StatisticService {
         }
         
         return totalProfit;
+    }
+
+    public List<swp391.group6.dto.BestSellingProductDTO> getBestSellingProducts(LocalDateTime startDate, LocalDateTime endDate) {
+        return orderRepository.findBestSellingProducts(startDate, endDate, OrderStatus.RECEIVED);
     }
 }

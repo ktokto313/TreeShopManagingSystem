@@ -35,6 +35,9 @@ public class Order {
     @Column(nullable = false)
     private Timestamp createdAt;
 
+    @Column
+    private Timestamp deliveryDate;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
@@ -97,6 +100,14 @@ public class Order {
 
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Timestamp getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(Timestamp deliveryDate) {
+        this.deliveryDate = deliveryDate;
     }
 
     public OrderStatus getStatus() {

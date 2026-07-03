@@ -79,7 +79,8 @@ CREATE TABLE orders (
    discount         DECIMAL(10,2) NOT NULL DEFAULT 0.00,
    status           VARCHAR(20) NOT NULL DEFAULT 'PENDING'
                     CHECK (status IN ('PROCESSING','PENDING','DELIVERING','ARRIVED','RECEIVED','RETURN_PROCESSING','RETURN_PENDING','RETURNING','FAILED')),
-   created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+   created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   delivery_date    TIMESTAMP
 );
 
 CREATE INDEX idx_orders_customer_id ON orders(customer_id);

@@ -36,10 +36,10 @@ export default function OrderManagement() {
           <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-extrabold text-black tracking-tight">
-                Order Dashboard
+                Quản lý Đơn Hàng
               </h1>
               <p className="text-sm text-black/60 mt-1">
-                Manage, trace, and inspect customer transactions and fulfillment statuses.
+                Quản lý, theo dõi và kiểm tra các giao dịch và trạng thái đơn hàng của khách hàng.
               </p>
             </div>
             <Button
@@ -51,14 +51,14 @@ export default function OrderManagement() {
               <svg className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 15.57M21 21v-5h-.581m0 0a8.003 8.003 0 01-15.357-2" />
               </svg>
-              Refresh Orders
+              Làm mới
             </Button>
           </div>
 
           {/* Statistics/Metrics Ribbon */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
             <div className="p-5 rounded-xl border border-border/60 bg-bg-surface/40 backdrop-blur-sm relative overflow-hidden group hover:border-interactive/40 transition-all duration-300">
-              <span className="text-xs font-bold uppercase tracking-wider text-black/50">Total Orders</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-black/50">Tổng Đơn Hàng</span>
               <div className="text-3xl font-black text-black mt-2">
                 {isLoading ? <Skeleton className="h-9 w-16 mt-1" /> : totalOrders}
               </div>
@@ -69,8 +69,8 @@ export default function OrderManagement() {
               </div>
             </div>
 
-            <div className="p-5 rounded-xl border border-border/60 bg-bg-surface/40 backdrop-blur-sm relative overflow-hidden group hover:border-interactive/40 transition-all duration-300">
-              <span className="text-xs font-bold uppercase tracking-wider text-black/50">Active Deliveries</span>
+            {/*<div className="p-5 rounded-xl border border-border/60 bg-bg-surface/40 backdrop-blur-sm relative overflow-hidden group hover:border-interactive/40 transition-all duration-300">
+              <span className="text-xs font-bold uppercase tracking-wider text-black/50">Đang Giao</span>
               <div className="text-3xl font-black text-black mt-2">
                 {isLoading ? <Skeleton className="h-9 w-16 mt-1" /> : totalOrders}
               </div>
@@ -79,7 +79,7 @@ export default function OrderManagement() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Search and Filters controls panel */}
@@ -93,7 +93,7 @@ export default function OrderManagement() {
               </span>
               <input
                 type="text"
-                placeholder="Search by Order ID or Shipping Address..."
+                placeholder="Tìm kiếm theo mã đơn hàng hoặc địa chỉ..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 bg-bg-base border border-border/80 rounded-xl text-sm text-black placeholder-black/40 focus:outline-none focus:border-interactive transition-colors"
@@ -103,12 +103,12 @@ export default function OrderManagement() {
             {/* Filter Tabs */}
             <div className="flex flex-wrap gap-1.5">
               {[
-                { id: 'ALL', label: 'All Orders' },
-                { id: 'PENDING', label: 'Pending' },
-                { id: 'PROCESSING', label: 'Processing' },
-                { id: 'DELIVERING', label: 'Delivering' },
-                { id: 'COMPLETED', label: 'Completed' },
-                { id: 'FAILED', label: 'Failed & Returns' },
+                { id: 'ALL', label: 'Tất cả' },
+                { id: 'PENDING', label: 'Chờ xử lý' },
+                { id: 'PROCESSING', label: 'Đang xử lý' },
+                { id: 'DELIVERING', label: 'Đang giao' },
+                { id: 'COMPLETED', label: 'Hoàn thành' },
+                { id: 'FAILED', label: 'Thất bại & Hoàn trả' },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -160,16 +160,16 @@ export default function OrderManagement() {
                 </svg>
               </div>
               <h3 className="text-lg font-bold text-black mb-2">
-                {error === 'UNAUTHORIZED' ? 'Authentication Required' : 'Failed to Load Orders'}
+                {error === 'UNAUTHORIZED' ? 'Yêu cầu xác thực' : 'Lỗi khi tải đơn hàng'}
               </h3>
               <p className="text-sm text-black/60 mb-6 leading-relaxed">
                 {error === 'UNAUTHORIZED'
-                  ? 'You need to be signed in to access the order dashboard.'
+                  ? 'Bạn cần đăng nhập để truy cập quản lý đơn hàng.'
                   : error
                 }
               </p>
               <Button variant="primary" onClick={fetchOrders} className="px-6 py-2.5">
-                Try Again
+                Thử Lại
               </Button>
             </div>
           )}
@@ -182,11 +182,11 @@ export default function OrderManagement() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-black mb-1">No Orders Found</h3>
+              <h3 className="text-lg font-bold text-black mb-1">Không tìm thấy đơn hàng</h3>
               <p className="text-sm text-black/60 mb-6">
                 {searchQuery || selectedFilter !== 'ALL'
-                  ? "We couldn't find any orders matching your search query or filter."
-                  : "No orders have been placed yet."
+                  ? "Chúng tôi không thể tìm thấy đơn hàng nào khớp với tìm kiếm hoặc bộ lọc của bạn."
+                  : "Chưa có đơn hàng nào được đặt."
                 }
               </p>
               {(searchQuery || selectedFilter !== 'ALL') && (
@@ -198,7 +198,7 @@ export default function OrderManagement() {
                   }}
                   className="px-5 py-2"
                 >
-                  Clear Filters
+                  Xóa bộ lọc
                 </Button>
               )}
             </div>
