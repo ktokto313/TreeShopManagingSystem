@@ -2,9 +2,9 @@
  * Author: HungDLM
  * Created Date: 2026-06-26
  * Name: BlogService.java
- * Description: 
+ * Description:
  * Last Change Author: HungDLM
- * Last Change Date: 2026-06-27
+ * Last Change Date: 2026-07-07
  */
 package swp391.group6.service;
 
@@ -46,7 +46,7 @@ public class BlogService {
     }
 
     public List<BlogResponse> getPending() {
-        return postRepo.findByStatusOrderByCreatedAtDesc(BlogStatus.PENDING)
+        return postRepo.findPendingOrHasPendingEdit(BlogStatus.PENDING)
                 .stream()
                 .map(p -> toResponse(p, null))
                 .toList();
@@ -89,7 +89,7 @@ public class BlogService {
         post.setStatus(status);
 
         postRepo.save(post);
-        saveImages(post, req.getImages());
+        saveImages(post, req.getImages(), false); // brand-new post — images are live from the start
 
         return toResponse(post, user.getId());
     }
@@ -106,16 +106,26 @@ public class BlogService {
 
         validate(req);
 
+        boolean isManager = "MANAGER".equals(user.getRole().getName());
+        boolean isLive = post.getStatus() == BlogStatus.PUBLISHED;
+
+        if (!isManager && isLive) {
+            post.setPendingTitle(req.getTitle());
+            post.setPendingContent(req.getContent());
+            post.setPendingThumbnail(req.getThumbnail());
+            post.setHasPendingEdit(true);
+
+            imageRepo.deleteAll(imageRepo.findByPostIdAndPendingTrue(postId));
+            saveImages(post, req.getImages(), true);
+
+            return toResponse(post, user.getId());
+        }
+
         post.setTitle(req.getTitle());
         post.setContent(req.getContent());
         post.setThumbnail(req.getThumbnail());
 
-        boolean isManager = "MANAGER".equals(user.getRole().getName());
-
         if (!isManager) {
-            if (post.getStatus() == BlogStatus.PUBLISHED) {
-                post.setStatus(BlogStatus.PENDING);
-            }
             if (post.getStatus() == BlogStatus.DRAFT && !"DRAFT".equals(req.getStatus())) {
                 post.setStatus(BlogStatus.PENDING);
             }
@@ -123,8 +133,9 @@ public class BlogService {
                 post.setStatus(BlogStatus.PENDING);
             }
         }
+
         imageRepo.deleteAll(imageRepo.findByPostIdOrderByIdAsc(postId));
-        saveImages(post, req.getImages());
+        saveImages(post, req.getImages(), false);
 
         return toResponse(post, user.getId());
     }
@@ -151,24 +162,59 @@ public class BlogService {
     public boolean approve(long postId) {
 
         BlogPost post = postRepo.findById(postId).orElse(null);
-        if (post == null || post.getStatus() != BlogStatus.PENDING) return false;
+        if (post == null) return false;
 
-        post.setStatus(BlogStatus.PUBLISHED);
-        postRepo.save(post);
+        if (post.getStatus() == BlogStatus.PENDING) {
+            post.setStatus(BlogStatus.PUBLISHED);
+            postRepo.save(post);
+            return true;
+        }
 
-        return true;
+        if (post.getStatus() == BlogStatus.PUBLISHED && post.isHasPendingEdit()) {
+            post.setTitle(post.getPendingTitle());
+            post.setContent(post.getPendingContent());
+            post.setThumbnail(post.getPendingThumbnail());
+
+            post.setHasPendingEdit(false);
+            post.setPendingTitle(null);
+            post.setPendingContent(null);
+            post.setPendingThumbnail(null);
+
+            imageRepo.deleteAll(imageRepo.findByPostIdAndPendingFalse(postId));
+            imageRepo.markPendingAsLive(postId);
+
+            postRepo.save(post);
+            return true;
+        }
+
+        return false;
     }
 
     @Transactional
     public boolean reject(long postId) {
 
         BlogPost post = postRepo.findById(postId).orElse(null);
-        if (post == null || post.getStatus() != BlogStatus.PENDING) return false;
+        if (post == null) return false;
 
-        post.setStatus(BlogStatus.REJECTED);
-        postRepo.save(post);
+        if (post.getStatus() == BlogStatus.PENDING) {
+            post.setStatus(BlogStatus.REJECTED);
+            postRepo.save(post);
+            return true;
+        }
 
-        return true;
+        if (post.getStatus() == BlogStatus.PUBLISHED && post.isHasPendingEdit()) {
+            post.setHasPendingEdit(false);
+            post.setPendingTitle(null);
+            post.setPendingContent(null);
+            post.setPendingThumbnail(null);
+
+            imageRepo.deleteAll(imageRepo.findByPostIdAndPendingTrue(postId));
+
+            postRepo.save(post);
+            return true;
+        }
+
+        return false;
     }
 
     // UPVOTE BLOG
@@ -221,13 +267,14 @@ public class BlogService {
 
     // HELPERS
 
-    private void saveImages(BlogPost post, List<String> imgs) {
+    private void saveImages(BlogPost post, List<String> imgs, boolean isPending) {
         if (imgs == null) return;
 
         imgs.forEach(url -> {
             BlogImage img = new BlogImage();
             img.setPost(post);
             img.setImageUrl(url);
+            img.setPending(isPending);
             imageRepo.save(img);
         });
     }
@@ -248,13 +295,25 @@ public class BlogService {
                                 voteRepo.existsByUserIdAndPostId(userId, post.getId())
                 )
                 .images(
-                        imageRepo.findByPostIdOrderByIdAsc(post.getId())
+                        imageRepo.findByPostIdAndPendingFalse(post.getId())
                                 .stream()
                                 .map(BlogImage::getImageUrl)
                                 .toList()
                 )
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
+                .hasPendingEdit(post.isHasPendingEdit())
+                .pendingTitle(post.getPendingTitle())
+                .pendingContent(post.getPendingContent())
+                .pendingThumbnail(post.getPendingThumbnail())
+                .pendingImages(
+                        post.isHasPendingEdit()
+                                ? imageRepo.findByPostIdAndPendingTrue(post.getId())
+                                .stream()
+                                .map(BlogImage::getImageUrl)
+                                .toList()
+                                : List.of()
+                )
                 .build();
     }
 
