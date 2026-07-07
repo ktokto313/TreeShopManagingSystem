@@ -4,7 +4,7 @@
  * Name: BlogImage.java
  * Description: 
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-06-27
+ * Last Change Date: 2026-07-07
  */
 package swp391.group6.model;
 
@@ -33,4 +33,7 @@ public class BlogImage {
 
     private String fileName;
     private String contentType;
+
+    @Column(name = "is_pending", nullable = false)
+    private boolean pending;
 }

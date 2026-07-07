@@ -22,4 +22,10 @@ public class BlogResponse {
     private List<String> images;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+
+    private boolean hasPendingEdit;
+    private String pendingTitle;
+    private String pendingContent;
+    private String pendingThumbnail;
+    private List<String> pendingImages;
 }
