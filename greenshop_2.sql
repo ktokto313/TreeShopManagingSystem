@@ -741,3 +741,16 @@ ALTER TABLE blog_images
     ADD COLUMN IF NOT EXISTS file_name  VARCHAR(255),
     ADD COLUMN IF NOT EXISTS content_type VARCHAR(100),
     ALTER COLUMN post_id DROP NOT NULL;
+
+-- ==============================================================
+-- BLOG POSTS / BLOG IMAGES - hỗ trợ chỉnh sửa bài đã đăng (staged edit)
+-- ==============================================================
+
+ALTER TABLE blog_posts
+    ADD COLUMN IF NOT EXISTS pending_title      VARCHAR(300),
+    ADD COLUMN IF NOT EXISTS pending_content    TEXT,
+    ADD COLUMN IF NOT EXISTS pending_thumbnail  TEXT,
+    ADD COLUMN IF NOT EXISTS has_pending_edit   BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE blog_images
+    ADD COLUMN IF NOT EXISTS is_pending BOOLEAN NOT NULL DEFAULT FALSE;

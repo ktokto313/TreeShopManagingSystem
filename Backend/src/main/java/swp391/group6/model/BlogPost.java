@@ -4,7 +4,7 @@
  * Name: BlogPost.java
  * Description: 
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-06-26
+ * Last Change Date: 2026-07-07
  */
 package swp391.group6.model;
 
@@ -46,6 +46,18 @@ public class BlogPost {
     @Column(name = "updated_at")
     private Timestamp updatedAt;
 
+    @Column(name = "pending_title", length = 300)
+    private String pendingTitle;
+
+    @Column(name = "pending_content", columnDefinition = "TEXT")
+    private String pendingContent;
+
+    @Column(name = "pending_thumbnail", columnDefinition = "TEXT")
+    private String pendingThumbnail;
+
+    @Column(name = "has_pending_edit", nullable = false)
+    private boolean hasPendingEdit;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BlogImage> images;
 
@@ -80,4 +92,16 @@ public class BlogPost {
     public Timestamp getUpdatedAt() { return updatedAt; }
 
     public List<BlogImage> getImages() { return images; }
+
+    public String getPendingTitle() { return pendingTitle; }
+    public void setPendingTitle(String pendingTitle) { this.pendingTitle = pendingTitle; }
+
+    public String getPendingContent() { return pendingContent; }
+    public void setPendingContent(String pendingContent) { this.pendingContent = pendingContent; }
+
+    public String getPendingThumbnail() { return pendingThumbnail; }
+    public void setPendingThumbnail(String pendingThumbnail) { this.pendingThumbnail = pendingThumbnail; }
+
+    public boolean isHasPendingEdit() { return hasPendingEdit; }
+    public void setHasPendingEdit(boolean hasPendingEdit) { this.hasPendingEdit = hasPendingEdit; }
 }
