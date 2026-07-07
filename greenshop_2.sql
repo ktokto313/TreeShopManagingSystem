@@ -1,12 +1,23 @@
+DROP TABLE IF EXISTS blog_votes CASCADE;
+DROP TABLE IF EXISTS blog_posts CASCADE;
+DROP TABLE IF EXISTS comments CASCADE;
+DROP TABLE IF EXISTS tickets CASCADE;
+DROP TABLE IF EXISTS reviews CASCADE;
+DROP TABLE IF EXISTS shopping_cart_entry CASCADE;
+DROP TABLE IF EXISTS shopping_carts CASCADE;
+DROP TABLE IF EXISTS order_detail CASCADE;
+DROP TABLE IF EXISTS orders CASCADE;
+DROP TABLE IF EXISTS product_details CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
+DROP TABLE IF EXISTS categories CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS role CASCADE;
 
 CREATE TABLE role (
    id      BIGSERIAL PRIMARY KEY,
    name    VARCHAR(50) NOT NULL UNIQUE
             CHECK (name IN ('CUSTOMER','MANAGER','SHIPPER','SUPPORT_AGENT','SYSTEM_ADMIN'))
 );
-
-INSERT INTO role (name) VALUES
-   ('CUSTOMER'), ('MANAGER'), ('SHIPPER'), ('SUPPORT_AGENT'), ('SYSTEM_ADMIN');
 
 -- ============================================================
 
@@ -54,7 +65,6 @@ CREATE TABLE product_details (
    id          BIGSERIAL PRIMARY KEY,
    product_id  BIGINT NOT NULL UNIQUE REFERENCES products(id) ON DELETE CASCADE,
    description TEXT,
-   variants    JSON,
    images      JSON
 );
 
@@ -68,8 +78,9 @@ CREATE TABLE orders (
    shipping_fee     DECIMAL(10,2) NOT NULL DEFAULT 0.00,
    discount         DECIMAL(10,2) NOT NULL DEFAULT 0.00,
    status           VARCHAR(20) NOT NULL DEFAULT 'PENDING'
-                    CHECK (status IN ('PROCESSING','PENDING','DELIVERING','ARRIVED','RECEIVED','RETURN_PENDING','RETURNING','FAILED')),
-   created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    CHECK (status IN ('PROCESSING','PENDING','DELIVERING','ARRIVED','RECEIVED','RETURN_PROCESSING','RETURN_PENDING','RETURNING','FAILED')),
+   created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   delivery_date    TIMESTAMP
 );
 
 CREATE INDEX idx_orders_customer_id ON orders(customer_id);
@@ -98,6 +109,12 @@ CREATE TABLE shopping_cart_entry (
    product_id  BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
    quantity    INT NOT NULL CHECK (quantity > 0),
    PRIMARY KEY (cart_id, product_id)
+);
+
+CREATE TABLE wishlist_items (
+   customer_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+   product_id  BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+   PRIMARY KEY (customer_id, product_id)
 );
 
 -- ============================================================
@@ -147,18 +164,6 @@ CREATE TABLE comments (
 
 CREATE INDEX idx_comments_ticket ON comments(ticket_id);
 
---DROP TABLE IF EXISTS comments CASCADE;
---DROP TABLE IF EXISTS tickets CASCADE;
---DROP TABLE IF EXISTS reviews CASCADE;
---DROP TABLE IF EXISTS shopping_cart_entry CASCADE;
---DROP TABLE IF EXISTS shopping_carts CASCADE;
---DROP TABLE IF EXISTS order_detail CASCADE;
---DROP TABLE IF EXISTS orders CASCADE;
---DROP TABLE IF EXISTS product_details CASCADE;
---DROP TABLE IF EXISTS products CASCADE;
---DROP TABLE IF EXISTS categories CASCADE;
---DROP TABLE IF EXISTS users CASCADE;
---DROP TABLE IF EXISTS role CASCADE;
 
 -- ============================================================
 --  THÊM BẢNG BLOG
@@ -183,7 +188,9 @@ CREATE INDEX idx_blog_published ON blog_posts(is_published);
 -- ============================================================
 
 -- ROLES (đã có từ trước, bỏ qua nếu đã chạy)
--- INSERT INTO role ...
+INSERT INTO role (name) VALUES
+   ('CUSTOMER'), ('MANAGER'), ('SHIPPER'), ('SUPPORT_AGENT'), ('SYSTEM_ADMIN');
+
 
 -- ============================================================
 --  USERS — 10 người
@@ -330,107 +337,107 @@ INSERT INTO products (category_id, name, price, stock, sku, status) VALUES
 -- ============================================================
 --  PRODUCT DETAILS — 100 bản ghi
 -- ============================================================
-INSERT INTO product_details (product_id, description, variants, images) VALUES
-(1,  'Trầu bà xanh dễ chăm, chịu bóng tốt, lọc không khí hiệu quả. Phù hợp để bàn hoặc góc phòng.', '{"sizes":["nhỏ","vừa","lớn"]}', '["traubaxanh_1.jpg","traubaxanh_2.jpg"]'),
-(2,  'Lưỡi hổ nhỏ thanh lịch, chịu hạn tốt, phù hợp người bận rộn ít có thời gian chăm cây.', '{"sizes":["mini","nhỏ"]}', '["luoiho_1.jpg","luoiho_2.jpg"]'),
-(3,  'Cây kim tiền mang lại may mắn tài lộc, lá tròn xanh bóng đẹp mắt, dễ trồng trong nhà.', '{"sizes":["nhỏ","vừa","lớn"]}', '["kimtien_1.jpg","kimtien_2.jpg"]'),
-(4,  'Cây phát lộc thân thẳng mọc từ bẹ lá, biểu tượng phát tài phát lộc trong phong thủy.', '{"sizes":["nhỏ","vừa"]}', '["phatLoc_1.jpg"]'),
-(5,  'Pothos dây leo mềm mại, lá tim xanh vàng, có thể để treo hoặc đặt bàn để tua rua.', '{"sizes":["mini","nhỏ","vừa"]}', '["pothos_1.jpg","pothos_2.jpg"]'),
-(6,  'Monstera lá xẻ độc đáo, biểu tượng của nội thất hiện đại, phù hợp góc phòng khách.', '{"sizes":["nhỏ","vừa"]}', '["monstera_1.jpg","monstera_2.jpg","monstera_3.jpg"]'),
-(7,  'Trầu bà vàng lá xanh vàng xen kẽ bắt mắt, sinh trưởng nhanh, dễ nhân giống.', '{"sizes":["nhỏ","vừa"]}', '["traubavang_1.jpg"]'),
-(8,  'Dracaena thân thẳng lá dài xanh đậm, phù hợp góc phòng, văn phòng công sở.', '{"sizes":["vừa","lớn"]}', '["dracaena_1.jpg","dracaena_2.jpg"]'),
-(9,  'Ficus nhỏ tán tròn đẹp, lá bóng xanh, phù hợp trang trí bàn tiếp khách.', '{"sizes":["nhỏ","vừa"]}', '["ficus_1.jpg"]'),
-(10, 'Cây bóng nước thân mọng nước, lá xanh bóng, cực dễ chăm, tưới ít vẫn sống tốt.', '{"sizes":["mini","nhỏ"]}', '["bongnuoc_1.jpg"]'),
-(11, 'Lan ý hoa trắng thanh tao, lọc không khí tốt, thích hợp phòng ngủ phòng làm việc.', '{"sizes":["nhỏ","vừa"]}', '["lanY_1.jpg","lanY_2.jpg"]'),
-(12, 'Cọ cảnh mini dáng sang trọng, phù hợp trang trí sảnh, phòng khách cao cấp.', '{"sizes":["nhỏ","vừa","lớn"]}', '["cocanhMini_1.jpg"]'),
-(13, 'Trầu bà đỏ lá đỏ tía nổi bật, tạo điểm nhấn màu sắc cho không gian sống.', '{"sizes":["nhỏ","vừa"]}', '["traubaDo_1.jpg"]'),
-(14, 'ZZ Plant cực chịu bóng và chịu hạn, lá bóng xanh đẹp, phù hợp văn phòng ít sáng.', '{"sizes":["nhỏ","vừa","lớn"]}', '["zzplant_1.jpg","zzplant_2.jpg"]'),
-(15, 'Calathea hoa văn lá đẹp như tranh vẽ, mỗi lá một hoa văn độc đáo, cây trang trí cao cấp.', '{"sizes":["nhỏ","vừa"]}', '["calathea_1.jpg","calathea_2.jpg"]'),
-(16, 'Dương xỉ Boston lá rủ mềm mại, phù hợp treo hoặc đặt trên giá để tạo không gian xanh.', '{"sizes":["nhỏ","vừa"]}', '["duongXi_1.jpg"]'),
-(17, 'Rubber Plant lá to bóng đỏ đen huyền bí, cây to khỏe phù hợp góc phòng khách lớn.', '{"sizes":["vừa","lớn"]}', '["rubberPlant_1.jpg","rubberPlant_2.jpg"]'),
-(18, 'Spider Plant lá xanh sọc trắng, tạo con nhiều, dễ nhân giống, phù hợp người mới chơi cây.', '{"sizes":["nhỏ","vừa"]}', '["spiderPlant_1.jpg"]'),
-(19, 'Anthurium đỏ hoa bền màu sắc rực rỡ, biểu tượng của sự nhiệt huyết và may mắn.', '{"sizes":["nhỏ","vừa"]}', '["anthurium_1.jpg","anthurium_2.jpg"]'),
-(20, 'Peace Lily lớn hoa trắng sang trọng, lọc không khí cực tốt, phù hợp phòng ngủ.', '{"sizes":["vừa","lớn"]}', '["peaceLily_1.jpg","peaceLily_2.jpg"]'),
-(21, 'Hoa hồng đỏ kinh điển thơm ngát, biểu tượng tình yêu, phù hợp trang trí sân vườn ban công.', '{"colors":["đỏ","hồng","trắng"],"sizes":["nhỏ","vừa"]}', '["hoaHong_1.jpg","hoaHong_2.jpg"]'),
-(22, 'Hoa cúc vàng rực rỡ, nở bền, phù hợp trang trí ban công hoặc làm quà tặng.', '{"colors":["vàng","trắng","tím"]}', '["hoaCuc_1.jpg"]'),
-(23, 'Hoa nhài thơm dịu, hoa trắng tinh khiết, phù hợp trồng ban công hoặc sân thượng.', '{"sizes":["nhỏ","vừa"]}', '["hoaNhai_1.jpg"]'),
-(24, 'Hoa giấy đỏ rực rỡ, leo giàn đẹp, phù hợp trang trí cổng nhà, hàng rào, ban công.', '{"colors":["đỏ","hồng","tím","cam"]}', '["hoaGiay_1.jpg","hoaGiay_2.jpg"]'),
-(25, 'Lan vàng hoa sang trọng quý phái, phù hợp làm quà tặng khai trương, sự kiện quan trọng.', '{"sizes":["nhỏ","vừa","lớn"]}', '["lanVang_1.jpg","lanVang_2.jpg"]'),
-(26, 'Hoa tigôn leo giàn hoa nhỏ hồng xinh, phủ kín giàn tạo không gian lãng mạn.', '{"colors":["hồng","đỏ"]}', '["tigon_1.jpg"]'),
-(27, 'Hoa tường vi leo giàn hoa nhỏ nhiều màu, phù hợp trang trí hàng rào sân vườn.', '{"colors":["đỏ","hồng","trắng","tím"]}', '["tuongVi_1.jpg"]'),
-(28, 'Lavender tím thơm dịu, đuổi muỗi tự nhiên, phù hợp trồng ban công hoặc cửa sổ.', '{"sizes":["nhỏ","vừa"]}', '["lavender_1.jpg","lavender_2.jpg"]'),
-(29, 'Hoa sứ trắng thanh tao hương thơm nhẹ nhàng, phù hợp trồng sân vườn hoặc ban công lớn.', '{"colors":["trắng","vàng","hồng"]}', '["hoaSu_1.jpg"]'),
-(30, 'Trúc nhật lá nhỏ xanh mướt, phù hợp trồng hàng rào hoặc trang trí sân vườn.', '{"sizes":["nhỏ","vừa","lớn"]}', '["trucNhat_1.jpg"]'),
-(31, 'Sanh bonsai mini dáng đẹp uốn lượn nghệ thuật, phù hợp để bàn làm việc hoặc kệ trang trí.', '{"sizes":["mini","nhỏ"]}', '["sanhBonsai_1.jpg","sanhBonsai_2.jpg"]'),
-(32, 'Mai vàng bonsai mini cánh vàng rực rỡ, biểu tượng may mắn ngày Tết.', '{"sizes":["mini","nhỏ","vừa"]}', '["maiVang_1.jpg","maiVang_2.jpg"]'),
-(33, 'Hoa đào mini cánh hồng dịu dàng, biểu tượng mùa xuân phương Bắc.', '{"sizes":["mini","nhỏ"]}', '["hoaDào_1.jpg"]'),
-(34, 'Cây ngâu hoa vàng thơm ngát, phù hợp trồng sân vườn, biểu tượng may mắn.', '{"sizes":["nhỏ","vừa"]}', '["ngau_1.jpg"]'),
-(35, 'Hoa mộc hương thơm đặc trưng, hoa trắng nhỏ li ti, phù hợp sân vườn ban công.', '{"sizes":["nhỏ","vừa"]}', '["hoaMoc_1.jpg"]'),
-(36, 'Xương rồng để bàn hình cầu đẹp, dễ chăm, phù hợp trang trí bàn làm việc.', '{"sizes":["mini","nhỏ"]}', '["xuongRongBan_1.jpg"]'),
-(37, 'Combo sen đá mix nhiều màu đẹp mắt, phù hợp trang trí bàn học bàn làm việc.', '{"quantity":["3 cây","5 cây","10 cây"]}', '["senDaMix_1.jpg","senDaMix_2.jpg"]'),
-(38, 'Kim ngân bàn lá xanh bóng nhỏ gọn, mang lại tài lộc, phù hợp để bàn làm việc.', '{"sizes":["mini","nhỏ"]}', '["kimNganBan_1.jpg"]'),
-(39, 'Lưỡi hổ mini cực nhỏ gọn, có thể đặt trên bàn phím, cửa sổ nhỏ.', '{"sizes":["mini"]}', '["luoiHoMini_1.jpg"]'),
-(40, 'Pothos mini để bàn lá xanh tươi, tưới ít, phù hợp văn phòng bận rộn.', '{"sizes":["mini","nhỏ"]}', '["pothosMini_1.jpg"]'),
-(41, 'Tre lucky bamboo thân thẳng xanh mướt, biểu tượng may mắn bền lâu trong phong thủy.', '{"stems":["1 cành","3 cành","5 cành","7 cành"]}', '["luckyBamboo_1.jpg","luckyBamboo_2.jpg"]'),
-(42, 'Cây phú quý mini lá đẹp bóng xanh, mang lại phú quý sung túc cho gia chủ.', '{"sizes":["mini","nhỏ"]}', '["phuQuy_1.jpg"]'),
-(43, 'Cẩm thạch bàn lá xanh đậm sọc vàng thanh lịch, phù hợp trang trí bàn tiếp khách.', '{"sizes":["nhỏ","vừa"]}', '["camThach_1.jpg"]'),
-(44, 'Thanh long mini cảnh dáng thẳng độc đáo, dễ chăm, phù hợp bàn làm việc.', '{"sizes":["mini","nhỏ"]}', '["thanhLongMini_1.jpg"]'),
-(45, 'Peperomia tròn lá dày mọng nước, chịu hạn tốt, nhiều màu sắc đẹp mắt.', '{"colors":["xanh","đỏ","vàng sọc"]}', '["peperomia_1.jpg","peperomia_2.jpg"]'),
-(46, 'Haworthia mini lá cứng hoa văn đẹp, chịu bóng tốt, phù hợp bàn làm việc ít sáng.', '{"sizes":["mini","nhỏ"]}', '["haworthia_1.jpg"]'),
-(47, 'Hoya tim lá hình trái tim độc đáo, leo giàn hoặc để treo tạo điểm nhấn.', '{"sizes":["nhỏ","vừa"]}', '["hoyaTim_1.jpg","hoyaTim_2.jpg"]'),
-(48, 'Pilea tròn lá tròn xanh bóng như đồng xu, biểu tượng may mắn tài lộc.', '{"sizes":["mini","nhỏ","vừa"]}', '["pilea_1.jpg"]'),
-(49, 'String of Pearls lá hình hạt ngọc độc đáo, thích hợp treo tạo màn lá ấn tượng.', '{"sizes":["nhỏ","vừa"]}', '["stringOfPearls_1.jpg","stringOfPearls_2.jpg"]'),
-(50, 'Combo cactus mix để bàn nhiều hình dáng độc đáo, phù hợp trang trí bàn làm việc.', '{"quantity":["3 cây","5 cây"]}', '["cactusMix_1.jpg"]'),
-(51, 'Sen đá Echeveria hồng cánh hoa xếp tầng đẹp như hoa hồng thu nhỏ.', '{"sizes":["mini","nhỏ","vừa"]}', '["echeveriaHong_1.jpg","echeveriaHong_2.jpg"]'),
-(52, 'Sen đá Echeveria tím màu tím xanh huyền bí, phù hợp trang trí bàn học.', '{"sizes":["mini","nhỏ"]}', '["echeveriaTim_1.jpg"]'),
-(53, 'Sen đá Echeveria xanh lá xanh mướt tươi mát, dễ trồng phù hợp người mới.', '{"sizes":["mini","nhỏ","vừa"]}', '["echeveriaXanh_1.jpg"]'),
-(54, 'Haworthia sọc lá cứng sọc trắng đặc trưng, chịu bóng xuất sắc.', '{"sizes":["mini","nhỏ"]}', '["haworthiaSoc_1.jpg"]'),
-(55, 'Crassula Jade lá xanh dày mọng, biểu tượng may mắn tài lộc trong phong thủy.', '{"sizes":["nhỏ","vừa","lớn"]}', '["crassula_1.jpg","crassula_2.jpg"]'),
-(56, 'Aloe mini lá dày có gai nhỏ, nhựa lô hội dưỡng da, đa công dụng.', '{"sizes":["mini","nhỏ"]}', '["aloeMini_1.jpg"]'),
-(57, 'Xương rồng cầu vàng hình cầu tròn đẹp, gai vàng nổi bật, dễ chăm.', '{"sizes":["mini","nhỏ","vừa"]}', '["caulVang_1.jpg","cauVang_2.jpg"]'),
-(58, 'Xương rồng cột thân cột thẳng cao, phù hợp trang trí góc phòng hoặc sân vườn.', '{"sizes":["nhỏ","vừa","lớn"]}', '["xuongRongCot_1.jpg"]'),
-(59, 'Xương rồng tai thỏ hình dáng độc đáo như tai thỏ, màu xanh mướt dễ thương.', '{"sizes":["mini","nhỏ","vừa"]}', '["taiTho_1.jpg","taiTho_2.jpg"]'),
-(60, 'Xương rồng hoa đỏ nở hoa đỏ rực rỡ theo mùa, tạo điểm nhấn bắt mắt.', '{"sizes":["nhỏ","vừa"]}', '["xuongRongHoa_1.jpg"]'),
-(61, 'Sedum mix combo nhiều loại sedum màu sắc đa dạng, phù hợp làm vườn mini.', '{"quantity":["5 cây","10 cây","20 cây"]}', '["sedumMix_1.jpg"]'),
-(62, 'Aeonium đen lá đen huyền bí độc đáo, điểm nhấn ấn tượng trong bộ sưu tập sen đá.', '{"sizes":["nhỏ","vừa"]}', '["aeoniumDen_1.jpg","aeoniumDen_2.jpg"]'),
-(63, 'Thanh long mini cảnh cây nhỏ gọn dễ chăm, phù hợp ban công nhỏ.', '{"sizes":["mini","nhỏ"]}', '["thanhLongMiniSD_1.jpg"]'),
-(64, 'Hộp sen đá mix 5 cây nhiều màu được chọn lọc kỹ, phù hợp làm quà tặng.', '{"box_size":["nhỏ","vừa"]}', '["hopSenDa_1.jpg","hopSenDa_2.jpg"]'),
-(65, 'Xương rồng san hô hình dáng phân nhánh như san hô biển, độc đáo và lạ mắt.', '{"sizes":["nhỏ","vừa"]}', '["sanHo_1.jpg"]'),
-(66, 'Kim tiền phong thủy lá tròn xanh bóng, trồng trong chậu đẹp mang lại tài lộc.', '{"sizes":["nhỏ","vừa","lớn"]}', '["kimTienPT_1.jpg","kimTienPT_2.jpg"]'),
-(67, 'Kim ngân phong thủy thân xoắn biểu tượng may mắn, phù hợp để bàn làm việc.', '{"sizes":["nhỏ","vừa"]}', '["kimNganPT_1.jpg"]'),
-(68, 'Phát lộc phong thủy chậu đẹp sang trọng, phù hợp làm quà tặng khai trương.', '{"sizes":["nhỏ","vừa","lớn"]}', '["phatLocPT_1.jpg","phatLocPT_2.jpg"]'),
-(69, 'Trúc phú quý thân thẳng xanh mướt, biểu tượng phú quý thịnh vượng lâu dài.', '{"sizes":["nhỏ","vừa"]}', '["trucPhuQuy_1.jpg"]'),
-(70, 'Cây vạn lộc lá xanh bóng đẹp, mang lại vạn điều may mắn cho gia chủ.', '{"sizes":["nhỏ","vừa","lớn"]}', '["vanLoc_1.jpg"]'),
-(71, 'Cẩm thạch đứng dáng thẳng thanh lịch, lá xanh đậm sọc vàng nổi bật.', '{"sizes":["vừa","lớn"]}', '["camThachDung_1.jpg","camThachDung_2.jpg"]'),
-(72, 'Thiết mộc lan hoa nhỏ thơm ngát đặc trưng, mang lại vượng khí cho không gian.', '{"sizes":["nhỏ","vừa"]}', '["thietMocLan_1.jpg"]'),
-(73, 'Sung bonsai quả đỏ sum suê biểu tượng sung túc đủ đầy, phù hợp phong thủy.', '{"sizes":["nhỏ","vừa"]}', '["sungBonsai_1.jpg","sungBonsai_2.jpg"]'),
-(74, 'Cây hạnh phúc lá xanh mướt tươi tốt, biểu tượng gia đình hạnh phúc bền vững.', '{"sizes":["nhỏ","vừa","lớn"]}', '["hanhPhuc_1.jpg"]'),
-(75, 'Đại phú gia cây to lớn sang trọng, phù hợp trang trí sảnh công ty biệt thự.', '{"sizes":["vừa","lớn","rất lớn"]}', '["daiPhuGia_1.jpg","daiPhuGia_2.jpg"]'),
-(76, 'Chậu nhựa tròn nhỏ nhẹ bền chắc, nhiều màu sắc, phù hợp cây nhỏ để bàn.', '{"colors":["trắng","đen","xanh lá","đỏ"],"diameter":"12cm"}', '["chauNhuaNho_1.jpg"]'),
-(77, 'Chậu nhựa tròn vừa dày dặn bền bỉ, phù hợp các loại cây cảnh vừa và nhỏ.', '{"colors":["trắng","đen","xanh lá"],"diameter":"20cm"}', '["chauNhuaVua_1.jpg"]'),
-(78, 'Chậu đất nung nhỏ thoáng khí tốt cho rễ cây, phù hợp sen đá xương rồng.', '{"diameter":"10cm"}', '["chauDatNungNho_1.jpg"]'),
-(79, 'Chậu đất nung vừa thoát nước tốt, phù hợp cây cảnh trong nhà và ngoài trời.', '{"diameter":"20cm"}', '["chauDatNungVua_1.jpg"]'),
-(80, 'Chậu sứ trắng nhỏ sang trọng tinh tế, phù hợp trang trí nội thất hiện đại.', '{"diameter":"12cm"}', '["chauSuTrangNho_1.jpg"]'),
-(81, 'Chậu sứ trắng vừa cao cấp sang trọng, tôn lên vẻ đẹp của mọi loại cây cảnh.', '{"diameter":"20cm"}', '["chauSuTrangVua_1.jpg","chauSuTrangVua_2.jpg"]'),
-(82, 'Chậu treo nhựa nhẹ có lỗ thoát nước, phù hợp cây dây leo treo ban công.', '{"colors":["trắng","đen","xanh"],"diameter":"15cm"}', '["chauTreo_1.jpg"]'),
-(83, 'Đất trồng thông dụng 5L đã xử lý sạch, tơi xốp, phù hợp mọi loại cây cảnh.', '{"weight":"5kg"}', '["datTrong_1.jpg"]'),
-(84, 'Đất trồng sen đá 3L thoát nước tốt pha sẵn cát, phù hợp sen đá xương rồng.', '{"weight":"3kg"}', '["datSenDa_1.jpg"]'),
-(85, 'Phân bón lá hữu cơ an toàn tự nhiên, giúp lá cây xanh bóng đẹp hơn.', '{"volume":"500ml","type":"phun lá"}', '["phanBonLa_1.jpg"]'),
-(86, 'Phân NPK tổng hợp đầy đủ dinh dưỡng, phù hợp bón gốc cho mọi loại cây cảnh.', '{"weight":"500g","ratio":"20-20-20"}', '["phanNPK_1.jpg"]'),
-(87, 'Bình tưới nhỏ 1L vòi dài tiện tưới cây trong nhà, nhẹ dễ sử dụng.', '{"capacity":"1L","colors":["trắng","xanh"]}', '["binhTuoiNho_1.jpg"]'),
-(88, 'Bình tưới vừa 3L dung tích lớn hơn, phù hợp tưới nhiều cây hoặc cây to.', '{"capacity":"3L","colors":["xanh lá","trắng"]}', '["binhTuoiVua_1.jpg"]'),
-(89, 'Kéo cắt tỉa cây lưỡi thép không gỉ sắc bén, cán nhựa chống trơn dễ cầm.', '{"material":"thép không gỉ"}', '["keoTia_1.jpg"]'),
-(90, 'Bộ dụng cụ làm vườn mini 5 món xẻng bay kéo tưới, phù hợp vườn mini trong nhà.', '{"pieces":5,"material":"thép+nhựa"}', '["boLamVuon_1.jpg","boLamVuon_2.jpg"]'),
-(91, 'Chậu xi măng thủ công độc đáo handmade, phong cách rustic, mỗi cái một kiểu riêng.', '{"sizes":["nhỏ","vừa"],"style":"rustic handmade"}', '["chauXiMang_1.jpg","chauXiMang_2.jpg"]'),
-(92, 'Giá đỡ cây gỗ tự nhiên thiết kế tối giản, phù hợp nội thất Bắc Âu hiện đại.', '{"material":"gỗ thông","sizes":["thấp","cao"]}', '["giaDoGo_1.jpg"]'),
-(93, 'Lưới che nắng 2x3m che 70% ánh nắng, bảo vệ cây khỏi nắng gắt mùa hè.', '{"size":"2x3m","shade":"70%"}', '["luoiCheNang_1.jpg"]'),
-(94, 'Thuốc trừ sâu hữu cơ an toàn cho người vật nuôi, diệt sâu bệnh hiệu quả.', '{"volume":"300ml","type":"hữu cơ sinh học"}', '["thuocTruSau_1.jpg"]'),
-(95, 'Que đo độ ẩm đất giúp biết chính xác khi nào cần tưới, tránh tưới thừa thiếu.', '{"type":"cơ học không cần pin"}', '["queDoAmDat_1.jpg"]'),
-(96, 'Chậu nhựa vuông nhỏ thiết kế vuông vắn hiện đại, phù hợp xếp thành dãy.', '{"colors":["đen","trắng","xanh"],"size":"10x10cm"}', '["chauVuong_1.jpg"]'),
-(97, 'Đá bọt 1kg thoát nước và thông khí tốt cho rễ, dùng lót đáy chậu rất hiệu quả.', '{"weight":"1kg"}', '["daBotLot_1.jpg"]'),
-(98, 'Phân trùn quế 2kg hữu cơ tự nhiên giàu dinh dưỡng, an toàn cho cây và đất.', '{"weight":"2kg","type":"hữu cơ 100%"}', '["phanTrunQue_1.jpg"]'),
-(99, 'Bình xịt phun sương 500ml phun mịn đều, phù hợp làm ẩm lá cây trong nhà.', '{"capacity":"500ml","type":"phun sương mịn"}', '["binhXitSuong_1.jpg"]'),
-(100,'Chậu nhựa treo hàng rào thiết kế riêng gắn hàng rào, phù hợp trồng hoa ban công.', '{"colors":["xanh","trắng","đen"],"type":"gắn hàng rào"}', '["chauTreoHangRao_1.jpg"]');
+INSERT INTO product_details (product_id, description, images) VALUES
+(1,  'Trầu bà xanh dễ chăm, chịu bóng tốt, lọc không khí hiệu quả. Phù hợp để bàn hoặc góc phòng.', '["traubaxanh_1.jpg","traubaxanh_2.jpg"]'),
+(2,  'Lưỡi hổ nhỏ thanh lịch, chịu hạn tốt, phù hợp người bận rộn ít có thời gian chăm cây.', '["luoiho_1.jpg","luoiho_2.jpg"]'),
+(3,  'Cây kim tiền mang lại may mắn tài lộc, lá tròn xanh bóng đẹp mắt, dễ trồng trong nhà.', '["kimtien_1.jpg","kimtien_2.jpg"]'),
+(4,  'Cây phát lộc thân thẳng mọc từ bẹ lá, biểu tượng phát tài phát lộc trong phong thủy.', '["phatLoc_1.jpg"]'),
+(5,  'Pothos dây leo mềm mại, lá tim xanh vàng, có thể để treo hoặc đặt bàn để tua rua.', '["pothos_1.jpg","pothos_2.jpg"]'),
+(6,  'Monstera lá xẻ độc đáo, biểu tượng của nội thất hiện đại, phù hợp góc phòng khách.', '["monstera_1.jpg","monstera_2.jpg","monstera_3.jpg"]'),
+(7,  'Trầu bà vàng lá xanh vàng xen kẽ bắt mắt, sinh trưởng nhanh, dễ nhân giống.', '["traubavang_1.jpg"]'),
+(8,  'Dracaena thân thẳng lá dài xanh đậm, phù hợp góc phòng, văn phòng công sở.', '["dracaena_1.jpg","dracaena_2.jpg"]'),
+(9,  'Ficus nhỏ tán tròn đẹp, lá bóng xanh, phù hợp trang trí bàn tiếp khách.', '["ficus_1.jpg"]'),
+(10, 'Cây bóng nước thân mọng nước, lá xanh bóng, cực dễ chăm, tưới ít vẫn sống tốt.', '["bongnuoc_1.jpg"]'),
+(11, 'Lan ý hoa trắng thanh tao, lọc không khí tốt, thích hợp phòng ngủ phòng làm việc.', '["lanY_1.jpg","lanY_2.jpg"]'),
+(12, 'Cọ cảnh mini dáng sang trọng, phù hợp trang trí sảnh, phòng khách cao cấp.', '["cocanhMini_1.jpg"]'),
+(13, 'Trầu bà đỏ lá đỏ tía nổi bật, tạo điểm nhấn màu sắc cho không gian sống.', '["traubaDo_1.jpg"]'),
+(14, 'ZZ Plant cực chịu bóng và chịu hạn, lá bóng xanh đẹp, phù hợp văn phòng ít sáng.', '["zzplant_1.jpg","zzplant_2.jpg"]'),
+(15, 'Calathea hoa văn lá đẹp như tranh vẽ, mỗi lá một hoa văn độc đáo, cây trang trí cao cấp.', '["calathea_1.jpg","calathea_2.jpg"]'),
+(16, 'Dương xỉ Boston lá rủ mềm mại, phù hợp treo hoặc đặt trên giá để tạo không gian xanh.', '["duongXi_1.jpg"]'),
+(17, 'Rubber Plant lá to bóng đỏ đen huyền bí, cây to khỏe phù hợp góc phòng khách lớn.', '["rubberPlant_1.jpg","rubberPlant_2.jpg"]'),
+(18, 'Spider Plant lá xanh sọc trắng, tạo con nhiều, dễ nhân giống, phù hợp người mới chơi cây.', '["spiderPlant_1.jpg"]'),
+(19, 'Anthurium đỏ hoa bền màu sắc rực rỡ, biểu tượng của sự nhiệt huyết và may mắn.', '["anthurium_1.jpg","anthurium_2.jpg"]'),
+(20, 'Peace Lily lớn hoa trắng sang trọng, lọc không khí cực tốt, phù hợp phòng ngủ.', '["peaceLily_1.jpg","peaceLily_2.jpg"]'),
+(21, 'Hoa hồng đỏ kinh điển thơm ngát, biểu tượng tình yêu, phù hợp trang trí sân vườn ban công.', '["hoaHong_1.jpg","hoaHong_2.jpg"]'),
+(22, 'Hoa cúc vàng rực rỡ, nở bền, phù hợp trang trí ban công hoặc làm quà tặng.', '["hoaCuc_1.jpg"]'),
+(23, 'Hoa nhài thơm dịu, hoa trắng tinh khiết, phù hợp trồng ban công hoặc sân thượng.', '["hoaNhai_1.jpg"]'),
+(24, 'Hoa giấy đỏ rực rỡ, leo giàn đẹp, phù hợp trang trí cổng nhà, hàng rào, ban công.', '["hoaGiay_1.jpg","hoaGiay_2.jpg"]'),
+(25, 'Lan vàng hoa sang trọng quý phái, phù hợp làm quà tặng khai trương, sự kiện quan trọng.', '["lanVang_1.jpg","lanVang_2.jpg"]'),
+(26, 'Hoa tigôn leo giàn hoa nhỏ hồng xinh, phủ kín giàn tạo không gian lãng mạn.', '["tigon_1.jpg"]'),
+(27, 'Hoa tường vi leo giàn hoa nhỏ nhiều màu, phù hợp trang trí hàng rào sân vườn.', '["tuongVi_1.jpg"]'),
+(28, 'Lavender tím thơm dịu, đuổi muỗi tự nhiên, phù hợp trồng ban công hoặc cửa sổ.', '["lavender_1.jpg","lavender_2.jpg"]'),
+(29, 'Hoa sứ trắng thanh tao hương thơm nhẹ nhàng, phù hợp trồng sân vườn hoặc ban công lớn.', '["hoaSu_1.jpg"]'),
+(30, 'Trúc nhật lá nhỏ xanh mướt, phù hợp trồng hàng rào hoặc trang trí sân vườn.', '["trucNhat_1.jpg"]'),
+(31, 'Sanh bonsai mini dáng đẹp uốn lượn nghệ thuật, phù hợp để bàn làm việc hoặc kệ trang trí.', '["sanhBonsai_1.jpg","sanhBonsai_2.jpg"]'),
+(32, 'Mai vàng bonsai mini cánh vàng rực rỡ, biểu tượng may mắn ngày Tết.', '["maiVang_1.jpg","maiVang_2.jpg"]'),
+(33, 'Hoa đào mini cánh hồng dịu dàng, biểu tượng mùa xuân phương Bắc.', '["hoaDào_1.jpg"]'),
+(34, 'Cây ngâu hoa vàng thơm ngát, phù hợp trồng sân vườn, biểu tượng may mắn.', '["ngau_1.jpg"]'),
+(35, 'Hoa mộc hương thơm đặc trưng, hoa trắng nhỏ li ti, phù hợp sân vườn ban công.', '["hoaMoc_1.jpg"]'),
+(36, 'Xương rồng để bàn hình cầu đẹp, dễ chăm, phù hợp trang trí bàn làm việc.', '["xuongRongBan_1.jpg"]'),
+(37, 'Combo sen đá mix nhiều màu đẹp mắt, phù hợp trang trí bàn học bàn làm việc.', '["senDaMix_1.jpg","senDaMix_2.jpg"]'),
+(38, 'Kim ngân bàn lá xanh bóng nhỏ gọn, mang lại tài lộc, phù hợp để bàn làm việc.', '["kimNganBan_1.jpg"]'),
+(39, 'Lưỡi hổ mini cực nhỏ gọn, có thể đặt trên bàn phím, cửa sổ nhỏ.', '["luoiHoMini_1.jpg"]'),
+(40, 'Pothos mini để bàn lá xanh tươi, tưới ít, phù hợp văn phòng bận rộn.', '["pothosMini_1.jpg"]'),
+(41, 'Tre lucky bamboo thân thẳng xanh mướt, biểu tượng may mắn bền lâu trong phong thủy.', '["luckyBamboo_1.jpg","luckyBamboo_2.jpg"]'),
+(42, 'Cây phú quý mini lá đẹp bóng xanh, mang lại phú quý sung túc cho gia chủ.', '["phuQuy_1.jpg"]'),
+(43, 'Cẩm thạch bàn lá xanh đậm sọc vàng thanh lịch, phù hợp trang trí bàn tiếp khách.', '["camThach_1.jpg"]'),
+(44, 'Thanh long mini cảnh dáng thẳng độc đáo, dễ chăm, phù hợp bàn làm việc.', '["thanhLongMini_1.jpg"]'),
+(45, 'Peperomia tròn lá dày mọng nước, chịu hạn tốt, nhiều màu sắc đẹp mắt.', '["peperomia_1.jpg","peperomia_2.jpg"]'),
+(46, 'Haworthia mini lá cứng hoa văn đẹp, chịu bóng tốt, phù hợp bàn làm việc ít sáng.', '["haworthia_1.jpg"]'),
+(47, 'Hoya tim lá hình trái tim độc đáo, leo giàn hoặc để treo tạo điểm nhấn.', '["hoyaTim_1.jpg","hoyaTim_2.jpg"]'),
+(48, 'Pilea tròn lá tròn xanh bóng như đồng xu, biểu tượng may mắn tài lộc.', '["pilea_1.jpg"]'),
+(49, 'String of Pearls lá hình hạt ngọc độc đáo, thích hợp treo tạo màn lá ấn tượng.', '["stringOfPearls_1.jpg","stringOfPearls_2.jpg"]'),
+(50, 'Combo cactus mix để bàn nhiều hình dáng độc đáo, phù hợp trang trí bàn làm việc.', '["cactusMix_1.jpg"]'),
+(51, 'Sen đá Echeveria hồng cánh hoa xếp tầng đẹp như hoa hồng thu nhỏ.', '["echeveriaHong_1.jpg","echeveriaHong_2.jpg"]'),
+(52, 'Sen đá Echeveria tím màu tím xanh huyền bí, phù hợp trang trí bàn học.', '["echeveriaTim_1.jpg"]'),
+(53, 'Sen đá Echeveria xanh lá xanh mướt tươi mát, dễ trồng phù hợp người mới.', '["echeveriaXanh_1.jpg"]'),
+(54, 'Haworthia sọc lá cứng sọc trắng đặc trưng, chịu bóng xuất sắc.', '["haworthiaSoc_1.jpg"]'),
+(55, 'Crassula Jade lá xanh dày mọng, biểu tượng may mắn tài lộc trong phong thủy.', '["crassula_1.jpg","crassula_2.jpg"]'),
+(56, 'Aloe mini lá dày có gai nhỏ, nhựa lô hội dưỡng da, đa công dụng.', '["aloeMini_1.jpg"]'),
+(57, 'Xương rồng cầu vàng hình cầu tròn đẹp, gai vàng nổi bật, dễ chăm.', '["caulVang_1.jpg","cauVang_2.jpg"]'),
+(58, 'Xương rồng cột thân cột thẳng cao, phù hợp trang trí góc phòng hoặc sân vườn.', '["xuongRongCot_1.jpg"]'),
+(59, 'Xương rồng tai thỏ hình dáng độc đáo như tai thỏ, màu xanh mướt dễ thương.', '["taiTho_1.jpg","taiTho_2.jpg"]'),
+(60, 'Xương rồng hoa đỏ nở hoa đỏ rực rỡ theo mùa, tạo điểm nhấn bắt mắt.', '["xuongRongHoa_1.jpg"]'),
+(61, 'Sedum mix combo nhiều loại sedum màu sắc đa dạng, phù hợp làm vườn mini.', '["sedumMix_1.jpg"]'),
+(62, 'Aeonium đen lá đen huyền bí độc đáo, điểm nhấn ấn tượng trong bộ sưu tập sen đá.', '["aeoniumDen_1.jpg","aeoniumDen_2.jpg"]'),
+(63, 'Thanh long mini cảnh cây nhỏ gọn dễ chăm, phù hợp ban công nhỏ.', '["thanhLongMiniSD_1.jpg"]'),
+(64, 'Hộp sen đá mix 5 cây nhiều màu được chọn lọc kỹ, phù hợp làm quà tặng.', '["hopSenDa_1.jpg","hopSenDa_2.jpg"]'),
+(65, 'Xương rồng san hô hình dáng phân nhánh như san hô biển, độc đáo và lạ mắt.', '["sanHo_1.jpg"]'),
+(66, 'Kim tiền phong thủy lá tròn xanh bóng, trồng trong chậu đẹp mang lại tài lộc.', '["kimTienPT_1.jpg","kimTienPT_2.jpg"]'),
+(67, 'Kim ngân phong thủy thân xoắn biểu tượng may mắn, phù hợp để bàn làm việc.', '["kimNganPT_1.jpg"]'),
+(68, 'Phát lộc phong thủy chậu đẹp sang trọng, phù hợp làm quà tặng khai trương.', '["phatLocPT_1.jpg","phatLocPT_2.jpg"]'),
+(69, 'Trúc phú quý thân thẳng xanh mướt, biểu tượng phú quý thịnh vượng lâu dài.', '["trucPhuQuy_1.jpg"]'),
+(70, 'Cây vạn lộc lá xanh bóng đẹp, mang lại vạn điều may mắn cho gia chủ.', '["vanLoc_1.jpg"]'),
+(71, 'Cẩm thạch đứng dáng thẳng thanh lịch, lá xanh đậm sọc vàng nổi bật.', '["camThachDung_1.jpg","camThachDung_2.jpg"]'),
+(72, 'Thiết mộc lan hoa nhỏ thơm ngát đặc trưng, mang lại vượng khí cho không gian.', '["thietMocLan_1.jpg"]'),
+(73, 'Sung bonsai quả đỏ sum suê biểu tượng sung túc đủ đầy, phù hợp phong thủy.', '["sungBonsai_1.jpg","sungBonsai_2.jpg"]'),
+(74, 'Cây hạnh phúc lá xanh mướt tươi tốt, biểu tượng gia đình hạnh phúc bền vững.', '["hanhPhuc_1.jpg"]'),
+(75, 'Đại phú gia cây to lớn sang trọng, phù hợp trang trí sảnh công ty biệt thự.', '["daiPhuGia_1.jpg","daiPhuGia_2.jpg"]'),
+(76, 'Chậu nhựa tròn nhỏ nhẹ bền chắc, nhiều màu sắc, phù hợp cây nhỏ để bàn.', '["chauNhuaNho_1.jpg"]'),
+(77, 'Chậu nhựa tròn vừa dày dặn bền bỉ, phù hợp các loại cây cảnh vừa và nhỏ.', '["chauNhuaVua_1.jpg"]'),
+(78, 'Chậu đất nung nhỏ thoáng khí tốt cho rễ cây, phù hợp sen đá xương rồng.', '["chauDatNungNho_1.jpg"]'),
+(79, 'Chậu đất nung vừa thoát nước tốt, phù hợp cây cảnh trong nhà và ngoài trời.', '["chauDatNungVua_1.jpg"]'),
+(80, 'Chậu sứ trắng nhỏ sang trọng tinh tế, phù hợp trang trí nội thất hiện đại.', '["chauSuTrangNho_1.jpg"]'),
+(81, 'Chậu sứ trắng vừa cao cấp sang trọng, tôn lên vẻ đẹp của mọi loại cây cảnh.', '["chauSuTrangVua_1.jpg","chauSuTrangVua_2.jpg"]'),
+(82, 'Chậu treo nhựa nhẹ có lỗ thoát nước, phù hợp cây dây leo treo ban công.', '["chauTreo_1.jpg"]'),
+(83, 'Đất trồng thông dụng 5L đã xử lý sạch, tơi xốp, phù hợp mọi loại cây cảnh.', '["datTrong_1.jpg"]'),
+(84, 'Đất trồng sen đá 3L thoát nước tốt pha sẵn cát, phù hợp sen đá xương rồng.', '["datSenDa_1.jpg"]'),
+(85, 'Phân bón lá hữu cơ an toàn tự nhiên, giúp lá cây xanh bóng đẹp hơn.', '["phanBonLa_1.jpg"]'),
+(86, 'Phân NPK tổng hợp đầy đủ dinh dưỡng, phù hợp bón gốc cho mọi loại cây cảnh.', '["phanNPK_1.jpg"]'),
+(87, 'Bình tưới nhỏ 1L vòi dài tiện tưới cây trong nhà, nhẹ dễ sử dụng.', '["binhTuoiNho_1.jpg"]'),
+(88, 'Bình tưới vừa 3L dung tích lớn hơn, phù hợp tưới nhiều cây hoặc cây to.', '["binhTuoiVua_1.jpg"]'),
+(89, 'Kéo cắt tỉa cây lưỡi thép không gỉ sắc bén, cán nhựa chống trơn dễ cầm.', '["keoTia_1.jpg"]'),
+(90, 'Bộ dụng cụ làm vườn mini 5 món xẻng bay kéo tưới, phù hợp vườn mini trong nhà.', '["boLamVuon_1.jpg","boLamVuon_2.jpg"]'),
+(91, 'Chậu xi măng thủ công độc đáo handmade, phong cách rustic, mỗi cái một kiểu riêng.', '["chauXiMang_1.jpg","chauXiMang_2.jpg"]'),
+(92, 'Giá đỡ cây gỗ tự nhiên thiết kế tối giản, phù hợp nội thất Bắc Âu hiện đại.', '["giaDoGo_1.jpg"]'),
+(93, 'Lưới che nắng 2x3m che 70% ánh nắng, bảo vệ cây khỏi nắng gắt mùa hè.', '["luoiCheNang_1.jpg"]'),
+(94, 'Thuốc trừ sâu hữu cơ an toàn cho người vật nuôi, diệt sâu bệnh hiệu quả.', '["thuocTruSau_1.jpg"]'),
+(95, 'Que đo độ ẩm đất giúp biết chính xác khi nào cần tưới, tránh tưới thừa thiếu.', '["queDoAmDat_1.jpg"]'),
+(96, 'Chậu nhựa vuông nhỏ thiết kế vuông vắn hiện đại, phù hợp xếp thành dãy.', '["chauVuong_1.jpg"]'),
+(97, 'Đá bọt 1kg thoát nước và thông khí tốt cho rễ, dùng lót đáy chậu rất hiệu quả.', '["daBotLot_1.jpg"]'),
+(98, 'Phân trùn quế 2kg hữu cơ tự nhiên giàu dinh dưỡng, an toàn cho cây và đất.', '["phanTrunQue_1.jpg"]'),
+(99, 'Bình xịt phun sương 500ml phun mịn đều, phù hợp làm ẩm lá cây trong nhà.', '["binhXitSuong_1.jpg"]'),
+(100,'Chậu nhựa treo hàng rào thiết kế riêng gắn hàng rào, phù hợp trồng hoa ban công.', '["chauTreoHangRao_1.jpg"]');
 
 -- ============================================================
 --  BLOG POSTS — 10 bài viết
@@ -509,7 +516,14 @@ INSERT INTO orders (customer_id, shipper_id, shipping_address, shipping_fee, dis
 (9,  NULL,'55 Lý Thường Kiệt, Huế',                 30000, 20000,  'PENDING'),
 (10, NULL,'99 Nguyễn Huệ, Cần Thơ',                 30000, 0,      'PENDING'),
 (5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 0,      'DELIVERING'),
-(6,  NULL,'45 Lê Lợi, Quận Hải Châu, Đà Nẵng',      30000, 10000,  'PROCESSING');
+(6,  NULL,'45 Lê Lợi, Quận Hải Châu, Đà Nẵng',      30000, 10000,  'PROCESSING'),
+-- Extra orders for khach1 (customer_id 5)
+(5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 5000,   'RECEIVED'),
+(5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 0,      'RECEIVED'),
+(5,  NULL,'123 Nguyễn Trãi, Quận 1, TP.HCM',        30000, 0,      'PENDING'),
+(5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 15000,  'ARRIVED'),
+(5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 0,      'RETURN_PENDING'),
+(5,  3, '123 Nguyễn Trãi, Quận 1, TP.HCM',          30000, 10000,  'RECEIVED');
 
 -- ============================================================
 --  ORDER DETAILS
@@ -527,15 +541,28 @@ INSERT INTO order_detail (order_id, product_id, quantity, price_paid) VALUES
 (6, 22,  3,  95000),
 (7, 3,   1, 120000),
 (7, 51,  2,  45000),
-(8, 64,  1, 150000),
-(8, 98,  1,  65000);
+(8,  64,  1, 150000),
+(8,  98,  1,  65000),
+-- Extra order_details for khach1
+(9,  11,  2, 130000),
+(9,  12,  1, 220000),
+(10, 24,  1, 150000),
+(10, 25,  2, 380000),
+(11, 31,  1, 450000),
+(11, 32,  1, 520000),
+(12, 44,  5,  70000),
+(12, 45,  3,  90000),
+(13, 58,  2,  75000),
+(13, 59,  1,  55000),
+(14, 76,  4,  25000),
+(14, 77,  2,  45000);
 
 -- ============================================================
 --  REVIEWS
 -- ============================================================
 INSERT INTO reviews (order_id, product_id, customer_id, rating, comment) VALUES
-(1, 1, 5, 5, 'Cây đẹp đúng như mô tả, đóng gói cẩn thận, giao hàng nhanh. Rất hài lòng!'),
-(1, 2, 5, 4, 'Chậu đẹp, chất lượng tốt, giá hợp lý. Sẽ mua lại lần sau.'),
+(1, 3, 5, 5, 'Cây đẹp đúng như mô tả, đóng gói cẩn thận, giao hàng nhanh. Rất hài lòng!'),
+(1, 76, 5, 4, 'Chậu đẹp, chất lượng tốt, giá hợp lý. Sẽ mua lại lần sau.'),
 (2, 3, 6, 5, 'Monstera đẹp lắm, lá to khỏe, không bị dập nát khi vận chuyển. 5 sao!'),
 (3, 4, 7, 4, 'ZZ Plant khỏe mạnh, đúng size, tuy nhiên chậu hơi nhỏ so với cây.'),
 (7, 5, 5, 5, 'Mua lần 2 vẫn rất hài lòng, kim tiền lên nhanh tốt lắm!');

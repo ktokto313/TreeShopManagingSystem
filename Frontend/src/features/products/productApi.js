@@ -1,6 +1,6 @@
 import { requestJson } from '../../utils/api'
 
-const PRODUCT_API_BASE = '/api/products'
+export const PRODUCT_API_BASE = '/api/products'
 
 export function getProducts(params = {}) {
   const searchParams = new URLSearchParams()

@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Container } from './Container';
 import { AuthContext } from "../../context/AuthContext";
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Button } from '../ui/Button';
 import { HiMenuAlt3 } from "react-icons/hi";
 import { cn } from '../../utils/cn';
@@ -9,8 +9,7 @@ import { RxCross1 } from "react-icons/rx";
 import { RiPlantFill } from "react-icons/ri";
 
 const linkClass = ({ isActive }) =>
-  `text-sm font-medium transition-colors ${
-    isActive ? 'text-interactive' : 'text-black hover:text-interactive'
+  `text-sm font-medium transition-colors ${isActive ? 'text-interactive' : 'text-black hover:text-interactive'
   }`;
 
 const navItemsByRole = {
@@ -24,7 +23,9 @@ const navItemsByRole = {
   CUSTOMER: [
     { label: 'Home', to: '/' },
     { label: 'Catalog', to: '/catalog' },
+    { label: 'Yêu thích', to: '/wishlist' },
     { label: 'Profile', to: '/profile' },
+    { label: 'Orders', to: '/orders' },
     { label: 'Tickets', to: '/tickets/' },
     { label: 'Blog', to: '/blogs' },
   ],
@@ -32,12 +33,14 @@ const navItemsByRole = {
     { label: 'Home', to: '/' },
     { label: 'Manage', to: '/manage' },
     { label: 'Orders', to: '/orders' },
+    { label: 'Statistics', to: '/statistic' },
     { label: 'Profile', to: '/profile' },
     { label: 'Blog', to: '/blogs' },
   ],
   SUPPORT_AGENT: [
     { label: 'Home', to: '/' },
     { label: 'Tickets', to: '/tickets/' },
+    { label: 'Orders', to: '/orders' },
     { label: 'Profile', to: '/profile' },
   ],
   SHIPPER: [
@@ -58,6 +61,47 @@ export function Header({ className = '', ...props }) {
   const { user, logout } = useContext(AuthContext);
   const role = user?.roleName ?? user?.role;
   const navItems = navItemsByRole[role] ?? navItemsByRole.anonymous;
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    if (role !== 'CUSTOMER') return;
+
+  let cancelled = false;
+
+  const loadCartCount = async () => {
+    try {
+      const response = await fetch('/api/cart', {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        setCartCount(0);
+        return;
+      }
+
+      const cart = await response.json();
+      const totalQuantity =
+        cart.items?.reduce((sum, item) => sum + Number(item.quantity ?? 0), 0) ?? 0;
+
+      if (!cancelled) {
+        setCartCount(totalQuantity);
+      }
+    } catch {
+      if (!cancelled) {
+        setCartCount(0);
+      }
+    }
+  };
+
+  loadCartCount();
+
+  window.addEventListener('cart-updated', loadCartCount);
+
+  return () => {
+    cancelled = true;
+    window.removeEventListener('cart-updated', loadCartCount);
+  };
+}, [role]);
 
   const navigate = useNavigate();
 
@@ -70,7 +114,7 @@ export function Header({ className = '', ...props }) {
     >
       <Container className="flex items-center justify-between h-16 gap-4">
         <div className="flex items-center gap-1 font-bold text-lg select-none cursor-pointer" onClick={() => navigate("/")}>
-            <RiPlantFill className='text-xl -mt-0.5 text-green-500'></RiPlantFill>
+          <RiPlantFill className='text-xl -mt-0.5 text-green-500'></RiPlantFill>
           <span className='text-green-600'>Greenshop</span>
         </div>
 
@@ -83,7 +127,15 @@ export function Header({ className = '', ...props }) {
         </nav>
 
         {user && (
-          <div className="lg:flex flex items-center gap-5">
+          <div className="flex items-center gap-3">
+              {role === 'CUSTOMER' && (
+      <NavLink
+        to="/cart"
+        className="text-sm font-medium px-3 py-1.5 rounded-lg border border-stone-300 text-stone-600 hover:bg-green-50 hover:text-interactive hover:border-interactive transition-colors"
+      >
+         Giỏ hàng{cartCount > 0 ? ` (${cartCount})` : ''}
+      </NavLink>
+    )}
             <span className="text-sm text-stone-600 hidden sm:block">
               {user.fullName ?? user.email}
             </span>
@@ -96,39 +148,39 @@ export function Header({ className = '', ...props }) {
 
           </div>
         )}
-        
+
         <Button className="text-lg lg:hidden inline-block" onClick={() => setIsNavOpen(true)}>
-          <HiMenuAlt3/>
+          <HiMenuAlt3 />
         </Button>
 
-        <div className={cn("fixed h-screen w-screen left-full top-0 bottom-0 overflow-y-scroll", 
-          "bg-bg-surface/70 backdrop-blur-sm transition-[left] duration-300", 
-          {"left-0": isNavOpen})}
-          >
-            <div className="flex text-green-600 flex-col p-10 mt-5 gap-2 max-w-125 m-auto relative">
-              {navItems.map((item) => (
-                <NavLink key={item.to} to={item.to} className={cn(linkClass, "p-5 text-left hover:translate-x-2 text-3xl hover:w-full duration-400")} onClick={() => setIsNavOpen(false)} end={item.to === '/'}>
-                  {item.label}
-                </NavLink>
-              ))}
+        <div className={cn("fixed h-screen w-screen left-full top-0 bottom-0 overflow-y-scroll",
+          "bg-bg-surface/70 backdrop-blur-sm transition-[left] duration-300",
+          { "left-0": isNavOpen })}
+        >
+          <div className="flex text-green-600 flex-col p-10 mt-5 gap-2 max-w-125 m-auto relative">
+            {navItems.map((item) => (
+              <NavLink key={item.to} to={item.to} className={cn(linkClass, "p-5 text-left hover:translate-x-2 text-3xl hover:w-full duration-400")} onClick={() => setIsNavOpen(false)} end={item.to === '/'}>
+                {item.label}
+              </NavLink>
+            ))}
 
-              {user && (
-                <div className="ps-5 text-green-700 mt-2 flex flex-col items-start gap-3">
-                  <span className="text-2xl text-stone-600">
-                    {user.fullName ?? user.email}
-                  </span>
-                  <button
-                    onClick={logout}
-                    className="cursor-pointer text-2xl font-medium px-3 py-1.5 rounded-lg border-2 border-stone-400 text-stone-600 hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
+            {user && (
+              <div className="ps-5 text-green-700 mt-2 flex flex-col items-start gap-3">
+                <span className="text-2xl text-stone-600">
+                  {user.fullName ?? user.email}
+                </span>
+                <button
+                  onClick={logout}
+                  className="cursor-pointer text-2xl font-medium px-3 py-1.5 rounded-lg border-2 border-stone-400 text-stone-600 hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
             <Button className="all-revert hover:bg-green-300/50 bg-transparent cursor-pointer p-3 absolute top-0 right-5" onClick={() => setIsNavOpen(false)}>
-              <RxCross1 className="text-3xl text-black"/>
+              <RxCross1 className="text-3xl text-black" />
             </Button>
-            </div>
+          </div>
         </div>
       </Container>
     </header>

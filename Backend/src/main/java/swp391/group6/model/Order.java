@@ -1,3 +1,11 @@
+/*
+ * Author: ktokto313
+ * Created Date: 2026-05-29
+ * Name: Order.java
+ * Description: 
+ * Last Change Author: ktokto313
+ * Last Change Date: 2026-07-03
+ */
 package swp391.group6.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,15 +43,16 @@ public class Order {
     @Column(nullable = false)
     private Timestamp createdAt;
 
+    @Column
+    private Timestamp deliveryDate;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetailList;
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review> reviewList;
 
     public long getId() {
         return id;
@@ -101,6 +110,14 @@ public class Order {
         this.createdAt = createdAt;
     }
 
+    public Timestamp getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(Timestamp deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
+
     public OrderStatus getStatus() {
         return status;
     }
@@ -117,11 +134,4 @@ public class Order {
         this.orderDetailList = orderDetailList;
     }
 
-    public List<Review> getReviewList() {
-        return reviewList;
-    }
-
-    public void setReviewList(List<Review> reviewList) {
-        this.reviewList = reviewList;
-    }
 }

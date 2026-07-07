@@ -1,3 +1,11 @@
+/*
+ * Author: PlotChat
+ * Created Date: 2026-06-08
+ * Name: CommentRepository.java
+ * Description: 
+ * Last Change Author: PlotChat
+ * Last Change Date: 2026-06-08
+ */
 package swp391.group6.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;

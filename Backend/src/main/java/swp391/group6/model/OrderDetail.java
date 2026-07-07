@@ -1,5 +1,14 @@
+/*
+ * Author: ktokto313
+ * Created Date: 2026-05-29
+ * Name: OrderDetail.java
+ * Description: 
+ * Last Change Author: lmd100
+ * Last Change Date: 2026-06-24
+ */
 package swp391.group6.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -14,6 +23,7 @@ public class OrderDetail {
     @ManyToOne
     @MapsId("orderId")
     @JoinColumn(name = "order_id")
+    @JsonIgnore
     private Order order;
 
     @ManyToOne

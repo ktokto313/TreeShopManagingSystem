@@ -1,5 +1,4 @@
 // Created by minhlthe200133
-import { summarizeVariantGroups } from '../../products/utils/variantUtils'
 import { getProductAvailability } from '../../products/utils/productAvailability'
 
 export function parseCatalogImages(value) {
@@ -43,48 +42,70 @@ export function formatCurrency(value) {
   }).format(numberValue)
 }
 
-function normalize(value) {
-  return String(value ?? '').toLowerCase().trim()
+function normalizeSearchText(value) { //dieu chinh de co tim duoc nhung san pham chua unicode
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ')
 }
 
-function matchesText(product, keyword, categoryName) {
-  if (!keyword) {
+function compactSearchText(value) {
+  return normalizeSearchText(value).replace(/\s+/g, '')
+}
+
+//check filter keyword search
+function matchesText(product, keyword, categoryName, searchAliases = []) {
+  const searchValue = normalizeSearchText(keyword)
+
+  if (!searchValue) {
     return true
   }
 
-  const searchValue = normalize(keyword)
+  const compactSearchValue = compactSearchText(searchValue)
   const searchableText = [
     product.name,
     product.sku,
     product.description,
     categoryName,
-    summarizeVariantGroups(product.variants)
-      .map((group) => `${group.name}:${group.values.join(', ')}`)
-      .join(' '),
+    ...searchAliases,
   ]
-    .map(normalize)
+    .map(normalizeSearchText)
     .join(' ')
+  const compactSearchableText = compactSearchText(searchableText)
 
-  return searchableText.includes(searchValue)
+  return searchableText.includes(searchValue) || compactSearchableText.includes(compactSearchValue)
 }
 
-export function matchesCatalogFilters(product, filters, categoryName) {
-  const keyword = normalize(filters.keyword)
+//check filter data
+export function matchesCatalogFilters(product, filters, categoryName, options = {}) {
+  const keyword = filters.keyword
   const selectedCategoryId = String(filters.categoryId ?? '')
   const selectedStatus = String(filters.status ?? '')
   const minPrice = filters.minPrice === '' ? null : Number(filters.minPrice)
   const maxPrice = filters.maxPrice === '' ? null : Number(filters.maxPrice)
-  const isPurchasable = getProductAvailability(product).canPurchase
+  const availability = getProductAvailability(product)
+  const otherCategoryId = options.otherCategoryId ?? 'other'
+  const smallCategoryIds = options.smallCategoryIds ?? new Set()
+  const productCategoryId = String(product.categoryId ?? '')
 
-  if (selectedCategoryId && String(product.categoryId) !== selectedCategoryId) {
+  if (selectedCategoryId === otherCategoryId && !smallCategoryIds.has(productCategoryId)) {
     return false
   }
 
-  if (selectedStatus === 'true' && !isPurchasable) {
+  if (selectedCategoryId && selectedCategoryId !== otherCategoryId && productCategoryId !== selectedCategoryId) {
     return false
   }
 
-  if (selectedStatus === 'false' && isPurchasable) {
+  if (selectedStatus === 'true' && !availability.canPurchase) {
+    return false
+  }
+
+  if (selectedStatus === 'false' && availability.state !== 'out-of-stock') {
     return false
   }
 
@@ -97,10 +118,11 @@ export function matchesCatalogFilters(product, filters, categoryName) {
     return false
   }
 
-  return matchesText(product, keyword, categoryName)
+  return matchesText(product, keyword, categoryName, options.searchAliases)
 }
 
-export function sortCatalogProducts(products, sortKey) {
+//sort products
+export function sortCatalogProducts(products, sortKey) { //sap xap theo vai thu tu nhat dinh
   const sortedProducts = [...products]
 
   switch (sortKey) {
@@ -108,12 +130,10 @@ export function sortCatalogProducts(products, sortKey) {
       return sortedProducts.sort((left, right) => {
         const leftScore =
           Number(left.stock ?? 0) * 2 +
-          parseCatalogImages(left.images).length * 3 +
-          summarizeVariantGroups(left.variants).length
+          parseCatalogImages(left.images).length * 3
         const rightScore =
           Number(right.stock ?? 0) * 2 +
-          parseCatalogImages(right.images).length * 3 +
-          summarizeVariantGroups(right.variants).length
+          parseCatalogImages(right.images).length * 3
 
         if (rightScore !== leftScore) {
           return rightScore - leftScore
@@ -123,10 +143,8 @@ export function sortCatalogProducts(products, sortKey) {
       })
     case 'rating':
       return sortedProducts.sort((left, right) => {
-        const leftScore =
-          summarizeVariantGroups(left.variants).length * 2 + parseCatalogImages(left.images).length
-        const rightScore =
-          summarizeVariantGroups(right.variants).length * 2 + parseCatalogImages(right.images).length
+        const leftScore = parseCatalogImages(left.images).length
+        const rightScore = parseCatalogImages(right.images).length
 
         if (rightScore !== leftScore) {
           return rightScore - leftScore

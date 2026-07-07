@@ -1,9 +1,10 @@
 /*
+ * Author: DucLM
+ * Created Date: 2026-05-29
  * Name: User Repository
- * @Author: DucLM
- * Date: 2026-06-01
- * Version: 2.0
  * Description: Spring Data JPA repository for user persistence, email lookup, and keyword search queries.
+ * Last Change Author: DucLM
+ * Last Change Date: 2026-06-10
  */
 package swp391.group6.repository;
 

@@ -1,3 +1,11 @@
+/*
+ * Author: PlotChat
+ * Created Date: 2026-06-08
+ * Name: CommentService.java
+ * Description: 
+ * Last Change Author: Aiden
+ * Last Change Date: 2026-06-15
+ */
 package swp391.group6.service;
 
 import org.springframework.beans.factory.annotation.Autowired;

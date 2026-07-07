@@ -1,6 +1,17 @@
+/*
+ * Author: ktokto313
+ * Created Date: 2026-06-05
+ * Name: OrderService.java
+ * Description: 
+ * Last Change Author: ktokto313
+ * Last Change Date: 2026-07-03
+ */
 package swp391.group6.service;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.dto.OrderDTO;
 import swp391.group6.exception.InvalidStateTransitionException;
@@ -8,6 +19,7 @@ import swp391.group6.model.*;
 import swp391.group6.repository.OrderRepository;
 import swp391.group6.repository.UserRepository;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,12 +29,15 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final swp391.group6.repository.ReviewRepository reviewRepository;
 
-    public OrderService(OrderRepository orderRepository, UserRepository userRepository) {
+    public OrderService(OrderRepository orderRepository, UserRepository userRepository, swp391.group6.repository.ReviewRepository reviewRepository) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
+        this.reviewRepository = reviewRepository;
     }
 
+    @PreAuthorize("isAuthenticated()")
     public List<Order> getOrders(LoginResponse loginResponse, List<OrderStatus> statuses, String query) {
         if (query == null) query = "";
         boolean hasStatusFilter = statuses != null && !statuses.isEmpty();
@@ -45,6 +60,7 @@ public class OrderService {
         }
     }
 
+    @PreAuthorize("isAuthenticated()")
     public Order getOrder(long id, LoginResponse user) {
         Optional<Order> order;
         if (canAccessAllOrder(user)) {
@@ -65,6 +81,7 @@ public class OrderService {
         return true;
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public boolean changeOrder(LoginResponse loginResponse, long id, OrderDTO order) {
         User user = userRepository.findByEmail(loginResponse.getEmail()).orElse(null);
         if (user == null || !user.getRole().getName().equals("MANAGER")) {
@@ -80,8 +97,8 @@ public class OrderService {
                 existingOrder.setShipper(newShipper);
                 if (existingOrder.getStatus() == OrderStatus.PROCESSING) {
                     tryToChangeState(existingOrder, user, OrderStatus.PENDING);
-                } else if (existingOrder.getStatus() == OrderStatus.RETURN_PENDING) {
-                    tryToChangeState(existingOrder, user, OrderStatus.RETURNING);
+                } else if (existingOrder.getStatus() == OrderStatus.RETURN_PROCESSING) {
+                    tryToChangeState(existingOrder, user, OrderStatus.RETURN_PENDING);
                 }
                 orderRepository.save(existingOrder);
                 return true;
@@ -90,19 +107,22 @@ public class OrderService {
         return false;
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'SHIPPER', 'CUSTOMER')")
     public boolean changeOrderStatus(long id, OrderStatus orderStatus, LoginResponse loginResponse) {
         User user = userRepository.findByEmail(loginResponse.getEmail()).orElse(null);
         Order order = orderRepository.findById(id).orElse(null);
         if (order == null) {
             return false;
         }
-        if (!canModifyAllOrder(loginResponse)) {
-            if (!order.getUser().equals(user) && !order.getShipper().equals(user)) {
-                return false;
-            }
-
-            tryToChangeState(order, user, orderStatus);
+        if (!canAccessAllOrder(loginResponse) && !order.getUser().equals(user) && !order.getShipper().equals(user)) {
+            return false;
         }
+
+        if (order.getUser().equals(user) && orderStatus == OrderStatus.RETURN_PROCESSING) {
+            order.setShipper(null);
+        }
+
+        tryToChangeState(order, user, orderStatus);
 
         orderRepository.save(order);
         return true;
@@ -116,10 +136,14 @@ public class OrderService {
             throw new InvalidStateTransitionException(
                 "Cannot transition order from " + currentStatus + " to " + targetStatus
                     + " with role " + roleName);
-        } else if (order.getShipper() == null) {
+        } else if (targetStatus != OrderStatus.RETURN_PROCESSING && order.getShipper() == null) {
             throw new InvalidStateTransitionException(
                 "Cannot transition order from " + currentStatus + " to " + targetStatus
                     + " without shipper");
+        }
+
+        if (targetStatus == OrderStatus.ARRIVED) {
+            order.setDeliveryDate(new Timestamp(System.currentTimeMillis()));
         }
 
         order.setStatus(targetStatus);
@@ -144,9 +168,10 @@ public class OrderService {
             case DELIVERING ->
                 (to == OrderStatus.ARRIVED || to == OrderStatus.RETURNING) && "SHIPPER".equals(roleName);
             case ARRIVED ->
-                (to == OrderStatus.RECEIVED || to == OrderStatus.RETURN_PENDING) && "CUSTOMER".equals(roleName);
-            case RETURN_PENDING -> to == OrderStatus.RETURNING && "MANAGER".equals(roleName);
-            case RETURNING -> to == OrderStatus.FAILED && "SHIPPER".equals(roleName);
+                (to == OrderStatus.RECEIVED || to == OrderStatus.RETURN_PROCESSING) && "CUSTOMER".equals(roleName);
+            case RETURN_PROCESSING -> to == OrderStatus.RETURN_PENDING && "MANAGER".equals(roleName);
+            case RETURN_PENDING -> to == OrderStatus.RETURNING && "SHIPPER".equals(roleName);
+            case RETURNING -> to == OrderStatus.FAILED && "MANAGER".equals(roleName);
             default -> false;
         };
     }
@@ -156,7 +181,56 @@ public class OrderService {
             || user.getRole().equals("SYSTEM_ADMIN"));
     }
 
-    public boolean canModifyAllOrder(LoginResponse user) {
-        return user.getRole().equals("SYSTEM_ADMIN");
+    public boolean hasReviewed(long orderId, long productId) {
+        return reviewRepository.existsByOrderDetail_Order_IdAndOrderDetail_Product_Id(orderId, productId);
+    }
+
+    public List<Review> getProductReviews(Long productId) {
+        return reviewRepository.findByOrderDetail_Product_Id(productId);
+    }
+
+    public Page<Review> getProductReviews(Long productId, Short rating, Pageable pageable) {
+        if (rating != null) {
+            return reviewRepository.findByOrderDetail_Product_IdAndRating(productId, rating, pageable);
+        }
+
+        return reviewRepository.findByOrderDetail_Product_Id(productId, pageable);
+    }
+
+    public Review createProductReview(long orderId, long productId, swp391.group6.dto.ReviewRequest request, LoginResponse loginResponse) {
+        User user = userRepository.findByEmail(loginResponse.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+
+        if (order.getUser().getId() != user.getId()) {
+            throw new RuntimeException("Bạn chỉ có thể đánh giá sản phẩm của đơn hàng của mình");
+        }
+
+        if (order.getStatus() != OrderStatus.RECEIVED) {
+            throw new RuntimeException("Order must be RECEIVED to review");
+        }
+
+        OrderDetail targetDetail = order.getOrderDetailList().stream()
+                .filter(od -> od.getProduct().getId() == productId)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Order Detail not found for product ID: " + productId));
+
+        // Check if this specific order detail already has a review
+        boolean alreadyReviewed = reviewRepository.existsByOrderDetail_Order_IdAndOrderDetail_Product_Id(orderId, productId);
+
+        if (alreadyReviewed) {
+            throw new RuntimeException("You have already reviewed this item in this order.");
+        }
+
+        Review review = new Review();
+        review.setUser(user);
+        review.setOrderDetail(targetDetail);
+        review.setComment(request.getComment());
+        review.setRating((short) request.getRating());
+        review.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
+
+        return reviewRepository.save(review);
     }
 }

@@ -1,0 +1,52 @@
+.reviewForm {
+	position: relative;
+	overflow: hidden;
+
+	&::before {
+		content: "";
+		position: absolute;
+		top:0;
+		bottom:0;
+		left:0;
+		width: clamp(0.5rem, 1%, 0.8rem);
+		background-color: var(--color-green-200);
+	}
+}
+
+.starsContainer {
+	display: flex;
+	color: var(--color-gray-400);
+
+	* {
+		position: relative;
+		cursor: pointer;
+		transition: transform 1s ease-in-out;
+
+		&:hover {
+			color: var(--color-amber-300);
+
+			& svg {
+				transform: rotate(25deg);
+				transition: 0.2s ease-in-out;
+			}
+		}
+
+		&::before {
+			content: "";
+			position: absolute;
+			inset: -15%;
+		}
+	}
+
+	.selectedStar {
+		color: var(--color-amber-300);
+	}
+
+	*:has(~ .selectedStar) {
+		color: var(--color-amber-300);
+	}
+
+	*:has(~ *:hover) {
+		color: var(--color-amber-300);
+	}
+}

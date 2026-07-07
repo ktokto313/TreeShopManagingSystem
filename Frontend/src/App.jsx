@@ -7,7 +7,10 @@ import LoginPage from "./features/auth/pages/LoginPage";
 import ProfilePage from "./features/auth/pages/ProfilePage";
 import RegisterPage from "./features/auth/pages/RegisterPage";
 import OrderManagement from "./features/orders/OrderManagement";
+import CartPage from "./pages/CartPage";
 import CatalogPage from "./pages/CatalogPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import CheckoutSuccessPage from "./pages/CheckoutSuccessPage";
 import HomePage from "./pages/HomePage";
 import ManagementPage from "./pages/ManagementPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
@@ -23,6 +26,8 @@ import BlogPage from './features/blog/pages/BlogPage';
 import MyBlogPage from './features/blog/pages/MyBlogPage';
 import BlogDetailPage from './features/blog/pages/BlogDetailPage';
 import BlogPendingPage from './features/blog/pages/BlogPendingPage';
+import WishlistPage from "./pages/WishlistPage";
+import ProfitDashboard from "./features/statistic/ProfitDashboard";
 
 function ProtectedRoute({ element, roles = [] }) {
 	const { user, isLoading } = useContext(AuthContext);
@@ -41,10 +46,12 @@ function AppRoutes() {
 			<Route path="/login" element={<LoginPage />} />
 			<Route path="/register" element={<RegisterPage />} />
 			<Route path="/staff-login" element={<StaffAuthentication />} />
+
 			<Route
 				path="/profile"
 				element={<ProtectedRoute element={<ProfilePage />} />}
 			/>
+
 			<Route
 				path="/change-password"
 				element={<ProtectedRoute element={<ChangePasswordPage />} />}
@@ -58,6 +65,34 @@ function AppRoutes() {
 			<Route path="/catalog" element={<CatalogPage />} />
 			<Route path="/catalog/category/:categoryId" element={<CatalogPage />} />
 			<Route path="/catalog/:productId" element={<ProductDetailPage />} />
+			<Route
+				path="/wishlist"
+				element={
+					<ProtectedRoute
+						roles={["CUSTOMER"]}
+						element={<WishlistPage />}
+					/>
+				}
+			/>
+			
+			{/* Cart and Checkout */}
+			<Route
+				path="/cart"
+				element={<ProtectedRoute roles={["CUSTOMER"]} element={<CartPage />} />}
+			/>
+			<Route
+				path="/checkout"
+				element={<ProtectedRoute roles={["CUSTOMER"]} element={<CheckoutPage />} />}
+			/>
+			<Route
+				path="/checkout/success/:orderId"
+				element={
+					<ProtectedRoute
+						roles={["CUSTOMER"]}
+						element={<CheckoutSuccessPage />}
+					/>
+				}
+			/>
 
 			{/* Admin and Manager */}
 			<Route
@@ -93,7 +128,7 @@ function AppRoutes() {
 				path="/tickets/:id"
 				element={
 					<ProtectedRoute
-						roles={["SUPPORT_AGENT", "CUSTOMER", "SYSTEM_ADMIN"]}
+						roles={["SUPPORT_AGENT", "CUSTOMER"]}
 						element={<TicketDetailPage />}
 					/>
 				}
@@ -124,6 +159,17 @@ function AppRoutes() {
 			/>
 			<Route path="/blogs/:id"
 				   element={<BlogDetailPage />} />
+
+			{/* Statistics */}
+			<Route
+				path="/statistic"
+				element={
+					<ProtectedRoute
+						roles={["MANAGER"]}
+						element={<ProfitDashboard />}
+					/>
+				}
+			/>
 
 			<Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>

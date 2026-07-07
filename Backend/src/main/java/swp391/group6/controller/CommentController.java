@@ -1,8 +1,17 @@
+/*
+ * Author: PlotChat
+ * Created Date: 2026-06-08
+ * Name: CommentController.java
+ * Description: 
+ * Last Change Author: lmd100
+ * Last Change Date: 2026-06-27
+ */
 package swp391.group6.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.model.Comment;
@@ -20,35 +29,26 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    // Create comment
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Comment> addComment(
             @PathVariable long ticketId,
             @RequestBody String detail,
             HttpServletRequest request) {
 
         LoginResponse currentUser = JWTUtil.getUser(request);
-
-        try {
-            Comment newComment = commentService.commentOnTicket(ticketId, currentUser.getEmail(), detail);
-            return ResponseEntity.status(HttpStatus.CREATED).body(newComment);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        Comment newComment = commentService.commentOnTicket(ticketId, currentUser.getEmail(), detail);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newComment);
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Comment>> getCommentsByTicketId(
             @PathVariable long ticketId,
             HttpServletRequest request) {
 
         LoginResponse currentUser = JWTUtil.getUser(request);
-
-        try {
-            List<Comment> comments = commentService.getTicketComments(ticketId, currentUser.getEmail());
-            return ResponseEntity.ok(comments);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        List<Comment> comments = commentService.getTicketComments(ticketId, currentUser.getEmail());
+        return ResponseEntity.ok(comments);
     }
 }

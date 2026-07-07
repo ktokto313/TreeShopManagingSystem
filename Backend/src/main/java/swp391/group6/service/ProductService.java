@@ -1,18 +1,23 @@
-// Created by minhlthe200133
+/*
+ * Author: minhlthe200133
+ * Created Date: 2026-05-30
+ * Name: ProductService.java
+ * Description: 
+ * Last Change Author: Aiden
+ * Last Change Date: 2026-06-25
+ */
 package swp391.group6.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 import swp391.group6.dto.ProductRequest;
 import swp391.group6.dto.ProductResponse;
-import swp391.group6.model.Category;
-import swp391.group6.model.Product;
-import swp391.group6.model.ProductDetail;
-import swp391.group6.repository.CategoryRepository;
-import swp391.group6.repository.ProductDetailRepository;
-import swp391.group6.repository.ProductRepository;
+import swp391.group6.dto.ReviewRequest;
+import swp391.group6.model.*;
+import swp391.group6.repository.*;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -27,11 +32,24 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductDetailRepository productDetailRepository;
+    private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository; // 1. Add this!
+    private final OrderRepository orderRepository;
 
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository, ProductDetailRepository productDetailRepository) {
+    // 2. Add UserRepository to your constructor
+    public ProductService(ProductRepository productRepository,
+                          CategoryRepository categoryRepository,
+                          ProductDetailRepository productDetailRepository,
+                          ReviewRepository reviewRepository,
+                          UserRepository userRepository,
+                          OrderRepository orderRepository
+    ) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.productDetailRepository = productDetailRepository;
+        this.reviewRepository = reviewRepository;
+        this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
     }
 
     public List<ProductResponse> listProducts(String keyword, Long categoryId, Boolean status) {
@@ -127,9 +145,8 @@ public class ProductService {
         product.setSku(sku);
 
         String description = trimToNull(request.getDescription());
-        String variants = trimToNull(request.getVariants());
         String images = trimToNull(request.getImages());
-        boolean hasDetail = description != null || variants != null || images != null;
+        boolean hasDetail = description != null || images != null;
 
         ProductDetail detail = product.getProductDetail();
         if (detail == null && hasDetail) {
@@ -140,7 +157,6 @@ public class ProductService {
         if (detail != null) {
             detail.setProduct(product);
             detail.setDescription(description);
-            detail.setVariants(variants);
             detail.setImages(images);
             product.setProductDetail(detail);
         } else {
@@ -160,7 +176,6 @@ public class ProductService {
         ProductDetail detail = resolveProductDetail(product);
         if (detail != null) {
             response.setDescription(detail.getDescription());
-            response.setVariants(detail.getVariants());
             response.setImages(detail.getImages());
         }
         return response;
@@ -201,4 +216,5 @@ public class ProductService {
                 && stock >= 0
                 && (description == null || description.length() <= MAX_DESCRIPTION_LENGTH);
     }
+
 }

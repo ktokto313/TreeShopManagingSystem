@@ -1,4 +1,5 @@
 // Created by minhlthe200133
+import { FaHeart, FaRegHeart } from 'react-icons/fa'
 import {Badge} from '../../../components/ui/Badge'
 import {Button} from '../../../components/ui/Button'
 import {Card} from '../../../components/ui/Card'
@@ -14,6 +15,9 @@ export default function CatalogProductCard({
   onOpen,
   onCategoryOpen,
   onAdd,
+  onWishlist,
+  isWishlisted = false,
+  isAdding = false,
 }) {
   const images = parseCatalogImages(product.images)
   const imagePreview = resolveProductImageSource(images[0])
@@ -28,12 +32,28 @@ export default function CatalogProductCard({
           </div>
         </div>
 
-        <ProductImageFrame
-          src={imagePreview}
-          alt={product.name}
-          className="h-52"
-          fallbackLabel="Chưa có ảnh"
-        />
+        <div className="relative">
+          <ProductImageFrame
+            src={imagePreview}
+            alt={product.name}
+            className="h-52"
+            fallbackLabel="Chưa có ảnh"
+          />
+          <button
+            type="button"
+            className={`absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full border bg-white/95 text-lg shadow-md transition hover:-translate-y-0.5 ${
+              isWishlisted
+                ? 'border-red-200 text-red-600 hover:bg-red-50'
+                : 'border-green-100 text-green-700 hover:bg-green-50'
+            }`}
+            disabled={availability.state === 'inactive'}
+            onClick={() => onWishlist?.(product)}
+            aria-label={isWishlisted ? 'Đến danh sách yêu thích' : 'Thêm vào yêu thích'}
+            title={isWishlisted ? 'Đến danh sách yêu thích' : 'Thêm vào yêu thích'}
+          >
+            {isWishlisted ? <FaHeart /> : <FaRegHeart />}
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 text-xs text-green-800">
@@ -71,15 +91,19 @@ export default function CatalogProductCard({
         <Button className="text-nowrap flex-1 hover:bg-gray-200 bg-white text-green-600 border border-green-300" onClick={() => onOpen?.(product)}>
           Xem chi tiết
         </Button>
-        <Button
-          className="text-nowrap flex-1"
-          size="sm"
-          disabled={!availability.canPurchase}
-          onClick={() => onAdd?.(product)}
-          title={availability.canPurchase ? 'Thêm vào giỏ hàng' : availability.helper}
-        >
-          Thêm vào giỏ
-        </Button>
+  <button
+  type="button"
+  disabled={isAdding || !availability.canPurchase}
+  onClick={(event) => {
+    event.stopPropagation()
+    onAdd?.(product)
+  }}
+  title={availability.canPurchase ? 'Thêm vào giỏ hàng' : availability.helper}
+  aria-label="Thêm vào giỏ hàng"
+  className="flex h-11 w-11 items-center justify-center rounded-full bg-interactive text-xl font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+>
+  {isAdding ? '...' : '+'}
+</button>
       </div>
     </Card>
   )
@@ -87,7 +111,9 @@ export default function CatalogProductCard({
 
 function ProductBadge({ className, availability }) {
   return (
-    <Badge status={availability.badgeStatus} className={availability.badgeClassName, className}>
+    <Badge status={availability.badgeStatus} 
+    className={[availability.badgeClassName, className].filter(Boolean).join(' ')}
+    >
       {availability.label}
     </Badge>
   )

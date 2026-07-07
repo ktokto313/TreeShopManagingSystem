@@ -1,3 +1,11 @@
+/*
+ * Author: ktokto313
+ * Created Date: 2026-05-29
+ * Name: Ticket.java
+ * Description: 
+ * Last Change Author: PlotChat
+ * Last Change Date: 2026-06-06
+ */
 package swp391.group6.model;
 
 import jakarta.persistence.*;

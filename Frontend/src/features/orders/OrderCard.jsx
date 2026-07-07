@@ -26,7 +26,7 @@ export function OrderCard({ order, onViewDetails }) {
         <CardHeader className="pb-3 flex flex-row items-center justify-between gap-4 border-b border-border/40">
           <div className="flex flex-col gap-0.5">
             <span className="text-xs font-semibold tracking-wider text-black/50 uppercase">
-              Order Reference
+              Mã Đơn Hàng
             </span>
             <CardTitle className="text-base font-bold text-black group-hover:text-interactive transition-colors">
               #ORD-{order.id}
@@ -44,13 +44,13 @@ export function OrderCard({ order, onViewDetails }) {
               <svg className="w-3.5 h-3.5 text-interactive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
-              Items Summary
+              Tóm Tắt Sản Phẩm
             </span>
             <div className="space-y-1.5 pl-5">
               {orderDetails.slice(0, 2).map((item, idx) => (
                 <div key={idx} className="flex justify-between text-sm text-black/85">
                   <span className="truncate max-w-[180px]">
-                    {item.product?.name || 'Unknown Product'}
+                    {item.productName || 'Sản phẩm không xác định'}
                   </span>
                   <span className="font-semibold text-black/60">
                     x{item.quantity}
@@ -59,11 +59,11 @@ export function OrderCard({ order, onViewDetails }) {
               ))}
               {orderDetails.length > 2 && (
                 <p className="text-xs text-interactive font-medium italic">
-                  + {orderDetails.length - 2} more item{orderDetails.length - 2 > 1 ? 's' : ''}...
+                  + {orderDetails.length - 2} sản phẩm khác...
                 </p>
               )}
               {orderDetails.length === 0 && (
-                <p className="text-sm text-black/50 italic">No products listed</p>
+                <p className="text-sm text-black/50 italic">Không có sản phẩm nào</p>
               )}
             </div>
           </div>
@@ -75,10 +75,10 @@ export function OrderCard({ order, onViewDetails }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              Ship To
+              Giao Đến
             </span>
-            <p className="text-xs text-black/85 pl-5 truncate" title={order.shippingAddress || 'No Address Provided'}>
-              {order.shippingAddress || 'No address specified'}
+            <p className="text-xs text-black/85 pl-5 truncate" title={order.shippingAddress || 'Không có địa chỉ'}>
+              {order.shippingAddress || 'Không có địa chỉ'}
             </p>
           </div>
         </CardContent>
@@ -90,14 +90,14 @@ export function OrderCard({ order, onViewDetails }) {
             {timeFormat(order.createdAt)}
           </span>
           <span className="text-xs text-black/60 mt-0.5">
-            {itemsCount} {itemsCount === 1 ? 'item' : 'items'}
+            {itemsCount} sản phẩm
           </span>
         </div>
         <div className="flex items-center gap-2">
           <div className="text-right mr-1">
-            <span className="text-[10px] text-black/40 block leading-none">Total</span>
+            <span className="text-[10px] text-black/40 block leading-none">Tổng cộng</span>
             <span className="text-base font-extrabold text-interactive">
-              ${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {total.toLocaleString('vi-VN')}đ
             </span>
           </div>
           <div className="p-1.5 rounded-lg bg-interactive/10 text-interactive group-hover:bg-interactive group-hover:text-white transition-all duration-200">

@@ -1,5 +1,14 @@
+/*
+ * Author: ktokto313
+ * Created Date: 2026-05-29
+ * Name: Product.java
+ * Description: 
+ * Last Change Author: lmd100
+ * Last Change Date: 2026-06-24
+ */
 package swp391.group6.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -15,6 +24,7 @@ public class Product {
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
+    @JsonIgnore
     private Category category;
 
     @Column(nullable = false)
@@ -36,10 +46,13 @@ public class Product {
     private ProductDetail productDetail;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<OrderDetail> orderDetailList;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<ShoppingCartEntry> shoppingCartEntryList;
+
 
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
@@ -61,6 +74,7 @@ public class Product {
 
     public String getSku() { return sku; }
     public void setSku(String sku) { this.sku = sku; }
+
 
     public ProductDetail getProductDetail() { return productDetail; }
     public void setProductDetail(ProductDetail productDetail) { this.productDetail = productDetail; }

@@ -10,8 +10,9 @@ const TicketDetailPage = () => {
 	const detailState = useTicketDetail(ticketId);
 
 	const {
-		ticket,
-		isFetchDetailLoading
+		isFetchDetailLoadingError,
+		isFetchDetailLoading,
+		
 	} = detailState;
 
 	if (isFetchDetailLoading)
@@ -19,13 +20,13 @@ const TicketDetailPage = () => {
 			<LoadingScreen></LoadingScreen>
 		);
 
-	if (!ticket)
+	if (isFetchDetailLoadingError)
 		return (
-			<TicketDetailLoadError></TicketDetailLoadError>
+			<TicketDetailLoadError detailState={detailState}></TicketDetailLoadError>
 		);
 
 	return (
-		<TicketDetail></TicketDetail>
+		<TicketDetail detailState={detailState}></TicketDetail>
 	);
 };
 

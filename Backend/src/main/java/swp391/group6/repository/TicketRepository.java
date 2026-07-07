@@ -1,3 +1,11 @@
+/*
+ * Author: PlotChat
+ * Created Date: 2026-06-01
+ * Name: TicketRepository.java
+ * Description: 
+ * Last Change Author: Aiden
+ * Last Change Date: 2026-06-15
+ */
 package swp391.group6.repository;
 
 import org.springframework.data.domain.Sort;

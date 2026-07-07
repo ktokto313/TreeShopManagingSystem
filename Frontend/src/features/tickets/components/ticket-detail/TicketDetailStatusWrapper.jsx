@@ -6,7 +6,6 @@ import { getSelectOption } from "../../data/ticketSelectList";
 import { Modal } from "../../../../components/ui/Modal";
 import { IoWarningOutline } from "react-icons/io5";
 
-
 const TicketDetailStatusWrapper = ({ detailState }) => {
 	const {
 		handleStatusChange,
@@ -67,14 +66,15 @@ const TicketDetailStatusWrapper = ({ detailState }) => {
 						<Select
 							className="w-48"
 							value={ticket.ticketState}
-							options={getSelectOption("status").filter(o => o.value != "")}
+							options={getSelectOption("status").filter((o) => o.value != "")}
 							onChange={(e) => {
-								setPendingStatus(e.target.value);
+								const selectedValue = e.target.value;
+								setPendingStatus(selectedValue);
 
 								if (!ticket.assignee) {
 									setIsConfirmOpen(true);
 								} else {
-									handleStatusChange(pendingStatus);
+									handleStatusChange(selectedValue);
 								}
 							}}
 						/>
@@ -87,7 +87,7 @@ const TicketDetailStatusWrapper = ({ detailState }) => {
 				title="Lưu ý"
 				isOpen={isConfirmOpen}
 			>
-				<h1 className="mb-4 -mt-7">
+				<h1 className="mb-4">
 					Thay đổi trạng thái sẽ cho bạn thành người xử lí cho Ticket này, bạn
 					có chắc chắn không?
 				</h1>

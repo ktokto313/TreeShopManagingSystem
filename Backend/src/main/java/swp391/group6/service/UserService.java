@@ -1,9 +1,10 @@
 /*
+ * Author: DucLM
+ * Created Date: 2026-05-29
  * Name: User Service
- * @Author: DucLM
- * Date: 2026-06-05
- * Version: 2.0
  * Description: Business logic for user CRUD, ban/unban, role validation, and DTO conversion; protects SYSTEM_ADMIN accounts.
+ * Last Change Author: lmd100
+ * Last Change Date: 2026-06-28
  */
 package swp391.group6.service;
 
@@ -40,12 +41,14 @@ public class UserService {
 
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
+                .filter(user -> !hasRole(user, PROTECTED_ROLE_NAME))
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     public Optional<UserDTO> getUserById(long id) {
         return userRepository.findById(id)
+                .filter(user -> !hasRole(user, PROTECTED_ROLE_NAME))
                 .map(this::convertToDTO);
     }
 
@@ -116,11 +119,15 @@ public class UserService {
     }
 
     public boolean deleteUser(long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-            return true;
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty()) {
+            return false;
         }
-        return false;
+        if (hasRole(user.get(), PROTECTED_ROLE_NAME)) {
+            return false;
+        }
+        userRepository.deleteById(id);
+        return true;
     }
 
     public UserDTO banUser(long id) {
@@ -144,6 +151,7 @@ public class UserService {
 
     public List<UserDTO> searchUsers(String query) {
         return userRepository.search(query).stream()
+                .filter(user -> !hasRole(user, PROTECTED_ROLE_NAME))
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -156,6 +164,7 @@ public class UserService {
     
     public Optional<UserDTO> getUserByEmail(String email) {
         return userRepository.findByEmail(email)
+                .filter(user -> !hasRole(user, PROTECTED_ROLE_NAME))
                 .map(this::convertToDTO);
     }
 

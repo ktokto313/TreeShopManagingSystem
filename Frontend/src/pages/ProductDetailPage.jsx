@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
+import { FaHeart, FaRegHeart } from 'react-icons/fa'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import {Container} from '../components/global/Container'
 import {Badge} from '../components/ui/Badge'
@@ -8,9 +9,10 @@ import { AuthContext } from '../context/AuthContext'
 import { loadPublicJson } from '../features/catalog/utils/catalogApi'
 import { formatCurrency } from '../features/catalog/utils/catalogUtils'
 import ProductImageFrame from '../features/products/components/ProductImageFrame'
-import { getProductAvailability } from '../features/products/utils/productAvailability'
+import { getProductAvailability, isProductActive } from '../features/products/utils/productAvailability'
 import { resolveProductImages } from '../features/products/utils/productImageResolver'
-import { parseVariantGroups } from '../features/products/utils/variantUtils'
+import { addWishlistProduct, checkWishlistProduct } from '../features/wishlist/wishlistApi'
+import ReviewSection from '../features/review/components/ReviewSection'
 
 function summarizeDescription(value) {
 	if (!value) {
@@ -44,6 +46,7 @@ export default function ProductDetailPage() {
 	const [loading, setLoading] = useState(!location.state?.product);
 	const [notice, setNotice] = useState("");
 	const [activeImageSource, setActiveImageSource] = useState("");
+	const [isWishlisted, setIsWishlisted] = useState(false);
 
 	async function loadProductDetail() {
 		setLoading(true);
@@ -51,11 +54,16 @@ export default function ProductDetailPage() {
 
 		try {
 			const [categoryData, productData] = await Promise.all([
-				loadPublicJson("/api/categories"),
-				loadPublicJson(`/api/products/${productId}`),
+				loadPublicJson("/api/categories"), //lay danh sanh category
+				loadPublicJson(`/api/products/${productId}`), //lay thong tin san pham tu id cua san pham
 			]);
 
 			setCategories(Array.isArray(categoryData) ? categoryData : []);
+			if (!canManage && productData && !isProductActive(productData.status)) {
+				setProduct(null);
+				setNotice("Không tìm thấy sản phẩm phù hợp.");
+				return;
+			}
 			setProduct(productData ?? null);
 		} catch (error) {
 			if (error?.status === 401 && isAuthenticated) {
@@ -79,6 +87,59 @@ export default function ProductDetailPage() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [productId]);
 
+	useEffect(() => { //kiem tra xem product da o trong wishlist hay chua
+		async function loadWishlistState() {
+			if (!isAuthenticated) {
+				setIsWishlisted(false);
+				return;
+			}
+
+			try {
+				const result = await checkWishlistProduct(productId);
+				setIsWishlisted(Boolean(result?.wishlisted));
+			} catch {
+				setIsWishlisted(false);
+			}
+		}
+
+		void loadWishlistState();
+	}, [isAuthenticated, productId]);
+
+	async function handleWishlistAction() {  //wishlist routing
+		if (!product) {
+			return;
+		}
+
+		if (!isAuthenticated) {
+			navigate("/login", {
+				state: { from: { pathname: `/catalog/${productId}` } },
+			});
+			return;
+		}
+
+		if (isWishlisted) {
+			navigate("/wishlist");
+			return;
+		}
+
+		setNotice("");
+		try {
+			await addWishlistProduct(product.id);
+			setIsWishlisted(true);
+			setNotice(`${product.name} đã được thêm vào danh sách yêu thích.`);
+		} catch (error) {
+			if (error?.status === 401 && isAuthenticated) {
+				logout();
+				navigate("/login", {
+					replace: true,
+					state: { from: { pathname: `/catalog/${productId}` } },
+				});
+				return;
+			}
+			setNotice(error?.status === 403 ? "Tính năng yêu thích dành cho tài khoản khách hàng." : error.message);
+		}
+	}
+
 	const categoryName = product
 		? categories.find(
 				(category) => String(category.id) === String(product.categoryId),
@@ -88,7 +149,6 @@ export default function ProductDetailPage() {
 		: "-";
 
 	const productImages = resolveProductImages(product?.images);
-	const variantGroups = parseVariantGroups(product?.variants);
 	const imagePreview = productImages.includes(activeImageSource)
 		? activeImageSource
 		: productImages[0];
@@ -162,12 +222,28 @@ export default function ProductDetailPage() {
 								</Badge>
 							</div>
 
-							<ProductImageFrame
-								src={imagePreview}
-								alt={product.name}
-								className="h-80 rounded-3xl p-4"
-								imageClassName="max-h-full max-w-full rounded-2xl object-contain"
-							/>
+							<div className="relative">
+								<ProductImageFrame
+									src={imagePreview}
+									alt={product.name}
+									className="h-80 rounded-3xl p-4"
+									imageClassName="max-h-full max-w-full rounded-2xl object-contain"
+								/>
+								<button
+									type="button"
+									className={`absolute right-4 top-4 flex h-12 w-12 items-center justify-center rounded-full border bg-white/95 text-xl shadow-lg transition hover:-translate-y-0.5 ${
+										isWishlisted
+											? "border-red-200 text-red-600 hover:bg-red-50"
+											: "border-green-100 text-green-700 hover:bg-green-50"
+									}`}
+									disabled={availability.state === "inactive"}
+									onClick={() => void handleWishlistAction()}
+									aria-label={isWishlisted ? "Đến danh sách yêu thích" : "Thêm vào yêu thích"}
+									title={isWishlisted ? "Đến danh sách yêu thích" : "Thêm vào yêu thích"}
+								>
+									{isWishlisted ? <FaHeart /> : <FaRegHeart />}
+								</button>
+							</div>
 
 							<div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[var(--social-bg)] px-4 py-3 text-sm text-[var(--text)]">
 								<span>
@@ -175,9 +251,20 @@ export default function ProductDetailPage() {
 										? `Ảnh ${activeImageIndex + 1} / ${productImages.length}`
 										: "Sản phẩm chưa có ảnh riêng."}
 								</span>
-								<span className="font-medium text-[var(--text-h)]">
-									{availability.helper}
-								</span>
+								<div className="flex flex-wrap items-center gap-2">
+									{isWishlisted ? (
+										<button
+											type="button"
+											className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+											onClick={() => navigate("/wishlist")}
+										>
+											Đã lưu trong danh sách yêu thích
+										</button>
+									) : null}
+									<span className="font-medium text-[var(--text-h)]">
+										{availability.helper}
+									</span>
+								</div>
 							</div>
 
 							{productImages.length > 1 ? (
@@ -211,10 +298,6 @@ export default function ProductDetailPage() {
 									label="Tồn kho"
 									value={`${product.stock ?? 0} - ${availability.label}`}
 								/>
-								<InfoBox
-									label="Biến thể"
-									value={`${variantGroups.length} nhóm`}
-								/>
 							</div>
 						</Card>
 
@@ -222,73 +305,14 @@ export default function ProductDetailPage() {
 							<Card className="space-y-4 border-[var(--border)] bg-white/95 p-5">
 								<div className="space-y-2">
 									<p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">
-										Mô tả & biến thể
+										Mô tả
 									</p>
 									<div className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--bg)] p-4 text-sm leading-7 text-[var(--text)]">
 										<p>{summarizeDescription(product.description)}</p>
-
-										<div className="space-y-3 border-t border-[var(--border)] pt-4">
-											<div className="text-xs uppercase tracking-[0.18em] text-[var(--accent)]">
-												Biến thể
-											</div>
-											{variantGroups.length ? (
-												<div className="grid gap-3">
-													{variantGroups.map((group) => (
-														<div
-															key={group.name}
-															className="rounded-xl border border-[var(--border)] bg-white px-4 py-3"
-														>
-															<div className="text-sm font-semibold text-[var(--text-h)]">
-																{group.name}
-															</div>
-															<div className="mt-2 flex flex-wrap gap-2">
-																{group.values.map((value) => (
-																	<span
-																		key={`${group.name}-${value}`}
-																		className="rounded-full bg-[var(--social-bg)] px-3 py-1.5 text-xs font-medium text-[var(--text-h)]"
-																	>
-																		{value}
-																	</span>
-																))}
-															</div>
-														</div>
-													))}
-												</div>
-											) : (
-												<div className="rounded-xl bg-[var(--social-bg)] px-3 py-2 text-sm text-[var(--text)]">
-													Chưa có biến thể nào.
-												</div>
-											)}
-										</div>
 									</div>
 								</div>
 							</Card>
 
-							<Card className="space-y-4 border-[var(--border)] bg-white/95 p-5">
-								<div className="space-y-2">
-									<p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">
-										Mua hàng
-									</p>
-									<div className="rounded-2xl border border-[var(--border)] bg-[var(--social-bg)] p-4 text-sm text-[var(--text)]">
-										<p className="leading-7">
-											{availability.canPurchase
-												? "Sản phẩm hiện có thể mua. Luồng giỏ hàng sẽ được kết nối ở bước mua hàng sau."
-												: availability.helper}
-										</p>
-										<Button
-											className="mt-4"
-											disabled={!availability.canPurchase}
-											onClick={() =>
-												setNotice(
-													`${product.name} có thể thêm vào giỏ hàng khi luồng mua hàng được bật.`,
-												)
-											}
-										>
-											Thêm vào giỏ hàng
-										</Button>
-									</div>
-								</div>
-							</Card>
 						</div>
 					</div>
 				) : !loading ? (
@@ -296,7 +320,12 @@ export default function ProductDetailPage() {
 						Không tìm thấy sản phẩm phù hợp.
 					</Card>
 				) : null}
+
+				<hr className="my-8 w-[98%] mx-auto"></hr>
+
+				<ReviewSection className={"w-[75%]"} productId={productId}></ReviewSection>
 			</Container>
+
 		</main>
 	);
 }

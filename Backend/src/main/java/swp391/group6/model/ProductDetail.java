@@ -1,5 +1,14 @@
+/*
+ * Author: ktokto313
+ * Created Date: 2026-05-29
+ * Name: ProductDetail.java
+ * Description: 
+ * Last Change Author: lmd100
+ * Last Change Date: 2026-06-24
+ */
 package swp391.group6.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -16,14 +25,11 @@ public class ProductDetail {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")
-    private String variants;
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "json")
     private String images;
 
     @OneToOne
     @JoinColumn(name = "product_id")
+    @JsonIgnore
     private Product product;
 
     public long getId() {
@@ -40,14 +46,6 @@ public class ProductDetail {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getVariants() {
-        return variants;
-    }
-
-    public void setVariants(String variants) {
-        this.variants = variants;
     }
 
     public String getImages() {

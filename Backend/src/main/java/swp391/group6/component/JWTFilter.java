@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,7 +18,6 @@ import swp391.group6.model.User;
 import swp391.group6.repository.UserRepository;
 import swp391.group6.util.CookieUtil;
 import swp391.group6.util.JWTUtil;
-import swp391.group6.util.ResponseUtil;
 
 import java.io.IOException;
 
@@ -36,87 +34,39 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String requestUri = request.getRequestURI();
-        String method = request.getMethod();
-
-        if (requestUri.startsWith("/product-images/")) {
-            return true;
-        }
-
-        if (requestUri.startsWith("/api/auth")) {
-            return true;
-        }
-
-        if ("GET".equalsIgnoreCase(method)) {
-            return requestUri.equals("/api/categories")
-                    || requestUri.startsWith("/api/categories/")
-                    || requestUri.equals("/api/products")
-                    || requestUri.startsWith("/api/products/");
-        }
-
-        return false;
-    }
-
-    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        String requestUri = request.getRequestURI();
-        String method = request.getMethod();
-
-        boolean isPublicBlogRead = "GET".equalsIgnoreCase(method)
-                && (requestUri.equals("/api/blogs") || requestUri.matches("/api/blogs/\\d+"));
-
         Cookie cookie = CookieUtil.getJWTCookie(request.getCookies());
 
-        if (cookie == null) {
-            if (isPublicBlogRead) {
-                // Guest được xem, không set userId
-                filterChain.doFilter(request, response);
-                return;
+        if (cookie != null) {
+            try {
+                DecodedJWT decodedJWT = JWTUtil.verify(cookie.getValue());
+                LoginResponse tokenUser = JWTUtil.getUser(decodedJWT);
+                if (tokenUser != null && tokenUser.getEmail() != null) {
+                    User user = userRepository.findByEmail(tokenUser.getEmail())
+                            .filter(User::isStatus)
+                            .orElse(null);
+
+                    if (user != null) {
+                        String role = user.getRole() == null ? "CUSTOMER" : user.getRole().getName();
+                        LoginResponse currentUser = new LoginResponse(
+                                user.getId(),
+                                user.getEmail(),
+                                user.getFullName(),
+                                role
+                        );
+
+                        Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        request.setAttribute(cookieName, currentUser);
+                    }
+                }
+            } catch (Exception e) {
+                // Ignore exceptions and let Spring Security handle authorization downstream
             }
-            ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
-            return;
-        }
-
-        try {
-            DecodedJWT decodedJWT = JWTUtil.verify(cookie.getValue());
-            LoginResponse tokenUser = JWTUtil.getUser(decodedJWT);
-            if (tokenUser == null || tokenUser.getEmail() == null) {
-                ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
-                return;
-            }
-
-            User user = userRepository.findByEmail(tokenUser.getEmail())
-                    .filter(User::isStatus)
-                    .orElse(null);
-            if (user == null) {
-                ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
-                return;
-            }
-
-            String role = user.getRole() == null ? "CUSTOMER" : user.getRole().getName();
-            LoginResponse currentUser = new LoginResponse(
-                    user.getId(),
-                    user.getEmail(),
-                    user.getFullName(),
-                    role
-            );
-
-            Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            request.setAttribute(cookieName, currentUser);
-
-        } catch (Exception e) {
-            if (isPublicBlogRead) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-            ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED);
-            return;
         }
 
         filterChain.doFilter(request, response);

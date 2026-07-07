@@ -1,8 +1,17 @@
+/*
+ * Author: Hung Dao
+ * Created Date: 2026-06-03
+ * Name: ProfileController.java
+ * Description: 
+ * Last Change Author: lmd100
+ * Last Change Date: 2026-06-27
+ */
 package swp391.group6.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import swp391.group6.dto.ChangePasswordRequest;
 import swp391.group6.dto.LoginResponse;
@@ -25,6 +34,7 @@ public class ProfileController {
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProfileResponse> getProfile(HttpServletRequest request) {
         LoginResponse jwtUser = JWTUtil.getUser(request);
 
@@ -35,6 +45,7 @@ public class ProfileController {
     }
 
     @PutMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProfileResponse> updateProfile(@RequestBody UserDTO userDTO,
                                                          HttpServletRequest request) {
         LoginResponse jwtUser = JWTUtil.getUser(request);
@@ -65,6 +76,7 @@ public class ProfileController {
     }
 
     @PostMapping("/change-password")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest req,
                                             HttpServletRequest request) {
 

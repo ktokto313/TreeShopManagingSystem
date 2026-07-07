@@ -1,13 +1,22 @@
+/*
+ * Author: ktokto313
+ * Created Date: 2026-06-05
+ * Name: OrderController.java
+ * Description: 
+ * Last Change Author: ktokto313
+ * Last Change Date: 2026-06-30
+ */
 package swp391.group6.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.websocket.server.PathParam;
 import lombok.extern.java.Log;
-import org.antlr.v4.runtime.atn.SemanticContext;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.dto.OrderDTO;
 import swp391.group6.dto.OrderListDTO;
@@ -52,7 +61,14 @@ public class OrderController {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(new OrderDTO(order));
+        OrderDTO orderDTO = new OrderDTO(order);
+        List<swp391.group6.dto.OrderDetailDTO> detailDTOs = order.getOrderDetailList().stream().map(od -> {
+            boolean hasReviewed = orderService.hasReviewed(od.getOrder().getId(), od.getProduct().getId());
+            return new swp391.group6.dto.OrderDetailDTO(od, hasReviewed);
+        }).toList();
+        orderDTO.setOrderDetailList(detailDTOs);
+
+        return ResponseEntity.ok(orderDTO);
     }
 
     @PostMapping
@@ -86,5 +102,31 @@ public class OrderController {
         }
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/products/{productId}/reviews")
+    public ResponseEntity<Page<swp391.group6.model.Review>> getProductReviews(
+            @PathVariable Long productId,
+            @RequestParam(required = false) Short rating,
+            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        System.out.println(rating);
+        Page<swp391.group6.model.Review> reviews = orderService.getProductReviews(productId, rating, pageable);
+        return ResponseEntity.ok(reviews);
+    }
+
+    @PostMapping("/{orderId}/details/{productId}/review")
+    public ResponseEntity<?> createProductReview(
+            HttpServletRequest request,
+            @PathVariable Long orderId,
+            @PathVariable Long productId,
+            @RequestBody swp391.group6.dto.ReviewRequest reviewRequest) {
+        
+        LoginResponse loggedInUser = JWTUtil.getUser(request);
+        try {
+            swp391.group6.model.Review review = orderService.createProductReview(orderId, productId, reviewRequest, loggedInUser);
+            return ResponseEntity.ok(review);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage() != null ? e.getMessage() : "Unknown error"));
+        }
     }
 }

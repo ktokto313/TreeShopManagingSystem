@@ -1,3 +1,11 @@
+/*
+ * Author: ktokto313
+ * Created Date: 2026-05-29
+ * Name: Comment.java
+ * Description: 
+ * Last Change Author: PlotChat
+ * Last Change Date: 2026-06-08
+ */
 package swp391.group6.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
