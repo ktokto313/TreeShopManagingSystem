@@ -28,6 +28,9 @@ import BlogDetailPage from './features/blog/pages/BlogDetailPage';
 import BlogPendingPage from './features/blog/pages/BlogPendingPage';
 import WishlistPage from "./pages/WishlistPage";
 import ProfitDashboard from "./features/statistic/ProfitDashboard";
+import PolicyPage from "./pages/PolicyPage";
+import PolicyDetailsPage from "./pages/PolicyDetailsPage";
+import CreatePolicyPage from "./pages/CreatePolicyPage";
 
 function ProtectedRoute({ element, roles = [] }) {
 	const { user, isLoading } = useContext(AuthContext);
@@ -41,6 +44,18 @@ function AppRoutes() {
 		<Routes>
 			{/* Others */}
 			<Route path="/" element={<HomePage />} />
+
+			<Route path="/policy" element={<PolicyPage />} />
+			<Route
+				path="/policy/create"
+				element={
+					<ProtectedRoute
+						roles={["MANAGER", "SYSTEM_ADMIN"]}
+						element={<CreatePolicyPage />}
+					/>
+				}
+			/>
+			<Route path="/policy/:id" element={<PolicyDetailsPage />} />
 
 			{/* Auth and Account */}
 			<Route path="/login" element={<LoginPage />} />
