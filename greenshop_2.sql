@@ -12,6 +12,8 @@ DROP TABLE IF EXISTS products CASCADE;
 DROP TABLE IF EXISTS categories CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS role CASCADE;
+DROP TABLE IF EXISTS wishlist_items CASCADE;
+DROP TABLE IF EXISTS policies CASCADE;
 
 CREATE TABLE role (
    id      BIGSERIAL PRIMARY KEY,
@@ -164,6 +166,85 @@ CREATE TABLE comments (
 
 CREATE INDEX idx_comments_ticket ON comments(ticket_id);
 
+-- ============================================================
+
+CREATE TABLE policies (
+   id          BIGSERIAL PRIMARY KEY,
+   title       VARCHAR(300) NOT NULL,
+   description TEXT NOT NULL,
+   status      VARCHAR(50) NOT NULL DEFAULT 'DRAFT',
+   updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO policies (title, description, status) VALUES
+('Chính sách Đổi trả & Hoàn tiền', '## 1. Điều kiện đổi trả
+- Cây bị dập nát, héo úa, gãy cành hoặc chết trong quá trình vận chuyển.
+- Giao sai loại cây, sai kích thước hoặc thiếu phụ kiện so với đơn đặt hàng.
+- Khách hàng cần thông báo và gửi hình ảnh/video tình trạng cây trong vòng **3 ngày** kể từ khi nhận hàng.
+
+## 2. Các trường hợp không hỗ trợ đổi trả
+- Cây chết hoặc héo úa do khách hàng chăm sóc sai cách (tưới quá nhiều nước, để sai vị trí thiếu sáng/quá nắng,...).
+- Sản phẩm phụ kiện đã qua sử dụng hoặc không còn nguyên vẹn bao bì.
+
+## 3. Quy trình hoàn tiền
+- **Thời gian xử lý:** Từ 3-5 ngày làm việc sau khi Greenshop xác nhận yêu cầu hợp lệ.
+- **Phương thức hoàn tiền:** Chuyển khoản ngân hàng hoặc ví điện tử theo thông tin khách hàng cung cấp.', 'PUBLISHED'),
+('Chính sách Vận chuyển & Giao hàng', '## 1. Thời gian giao hàng
+- **Nội thành:** Giao hàng trong vòng 1-2 ngày làm việc.
+- **Ngoại tỉnh/Toàn quốc:** Giao hàng từ 3-5 ngày làm việc tùy thuộc vào đơn vị vận chuyển.
+
+## 2. Chi phí vận chuyển
+- **Phí tiêu chuẩn:** 30.000 VNĐ cho các đơn hàng thông thường.
+- **Miễn phí vận chuyển (Freeship):** Áp dụng cho mọi đơn hàng có giá trị từ **500.000 VNĐ** trở lên.
+
+## 3. Quy cách đóng gói cây xanh
+- Cây luôn được bọc màng bảo vệ chuyên dụng xung quanh tán lá.
+- Bầu đất được quấn màng bọc nilon để tránh rơi vãi đất và giữ ẩm.
+- Cây được cố định chắc chắn trong thùng carton hộp chữ nhật hoặc khung gỗ (đối với cây lớn) để chống sốc và chống lật.', 'PUBLISHED'),
+('Chính sách Bảo hành Cây xanh', '## 1. Thời gian bảo hành
+Tất cả các loại cây xanh mua tại **Greenshop** đều được bảo hành sức khỏe trong vòng **7 ngày** đầu kể từ khi nhận hàng.
+
+## 2. Hỗ trợ trọn đời
+- Chúng tôi cung cấp dịch vụ **tư vấn chăm sóc cây miễn phí trọn đời**. 
+- Bất cứ khi nào cây của bạn có dấu hiệu bất thường (vàng lá, rụng lá, nấm mốc,...), hãy chụp ảnh và gửi qua kênh chat hoặc Zalo của cửa hàng để được đội ngũ kỹ thuật hỗ trợ kịp thời.
+
+## 3. Thay cây mới
+Nếu cây bị chết trong thời gian bảo hành do nguyên nhân bệnh lý có sẵn từ nhà vườn (được xác nhận bởi kỹ thuật viên của chúng tôi), Greenshop sẽ **1 đổi 1** cây mới cùng loại cho bạn.', 'PUBLISHED'),
+('Chính sách Bảo mật Thông tin', '## 1. Mục đích thu thập thông tin
+Greenshop thu thập thông tin cá nhân (Họ tên, Số điện thoại, Địa chỉ, Email) của khách hàng chỉ nhằm mục đích:
+- Xử lý đơn đặt hàng và giao hàng.
+- Cung cấp dịch vụ hỗ trợ khách hàng và giải quyết khiếu nại.
+- Gửi thông tin khuyến mãi, ưu đãi dành cho khách hàng thân thiết (nếu khách hàng đăng ký nhận tin).
+
+## 2. Cam kết bảo mật
+- Mọi thông tin của khách hàng được bảo mật tuyệt đối trên hệ thống máy chủ của chúng tôi.
+- **Greenshop cam kết không bán, trao đổi hay chia sẻ** thông tin của bạn cho bất kỳ bên thứ ba nào vì mục đích thương mại, ngoại trừ việc cung cấp địa chỉ cho đơn vị vận chuyển.
+
+## 3. Quyền của khách hàng
+Khách hàng có quyền yêu cầu Greenshop kiểm tra, cập nhật, điều chỉnh hoặc hủy bỏ thông tin cá nhân của mình bất cứ lúc nào.', 'PUBLISHED'),
+('Chính sách Khách hàng Thân thiết', '## 1. Tích điểm thưởng
+- Cứ mỗi **10.000 VNĐ** giá trị đơn hàng được thanh toán thành công, khách hàng sẽ tích lũy được **1 điểm**.
+- Điểm thưởng được tự động cộng vào tài khoản sau khi đơn hàng chuyển sang trạng thái "Giao hàng thành công".
+
+## 2. Quy đổi và Ưu đãi
+- Điểm thưởng có thể được dùng để quy đổi thành **Mã giảm giá** cho các lần mua sắm tiếp theo.
+- Khách hàng có ngày sinh nhật trong tháng sẽ nhận được Voucher giảm giá **20%** cho một đơn hàng bất kỳ.
+
+## 3. Hạng thành viên
+- **Thành viên Bạc:** Tổng chi tiêu trên 2.000.000 VNĐ - Giảm thêm 5% mọi đơn hàng.
+- **Thành viên Vàng:** Tổng chi tiêu trên 5.000.000 VNĐ - Giảm thêm 10% mọi đơn hàng + Quà tặng kèm theo mùa.', 'PUBLISHED'),
+('Chính sách Thanh toán', '## 1. Các phương thức thanh toán
+Greenshop hiện đang hỗ trợ các phương thức thanh toán linh hoạt và an toàn:
+- **Thanh toán khi nhận hàng (COD):** Khách hàng kiểm tra hàng và thanh toán trực tiếp cho nhân viên giao hàng.
+- **Chuyển khoản ngân hàng:** Khách hàng chuyển khoản qua Internet Banking vào số tài khoản của cửa hàng.
+- **Thanh toán qua Ví điện tử:** Hỗ trợ thanh toán qua VNPay, Momo, ZaloPay tiện lợi.
+
+## 2. Quy định thanh toán đối với đơn hàng lớn
+Đối với các đơn hàng có giá trị lớn hơn **2.000.000 VNĐ** hoặc các đơn hàng đặt thiết kế thi công tiểu cảnh, khách hàng vui lòng đặt cọc trước **30%** giá trị đơn hàng. 
+
+## 3. Bảo mật thanh toán
+Tất cả các giao dịch trực tuyến qua thẻ hay ví điện tử đều được mã hóa an toàn theo tiêu chuẩn SSL, đảm bảo không rò rỉ dữ liệu tài chính của khách hàng.', 'PUBLISHED');
 
 -- ============================================================
 --  THÊM BẢNG BLOG

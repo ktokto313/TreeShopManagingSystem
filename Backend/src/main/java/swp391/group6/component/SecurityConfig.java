@@ -41,14 +41,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/blogs/**").permitAll()
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers(HttpMethod.GET, "/api/policy/**").permitAll()
+                        .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((request, response, authException) ->
-                                ResponseUtil.writeErrorResponse(response, HttpStatus.UNAUTHORIZED))
-                        .accessDeniedHandler((request, response, accessDeniedException) ->
-                                ResponseUtil.writeErrorResponse(response, HttpStatus.FORBIDDEN))
-                );
+                        .authenticationEntryPoint((request, response, authException) -> ResponseUtil
+                                .writeErrorResponse(response, HttpStatus.UNAUTHORIZED))
+                        .accessDeniedHandler((request, response, accessDeniedException) -> ResponseUtil
+                                .writeErrorResponse(response, HttpStatus.FORBIDDEN)));
         return http.build();
     }
 
@@ -56,9 +55,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(Arrays.asList(
-              "http://localhost:[*]", 
-              "https://localhost:[*]"
-       ));
+                "http://localhost:[*]",
+                "https://localhost:[*]"));
         config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Set-Cookie"));
