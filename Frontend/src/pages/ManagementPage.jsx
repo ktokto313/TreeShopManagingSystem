@@ -39,6 +39,7 @@ const emptyProductForm = {
 	status: true,
 	sku: "",
 	description: "",
+	content: "",
 	images: [],
 	imageFiles: [],
 };
@@ -51,6 +52,7 @@ const emptyFilters = {
 const SKU_PATTERN = /^[A-Za-z0-9_-]+$/;
 const MAX_IMAGE_FILES = 5;
 const MAX_IMAGE_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_PRODUCT_CONTENT_LENGTH = 10000;
 
 function hasErrors(errors) {
 	return Object.keys(errors).length > 0;
@@ -109,6 +111,7 @@ function validateProductForm(values) {
 	const name = String(values.name ?? "").trim();
 	const sku = String(values.sku ?? "").trim();
 	const description = String(values.description ?? "").trim();
+	const content = String(values.content ?? "").trim();
 	const price = values.price === "" ? null : Number(values.price);
 	const stock = values.stock === "" ? null : Number(values.stock);
 
@@ -146,6 +149,10 @@ function validateProductForm(values) {
 
 	if (description.length > 1000) {
 		errors.description = "Mô tả tối đa 1000 ký tự.";
+	}
+
+	if (content.length > MAX_PRODUCT_CONTENT_LENGTH) {
+		errors.content = `Nội dung markdown tối đa ${MAX_PRODUCT_CONTENT_LENGTH} ký tự.`;
 	}
 
 	const imageError = validateProductImages(values.imageFiles);
@@ -373,6 +380,7 @@ export default function ManagementPage() {
 			status: Boolean(product.status),
 			sku: product.sku ?? "",
 			description: product.description ?? "",
+			content: product.content ?? "",
 			images: parseImageList(product.images),
 			imageFiles: [],
 		});
@@ -447,6 +455,7 @@ export default function ManagementPage() {
 				status: productForm.status,
 				sku: productForm.sku.trim(),
 				description: productForm.description.trim(),
+				content: productForm.content.trim(),
 				images: imageNames.length ? JSON.stringify(imageNames) : null,
 			};
 
@@ -766,6 +775,7 @@ export default function ManagementPage() {
 
 			<Modal
 				isOpen={isProductModalOpen}
+				className="max-w-6xl min-w-[min(1120px,94vw)]"
 				onClose={() => {
 					closeProductModal();
 				}}

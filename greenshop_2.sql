@@ -65,6 +65,7 @@ CREATE TABLE product_details (
    id          BIGSERIAL PRIMARY KEY,
    product_id  BIGINT NOT NULL UNIQUE REFERENCES products(id) ON DELETE CASCADE,
    description TEXT,
+   content     TEXT,
    images      JSON
 );
 
@@ -442,6 +443,10 @@ INSERT INTO product_details (product_id, description, images) VALUES
 -- ============================================================
 --  BLOG POSTS — 10 bài viết
 -- ============================================================
+UPDATE product_details
+SET content = description
+WHERE content IS NULL;
+
 INSERT INTO blog_posts (author_id, title, content, thumbnail, is_published) VALUES
 (2, 'Top 10 cây trong nhà dễ chăm nhất cho người bận rộn',
 'Bạn yêu cây nhưng không có nhiều thời gian chăm sóc? Đây là danh sách 10 loại cây cực dễ chăm: Lưỡi hổ, ZZ Plant, Pothos, Trầu bà... Những loại cây này chỉ cần tưới 1-2 lần mỗi tuần, chịu bóng tốt và vẫn phát triển khỏe mạnh.',

@@ -23,6 +23,9 @@ public class ProductDetail {
     @Column
     private String description;
 
+    @Column
+    private String content;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")
     private String images;
@@ -46,6 +49,14 @@ public class ProductDetail {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public String getImages() {
