@@ -9,9 +9,10 @@ import { Input } from "../../../components/ui/Input";
 import ModalButton from "../../../components/ui/ModalButton";
 import { RxCross2 } from "react-icons/rx";
 import { IoWarning, IoReload } from "react-icons/io5";
+import { MdBlock } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 
-const PolicyDetails = ({ policy, onUpdate, onCreate, isCreate = false, updateLoading }) => {
+const PolicyDetails = ({ policy, onUpdate, onCreate, isCreate = false, updateLoading, policyError, setPolicyError }) => {
 	const [editDesc, setEditDesc] = useState(policy?.description || "");
 	const [editTitle, setEditTitle] = useState(policy?.title || "");
 
@@ -57,11 +58,18 @@ const PolicyDetails = ({ policy, onUpdate, onCreate, isCreate = false, updateLoa
 			setEditDesc(description);
 			setEditTitle(title);
 			setIsEdit(false);
+            if (setPolicyError) setPolicyError("");
 		}
 	};
 
 	return (
 		<>
+            {policyError && (
+                <div className="flex items-center gap-2 py-3 px-4 rounded-xl bg-red-500 text-white mb-4">
+                    <MdBlock className="text-xl shrink-0" />
+                    <p>{policyError}</p>
+                </div>
+            )}
 			{canManage && (
 				<div className="flex gap-2 flex-wrap mb-3">
 					{!isEdit && (
@@ -142,7 +150,10 @@ const PolicyDetails = ({ policy, onUpdate, onCreate, isCreate = false, updateLoa
 					<Input
 						placeholder={"Chỉnh sửa tiêu đề..."}
 						type="text"
-						onChange={(e) => setEditTitle(e.target.value)}
+						onChange={(e) => {
+                            setEditTitle(e.target.value);
+                            if (setPolicyError) setPolicyError("");
+                        }}
 						defaultValue={editTitle}
 					></Input>
 

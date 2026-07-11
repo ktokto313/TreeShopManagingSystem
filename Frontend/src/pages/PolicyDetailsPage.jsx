@@ -5,7 +5,7 @@ import LoadingScreen from "./LoadingScreen";
 
 const PolicyDetailsPage = () => {
 	const { id } = useParams();
-	const { policy, loading, handleUpdatePolicy, updateLoading } = usePolicy(id);
+	const { policy, loading, handleUpdatePolicy, updateLoading, policyError, setPolicyError } = usePolicy(id);
 
 	if (loading) {
 		return <LoadingScreen className={"h-[75vh]"}></LoadingScreen>
@@ -17,6 +17,8 @@ const PolicyDetailsPage = () => {
 				policy={policy}
 				onUpdate={handleUpdatePolicy}
 				updateLoading={updateLoading}
+                policyError={policyError}
+                setPolicyError={setPolicyError}
 			></PolicyDetails>
 		</div>
 	);
