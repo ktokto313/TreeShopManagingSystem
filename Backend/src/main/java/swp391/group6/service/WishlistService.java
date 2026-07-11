@@ -108,6 +108,7 @@ public class WishlistService {
         ProductDetail detail = resolveProductDetail(product);
         if (detail != null) {
             response.setDescription(detail.getDescription());
+            response.setContent(detail.getContent());
             response.setImages(detail.getImages());
         }
 

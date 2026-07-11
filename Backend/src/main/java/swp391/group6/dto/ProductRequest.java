@@ -11,6 +11,7 @@ public class ProductRequest {
     private Boolean status;
     private String sku;
     private String description;
+    private String content;
     private String images;
 
     public Long getCategoryId() {
@@ -67,6 +68,14 @@ public class ProductRequest {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public String getImages() {
