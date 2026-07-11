@@ -36,10 +36,16 @@ public class PolicyService {
     }
 
     public Policy createPolicy(Policy policy) {
+        if (policyRepository.existsByTitleIgnoreCase(policy.getTitle())) {
+            throw new IllegalArgumentException("Tiêu đề chính sách này đã tồn tại. Vui lòng chọn một tên khác.");
+        }
         return policyRepository.save(policy);
     }
 
     public Policy updatePolicy(Long id, Policy policyDetails) {
+        if (policyDetails.getTitle() != null && policyRepository.existsByTitleIgnoreCaseAndIdNot(policyDetails.getTitle(), id)) {
+            throw new IllegalArgumentException("Tiêu đề chính sách này đã tồn tại. Vui lòng chọn một tên khác.");
+        }
         Policy policy = getPolicyById(id);
         policy.setTitle(policyDetails.getTitle());
         policy.setDescription(policyDetails.getDescription());

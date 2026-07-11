@@ -2,7 +2,7 @@ import PolicyDetails from "../features/policy/components/PolicyDetails";
 import { usePolicy } from "../features/policy/hooks/usePolicy";
 
 const CreatePolicyPage = () => {
-	const { handleCreatePolicy, updateLoading } = usePolicy();
+	const { handleCreatePolicy, updateLoading, policyError, setPolicyError } = usePolicy();
 
 	return (
 		<div className="mx-auto mt-8 w-[90%] sm:w-[80%] max-w-230">
@@ -12,6 +12,8 @@ const CreatePolicyPage = () => {
                 isCreate={true}
 				onCreate={handleCreatePolicy}
 				updateLoading={updateLoading}
+                policyError={policyError}
+                setPolicyError={setPolicyError}
 			/>
 		</div>
 	);

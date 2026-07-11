@@ -9,6 +9,7 @@ export const usePolicy = (id = null) => {
 	const [searchTitle, setSearchTitle] = useState("");
 	const [filterStatus, setFilterStatus] = useState(canManage ? "" : "PUBLISHED");
 	const [loading, setLoading] = useState(true);
+	const [policyError, setPolicyError] = useState("");
 
 	const [updateLoading, setUpdateLoading] = useState(false);
 
@@ -41,6 +42,11 @@ export const usePolicy = (id = null) => {
 			);
 		} catch (error) {
 			console.error("Failed to update policy", error);
+            if (error.payload) {
+                setPolicyError(error.payload);
+            } else {
+                setPolicyError("Đã xảy ra lỗi khi cập nhật chính sách.");
+            }
 		} finally {
 			setUpdateLoading(false);
 		}
@@ -54,6 +60,11 @@ export const usePolicy = (id = null) => {
             return newPolicy;
 		} catch (error) {
 			console.error("Failed to create policy", error);
+            if (error.payload) {
+                setPolicyError(error.payload);
+            } else {
+                setPolicyError("Đã xảy ra lỗi khi tạo chính sách.");
+            }
             throw error;
 		} finally {
 			setUpdateLoading(false);
@@ -86,5 +97,7 @@ export const usePolicy = (id = null) => {
 		updateLoading,
 		setUpdateLoading,
         handleSearch,
+        policyError,
+        setPolicyError,
 	};
 };

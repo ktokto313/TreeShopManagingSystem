@@ -10,4 +10,6 @@ public interface PolicyRepository extends JpaRepository<Policy, Long> {
     List<Policy> findAllByTitleContainingIgnoreCase(String title, Pageable pageable);
     List<Policy> findAllByStatus(PolicyStatus status, Pageable pageable);
     List<Policy> findAllByTitleContainingIgnoreCaseAndStatus(String title, PolicyStatus status, Pageable pageable);
+    boolean existsByTitleIgnoreCase(String title);
+    boolean existsByTitleIgnoreCaseAndIdNot(String title, Long id);
 }
