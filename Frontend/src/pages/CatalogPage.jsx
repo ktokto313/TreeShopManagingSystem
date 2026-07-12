@@ -1,10 +1,10 @@
 import { useContext, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import {Container} from '../components/global/Container'
-import {Button} from '../components/ui/Button'
-import {Card} from '../components/ui/Card'
-import {Input} from '../components/ui/Input'
-import {Select} from '../components/ui/Select'
+import { Container } from '../components/global/Container'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { Input } from '../components/ui/Input'
+import { Select } from '../components/ui/Select'
 import { AuthContext } from '../context/AuthContext'
 import CatalogProductCard from '../features/catalog/components/CatalogProductCard'
 import { addCartItem } from '../features/cart/cartApi'
@@ -69,18 +69,19 @@ export default function CatalogPage() {
     categoryId: routeCategoryId ?? '',
   }))
 
-  useEffect(() => {
-    if (routeCategoryId !== undefined) {
-      setFilters(prev => ({ ...prev, categoryId: routeCategoryId }))
-      setCurrentPage(1)
-    }
-  }, [routeCategoryId])
   const [showFilters, setShowFilters] = useState(true)
   const [notice, setNotice] = useState('')
   const [addingProductId, setAddingProductId] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [wishlistIds, setWishlistIds] = useState(new Set())
   const itemsPerPage = 12
+
+  useEffect(() => {
+    if (routeCategoryId !== undefined) {
+      setFilters(prev => ({ ...prev, categoryId: routeCategoryId }))
+      setCurrentPage(1)
+    }
+  }, [routeCategoryId])
 
   function handleAuthError(error) {
     if (error?.status !== 401) {
@@ -309,7 +310,7 @@ export default function CatalogPage() {
       setNotice(error.message)
     }
   }
-  
+
   const displayStart = visibleProducts.length === 0 ? 0 : (effectiveCurrentPage - 1) * itemsPerPage + 1
   const displayEnd = Math.min(effectiveCurrentPage * itemsPerPage, visibleProducts.length)
 
@@ -433,7 +434,7 @@ export default function CatalogPage() {
                 <div className="flex flex-wrap gap-2">
                   {categoryCounts.map((category) => (
                     <Button
-                      className={cn("hover:bg-green-400", {"bg-surface border-green-400 border text-green-600 hover:bg-green-200/50": (String(filters.categoryId) !== String(category.id))})}
+                      className={cn("hover:bg-green-400", { "bg-surface border-green-400 border text-green-600 hover:bg-green-200/50": (String(filters.categoryId) !== String(category.id)) })}
                       key={category.id || 'all'}
                       onClick={() =>
                         selectCategory(category.id ?? '')
@@ -540,7 +541,7 @@ export default function CatalogPage() {
                       </Button>
                     ))}
                     <Button
-                    
+
                       size="sm"
                       disabled={effectiveCurrentPage === totalPages}
                       onClick={() => setCurrentPage((value) => Math.min(totalPages, value + 1))}
