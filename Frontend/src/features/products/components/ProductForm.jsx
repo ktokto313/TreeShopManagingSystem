@@ -12,6 +12,7 @@ export default function ProductForm({
   isSubmitting = false,
   onChange,
   onSubmit,
+  children,
 }) {
   function handleInputChange(event) {
     const { name, value, type, checked } = event.target
@@ -130,9 +131,12 @@ export default function ProductForm({
           Sản phẩm chỉ mua được khi đang hoạt động và tồn kho lớn hơn 0.
         </p>
       </div>
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Đang lưu...' : 'Lưu sản phẩm'}
-      </Button>
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isSubmitting} className="w-full">
+          {isSubmitting ? 'Đang lưu...' : 'Lưu sản phẩm'}
+        </Button>
+        {children}
+      </div>
     </Form>
   )
 }

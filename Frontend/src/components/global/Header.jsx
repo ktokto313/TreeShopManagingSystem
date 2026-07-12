@@ -31,6 +31,7 @@ const navItemsByRole = {
   ],
   MANAGER: [
     { label: 'Home', to: '/' },
+    { label: 'Catalog', to: '/catalog' },
     { label: 'Manage', to: '/manage' },
     { label: 'Orders', to: '/orders' },
     { label: 'Statistics', to: '/statistic' },
@@ -50,6 +51,7 @@ const navItemsByRole = {
   ],
   SYSTEM_ADMIN: [
     { label: 'Home', to: '/' },
+    { label: 'Catalog', to: '/catalog' },
     { label: 'User Management', to: '/admin/users' },
     { label: 'Manage', to: '/manage' },
     { label: 'Orders', to: '/orders' },

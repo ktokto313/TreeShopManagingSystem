@@ -1,8 +1,17 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Container } from "../components/global/Container";
 import { cn } from "../utils/cn";
 import bg from "../assets/images/home-bg.jpg";
 import { MdOutlineTipsAndUpdates } from "react-icons/md";
+import ValuePropositions from "../features/homepage/components/ValuePropositions";
+import CategoriesGrid from "../features/homepage/components/CategoriesGrid";
+import FeaturedProducts from "../features/homepage/components/FeaturedProducts";
+import TestimonialSlider from "../features/homepage/components/TestimonialSlider";
+import BlogHighlight from "../features/homepage/components/BlogHighlight";
+import NewsletterFAQ from "../features/homepage/components/NewsletterFAQ";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { BiLeaf } from "react-icons/bi";
 
 function ActionLink({ className, to, children, variant = "primary" }) {
 	const baseClass = cn(
@@ -11,7 +20,7 @@ function ActionLink({ className, to, children, variant = "primary" }) {
 	);
 	const variantClass =
 		variant === "primary"
-			? "bg-green-500 text-white hover:bg-green-400"
+			? "bg-yellow-500 text-white hover:bg-yellow-400"
 			: "border border-green-600 bg-white text-green-700 hover:opacity-60";
 
 	if (typeof to === "string" && to.startsWith("#")) {
@@ -30,6 +39,12 @@ function ActionLink({ className, to, children, variant = "primary" }) {
 }
 
 export default function HomePage() {
+	const { canManage } = useContext(AuthContext);
+
+	useEffect(() => {
+		window.scrollTo(0, 0);
+	}, []);
+
 	return (
 		<main>
 			<section className="relative overflow-hidden">
@@ -54,21 +69,25 @@ export default function HomePage() {
 							</p>
 						</div>
 
-						<div className="flex flex-wrap gap-3 mt-8">
+						<div className="flex w-70 flex-wrap gap-3 mt-8">
 							<ActionLink
 								to="/catalog"
 								variant="primary"
-								className="hover:-translate-y-1 duration-300"
+								className="flex gap-2 grow text-xl hover:-translate-y-1 duration-300"
 							>
-								Vào catalog
+								<BiLeaf></BiLeaf>
+								 Khám phá gian hàng
+								 <BiLeaf></BiLeaf>
 							</ActionLink>
-							<ActionLink
-								to="/manage"
-								variant="secondary"
-								className="hover:-translate-y-1 duration-300"
-							>
-								Vào quản lý
-							</ActionLink>
+							{canManage && (
+								<ActionLink
+									to="/manage"
+									variant="secondary"
+									className="hover:-translate-y-1 duration-300"
+								>
+									Vào quản lý
+								</ActionLink>
+							)}
 						</div>
 
 						<div className="flex gap-1 items-center text-xs sm:text-sm mt-7 text-white/90 bg-green-500/60 rounded-xl p-2 px-4 w-max max-w-full">
@@ -82,25 +101,12 @@ export default function HomePage() {
 				</Container>
 			</section>
 
-			<section className="bg-green-400">
-				<Container className="py-12">
-					<div className="flex flex-col items-start justify-between gap-5 rounded-3xl bg-bg-surface p-8 shadow-xl lg:flex-row lg:items-center">
-						<div className="space-y-2">
-							<h2 className="text-2xl font-semibold text-green-700">
-								Mở catalog để xem cây, hoặc vào quản lý nếu cần cập nhật sản
-								phẩm
-							</h2>
-							<p className="max-w-2xl text-sm text-green-600">
-								Trang đầu giữ vai trò dẫn hướng đơn giản cho khách xem cây và
-								cho quản trị viên cập nhật dữ liệu.
-							</p>
-						</div>
-						<ActionLink to="/catalog" variant="primary">
-							Mở catalog
-						</ActionLink>
-					</div>
-				</Container>
-			</section>
+			<ValuePropositions />
+			<CategoriesGrid />
+			<FeaturedProducts />
+			<TestimonialSlider />
+			<BlogHighlight />
+			<NewsletterFAQ />
 		</main>
 	);
 }

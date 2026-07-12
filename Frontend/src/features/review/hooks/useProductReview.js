@@ -1,6 +1,6 @@
 import { useCallback, useContext, useState } from "react";
 import { AuthContext } from "../../../context/AuthContext";
-import { createProductReview, getProductReviews } from "../reviewApi";
+import { createProductReview, getProductReviews, toggleReviewHideApi, toggleReviewCurateApi } from "../reviewApi";
 import { useReviewForm } from "./useReviewForm";
 import { REVIEWS_PER_PAGE } from './../data/reviewsData';
 
@@ -22,7 +22,7 @@ export const useProductReview = (productId, onSuccess) => {
 	const [totalElements, setTotalElements] = useState(0);
 	const [ratingFilter, setRatingFilter] = useState(null);
 	
-	const { user } = useContext(AuthContext);
+	const { user, canManage } = useContext(AuthContext);
 
 	const loadReviews = useCallback(async (page = 1) => {
 		try {
@@ -34,7 +34,7 @@ export const useProductReview = (productId, onSuccess) => {
 				cleanRating = Number(ratingFilter);
 			}
 			
-			const result = await getProductReviews(productId, backendPage, REVIEWS_PER_PAGE, cleanRating);
+			const result = await getProductReviews(productId, backendPage, REVIEWS_PER_PAGE, cleanRating, canManage);
 
 			setReviews(result.content || []);
 			setTotalPages(result.totalPages || 1);
@@ -45,7 +45,7 @@ export const useProductReview = (productId, onSuccess) => {
 		} finally {
 			setIsReviewsLoading(false);
 		}
-	}, [productId, setIsReviewsLoading, ratingFilter]);
+	}, [productId, setIsReviewsLoading, ratingFilter, canManage]);
 
 	const handleStarOnClick = (starValue) => {
 		setStarValue(starValue);
@@ -102,6 +102,24 @@ export const useProductReview = (productId, onSuccess) => {
 		return true;
 	};
 
+	const toggleReviewHide = async (reviewId) => {
+		try {
+			await toggleReviewHideApi(reviewId);
+			setReviews(reviews.map(r => r.id === reviewId ? { ...r, hidden: !r.hidden } : r));
+		} catch (err) {
+			console.error('Lỗi ẩn đánh giá:', err);
+		}
+	};
+
+	const toggleReviewCurate = async (reviewId) => {
+		try {
+			await toggleReviewCurateApi(reviewId);
+			setReviews(reviews.map(r => r.id === reviewId ? { ...r, curated: !r.curated } : r));
+		} catch (err) {
+			console.error('Lỗi curate đánh giá:', err);
+		}
+	};
+
 	return {
 		handleReviewForm,
 		handleReviewValidation,
@@ -120,5 +138,8 @@ export const useProductReview = (productId, onSuccess) => {
 		reviewValidationError,
 		isReviewSubmitLoading,
 		pageSize: REVIEWS_PER_PAGE,
+		canManage,
+		toggleReviewHide,
+		toggleReviewCurate,
 	};
 };
