@@ -1,4 +1,4 @@
-﻿import { useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {Container} from '../components/global/Container'
 import {Button} from '../components/ui/Button'
@@ -68,6 +68,13 @@ export default function CatalogPage() {
     ...emptyFilters,
     categoryId: routeCategoryId ?? '',
   }))
+
+  useEffect(() => {
+    if (routeCategoryId !== undefined) {
+      setFilters(prev => ({ ...prev, categoryId: routeCategoryId }))
+      setCurrentPage(1)
+    }
+  }, [routeCategoryId])
   const [showFilters, setShowFilters] = useState(true)
   const [notice, setNotice] = useState('')
   const [addingProductId, setAddingProductId] = useState(null)

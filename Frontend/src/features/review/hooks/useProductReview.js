@@ -5,7 +5,7 @@
  */
 import { useCallback, useContext, useState } from "react";
 import { AuthContext } from "../../../context/AuthContext";
-import { createProductReview, getProductReviews } from "../reviewApi";
+import { createProductReview, getProductReviews, toggleReviewHideApi, toggleReviewCurateApi } from "../reviewApi";
 import { useReviewForm } from "./useReviewForm";
 import { REVIEWS_PER_PAGE } from "../data/reviewsData";
 
@@ -26,37 +26,35 @@ export const useProductReview = (productId, onSuccess) => {
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalElements, setTotalElements] = useState(0);
 	const [ratingFilter, setRatingFilter] = useState(null);
-
-	const { user } = useContext(AuthContext);
+	
+	const { user, canManage } = useContext(AuthContext);
 
 	const loadReviews = useCallback(
-		async (page = 1) => {
-			try {
-				setIsReviewsLoading(true);
-				const backendPage = Math.max(0, page - 1);
+	async (page = 1) => {
+		try {
+			setIsReviewsLoading(true);
+			const backendPage = Math.max(0, page - 1);
 
-				let cleanRating = null;
-				if (ratingFilter !== undefined && ratingFilter !== null && ratingFilter !== "" && ratingFilter !== "null") {
-					cleanRating = Number(ratingFilter);
-				}
-
-				const result = await getProductReviews(productId, backendPage, REVIEWS_PER_PAGE, cleanRating);
-
-				setReviews(result.content || []);
-				setTotalPages(result.totalPages || 1);
-				setTotalElements(result.totalElements || 0);
-				setCurrentPage((result.number ?? 0) + 1);
-			} catch (error) {
-				console.error("Lỗi tải đánh giá:", error);
-			} finally {
-				setIsReviewsLoading(false);
+			let cleanRating = null;
+			if (ratingFilter !== undefined && ratingFilter !== null && ratingFilter !== "" && ratingFilter !== "null") {
+				cleanRating = Number(ratingFilter);
 			}
-		},
-		[productId, setIsReviewsLoading, ratingFilter],
-	);
 
-	const handleStarOnClick = (selectedStar) => {
-		setStarValue(selectedStar);
+			const result = await getProductReviews(productId, backendPage, REVIEWS_PER_PAGE, cleanRating, canManage);
+
+			setReviews(result.content || []);
+			setTotalPages(result.totalPages || 1);
+			setTotalElements(result.totalElements || 0);
+			setCurrentPage((result.number ?? 0) + 1);
+		} catch (error) {
+			console.error("Lỗi tải đánh giá:", error);
+		} finally {
+			setIsReviewsLoading(false);
+		}
+	}, [productId, setIsReviewsLoading, ratingFilter, canManage]);
+
+	const handleStarOnClick = (starValue) => {
+		setStarValue(starValue);
 	};
 
 	const handleReviewForm = async (e, orderId) => {
@@ -106,6 +104,24 @@ export const useProductReview = (productId, onSuccess) => {
 		return true;
 	};
 
+	const toggleReviewHide = async (reviewId) => {
+		try {
+			await toggleReviewHideApi(reviewId);
+			setReviews(reviews.map(r => r.id === reviewId ? { ...r, hidden: !r.hidden } : r));
+		} catch (err) {
+			console.error('Lỗi ẩn đánh giá:', err);
+		}
+	};
+
+	const toggleReviewCurate = async (reviewId) => {
+		try {
+			await toggleReviewCurateApi(reviewId);
+			setReviews(reviews.map(r => r.id === reviewId ? { ...r, curated: !r.curated } : r));
+		} catch (err) {
+			console.error('Lỗi curate đánh giá:', err);
+		}
+	};
+
 	return {
 		handleReviewForm,
 		handleReviewValidation,
@@ -124,5 +140,8 @@ export const useProductReview = (productId, onSuccess) => {
 		reviewValidationError,
 		isReviewSubmitLoading,
 		pageSize: REVIEWS_PER_PAGE,
+		canManage,
+		toggleReviewHide,
+		toggleReviewCurate,
 	};
 };

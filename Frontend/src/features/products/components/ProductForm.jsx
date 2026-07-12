@@ -13,12 +13,13 @@ import { Select } from "../../../components/ui/Select";
 import { Textarea } from "../../../components/ui/Textarea";
 
 export default function ProductForm({
-	values,
-	errors = {},
-	categoryOptions = [],
-	isSubmitting = false,
-	onChange,
-	onSubmit,
+  values,
+  errors = {},
+  categoryOptions = [],
+  isSubmitting = false,
+  onChange,
+  onSubmit,
+  children,
 }) {
 	function handleInputChange(event) {
 		const { name, value, type, checked } = event.target;
