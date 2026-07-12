@@ -45,8 +45,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/debug/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/checkout/shipping-fee").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/policy/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/orders/products/*/reviews").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/orders/reviews/curated").permitAll()
+                        //TODO: funny security vulnerability
+                        .requestMatchers(HttpMethod.GET, "/api/statistic/products").permitAll()
                         .anyRequest().authenticated()
-                )
+                    )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> ResponseUtil
                                 .writeErrorResponse(response, HttpStatus.UNAUTHORIZED))
