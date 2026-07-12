@@ -42,6 +42,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/blogs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/policy/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/orders/products/*/reviews").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/orders/reviews/curated").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/statistic/products").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> ResponseUtil
