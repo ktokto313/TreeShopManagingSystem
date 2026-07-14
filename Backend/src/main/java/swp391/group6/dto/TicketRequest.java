@@ -1,3 +1,11 @@
+/*
+ * Author: AnhLV
+ * Created Date: 2026-06-08
+ * Name: TicketRequest.java
+ * Description: Data Transfer Object (DTO) for encapsulating ticket request data.
+ * Last Change Author: AnhLV
+ * Last Change Date: 2026-06-08
+ */
 package swp391.group6.dto;
 
 public class TicketRequest {

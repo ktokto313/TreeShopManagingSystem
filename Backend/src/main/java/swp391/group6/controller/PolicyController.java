@@ -1,3 +1,11 @@
+/*
+ * Author: AnhLV
+ * Created Date: 2026-07-09
+ * Name: PolicyController.java
+ * Description: REST controller handling HTTP requests and routing for policy-related operations.
+ * Last Change Author: AnhLV
+ * Last Change Date: 2026-07-09
+ */
 package swp391.group6.controller;
 
 import org.springframework.data.domain.Pageable;

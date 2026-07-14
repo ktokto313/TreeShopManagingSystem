@@ -1,4 +1,12 @@
 /*
+ * Author: AnhLV
+ * Created Date: 2026-05-29
+ * Name: Ticket.java
+ * Description: Entity model representing a ticket in the system.
+ * Last Change Author: AnhLV
+ * Last Change Date: 2026-07-03
+ */
+/*
  * Author: ktokto313
  * Created Date: 2026-05-29
  * Name: Ticket.java

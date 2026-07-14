@@ -1,4 +1,12 @@
 /*
+ * Author: AnhLV
+ * Created Date: 2026-06-01
+ * Name: TicketController.java
+ * Description: REST controller handling HTTP requests and routing for ticket-related operations.
+ * Last Change Author: AnhLV
+ * Last Change Date: 2026-07-03
+ */
+/*
  * Author: PlotChat
  * Created Date: 2026-06-01
  * Name: TicketController.java
