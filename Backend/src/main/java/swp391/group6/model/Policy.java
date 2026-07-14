@@ -1,3 +1,11 @@
+/*
+ * Author: AnhLV
+ * Created Date: 2026-07-09
+ * Name: Policy.java
+ * Description: Entity model representing a policy in the system.
+ * Last Change Author: AnhLV
+ * Last Change Date: 2026-07-09
+ */
 package swp391.group6.model;
 
 import jakarta.persistence.*;

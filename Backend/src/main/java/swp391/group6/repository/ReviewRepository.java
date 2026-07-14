@@ -1,4 +1,12 @@
 /*
+ * Author: AnhLV
+ * Created Date: 2026-06-24
+ * Name: ReviewRepository.java
+ * Description: Data access interface for review persistence and database operations.
+ * Last Change Author: AnhLV
+ * Last Change Date: 2026-07-12
+ */
+/*
  * Author: Aiden
  * Created Date: 2026-06-24
  * Name: ReviewRepository.java

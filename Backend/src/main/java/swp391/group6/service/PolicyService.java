@@ -1,3 +1,11 @@
+/*
+ * Author: AnhLV
+ * Created Date: 2026-07-09
+ * Name: PolicyService.java
+ * Description: Service layer component handling business logic for policies.
+ * Last Change Author: AnhLV
+ * Last Change Date: 2026-07-11
+ */
 package swp391.group6.service;
 
 import org.springframework.data.domain.Pageable;
