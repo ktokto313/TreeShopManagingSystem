@@ -1,3 +1,11 @@
+/*
+ * Author: AnhLV
+ * Created Date: 2026-07-09
+ * Name: PolicyRepository.java
+ * Description: Data access interface for policy persistence and database operations.
+ * Last Change Author: AnhLV
+ * Last Change Date: 2026-07-11
+ */
 package swp391.group6.repository;
 
 import org.springframework.data.domain.Pageable;
