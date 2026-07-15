@@ -52,6 +52,45 @@ function createDetailParagraphs(product, categoryName) {
 	];
 }
 
+function createDetailMarkdownContent(product, categoryName, imageUrl) {
+	const stock = Number(product?.stock ?? 0);
+	const price = formatCurrency(product?.price);
+	const careGuide = product?.careGuide || "Chưa cập nhật";
+	const sunlightLevel = product?.sunlightLevel || "Chưa cập nhật";
+	const wateringFrequency = product?.wateringFrequency || "Chưa cập nhật";
+	const difficulty = product?.difficulty || "Chưa cập nhật";
+	const fengShuiElement = product?.fengShuiElement || "Chưa cập nhật";
+	const imageBlock = imageUrl
+		? `![${product?.name || "Sản phẩm"}](${imageUrl})`
+		: "Chưa có ảnh minh họa riêng cho sản phẩm này.";
+
+	const sample = [
+		`# ${product?.name || "Thông tin chi tiết của sản phẩm"}`,
+		"",
+		`## ${categoryName && categoryName !== "-" ? categoryName : "Danh mục sản phẩm"}`,
+		"",
+		`Sản phẩm phù hợp để bố trí trong không gian sống, bàn làm việc hoặc khu vực thư giãn. Hiện tại sản phẩm đang có **${stock}** sản phẩm với mức giá **${price}**.`,
+		"",
+		"### Hình ảnh minh họa",
+		"",
+		imageBlock,
+		"",
+		"### Thông tin nhanh",
+		"",
+		`- **Hướng dẫn chăm sóc:** ${careGuide}`,
+		`- **Ánh sáng:** ${sunlightLevel}`,
+		`- **Tần suất tưới:** ${wateringFrequency}`,
+		`- **Độ khó chăm:** ${difficulty}`,
+		`- **Phong thủy:** ${fengShuiElement}`,
+		"",
+		"### Ghi chú",
+		"",
+		"Sản phẩm này được hiển thị theo nội dung markdown để hỗ trợ thêm ảnh, tiêu đề và các đoạn mô tả chi tiết.",
+	];
+
+	return sample.join("\n");
+}
+
 function InfoBox({ label, value }) {
 	return (
 		<div className="rounded-2xl border border-green-200 bg-white/80 p-4 shadow-sm">
@@ -339,6 +378,7 @@ export default function ProductDetailPage() {
 		categoryName
 	);
 	const detailParagraphs = createDetailParagraphs(product, categoryName);
+	const detailMarkdownContent = createDetailMarkdownContent(product, categoryName, imagePreview);
 	const plantDetails = [
 		{ label: "Hướng dẫn chăm sóc", value: product?.careGuide },
 		{ label: "Ánh sáng", value: product?.sunlightLevel },
@@ -526,8 +566,6 @@ export default function ProductDetailPage() {
 
 						<div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
 							<Card className="space-y-5 border-green-200 bg-white/90 p-6 shadow-lg shadow-green-900/5">
-								<SectionTitle eyebrow="Mô tả chi tiết" title="Câu chuyện và cách sử dụng sản phẩm" />
-
 								<div className="space-y-5 rounded-3xl border border-green-100 bg-green-50/70 p-5 text-sm leading-7 text-green-950">
 									{detailParagraphs.map((paragraph, index) => (
 										<p key={index}>{paragraph}</p>
@@ -545,12 +583,16 @@ export default function ProductDetailPage() {
 									</div>
 								) : null}
 
-								{product.content ? (
-									<div className="space-y-4">
-										<SectionTitle eyebrow="Markdown" title="Nội dung dài hiển thị theo markdown" />
-										<MarkdownContent content={product.content} />
-									</div>
-								) : null}
+								<div className="space-y-4">
+									<SectionTitle title="Thông tin chi tiết của sản phẩm" />
+									<MarkdownContent
+										content={
+											product?.content?.trim()
+												? `${detailMarkdownContent}\n\n---\n\n${product.content.trim()}`
+												: detailMarkdownContent
+										}
+									/>
+								</div>
 							</Card>
 
 							<Card className="space-y-4 border-green-200 bg-white/90 p-6 shadow-lg shadow-green-900/5">
