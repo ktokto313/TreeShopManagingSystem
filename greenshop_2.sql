@@ -62,12 +62,23 @@ CREATE INDEX idx_products_sku      ON products(sku);
 -- ============================================================
 
 CREATE TABLE product_details (
-   id          BIGSERIAL PRIMARY KEY,
-   product_id  BIGINT NOT NULL UNIQUE REFERENCES products(id) ON DELETE CASCADE,
-   description TEXT,
-   content     TEXT,
-   images      JSON
+    id          BIGSERIAL PRIMARY KEY,
+    product_id  BIGINT NOT NULL UNIQUE REFERENCES products(id) ON DELETE CASCADE,
+    description TEXT,
+    content     TEXT,
+    care_guide  TEXT,
+    sunlight_level TEXT,
+    water_freq  TEXT,
+    difficulty  TEXT,
+    feng_shui_element TEXT,
+    images      JSON
 );
+
+ALTER TABLE product_details ADD COLUMN IF NOT EXISTS care_guide TEXT;
+ALTER TABLE product_details ADD COLUMN IF NOT EXISTS sunlight_level TEXT;
+ALTER TABLE product_details ADD COLUMN IF NOT EXISTS water_freq TEXT;
+ALTER TABLE product_details ADD COLUMN IF NOT EXISTS difficulty TEXT;
+ALTER TABLE product_details ADD COLUMN IF NOT EXISTS feng_shui_element TEXT;
 
 -- ============================================================
 
@@ -444,8 +455,104 @@ INSERT INTO product_details (product_id, description, images) VALUES
 --  BLOG POSTS — 10 bài viết
 -- ============================================================
 UPDATE product_details
-SET content = description
-WHERE content IS NULL;
+  SET content = description
+  WHERE content IS NULL;
+
+UPDATE product_details
+  SET care_guide = 'Đặt nơi sáng nhẹ, tưới khi mặt đất khô, lau lá định kỳ.',
+      sunlight_level = 'Ánh sáng gián tiếp thấp đến trung bình',
+      water_freq = '1 lần/tuần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 1;
+
+UPDATE product_details
+  SET care_guide = 'Để nơi sáng dịu, tránh nắng gắt buổi trưa, tưới ít nhưng đều.',
+      sunlight_level = 'Ánh sáng gián tiếp thấp',
+      water_freq = '7-10 ngày/lần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 2;
+
+UPDATE product_details
+  SET care_guide = 'Ưa sáng vừa, tưới khi đất ráo, phù hợp góc phòng thoáng.',
+      sunlight_level = 'Ánh sáng trung bình',
+      water_freq = '1 lần/tuần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Kim'
+  WHERE product_id = 3;
+
+UPDATE product_details
+  SET care_guide = 'Cần ánh sáng ổn định, tưới vừa phải và kiểm tra thoát nước.',
+      sunlight_level = 'Ánh sáng trung bình đến cao',
+      water_freq = '1 lần/tuần',
+      difficulty = 'Trung bình',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 4;
+
+UPDATE product_details
+  SET care_guide = 'Có thể treo hoặc đặt kệ, chịu thiếu sáng tốt, tưới khi khô bề mặt.',
+      sunlight_level = 'Ánh sáng thấp đến trung bình',
+      water_freq = '1 lần/tuần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Thủy'
+  WHERE product_id = 5;
+
+UPDATE product_details
+  SET care_guide = 'Ưa nơi sáng, giữ ẩm vừa phải, lau lá để giữ bề mặt đẹp.',
+      sunlight_level = 'Ánh sáng gián tiếp sáng',
+      water_freq = '5-7 ngày/lần',
+      difficulty = 'Trung bình',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 6;
+
+UPDATE product_details
+  SET care_guide = 'Phù hợp người mới, chăm đơn giản, tưới khi đất khô nhẹ.',
+      sunlight_level = 'Ánh sáng thấp đến trung bình',
+      water_freq = '7-10 ngày/lần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 7;
+
+UPDATE product_details
+  SET care_guide = 'Thân cao, cần ánh sáng tốt và chỗ đứng ổn định.',
+      sunlight_level = 'Ánh sáng trung bình',
+      water_freq = '7-10 ngày/lần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 8;
+
+UPDATE product_details
+  SET care_guide = 'Ưa không gian sáng nhẹ, tưới vừa đủ để giữ tán lá cân đối.',
+      sunlight_level = 'Ánh sáng trung bình',
+      water_freq = '1 lần/tuần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 9;
+
+UPDATE product_details
+  SET care_guide = 'Rất dễ chăm, tưới ít, tránh ngập nước và giữ nơi thoáng.',
+      sunlight_level = 'Ánh sáng thấp',
+      water_freq = '10 ngày/lần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Thủy'
+  WHERE product_id = 10;
+
+UPDATE product_details
+  SET care_guide = 'Ưa nơi sáng nhưng không gắt, giữ độ ẩm đều để lá đẹp.',
+      sunlight_level = 'Ánh sáng gián tiếp sáng',
+      water_freq = '5-7 ngày/lần',
+      difficulty = 'Trung bình',
+      feng_shui_element = 'Kim'
+  WHERE product_id = 11;
+
+UPDATE product_details
+  SET care_guide = 'Hợp không gian sảnh hoặc phòng khách, tưới vừa phải và cắt tỉa gọn.',
+      sunlight_level = 'Ánh sáng trung bình',
+      water_freq = '1 lần/tuần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 12;
 
 INSERT INTO blog_posts (author_id, title, content, thumbnail, is_published) VALUES
 (2, 'Top 10 cây trong nhà dễ chăm nhất cho người bận rộn',

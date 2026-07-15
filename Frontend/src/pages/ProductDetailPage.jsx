@@ -1,3 +1,8 @@
+/*
+ * Created By: MinhLTHE200133
+ * Created At: 2026-06-04
+ * Last Modified: 2026-07-15
+ */
 import { useContext, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import {
@@ -10,6 +15,7 @@ import {
 	FaUndo,
 } from "react-icons/fa";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import remarkGfm from "remark-gfm";
 import { Container } from "../components/global/Container";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
@@ -22,8 +28,7 @@ import ProductImageFrame from "../features/products/components/ProductImageFrame
 import { getProductAvailability, isProductActive } from "../features/products/utils/productAvailability";
 import { resolveProductImages } from "../features/products/utils/productImageResolver";
 import ReviewSection from "../features/review/components/ReviewSection";
-	import { addWishlistProduct, checkWishlistProduct } from "../features/wishlist/wishlistApi";
-import remarkGfm from "remark-gfm";
+import { addWishlistProduct, checkWishlistProduct } from "../features/wishlist/wishlistApi";
 
 function summarizeDescription(value) {
 	if (!value) {
@@ -42,7 +47,7 @@ function createDetailParagraphs(product, categoryName) {
 		baseDescription,
 		`Sản phẩm thuộc nhóm ${categoryText}, phù hợp để làm mới không gian sống, góc học tập hoặc khu vực làm việc. Khi chọn mua, bạn có thể xem nhanh tình trạng kho, giá bán và ảnh minh họa ngay trên trang này.`,
 		stock > 0
-			? `Hiện còn ${stock} sản phẩm. Bạn nên đặt mua khi cây còn đúng kích thước và mẫu dáng mong muốn, đặc biệt với các sản phẩm cây cảnh có số lượng thay đổi theo từng đợt nhập hàng.`
+			? `Hiện còn ${stock} sản phẩm. Bạn nên đặt mua khi cây còn đúng kích thước và màu dáng mong muốn, đặc biệt với các sản phẩm cây cảnh có số lượng thay đổi theo từng đợt nhập hàng.`
 			: "Sản phẩm hiện đã hết hàng. Bạn vẫn có thể lưu vào danh sách yêu thích để quay lại kiểm tra khi cửa hàng cập nhật tồn kho.",
 	];
 }
@@ -257,6 +262,7 @@ export default function ProductDetailPage() {
 		}
 
 		setNotice("");
+
 		try {
 			await addWishlistProduct(product.id);
 			setIsWishlisted(true);
@@ -333,10 +339,14 @@ export default function ProductDetailPage() {
 		categoryName
 	);
 	const detailParagraphs = createDetailParagraphs(product, categoryName);
-	const similarProducts = useMemo(
-		() => pickRandomSimilarProducts(products, product),
-		[products, product],
-	);
+	const plantDetails = [
+		{ label: "Hướng dẫn chăm sóc", value: product?.careGuide },
+		{ label: "Ánh sáng", value: product?.sunlightLevel },
+		{ label: "Tần suất tưới", value: product?.wateringFrequency },
+		{ label: "Độ khó chăm", value: product?.difficulty },
+		{ label: "Phong thủy", value: product?.fengShuiElement },
+	].filter((item) => String(item.value ?? "").trim().length > 0);
+	const similarProducts = useMemo(() => pickRandomSimilarProducts(products, product), [products, product]);
 	const canAddToCart = availability.canPurchase && !addingToCart;
 
 	return (
@@ -349,10 +359,7 @@ export default function ProductDetailPage() {
 					</div>
 					<div className="flex flex-wrap items-center gap-3">
 						{canManage && product ? (
-							<Button
-								className="rounded-full"
-								onClick={() => navigate("/manage", { state: { editProduct: product } })}
-							>
+							<Button className="rounded-full" onClick={() => navigate("/manage", { state: { editProduct: product } })}>
 								Sửa sản phẩm
 							</Button>
 						) : null}
@@ -411,9 +418,7 @@ export default function ProductDetailPage() {
 
 								<div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-green-50 px-4 py-3 text-sm text-green-800">
 									<span>
-										{productImages.length
-											? `Ảnh ${activeImageIndex + 1} / ${productImages.length}`
-											: "Sản phẩm chưa có ảnh riêng."}
+										{productImages.length ? `Ảnh ${activeImageIndex + 1} / ${productImages.length}` : "Sản phẩm chưa có ảnh riêng."}
 									</span>
 									<div className="flex flex-wrap items-center gap-2">
 										{isWishlisted ? (
@@ -463,9 +468,7 @@ export default function ProductDetailPage() {
 
 							<div className="space-y-6">
 								<Card className="space-y-5 border-green-200 bg-white/90 p-6 shadow-xl shadow-green-900/5">
-									<SectionTitle eyebrow="Thông tin mua hàng" title="Sẵn sàng thêm vào không gian của bạn">
-										Kiểm tra nhanh giá, tồn kho và lưu sản phẩm để quay lại khi cần so sánh.
-									</SectionTitle>
+									<SectionTitle eyebrow="Thông tin mua hàng" title="Sẵn sàng thêm vào không gian của bạn" />
 
 									<div className="rounded-3xl bg-green-950 p-5 text-white">
 										<div className="flex flex-wrap items-end justify-between gap-4">
@@ -514,7 +517,7 @@ export default function ProductDetailPage() {
 										<PolicyItem
 											icon={<FaUndo />}
 											title="Hỗ trợ"
-											description="Nếu sản phẩm gặp vấn đề, bạn có thể liên hệ hỗ trợ để được hướng dẫn xử lý."
+											description="Nếu sản phẩm gặp vấn đề, bạn có thể liên hệ cửa hàng để được hướng dẫn xử lý."
 										/>
 									</div>
 								</Card>
@@ -522,26 +525,33 @@ export default function ProductDetailPage() {
 						</div>
 
 						<div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-						<Card className="space-y-5 border-green-200 bg-white/90 p-6 shadow-lg shadow-green-900/5">
-							<SectionTitle eyebrow="Mô tả chi tiết" title="Câu chuyện và cách sử dụng sản phẩm">
-								Thông tin bên dưới giúp khách hàng hiểu sản phẩm rõ hơn trước khi thêm vào giỏ hoặc lưu lại.
-							</SectionTitle>
+							<Card className="space-y-5 border-green-200 bg-white/90 p-6 shadow-lg shadow-green-900/5">
+								<SectionTitle eyebrow="Mô tả chi tiết" title="Câu chuyện và cách sử dụng sản phẩm" />
 
-							<div className="space-y-5 rounded-3xl border border-green-100 bg-green-50/70 p-5 text-sm leading-7 text-green-950">
-								{detailParagraphs.map((paragraph, index) => (
-									<p key={index}>{paragraph}</p>
-								))}
-							</div>
-
-							{product.content ? (
-								<div className="space-y-4">
-									<SectionTitle eyebrow="Markdown" title="Nội dung dài hiển thị theo markdown">
-										Phần này đọc đúng đoạn văn, tiêu đề, danh sách và ảnh mà manager nhập trong nội dung sản phẩm.
-									</SectionTitle>
-									<MarkdownContent content={product.content} />
+								<div className="space-y-5 rounded-3xl border border-green-100 bg-green-50/70 p-5 text-sm leading-7 text-green-950">
+									{detailParagraphs.map((paragraph, index) => (
+										<p key={index}>{paragraph}</p>
+									))}
 								</div>
-							) : null}
-						</Card>
+
+								{plantDetails.length ? (
+									<div className="space-y-4">
+										<SectionTitle eyebrow="Thông tin cây" title="Dữ liệu chăm sóc và sinh trưởng" />
+										<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+											{plantDetails.map((item) => (
+												<InfoBox key={item.label} label={item.label} value={item.value || "Chưa cập nhật"} />
+											))}
+										</div>
+									</div>
+								) : null}
+
+								{product.content ? (
+									<div className="space-y-4">
+										<SectionTitle eyebrow="Markdown" title="Nội dung dài hiển thị theo markdown" />
+										<MarkdownContent content={product.content} />
+									</div>
+								) : null}
+							</Card>
 
 							<Card className="space-y-4 border-green-200 bg-white/90 p-6 shadow-lg shadow-green-900/5">
 								<SectionTitle eyebrow="Gợi ý chăm sóc" title="Nhắc nhanh trước khi mua" />
@@ -564,9 +574,7 @@ export default function ProductDetailPage() {
 
 						{similarProducts.length ? (
 							<Card className="mt-8 space-y-5 border-green-200 bg-white/90 p-6 shadow-lg shadow-green-900/5">
-								<SectionTitle eyebrow="Sản phẩm liên quan" title="Có thể bạn cũng sẽ thích">
-									Các sản phẩm cùng danh mục giúp khách hàng so sánh nhanh trước khi quyết định.
-								</SectionTitle>
+								<SectionTitle eyebrow="Sản phẩm liên quan" title="Có thể bạn cũng sẽ thích" />
 								<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 									{similarProducts.map((item) => (
 										<SimilarProductCard key={item.id} product={item} onOpen={openSimilarProduct} />
@@ -576,9 +584,7 @@ export default function ProductDetailPage() {
 						) : null}
 
 						<Card className="mt-8 space-y-5 border-green-200 bg-white/90 p-6 shadow-lg shadow-green-900/5">
-							<SectionTitle eyebrow="Đánh giá sản phẩm" title="Trải nghiệm từ khách hàng">
-								Phần đánh giá nằm sau thông tin chính sách để khách hàng có đủ ngữ cảnh trước khi đọc phản hồi.
-							</SectionTitle>
+							<SectionTitle eyebrow="Đánh giá sản phẩm" title="Trải nghiệm từ khách hàng" />
 							<ReviewSection productId={productId} />
 						</Card>
 					</>

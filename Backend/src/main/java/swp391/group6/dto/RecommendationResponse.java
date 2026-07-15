@@ -1,19 +1,16 @@
-/*
- * Created By: MinhLTHE200133
- * Created At: 2026-05-30
- * Last Modified: 2026-07-11
- */
-// Created by minhlthe200133
 package swp391.group6.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
-public class ProductRequest {
+public class RecommendationResponse {
+    private Long id;
     private Long categoryId;
+    private String categoryName;
     private String name;
     private BigDecimal price;
-    private Integer stock;
-    private Boolean status;
+    private int stock;
+    private boolean status;
     private String sku;
     private String description;
     private String content;
@@ -23,6 +20,16 @@ public class ProductRequest {
     private String difficulty;
     private String fengShuiElement;
     private String images;
+    private double matchScore;
+    private List<String> matchReasons;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Long getCategoryId() {
         return categoryId;
@@ -30,6 +37,14 @@ public class ProductRequest {
 
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 
     public String getName() {
@@ -48,19 +63,19 @@ public class ProductRequest {
         this.price = price;
     }
 
-    public Integer getStock() {
+    public int getStock() {
         return stock;
     }
 
-    public void setStock(Integer stock) {
+    public void setStock(int stock) {
         this.stock = stock;
     }
 
-    public Boolean getStatus() {
+    public boolean isStatus() {
         return status;
     }
 
-    public void setStatus(Boolean status) {
+    public void setStatus(boolean status) {
         this.status = status;
     }
 
@@ -134,5 +149,21 @@ public class ProductRequest {
 
     public void setImages(String images) {
         this.images = images;
+    }
+
+    public double getMatchScore() {
+        return matchScore;
+    }
+
+    public void setMatchScore(double matchScore) {
+        this.matchScore = matchScore;
+    }
+
+    public List<String> getMatchReasons() {
+        return matchReasons;
+    }
+
+    public void setMatchReasons(List<String> matchReasons) {
+        this.matchReasons = matchReasons;
     }
 }

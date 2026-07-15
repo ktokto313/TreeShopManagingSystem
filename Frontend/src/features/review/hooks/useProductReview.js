@@ -1,8 +1,13 @@
+/*
+ * Created By: MinhLTHE200133
+ * Created At: 2026-06-25
+ * Last Modified: 2026-07-15
+ */
 import { useCallback, useContext, useState } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import { createProductReview, getProductReviews } from "../reviewApi";
 import { useReviewForm } from "./useReviewForm";
-import { REVIEWS_PER_PAGE } from './../data/reviewsData';
+import { REVIEWS_PER_PAGE } from "../data/reviewsData";
 
 export const useProductReview = (productId, onSuccess) => {
 	const {
@@ -13,7 +18,7 @@ export const useProductReview = (productId, onSuccess) => {
 		reviewValidationError,
 		setReviewValidationError,
 		isReviewSubmitLoading,
-		setIsReviewSubmitLoading
+		setIsReviewSubmitLoading,
 	} = useReviewForm();
 
 	const [reviews, setReviews] = useState([]);
@@ -21,34 +26,37 @@ export const useProductReview = (productId, onSuccess) => {
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalElements, setTotalElements] = useState(0);
 	const [ratingFilter, setRatingFilter] = useState(null);
-	
+
 	const { user } = useContext(AuthContext);
 
-	const loadReviews = useCallback(async (page = 1) => {
-		try {
-			setIsReviewsLoading(true);
-			const backendPage = Math.max(0, page - 1);
-			
-			let cleanRating = null;
-			if (ratingFilter !== undefined && ratingFilter !== null && ratingFilter !== "" && ratingFilter !== "null") {
-				cleanRating = Number(ratingFilter);
+	const loadReviews = useCallback(
+		async (page = 1) => {
+			try {
+				setIsReviewsLoading(true);
+				const backendPage = Math.max(0, page - 1);
+
+				let cleanRating = null;
+				if (ratingFilter !== undefined && ratingFilter !== null && ratingFilter !== "" && ratingFilter !== "null") {
+					cleanRating = Number(ratingFilter);
+				}
+
+				const result = await getProductReviews(productId, backendPage, REVIEWS_PER_PAGE, cleanRating);
+
+				setReviews(result.content || []);
+				setTotalPages(result.totalPages || 1);
+				setTotalElements(result.totalElements || 0);
+				setCurrentPage((result.number ?? 0) + 1);
+			} catch (error) {
+				console.error("Lỗi tải đánh giá:", error);
+			} finally {
+				setIsReviewsLoading(false);
 			}
-			
-			const result = await getProductReviews(productId, backendPage, REVIEWS_PER_PAGE, cleanRating);
+		},
+		[productId, setIsReviewsLoading, ratingFilter],
+	);
 
-			setReviews(result.content || []);
-			setTotalPages(result.totalPages || 1);
-			setTotalElements(result.totalElements || 0);
-			setCurrentPage((result.number ?? 0) + 1);
-		} catch (error) {
-			console.error("Lỗi tải đánh giá:", error);
-		} finally {
-			setIsReviewsLoading(false);
-		}
-	}, [productId, setIsReviewsLoading, ratingFilter]);
-
-	const handleStarOnClick = (starValue) => {
-		setStarValue(starValue);
+	const handleStarOnClick = (selectedStar) => {
+		setStarValue(selectedStar);
 	};
 
 	const handleReviewForm = async (e, orderId) => {
@@ -68,7 +76,7 @@ export const useProductReview = (productId, onSuccess) => {
 
 			const payload = {
 				rating: parseInt(rating, 10),
-				comment: comment,
+				comment,
 			};
 
 			await createProductReview(orderId, productId, payload);
@@ -78,9 +86,7 @@ export const useProductReview = (productId, onSuccess) => {
 			setStarValue(null);
 			if (onSuccess) onSuccess();
 		} catch (error) {
-			setReviewValidationError(
-				error.message || "Có lỗi xảy ra khi gửi đánh giá.",
-			);
+			setReviewValidationError(error.message || "Có lỗi xảy ra khi gửi đánh giá.");
 		} finally {
 			setIsReviewSubmitLoading(false);
 		}
@@ -93,9 +99,7 @@ export const useProductReview = (productId, onSuccess) => {
 		}
 
 		if (!rating || !comment) {
-			setReviewValidationError(
-				"Vui lòng chọn số sao và nhập bình luận để gửi đánh giá.",
-			);
+			setReviewValidationError("Vui lòng chọn số sao và nhập bình luận để gửi đánh giá.");
 			return false;
 		}
 

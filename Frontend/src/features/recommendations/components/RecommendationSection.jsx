@@ -32,9 +32,7 @@ function attachCategoryName(product, categoryMap) {
 }
 
 function collectPurchaseSignals(orders, products) {
-	const productBySku = new Map(
-		products.map((product) => [normalizeText(product.sku), product]),
-	);
+	const productBySku = new Map(products.map((product) => [normalizeText(product.sku), product]));
 
 	const purchasedProductIds = new Set();
 	const purchasedCategories = new Map();
@@ -44,8 +42,7 @@ function collectPurchaseSignals(orders, products) {
 	const purchasePrices = [];
 
 	const sortedOrders = [...(Array.isArray(orders) ? orders : [])].sort(
-		(left, right) =>
-			new Date(right?.createdAt ?? 0).getTime() - new Date(left?.createdAt ?? 0).getTime(),
+		(left, right) => new Date(right?.createdAt ?? 0).getTime() - new Date(left?.createdAt ?? 0).getTime(),
 	);
 
 	for (const order of sortedOrders) {
@@ -225,12 +222,8 @@ function RecommendationCard({ product }) {
 			<div className="space-y-3 p-4">
 				<div className="flex items-start justify-between gap-3">
 					<div className="space-y-1">
-						<h3 className="font-semibold text-green-950 group-hover:text-green-700">
-							{product.name}
-						</h3>
-						<p className="text-sm text-green-700">
-							{product.categoryName || "Sản phẩm phù hợp"}
-						</p>
+						<h3 className="font-semibold text-green-950 group-hover:text-green-700">{product.name}</h3>
+						<p className="text-sm text-green-700">{product.categoryName || "Sản phẩm phù hợp"}</p>
 					</div>
 					<span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
 						{Math.round(product.matchScore ?? 0)} điểm
@@ -238,9 +231,7 @@ function RecommendationCard({ product }) {
 				</div>
 
 				<div className="flex items-center justify-between gap-3">
-					<span className="font-semibold text-green-700">
-						{formatCurrency(product.price)}
-					</span>
+					<span className="font-semibold text-green-700">{formatCurrency(product.price)}</span>
 					<span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
 						{availability.label}
 					</span>
@@ -267,6 +258,15 @@ export default function RecommendationSection() {
 	useEffect(() => {
 		let cancelled = false;
 
+		if (!isAuthenticated) {
+			setResults([]);
+			setMessage("");
+			setLoading(false);
+			return () => {
+				cancelled = true;
+			};
+		}
+
 		async function loadRecommendations() {
 			setLoading(true);
 			setMessage("");
@@ -283,12 +283,8 @@ export default function RecommendationSection() {
 
 				const categories = Array.isArray(categoryData) ? categoryData : [];
 				const products = Array.isArray(productData) ? productData : [];
-				const categoryMap = new Map(
-					categories.map((category) => [String(category.id), category.name]),
-				);
-				const activeProducts = products.filter(
-					(product) => Number(product.stock ?? 0) > 0 && product.status !== false,
-				);
+				const categoryMap = new Map(categories.map((category) => [String(category.id), category.name]));
+				const activeProducts = products.filter((product) => Number(product.stock ?? 0) > 0 && product.status !== false);
 
 				let orders = [];
 				if (isAuthenticated) {
@@ -335,30 +331,26 @@ export default function RecommendationSection() {
 		};
 	}, [isAuthenticated]);
 
+	if (!isAuthenticated) {
+		return null;
+	}
+
 	return (
 		<section className="bg-gradient-to-b from-green-50 via-white to-green-100/80">
 			<Card className="mx-auto max-w-7xl border-green-200 bg-white/90 p-6 shadow-lg shadow-green-900/5">
 				<div className="mb-6 space-y-2">
 					<p className="text-xs font-semibold uppercase tracking-[0.3em] text-green-700">
-						Plant recommendation
+						Gợi ý mua hàng
 					</p>
 					<h2 className="text-3xl font-semibold tracking-tight text-green-950">
 						Gợi ý cây phù hợp từ lịch sử mua hàng
 					</h2>
-					<p className="max-w-3xl text-sm leading-6 text-green-800">
-						Hệ thống ưu tiên các sản phẩm dựa trên lịch sử mua hàng của bạn. Nếu chưa
-						có lịch sử, chúng tôi sẽ hiển thị các sản phẩm nổi bật đang hoạt động.
-						Việc tìm kiếm theo nhu cầu riêng được chuyển sang bộ lọc của catalog.
-					</p>
 				</div>
 
 				<div className="space-y-4">
 					<div className="flex flex-wrap items-center justify-between gap-3">
 						<div>
 							<h3 className="text-lg font-semibold text-green-950">Kết quả đề xuất</h3>
-							<p className="text-sm text-green-700">
-								{message || "Hệ thống đang ưu tiên các cây liên quan đến những gì bạn đã mua."}
-							</p>
 						</div>
 						{results.length ? (
 							<span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
