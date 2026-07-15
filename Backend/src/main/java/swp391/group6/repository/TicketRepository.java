@@ -29,6 +29,7 @@ import java.util.List;
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByTicketCreator(long id);
     List<Ticket> findByTicketStateNot(TicketState state);
+    List<Ticket> findByTicketState(TicketState state);
 
     @Query("SELECT t FROM Ticket t WHERE t.ticketCreator.id = :userId")
     List<Ticket> findTicketsByCreator(@Param("userId") long userId);
