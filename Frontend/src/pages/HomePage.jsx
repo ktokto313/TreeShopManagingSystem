@@ -3,6 +3,7 @@ import { Container } from "../components/global/Container";
 import { cn } from "../utils/cn";
 import bg from "../assets/images/home-bg.jpg";
 import { MdOutlineTipsAndUpdates } from "react-icons/md";
+import RecommendationSection from "../features/recommendations/components/RecommendationSection";
 
 function ActionLink({ className, to, children, variant = "primary" }) {
 	const baseClass = cn(
@@ -81,6 +82,8 @@ export default function HomePage() {
 					</div>
 				</Container>
 			</section>
+
+			<RecommendationSection />
 
 			<section className="bg-green-400">
 				<Container className="py-12">

@@ -40,6 +40,11 @@ const emptyProductForm = {
 	sku: "",
 	description: "",
 	content: "",
+	careGuide: "",
+	sunlightLevel: "",
+	wateringFrequency: "",
+	difficulty: "",
+	fengShuiElement: "",
 	images: [],
 	imageFiles: [],
 };
@@ -53,7 +58,6 @@ const SKU_PATTERN = /^[A-Za-z0-9_-]+$/;
 const MAX_IMAGE_FILES = 5;
 const MAX_IMAGE_FILE_SIZE = 5 * 1024 * 1024;
 const MAX_PRODUCT_CONTENT_LENGTH = 10000;
-
 function hasErrors(errors) {
 	return Object.keys(errors).length > 0;
 }
@@ -153,6 +157,32 @@ function validateProductForm(values) {
 
 	if (content.length > MAX_PRODUCT_CONTENT_LENGTH) {
 		errors.content = `Nội dung markdown tối đa ${MAX_PRODUCT_CONTENT_LENGTH} ký tự.`;
+	}
+
+	const careGuide = String(values.careGuide ?? "").trim();
+	const sunlightLevel = String(values.sunlightLevel ?? "").trim();
+	const wateringFrequency = String(values.wateringFrequency ?? "").trim();
+	const difficulty = String(values.difficulty ?? "").trim();
+	const fengShuiElement = String(values.fengShuiElement ?? "").trim();
+
+	if (careGuide.length > MAX_DESCRIPTION_LENGTH) {
+		errors.careGuide = "Hướng dẫn chăm sóc tối đa 1000 ký tự.";
+	}
+
+	if (sunlightLevel.length > MAX_SHORT_TEXT_LENGTH) {
+		errors.sunlightLevel = "Ánh sáng tối đa 255 ký tự.";
+	}
+
+	if (wateringFrequency.length > MAX_SHORT_TEXT_LENGTH) {
+		errors.wateringFrequency = "Tần suất tưới tối đa 255 ký tự.";
+	}
+
+	if (difficulty.length > MAX_SHORT_TEXT_LENGTH) {
+		errors.difficulty = "Độ khó chăm tối đa 255 ký tự.";
+	}
+
+	if (fengShuiElement.length > MAX_SHORT_TEXT_LENGTH) {
+		errors.fengShuiElement = "Phong thủy tối đa 255 ký tự.";
 	}
 
 	const imageError = validateProductImages(values.imageFiles);
@@ -381,6 +411,11 @@ export default function ManagementPage() {
 			sku: product.sku ?? "",
 			description: product.description ?? "",
 			content: product.content ?? "",
+			careGuide: product.careGuide ?? "",
+			sunlightLevel: product.sunlightLevel ?? "",
+			wateringFrequency: product.wateringFrequency ?? "",
+			difficulty: product.difficulty ?? "",
+			fengShuiElement: product.fengShuiElement ?? "",
 			images: parseImageList(product.images),
 			imageFiles: [],
 		});
@@ -456,6 +491,11 @@ export default function ManagementPage() {
 				sku: productForm.sku.trim(),
 				description: productForm.description.trim(),
 				content: productForm.content.trim(),
+				careGuide: productForm.careGuide.trim(),
+				sunlightLevel: productForm.sunlightLevel.trim(),
+				wateringFrequency: productForm.wateringFrequency.trim(),
+				difficulty: productForm.difficulty.trim(),
+				fengShuiElement: productForm.fengShuiElement.trim(),
 				images: imageNames.length ? JSON.stringify(imageNames) : null,
 			};
 
@@ -721,6 +761,7 @@ export default function ManagementPage() {
 							/>
 						</div>
 					</div>
+
 				</section>
 			</Container>
 

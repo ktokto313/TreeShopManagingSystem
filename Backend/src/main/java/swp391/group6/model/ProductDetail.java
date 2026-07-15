@@ -1,4 +1,9 @@
 /*
+ * Created By: MinhLTHE200133
+ * Created At: 2026-05-29
+ * Last Modified: 2026-07-11
+ */
+/*
  * Author: ktokto313
  * Created Date: 2026-05-29
  * Name: ProductDetail.java
@@ -25,6 +30,21 @@ public class ProductDetail {
 
     @Column
     private String content;
+
+    @Column(name = "care_guide")
+    private String careGuide;
+
+    @Column(name = "sunlight_level")
+    private String sunlightLevel;
+
+    @Column(name = "water_freq")
+    private String wateringFrequency;
+
+    @Column
+    private String difficulty;
+
+    @Column(name = "feng_shui_element")
+    private String fengShuiElement;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")
@@ -57,6 +77,46 @@ public class ProductDetail {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getCareGuide() {
+        return careGuide;
+    }
+
+    public void setCareGuide(String careGuide) {
+        this.careGuide = careGuide;
+    }
+
+    public String getSunlightLevel() {
+        return sunlightLevel;
+    }
+
+    public void setSunlightLevel(String sunlightLevel) {
+        this.sunlightLevel = sunlightLevel;
+    }
+
+    public String getWateringFrequency() {
+        return wateringFrequency;
+    }
+
+    public void setWateringFrequency(String wateringFrequency) {
+        this.wateringFrequency = wateringFrequency;
+    }
+
+    public String getDifficulty() {
+        return difficulty;
+    }
+
+    public void setDifficulty(String difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public String getFengShuiElement() {
+        return fengShuiElement;
+    }
+
+    public void setFengShuiElement(String fengShuiElement) {
+        this.fengShuiElement = fengShuiElement;
     }
 
     public String getImages() {

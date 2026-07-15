@@ -1,3 +1,8 @@
+/*
+ * Created By: MinhLTHE200133
+ * Created At: 2026-06-03
+ * Last Modified: 2026-06-24
+ */
 import { requestJson } from '../../utils/api'
 
 export const PRODUCT_API_BASE = '/api/products'

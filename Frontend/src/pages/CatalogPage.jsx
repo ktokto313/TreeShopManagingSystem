@@ -388,12 +388,9 @@ export default function CatalogPage() {
                 </div>
 
                 <div className="rounded-2xl border border-dashed border-green-200 bg-green-50/60 p-4 space-y-4">
-                  <div className="space-y-1">
+                <div className="space-y-1">
                     <h3 className="text-sm font-semibold text-green-800">Lọc theo nhu cầu chăm</h3>
-                    <p className="text-xs text-green-700">
-                      Bộ lọc này thay cho phần nhập tiêu chí ở gợi ý sản phẩm.
-                    </p>
-                  </div>
+                </div>
                   <Input
                     label="Độ khó chăm"
                     value={filters.careDifficulty}
@@ -474,7 +471,7 @@ export default function CatalogPage() {
                 <div className="space-y-1">
                   <h2 className="text-2xl font-semibold text-green-800">Danh sách sản phẩm</h2>
                   <p className="text-sm text-green-800">
-                    Hiển thị {displayStart}-{displayEnd} trên {visibleProducts.length} sản phẩm phù hợp
+                    Hiển thị {displayStart}-{displayEnd} trên {visibleProducts.length} sản phẩm
                   </p>
                 </div>
 
