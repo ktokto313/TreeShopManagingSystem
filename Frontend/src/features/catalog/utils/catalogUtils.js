@@ -71,6 +71,10 @@ function matchesText(product, keyword, categoryName, searchAliases = []) {
     product.name,
     product.sku,
     product.description,
+    product.content,
+    product.careGuide,
+    product.difficulty,
+    product.fengShuiElement,
     categoryName,
     ...searchAliases,
   ]
@@ -81,6 +85,16 @@ function matchesText(product, keyword, categoryName, searchAliases = []) {
   return searchableText.includes(searchValue) || compactSearchableText.includes(compactSearchValue)
 }
 
+function matchesAnyText(keyword, candidates = []) {
+  const searchValue = normalizeSearchText(keyword)
+
+  if (!searchValue) {
+    return true
+  }
+
+  return candidates.some((candidate) => normalizeSearchText(candidate).includes(searchValue))
+}
+
 //check filter data
 export function matchesCatalogFilters(product, filters, categoryName, options = {}) {
   const keyword = filters.keyword
@@ -88,6 +102,8 @@ export function matchesCatalogFilters(product, filters, categoryName, options = 
   const selectedStatus = String(filters.status ?? '')
   const minPrice = filters.minPrice === '' ? null : Number(filters.minPrice)
   const maxPrice = filters.maxPrice === '' ? null : Number(filters.maxPrice)
+  const careDifficulty = filters.careDifficulty
+  const fengShuiElement = filters.fengShuiElement
   const availability = getProductAvailability(product)
   const otherCategoryId = options.otherCategoryId ?? 'other'
   const smallCategoryIds = options.smallCategoryIds ?? new Set()
@@ -115,6 +131,29 @@ export function matchesCatalogFilters(product, filters, categoryName, options = 
   }
 
   if (maxPrice !== null && !Number.isNaN(maxPrice) && priceValue > maxPrice) {
+    return false
+  }
+
+  if (
+    !matchesAnyText(careDifficulty, [
+      product.difficulty,
+      product.careGuide,
+      product.description,
+      product.content,
+    ])
+  ) {
+    return false
+  }
+
+  if (
+    !matchesAnyText(fengShuiElement, [
+      product.fengShuiElement,
+      categoryName,
+      product.name,
+      product.description,
+      product.content,
+    ])
+  ) {
     return false
   }
 
