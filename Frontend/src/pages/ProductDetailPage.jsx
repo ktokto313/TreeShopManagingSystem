@@ -403,6 +403,11 @@ export default function ProductDetailPage() {
 								Sửa sản phẩm
 							</Button>
 						) : null}
+						<Link to="/policy">
+							<Button variant="secondary" className="rounded-full">
+								Policy
+							</Button>
+						</Link>
 						<Link to="/catalog">
 							<Button variant="secondary" className="rounded-full">
 								Quay lại catalog
