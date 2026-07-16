@@ -1,3 +1,11 @@
+/*
+ * Author: Hung Dao
+ * Created Date: 2026-06-03
+ * Name: ProfileResponse.java
+ * Description:
+ * Last Change Author: Hung Dao
+ * Last Change Date: 2026-07-15
+ */
 package swp391.group6.dto;
 
 public class ProfileResponse {
