@@ -128,24 +128,24 @@ function MarkdownContent({ content }) {
 			<ReactMarkdown
 				remarkPlugins={[remarkGfm]}
 				components={{
-					h1: ({ node, ...props }) => <h3 className="text-2xl font-semibold text-green-950" {...props} />,
-					h2: ({ node, ...props }) => <h4 className="text-xl font-semibold text-green-950" {...props} />,
-					h3: ({ node, ...props }) => <h5 className="text-lg font-semibold text-green-950" {...props} />,
-					p: ({ node, ...props }) => <p className="text-sm leading-7 text-green-900" {...props} />,
-					ul: ({ node, ...props }) => <ul className="list-disc space-y-2 pl-5 text-sm leading-7 text-green-900" {...props} />,
-					ol: ({ node, ...props }) => <ol className="list-decimal space-y-2 pl-5 text-sm leading-7 text-green-900" {...props} />,
-					li: ({ node, ...props }) => <li className="pl-1" {...props} />,
-					blockquote: ({ node, ...props }) => (
+					h1: (props) => <h3 className="text-2xl font-semibold text-green-950" {...props} />,
+					h2: (props) => <h4 className="text-xl font-semibold text-green-950" {...props} />,
+					h3: (props) => <h5 className="text-lg font-semibold text-green-950" {...props} />,
+					p: (props) => <p className="text-sm leading-7 text-green-900" {...props} />,
+					ul: (props) => <ul className="list-disc space-y-2 pl-5 text-sm leading-7 text-green-900" {...props} />,
+					ol: (props) => <ol className="list-decimal space-y-2 pl-5 text-sm leading-7 text-green-900" {...props} />,
+					li: (props) => <li className="pl-1" {...props} />,
+					blockquote: (props) => (
 						<blockquote className="border-l-4 border-green-300 bg-green-50 px-4 py-3 text-sm leading-7 text-green-900" {...props} />
 					),
-					img: ({ node, ...props }) => (
+					img: (props) => (
 						<img
 							{...props}
 							alt={props.alt || ""}
 							className="my-4 w-full rounded-2xl border border-green-200 object-cover shadow-sm"
 						/>
 					),
-					a: ({ node, ...props }) => (
+					a: (props) => (
 						<a className="font-medium text-green-700 underline decoration-green-300 underline-offset-4" {...props} />
 					),
 				}}

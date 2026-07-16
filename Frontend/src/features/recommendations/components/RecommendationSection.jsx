@@ -252,7 +252,6 @@ function RecommendationCard({ product }) {
 export default function RecommendationSection() {
 	const { isAuthenticated } = useContext(AuthContext);
 	const [results, setResults] = useState([]);
-	const [message, setMessage] = useState("");
 	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
@@ -260,7 +259,6 @@ export default function RecommendationSection() {
 
 		if (!isAuthenticated) {
 			setResults([]);
-			setMessage("");
 			setLoading(false);
 			return () => {
 				cancelled = true;
@@ -269,7 +267,6 @@ export default function RecommendationSection() {
 
 		async function loadRecommendations() {
 			setLoading(true);
-			setMessage("");
 
 			try {
 				const [categoryData, productData] = await Promise.all([
@@ -305,17 +302,9 @@ export default function RecommendationSection() {
 
 				setResults(nextResults);
 
-				if (signals.hasHistory) {
-					setMessage(nextResults.length ? "" : "Chưa có gợi ý phù hợp từ lịch sử mua hàng.");
-				} else if (isAuthenticated) {
-					setMessage("Chưa có lịch sử mua hàng. Đang hiển thị sản phẩm nổi bật.");
-				} else {
-					setMessage("Đăng nhập để xem gợi ý cá nhân hoá từ lịch sử mua hàng.");
-				}
 			} catch (error) {
 				if (!cancelled) {
 					setResults([]);
-					setMessage(error.message || "Không thể tải gợi ý lúc này.");
 				}
 			} finally {
 				if (!cancelled) {
@@ -379,3 +368,5 @@ export default function RecommendationSection() {
 		</section>
 	);
 }
+
+

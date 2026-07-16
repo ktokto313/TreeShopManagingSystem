@@ -57,6 +57,8 @@ const emptyFilters = {
 const SKU_PATTERN = /^[A-Za-z0-9_-]+$/;
 const MAX_IMAGE_FILES = 5;
 const MAX_IMAGE_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_DESCRIPTION_LENGTH = 1000;
+const MAX_SHORT_TEXT_LENGTH = 255;
 const MAX_PRODUCT_CONTENT_LENGTH = 10000;
 function hasErrors(errors) {
 	return Object.keys(errors).length > 0;
