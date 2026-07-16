@@ -2,7 +2,7 @@
  * Author: ktokto313
  * Created Date: 2026-06-05
  * Name: OrderService.java
- * Description: 
+ * Description:
  * Last Change Author: ktokto313
  * Last Change Date: 2026-07-03
  */
@@ -16,6 +16,7 @@ import swp391.group6.dto.LoginResponse;
 import swp391.group6.dto.OrderDTO;
 import swp391.group6.exception.InvalidStateTransitionException;
 import swp391.group6.model.*;
+import swp391.group6.model.NotificationType;
 import swp391.group6.repository.OrderRepository;
 import swp391.group6.repository.UserRepository;
 
@@ -30,11 +31,15 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final swp391.group6.repository.ReviewRepository reviewRepository;
+    private final NotificationService notificationService; // added for order notification triggers
 
-    public OrderService(OrderRepository orderRepository, UserRepository userRepository, swp391.group6.repository.ReviewRepository reviewRepository) {
+    public OrderService(OrderRepository orderRepository, UserRepository userRepository,
+                        swp391.group6.repository.ReviewRepository reviewRepository,
+                        NotificationService notificationService) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.reviewRepository = reviewRepository;
+        this.notificationService = notificationService;
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -101,6 +106,16 @@ public class OrderService {
                     tryToChangeState(existingOrder, user, OrderStatus.RETURN_PENDING);
                 }
                 orderRepository.save(existingOrder);
+
+                // Notify the newly assigned shipper.
+                notificationService.notifyUserByTemplate(
+                        newShipper.getId(),
+                        newShipper.getEmail(),
+                        NotificationType.DELIVERY_ASSIGNMENT,
+                        "DELIVERY_ASSIGNMENT_SHIPPER",
+                        existingOrder.getId()
+                );
+
                 return true;
             }
         }
@@ -134,12 +149,12 @@ public class OrderService {
 
         if (!isTransitionAllowed(currentStatus, targetStatus, roleName)) {
             throw new InvalidStateTransitionException(
-                "Cannot transition order from " + currentStatus + " to " + targetStatus
-                    + " with role " + roleName);
+                    "Cannot transition order from " + currentStatus + " to " + targetStatus
+                            + " with role " + roleName);
         } else if (targetStatus != OrderStatus.RETURN_PROCESSING && order.getShipper() == null) {
             throw new InvalidStateTransitionException(
-                "Cannot transition order from " + currentStatus + " to " + targetStatus
-                    + " without shipper");
+                    "Cannot transition order from " + currentStatus + " to " + targetStatus
+                            + " without shipper");
         }
 
         if (targetStatus == OrderStatus.ARRIVED) {
@@ -147,6 +162,32 @@ public class OrderService {
         }
 
         order.setStatus(targetStatus);
+
+        notifyStatusChange(order, targetStatus);
+    }
+
+    // Notify the customer whenever their order's status changes.
+    private void notifyStatusChange(Order order, OrderStatus targetStatus) {
+        User customer = order.getUser();
+        if (customer == null) return;
+
+        if (targetStatus == OrderStatus.ARRIVED) {
+            notificationService.notifyUserByTemplate(
+                    customer.getId(),
+                    customer.getEmail(),
+                    NotificationType.DELIVERY_COMPLETED,
+                    "ORDER_DELIVERED_CUSTOMER",
+                    order.getId()
+            );
+        } else {
+            notificationService.notifyUserByTemplate(
+                    customer.getId(),
+                    customer.getEmail(),
+                    NotificationType.ORDER_STATUS_UPDATE,
+                    "ORDER_STATUS_UPDATE_CUSTOMER",
+                    order.getId(), targetStatus
+            );
+        }
     }
 
     private String resolveRoleName(User user) {
@@ -157,7 +198,7 @@ public class OrderService {
     }
 
     private boolean isTransitionAllowed(
-        OrderStatus from, OrderStatus to, String roleName) {
+            OrderStatus from, OrderStatus to, String roleName) {
         if (from == null || to == null || roleName == null) {
             return false;
         }
@@ -166,9 +207,9 @@ public class OrderService {
             case PROCESSING -> to == OrderStatus.PENDING && "MANAGER".equals(roleName);
             case PENDING -> to == OrderStatus.DELIVERING && "MANAGER".equals(roleName);
             case DELIVERING ->
-                (to == OrderStatus.ARRIVED || to == OrderStatus.RETURNING) && "SHIPPER".equals(roleName);
+                    (to == OrderStatus.ARRIVED || to == OrderStatus.RETURNING) && "SHIPPER".equals(roleName);
             case ARRIVED ->
-                (to == OrderStatus.RECEIVED || to == OrderStatus.RETURN_PROCESSING) && "CUSTOMER".equals(roleName);
+                    (to == OrderStatus.RECEIVED || to == OrderStatus.RETURN_PROCESSING) && "CUSTOMER".equals(roleName);
             case RETURN_PROCESSING -> to == OrderStatus.RETURN_PENDING && "MANAGER".equals(roleName);
             case RETURN_PENDING -> to == OrderStatus.RETURNING && "SHIPPER".equals(roleName);
             case RETURNING -> to == OrderStatus.FAILED && "MANAGER".equals(roleName);
@@ -178,7 +219,7 @@ public class OrderService {
 
     public boolean canAccessAllOrder(LoginResponse user) {
         return (user.getRole().equals("MANAGER")
-            || user.getRole().equals("SYSTEM_ADMIN"));
+                || user.getRole().equals("SYSTEM_ADMIN"));
     }
 
     public boolean hasReviewed(long orderId, long productId) {
