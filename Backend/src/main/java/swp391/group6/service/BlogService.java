@@ -15,6 +15,7 @@ import swp391.group6.dto.BlogRequest;
 import swp391.group6.dto.BlogResponse;
 import swp391.group6.dto.BlogTagOption;
 import swp391.group6.model.*;
+import swp391.group6.model.NotificationType;
 import swp391.group6.repository.*;
 
 import java.util.Arrays;
@@ -32,6 +33,7 @@ public class BlogService {
     private final BlogVoteRepository voteRepo;
     private final BlogImageRepository imageRepo;
     private final UserRepository userRepo;
+    private final NotificationService notificationService; // added for blog notification triggers
 
     // VIEW BLOG
 
@@ -108,6 +110,16 @@ public class BlogService {
         postRepo.save(post);
         saveImages(post, req.getImages(), false);
 
+        // Notify Managers that a new blog post is waiting for review.
+        if (status == BlogStatus.PENDING) {
+            notificationService.notifyRoleByTemplate(
+                    "MANAGER",
+                    NotificationType.BLOG_PENDING_APPROVAL,
+                    "BLOG_PENDING_APPROVAL_MANAGER",
+                    post.getTitle(), user.getFullName()
+            );
+        }
+
         return toResponse(post, user.getId());
     }
 
@@ -139,6 +151,14 @@ public class BlogService {
             imageRepo.deleteAll(imageRepo.findByPostIdAndPendingTrue(postId));
             saveImages(post, req.getImages(), true);
 
+            // Edit to a live post needs approval too — notify Managers.
+            notificationService.notifyRoleByTemplate(
+                    "MANAGER",
+                    NotificationType.BLOG_PENDING_APPROVAL,
+                    "BLOG_EDIT_PENDING_APPROVAL_MANAGER",
+                    post.getTitle(), user.getFullName()
+            );
+
             return toResponse(post, user.getId());
         }
 
@@ -150,17 +170,30 @@ public class BlogService {
             post.setTags(new HashSet<>(req.getTags()));
         }
 
+        boolean movedToPending = false;
+
         if (!isManager) {
             if (post.getStatus() == BlogStatus.DRAFT && !"DRAFT".equals(req.getStatus())) {
                 post.setStatus(BlogStatus.PENDING);
+                movedToPending = true;
             }
             if (post.getStatus() == BlogStatus.REJECTED && !"DRAFT".equals(req.getStatus())) {
                 post.setStatus(BlogStatus.PENDING);
+                movedToPending = true;
             }
         }
 
         imageRepo.deleteAll(imageRepo.findByPostIdOrderByIdAsc(postId));
         saveImages(post, req.getImages(), false);
+
+        if (movedToPending) {
+            notificationService.notifyRoleByTemplate(
+                    "MANAGER",
+                    NotificationType.BLOG_PENDING_APPROVAL,
+                    "BLOG_PENDING_APPROVAL_MANAGER",
+                    post.getTitle(), user.getFullName()
+            );
+        }
 
         return toResponse(post, user.getId());
     }
@@ -192,6 +225,8 @@ public class BlogService {
         if (post.getStatus() == BlogStatus.PENDING) {
             post.setStatus(BlogStatus.PUBLISHED);
             postRepo.save(post);
+            notifyAuthor(post, NotificationType.BLOG_STATUS_UPDATE,
+                    "BLOG_APPROVED_CUSTOMER", post.getTitle());
             return true;
         }
 
@@ -209,6 +244,8 @@ public class BlogService {
             imageRepo.markPendingAsLive(postId);
 
             postRepo.save(post);
+            notifyAuthor(post, NotificationType.BLOG_STATUS_UPDATE,
+                    "BLOG_EDIT_APPROVED_CUSTOMER", post.getTitle());
             return true;
         }
 
@@ -224,6 +261,8 @@ public class BlogService {
         if (post.getStatus() == BlogStatus.PENDING) {
             post.setStatus(BlogStatus.REJECTED);
             postRepo.save(post);
+            notifyAuthor(post, NotificationType.BLOG_STATUS_UPDATE,
+                    "BLOG_REJECTED_CUSTOMER", post.getTitle());
             return true;
         }
 
@@ -236,6 +275,8 @@ public class BlogService {
             imageRepo.deleteAll(imageRepo.findByPostIdAndPendingTrue(postId));
 
             postRepo.save(post);
+            notifyAuthor(post, NotificationType.BLOG_STATUS_UPDATE,
+                    "BLOG_EDIT_REJECTED_CUSTOMER", post.getTitle());
             return true;
         }
 
@@ -302,6 +343,12 @@ public class BlogService {
             img.setPending(isPending);
             imageRepo.save(img);
         });
+    }
+
+    // Notify the post's author when their blogs status got published/rejected
+    private void notifyAuthor(BlogPost post, NotificationType type, String templateKey, Object... args) {
+        User author = post.getAuthor();
+        notificationService.notifyUserByTemplate(author.getId(), author.getEmail(), type, templateKey, args);
     }
 
     private BlogResponse toResponse(BlogPost post, Long userId) {
