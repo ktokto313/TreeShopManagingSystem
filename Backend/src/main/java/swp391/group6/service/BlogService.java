@@ -4,7 +4,7 @@
  * Name: BlogService.java
  * Description:
  * Last Change Author: HungDLM
- * Last Change Date: 2026-07-07
+ * Last Change Date: 2026-07-15
  */
 package swp391.group6.service;
 
@@ -13,9 +13,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swp391.group6.dto.BlogRequest;
 import swp391.group6.dto.BlogResponse;
+import swp391.group6.dto.BlogTagOption;
 import swp391.group6.model.*;
 import swp391.group6.repository.*;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -32,10 +35,20 @@ public class BlogService {
 
     // VIEW BLOG
 
-    public List<BlogResponse> getPublished(Long userId) {
-        return postRepo.findByStatusOrderByCreatedAtDesc(BlogStatus.PUBLISHED)
-                .stream()
+    public List<BlogResponse> getPublished(Long userId, List<BlogTag> tags) {
+        List<BlogPost> posts = (tags == null || tags.isEmpty())
+                ? postRepo.findByStatusOrderByCreatedAtDesc(BlogStatus.PUBLISHED)
+                : postRepo.findByTagsInAndStatus(tags, BlogStatus.PUBLISHED);
+
+        return posts.stream()
                 .map(p -> toResponse(p, userId))
+                .toList();
+    }
+
+    // Fixed taxonomy — no DB query needed, the enum itself is the source of truth.
+    public List<BlogTagOption> getAvailableTags() {
+        return Arrays.stream(BlogTag.values())
+                .map(t -> new BlogTagOption(t.name(), t.getDisplayName()))
                 .toList();
     }
 
@@ -68,6 +81,10 @@ public class BlogService {
         post.setContent(req.getContent());
         post.setThumbnail(req.getThumbnail());
 
+        if (req.getTags() != null) {
+            post.setTags(new HashSet<>(req.getTags()));
+        }
+
         BlogStatus status;
 
         try {
@@ -89,7 +106,7 @@ public class BlogService {
         post.setStatus(status);
 
         postRepo.save(post);
-        saveImages(post, req.getImages(), false); // brand-new post — images are live from the start
+        saveImages(post, req.getImages(), false);
 
         return toResponse(post, user.getId());
     }
@@ -115,6 +132,10 @@ public class BlogService {
             post.setPendingThumbnail(req.getThumbnail());
             post.setHasPendingEdit(true);
 
+            if (req.getTags() != null) {
+                post.setTags(new HashSet<>(req.getTags()));
+            }
+
             imageRepo.deleteAll(imageRepo.findByPostIdAndPendingTrue(postId));
             saveImages(post, req.getImages(), true);
 
@@ -124,6 +145,10 @@ public class BlogService {
         post.setTitle(req.getTitle());
         post.setContent(req.getContent());
         post.setThumbnail(req.getThumbnail());
+
+        if (req.getTags() != null) {
+            post.setTags(new HashSet<>(req.getTags()));
+        }
 
         if (!isManager) {
             if (post.getStatus() == BlogStatus.DRAFT && !"DRAFT".equals(req.getStatus())) {
@@ -298,6 +323,12 @@ public class BlogService {
                         imageRepo.findByPostIdAndPendingFalse(post.getId())
                                 .stream()
                                 .map(BlogImage::getImageUrl)
+                                .toList()
+                )
+                .tags(
+                        post.getTags().stream()
+                                .map(Enum::name)
+                                .sorted()
                                 .toList()
                 )
                 .createdAt(post.getCreatedAt())

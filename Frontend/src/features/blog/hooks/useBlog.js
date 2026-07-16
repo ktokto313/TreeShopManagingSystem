@@ -9,27 +9,52 @@ async function apiFetch(url, options = {}) {
     return text ? JSON.parse(text) : null;
 }
 
-export function useBlogs() {
+function buildTagsQuery(tags) {
+    if (!tags || tags.length === 0) return '';
+    const params = new URLSearchParams();
+    tags.forEach(t => params.append('tags', t));
+    return `?${params.toString()}`;
+}
+
+export function useBlogs(tags = []) {
     const [blogs, setBlogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    // stable key so the effect only re-runs when the actual tag selection changes
+    const tagsKey = tags.join(',');
 
     const load = useCallback(async () => {
         setLoading(true);
         setError('');
         try {
-            const data = await apiFetch(BASE);
+            const data = await apiFetch(`${BASE}${buildTagsQuery(tags)}`);
             setBlogs(Array.isArray(data) ? data : []);
         } catch {
             setError('Không thể tải danh sách bài viết.');
         } finally {
             setLoading(false);
         }
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tagsKey]);
 
     useEffect(() => { load(); }, [load]);
 
     return { blogs, loading, error, reload: load };
+}
+
+export function useAvailableTags() {
+    const [tags, setTags] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        apiFetch(`${BASE}/tags`)
+            .then(data => setTags(Array.isArray(data) ? data : []))
+            .catch(() => setTags([]))
+            .finally(() => setLoading(false));
+    }, []);
+
+    return { tags, loading };
 }
 
 export function useBlogDetail(id) {

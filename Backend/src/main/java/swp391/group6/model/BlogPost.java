@@ -2,15 +2,17 @@
  * Author: Hung Dao
  * Created Date: 2026-06-26
  * Name: BlogPost.java
- * Description: 
+ * Description:
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-07-07
+ * Last Change Date: 2026-07-15
  */
 package swp391.group6.model;
 
 import jakarta.persistence.*;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 @Table(name = "blog_posts")
@@ -61,6 +63,12 @@ public class BlogPost {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BlogImage> images;
 
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "blog_tags", joinColumns = @JoinColumn(name = "blog_post_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tag", nullable = false, length = 50)
+    private Set<BlogTag> tags = new HashSet<>();
+
     @PrePersist
     void onCreate() {
         createdAt = new Timestamp(System.currentTimeMillis());
@@ -104,4 +112,7 @@ public class BlogPost {
 
     public boolean isHasPendingEdit() { return hasPendingEdit; }
     public void setHasPendingEdit(boolean hasPendingEdit) { this.hasPendingEdit = hasPendingEdit; }
+
+    public Set<BlogTag> getTags() { return tags; }
+    public void setTags(Set<BlogTag> tags) { this.tags = tags; }
 }
