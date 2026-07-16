@@ -642,3 +642,17 @@ ALTER TABLE blog_posts
 
 ALTER TABLE blog_images
     ADD COLUMN IF NOT EXISTS is_pending BOOLEAN NOT NULL DEFAULT FALSE;
+
+-- ==============================================================
+-- BLOG TAG - filter cho bài đăng
+-- ==============================================================
+
+CREATE TABLE blog_tags (
+                           blog_post_id BIGINT NOT NULL REFERENCES blog_posts(id) ON DELETE CASCADE,
+                           tag VARCHAR(50) NOT NULL
+);
+
+CREATE INDEX idx_blog_tags_post_id ON blog_tags(blog_post_id);
+CREATE INDEX idx_blog_tags_tag ON blog_tags(tag);
+
+TRUNCATE TABLE blog_tags;

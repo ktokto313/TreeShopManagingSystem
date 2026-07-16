@@ -20,9 +20,9 @@ public class BlogResponse {
     private long voteCount;
     private boolean votedByCurrentUser;
     private List<String> images;
+    private List<String> tags;
     private Timestamp createdAt;
     private Timestamp updatedAt;
-
     private boolean hasPendingEdit;
     private String pendingTitle;
     private String pendingContent;

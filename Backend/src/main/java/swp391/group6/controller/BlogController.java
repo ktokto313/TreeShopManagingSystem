@@ -2,9 +2,9 @@
  * Author: Hung Dao
  * Created Date: 2026-06-26
  * Name: BlogController.java
- * Description: 
+ * Description:
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-06-27
+ * Last Change Date: 2026-07-15
  */
 package swp391.group6.controller;
 
@@ -19,8 +19,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import swp391.group6.dto.BlogRequest;
 import swp391.group6.dto.BlogResponse;
+import swp391.group6.dto.BlogTagOption;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.model.BlogImage;
+import swp391.group6.model.BlogTag;
 import swp391.group6.repository.BlogImageRepository;
 import swp391.group6.service.BlogService;
 
@@ -56,10 +58,18 @@ public class BlogController {
     // VIEW
 
     @GetMapping
-    public List<BlogResponse> getPublished(HttpServletRequest request) {
+    public List<BlogResponse> getPublished(@RequestParam(required = false) List<BlogTag> tags,
+                                           HttpServletRequest request) {
         LoginResponse user = (LoginResponse) request.getAttribute(cookieName);
         Long userId = (user != null) ? user.getId() : null;
-        return service.getPublished(userId);
+        return service.getPublished(userId, tags);
+    }
+
+    // TAGS
+
+    @GetMapping("/tags")
+    public List<BlogTagOption> getAvailableTags() {
+        return service.getAvailableTags();
     }
 
     @GetMapping("/{id}")
