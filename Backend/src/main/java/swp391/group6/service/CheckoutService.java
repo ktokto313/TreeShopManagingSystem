@@ -8,6 +8,8 @@
  */
 package swp391.group6.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +43,7 @@ import java.util.regex.Pattern;
 
 @Service
 public class CheckoutService {
+    private static final Logger log = LoggerFactory.getLogger(CheckoutService.class);
     private static final BigDecimal DISCOUNT = BigDecimal.ZERO;
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^0\\d{8,10}$");
@@ -90,15 +93,38 @@ public class CheckoutService {
         if (request.getWeightGrams() > 0) {
             weightGrams = request.getWeightGrams();
         }
-        int fee = viettelPostService.calculateShippingFee(
-                request.getProvince(), request.getDistrict(), weightGrams);
+        int districtId = viettelPostService.mapDistrictNameToId(request.getDistrict());
+
+        int fee;
+        if (viettelPostProperties.isEnabled()) {
+            fee = viettelPostService.calculateShippingFee(districtId, weightGrams);
+        } else {
+            fee = viettelPostService.calculateFallbackFee(
+                    request.getDistrict(),
+                    request.getTotalOrderValue(),
+                    request.getItemCount()
+            );
+        }
         return BigDecimal.valueOf(fee);
     }
 
     public BigDecimal resolveShippingFee(LoginResponse loginResponse, ShippingFeeRequest request) {
         int weightGrams = 1000;
-        int fee = viettelPostService.calculateShippingFee(
-                request.getProvince(), request.getDistrict(), weightGrams);
+        int districtId = viettelPostService.mapDistrictNameToId(request.getDistrict());
+        log.info("resolveShippingFee: districtName='{}' -> districtId={}", request.getDistrict(), districtId);
+
+        int fee;
+        if (viettelPostProperties.isEnabled()) {
+            fee = viettelPostService.calculateShippingFee(districtId, weightGrams);
+        } else {
+            fee = viettelPostService.calculateFallbackFee(
+                    request.getDistrict(),
+                    request.getTotalOrderValue(),
+                    request.getItemCount()
+            );
+        }
+
+        log.info("resolveShippingFee: RETURNED fee={}", fee);
         return BigDecimal.valueOf(fee);
     }
 

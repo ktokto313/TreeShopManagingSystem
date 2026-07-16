@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +21,9 @@ public class ViettelPostService {
         this.client = client;
     }
 
-    public int calculateShippingFee(String province, String district, int weightGrams) {
-        log.info("calculateShippingFee ENTRY province={} district={} weight={}g enabled={}",
-                province, district, weightGrams, properties.isEnabled());
+    public int calculateShippingFee(int receiverDistrictId, int weightGrams) {
+        log.info("calculateShippingFee ENTRY districtId={} weight={}g enabled={}",
+                receiverDistrictId, weightGrams, properties.isEnabled());
 
         if (!properties.isEnabled()) {
             log.warn("ViettelPost disabled, returning fallback fee: {}", properties.getFallbackFee());
@@ -37,15 +38,13 @@ public class ViettelPostService {
         try {
             int senderProvinceId = properties.getSenderProvinceId();
             int senderDistrictId = properties.getSenderDistrictId();
-            int receiverProvinceId = mapProvinceNameToId(province);
-            int receiverDistrictId = mapDistrictNameToId(district, receiverProvinceId);
 
-            log.info("Mapped IDs: senderProvince={} senderDistrict={} receiverProvince={} receiverDistrict={}",
-                    senderProvinceId, senderDistrictId, receiverProvinceId, receiverDistrictId);
+            log.info("Mapped IDs: senderProvince={} senderDistrict={} receiverDistrict={}",
+                    senderProvinceId, senderDistrictId, receiverDistrictId);
 
             List<PriceOption> options = client.getShippingPrice(
                     senderProvinceId, senderDistrictId,
-                    receiverProvinceId, receiverDistrictId,
+                    senderProvinceId, receiverDistrictId,
                     weightGrams, 100000, 0
             );
 
@@ -69,73 +68,13 @@ public class ViettelPostService {
         }
     }
 
-    private int mapProvinceNameToId(String provinceName) {
-        if (provinceName == null) {
-            return 1;
-        }
-        String normalized = normalizeText(provinceName);
-        
-        Map<String, Integer> provinceMap = new HashMap<>();
-        provinceMap.put("hanoi", 10);
-        provinceMap.put("ha noi", 10);
-        provinceMap.put("thanh pho ha noi", 10);
-        provinceMap.put("ho chi minh", 1);
-        provinceMap.put("hochiminh", 1);
-        provinceMap.put("hcm", 1);
-        provinceMap.put("tp hcm", 1);
-        provinceMap.put("thanh pho ho chi minh", 1);
-        provinceMap.put("da nang", 2);
-        provinceMap.put("tp da nang", 2);
-        provinceMap.put("hai phong", 3);
-        provinceMap.put("can tho", 4);
-        provinceMap.put("hue", 5);
-        provinceMap.put("thanh hoa", 6);
-        provinceMap.put("nghe an", 7);
-        provinceMap.put("binh duong", 8);
-        provinceMap.put("dong nai", 9);
-        provinceMap.put("hai duong", 11);
-
-        for (Map.Entry<String, Integer> entry : provinceMap.entrySet()) {
-            if (normalized.contains(entry.getKey())) {
-                log.debug("Mapped province '{}' to ID {}", provinceName, entry.getValue());
-                return entry.getValue();
-            }
-        }
-
-        log.warn("Unknown province '{}', defaulting to ID 1", provinceName);
-        return 1;
-    }
-
-    private int mapDistrictNameToId(String districtName, int provinceId) {
+    public int mapDistrictNameToId(String districtName) {
         if (districtName == null) {
-            return 1;
+            return 110; // Default Hoan Kiem
         }
+        
         String normalized = normalizeText(districtName);
         
-        Map<String, Integer> hcmDistricts = new HashMap<>();
-        hcmDistricts.put("quan 1", 1);
-        hcmDistricts.put("quan 2", 2);
-        hcmDistricts.put("quan 3", 3);
-        hcmDistricts.put("quan 4", 4);
-        hcmDistricts.put("quan 5", 5);
-        hcmDistricts.put("quan 6", 6);
-        hcmDistricts.put("quan 7", 7);
-        hcmDistricts.put("quan 8", 8);
-        hcmDistricts.put("quan 9", 9);
-        hcmDistricts.put("quan 10", 10);
-        hcmDistricts.put("quan 11", 11);
-        hcmDistricts.put("quan 12", 12);
-        hcmDistricts.put("binh thanh", 13);
-        hcmDistricts.put("tan binh", 14);
-        hcmDistricts.put("tan phu", 15);
-        hcmDistricts.put("go vap", 16);
-        hcmDistricts.put("phu nhuan", 17);
-        hcmDistricts.put("thu duc", 18);
-        hcmDistricts.put("binh chanh", 19);
-        hcmDistricts.put("cu chi", 20);
-        hcmDistricts.put("hoc mon", 21);
-        hcmDistricts.put("nha be", 22);
-
         Map<String, Integer> hanoiDistricts = new HashMap<>();
         hanoiDistricts.put("quan hoan kiem", 110);
         hanoiDistricts.put("hoan kiem", 110);
@@ -145,49 +84,132 @@ public class ViettelPostService {
         hanoiDistricts.put("dong da", 112);
         hanoiDistricts.put("quan hai ba trung", 113);
         hanoiDistricts.put("hai ba trung", 113);
-        hanoiDistricts.put("quan badinh", 114);
+        hanoiDistricts.put("quan tay ho", 114);
+        hanoiDistricts.put("tay ho", 114);
         hanoiDistricts.put("quan cau giay", 115);
         hanoiDistricts.put("cau giay", 115);
-        hanoiDistricts.put("quan long bien", 116);
-        hanoiDistricts.put("long bien", 116);
-        hanoiDistricts.put("quan tu liem", 117);
-        hanoiDistricts.put("tu liem", 117);
-        hanoiDistricts.put("quan thanh xuan", 118);
-        hanoiDistricts.put("thanh xuan", 118);
-        hanoiDistricts.put("quan ha dong", 119);
-        hanoiDistricts.put("ha dong", 119);
-        hanoiDistricts.put("quan son tay", 120);
-        hanoiDistricts.put("son tay", 120);
+        hanoiDistricts.put("quan thanh xuan", 116);
+        hanoiDistricts.put("thanh xuan", 116);
+        hanoiDistricts.put("quan ha dong", 117);
+        hanoiDistricts.put("ha dong", 117);
+        hanoiDistricts.put("quan long bien", 118);
+        hanoiDistricts.put("long bien", 118);
+        hanoiDistricts.put("quan nam tu liem", 119);
+        hanoiDistricts.put("nam tu liem", 119);
+        hanoiDistricts.put("quan bac tu liem", 120);
+        hanoiDistricts.put("bac tu liem", 120);
+        hanoiDistricts.put("quan hoang mai", 121);
+        hanoiDistricts.put("hoang mai", 121);
+        hanoiDistricts.put("quan thanh tri", 122);
+        hanoiDistricts.put("thanh tri", 122);
+        hanoiDistricts.put("huyen soc son", 123);
+        hanoiDistricts.put("soc son", 123);
+        hanoiDistricts.put("huyen dong anh", 124);
+        hanoiDistricts.put("dong anh", 124);
+        hanoiDistricts.put("huyen gia lam", 125);
+        hanoiDistricts.put("gia lam", 125);
+        hanoiDistricts.put("huyen thanh oai", 126);
+        hanoiDistricts.put("thanh oai", 126);
+        hanoiDistricts.put("huyen thuong tin", 127);
+        hanoiDistricts.put("thuong tin", 127);
+        hanoiDistricts.put("huyen phu xuyen", 128);
+        hanoiDistricts.put("phu xuyen", 128);
+        hanoiDistricts.put("huyen chuong my", 129);
+        hanoiDistricts.put("chuong my", 129);
+        hanoiDistricts.put("huyen my duc", 130);
+        hanoiDistricts.put("my duc", 130);
+        hanoiDistricts.put("huyen quoc oai", 131);
+        hanoiDistricts.put("quoc oai", 131);
+        hanoiDistricts.put("huyen thach that", 132);
+        hanoiDistricts.put("thach that", 132);
+        hanoiDistricts.put("huyen dan phuong", 133);
+        hanoiDistricts.put("dan phuong", 133);
+        hanoiDistricts.put("huyen hoai duc", 134);
+        hanoiDistricts.put("hoai duc", 134);
+        hanoiDistricts.put("huyen son tay", 135);
+        hanoiDistricts.put("son tay", 135);
+        hanoiDistricts.put("huyen Ba Vi", 136);
+        hanoiDistricts.put("ba vi", 136);
+        hanoiDistricts.put("huyen phuc tho", 137);
+        hanoiDistricts.put("phuc tho", 137);
+        hanoiDistricts.put("huyen ME Tri", 138);
+        hanoiDistricts.put("me tri", 138);
 
-        Map<String, Integer> districtMap;
-        switch (provinceId) {
-            case 1:
-                districtMap = hcmDistricts;
-                break;
-            case 10:
-                districtMap = hanoiDistricts;
-                break;
-            default:
-                return 1;
-        }
-
-        for (Map.Entry<String, Integer> entry : districtMap.entrySet()) {
+        for (Map.Entry<String, Integer> entry : hanoiDistricts.entrySet()) {
             if (normalized.contains(entry.getKey())) {
                 log.debug("Mapped district '{}' to ID {}", districtName, entry.getValue());
                 return entry.getValue();
             }
         }
 
-        log.warn("Unknown district '{}' in province {}, defaulting to ID 1", districtName, provinceId);
-        return 1;
+        log.warn("Unknown district '{}', defaulting to Hoan Kiem ID 110", districtName);
+        return 110; // Default to Hoan Kiem
     }
 
     private String normalizeText(String text) {
-        return text.toLowerCase()
+        if (text == null) return "";
+        return removeDiacritics(text.toLowerCase()
                 .replace("quận", "quan ")
+                .replace("huyện", "huyen")
                 .replace("tp ", "")
                 .replace("tỉnh", "")
                 .replaceAll("\\s+", " ")
-                .trim();
+                .trim());
+    }
+
+    private String removeDiacritics(String text) {
+        if (text == null) return "";
+        String normalized = java.text.Normalizer.normalize(text, java.text.Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+    }
+
+    public int calculateFallbackFee(String districtName, BigDecimal totalOrderValue, int itemCount) {
+        log.info("calculateFallbackFee district={} totalOrderValue={} itemCount={}", districtName, totalOrderValue, itemCount);
+
+        if (totalOrderValue != null && totalOrderValue.compareTo(BigDecimal.valueOf(1_000_000)) >= 0) {
+            log.info("Order value {} >= 1,000,000 -> freeship", totalOrderValue);
+            return 0;
+        }
+
+        int baseFee = getDistanceFee(districtName);
+        int itemSurcharge = (itemCount / 3) * 3000;
+        int total = baseFee + itemSurcharge;
+
+        log.info("Fallback fee: base={} + surcharge={} = {}", baseFee, itemSurcharge, total);
+        return total;
+    }
+
+    private int getDistanceFee(String districtName) {
+        if (districtName == null) return 50000;
+
+        String normalized = normalizeText(districtName);
+
+        // Inner: Ba Đinh, Đống Đa, Hai Bà Trưng
+        if (normalized.contains("ba dinh") || normalized.contains("dong da") || normalized.contains("hai ba trung")) {
+            return 25000;
+        }
+
+        // Mid: Tây Hồ, Cầu Giấy, Thanh Xuân, Hoàn Kiếm, Nam Từ Liêm, Bắc Từ Liêm
+        if (normalized.contains("tay ho") || normalized.contains("cau giay") || normalized.contains("thanh xuan")
+                || normalized.contains("hoan kiem") || normalized.contains("nam tu liem") || normalized.contains("bac tu liem")) {
+            return 30000;
+        }
+
+        // Outer: Hà Đông, Long Biên, Thanh Trì, Gia Lâm, Đan Phượng, Hoài Đức
+        if (normalized.contains("ha dong") || normalized.contains("long bien") || normalized.contains("thanh tri")
+                || normalized.contains("gia lam") || normalized.contains("dan phuong") || normalized.contains("hoai duc")) {
+            return 40000;
+        }
+
+        // Far: Sóc Sơn, Đông Anh, Thạch Thất, Quốc Oai, Phú Xuyên, Chương Mỹ, Mỹ Đức, Phúc Thọ, Ba Vì, Sơn Tây, ME Tri
+        if (normalized.contains("soc son") || normalized.contains("dong anh") || normalized.contains("thach that")
+                || normalized.contains("quoc oai") || normalized.contains("phu xuyen") || normalized.contains("chuong my")
+                || normalized.contains("my duc") || normalized.contains("phuc tho") || normalized.contains("ba vi")
+                || normalized.contains("son tay") || normalized.contains("me tri")) {
+            return 50000;
+        }
+
+        log.warn("Unknown district '{}', defaulting to far zone (50,000)", districtName);
+        return 50000;
     }
 }

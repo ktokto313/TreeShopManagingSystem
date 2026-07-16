@@ -68,6 +68,8 @@ export default function CheckoutPage() {
 
   const items = cart?.items || []
   const subtotal = Number(cart?.subtotal || 0)
+  const totalItemQuantity = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)
+  const totalOrderValue = subtotal
   const total = useMemo(
     () => (items.length ? subtotal + shippingFee : 0),
     [items.length, shippingFee, subtotal],
@@ -76,10 +78,7 @@ export default function CheckoutPage() {
     () => items.length * PRODUCT_WEIGHT_GRAMS,
     [items.length],
   )
-  const shippingFeeAmount = useMemo(
-    () => (items.length ? shippingFee : 0),
-    [items.length, shippingFee, subtotal, total],
-  )
+  const shippingFeeAmount = items.length ? shippingFee : 0
 
   useEffect(() => {
     if (!form.province) {
@@ -95,7 +94,12 @@ export default function CheckoutPage() {
     let timeoutId
     setCalculatingShipping(true)
     timeoutId = window.setTimeout(() => {
-      void fetchShippingFee({ province: form.province, district: form.district })
+      void fetchShippingFee({
+          province: form.province,
+          district: form.district,
+          totalOrderValue,
+          itemCount: totalItemQuantity,
+        })
         .then((data) => {
           if (cancelled) return
           if (data && typeof data.shippingFee === 'number') {
@@ -116,7 +120,7 @@ export default function CheckoutPage() {
       cancelled = true
       window.clearTimeout(timeoutId)
     }
-  }, [form.province, form.district])
+  }, [form.province, form.district, totalOrderValue, totalItemQuantity])
 
   function updateField(name, value) {
     setForm((current) => ({ ...current, [name]: value }))
@@ -151,7 +155,12 @@ export default function CheckoutPage() {
     setSubmitting(true)
     setError('')
     try {
-      const response = await submitCheckout({ ...form, weightGrams })
+      const response = await submitCheckout({
+        ...form,
+        weightGrams,
+        totalOrderValue,
+        itemCount: totalItemQuantity,
+      })
       window.sessionStorage.setItem(`checkout:${response.orderId}`, JSON.stringify(response))
       navigate(`/checkout/success/${response.orderId}`, { state: { checkout: response } })
     } catch (err) {

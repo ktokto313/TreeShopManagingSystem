@@ -1,5 +1,7 @@
 package swp391.group6.dto;
 
+import java.math.BigDecimal;
+
 public class CheckoutRequest {
     private String fullName;
     private String email;
@@ -10,6 +12,8 @@ public class CheckoutRequest {
     private String address;
     private String deliveryNote;
     private int weightGrams;
+    private BigDecimal totalOrderValue;
+    private int itemCount;
 
     public String getFullName() {
         return fullName;
@@ -81,5 +85,21 @@ public class CheckoutRequest {
 
     public void setWeightGrams(int weightGrams) {
         this.weightGrams = weightGrams;
+    }
+
+    public BigDecimal getTotalOrderValue() {
+        return totalOrderValue;
+    }
+
+    public void setTotalOrderValue(BigDecimal totalOrderValue) {
+        this.totalOrderValue = totalOrderValue;
+    }
+
+    public int getItemCount() {
+        return itemCount;
+    }
+
+    public void setItemCount(int itemCount) {
+        this.itemCount = itemCount;
     }
 }

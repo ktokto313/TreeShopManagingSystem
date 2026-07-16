@@ -4,10 +4,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "viettelpost")
 public class ViettelPostProperties {
-    private boolean enabled = false;
-    private String username = "";
-    private String password = "";
-    private String baseUrl = "https://partner2.viettelpost.vn";
+
+    private boolean enabled = true;
+    private String username;
+    private String password;
+    private String baseUrl = "https://partner.viettelpost.vn";
     private int senderProvinceId = 10;
     private int senderDistrictId = 110;
     private int fallbackFee = 30000;
