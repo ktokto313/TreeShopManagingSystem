@@ -1,4 +1,11 @@
-//6/6: Hung Dao: Add Response method for Google SSO
+/*
+ * Author: Hung Dao
+ * Created Date: 2026-06-07
+ * Name: GoogleAuthResponse.java
+ * Description:
+ * Last Change Author: Hung Dao
+ * Last Change Date: 2026-07-15
+ */
 package swp391.group6.dto;
 
 public class GoogleAuthResponse {
