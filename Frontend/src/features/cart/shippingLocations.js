@@ -1,0 +1,62 @@
+export const SHIPPING_PROVINCES = [
+  {
+    value: 'Hà Nội',
+    label: 'Hà Nội',
+    districts: [
+      { value: 'Quận Hoàn Kiếm', label: 'Quận Hoàn Kiếm' },
+      { value: 'Quận Ba Đình', label: 'Quận Ba Đình' },
+      { value: 'Quận Hai Bà Trưng', label: 'Quận Hai Bà Trưng' },
+      { value: 'Quận Đống Đa', label: 'Quận Đống Đa' },
+      { value: 'Quận Tây Hồ', label: 'Quận Tây Hồ' },
+      { value: 'Quận Cầu Giấy', label: 'Quận Cầu Giấy' },
+      { value: 'Quận Thanh Xuân', label: 'Quận Thanh Xuân' },
+      { value: 'Quận Hà Đông', label: 'Quận Hà Đông' },
+      { value: 'Quận Long Biên', label: 'Quận Long Biên' },
+      { value: 'Quận Nam Từ Liêm', label: 'Quận Nam Từ Liêm' },
+      { value: 'Quận Bắc Từ Liêm', label: 'Quận Bắc Từ Liêm' },
+      { value: 'Quận Hoàng Mai', label: 'Quận Hoàng Mai' },
+      { value: 'Quận Thanh Trì', label: 'Quận Thanh Trì' },
+      { value: 'Huyện Sóc Sơn', label: 'Huyện Sóc Sơn' },
+      { value: 'Huyện Đông Anh', label: 'Huyện Đông Anh' },
+      { value: 'Huyện Gia Lâm', label: 'Huyện Gia Lâm' },
+      { value: 'Huyện Thanh Oai', label: 'Huyện Thanh Oai' },
+      { value: 'Huyện Thường Tín', label: 'Huyện Thường Tín' },
+      { value: 'Huyện Phú Xuyên', label: 'Huyện Phú Xuyên' },
+      { value: 'Huyện Chương Mỹ', label: 'Huyện Chương Mỹ' },
+    ],
+  },
+  {
+    value: 'TP Hồ Chí Minh',
+    label: 'TP Hồ Chí Minh',
+    districts: [
+      { value: 'Quận 1', label: 'Quận 1' },
+      { value: 'Quận 12', label: 'Quận 12' },
+      { value: 'Quận Thủ Đức', label: 'Quận Thủ Đức' },
+      { value: 'Quận 9', label: 'Quận 9' },
+      { value: 'Quận Gò Vấp', label: 'Quận Gò Vấp' },
+      { value: 'Quận Bình Thạnh', label: 'Quận Bình Thạnh' },
+      { value: 'Quận Tân Bình', label: 'Quận Tân Bình' },
+      { value: 'Quận Tân Phú', label: 'Quận Tân Phú' },
+      { value: 'Quận Phú Nhuận', label: 'Quận Phú Nhuận' },
+      { value: 'Quận Bình Tân', label: 'Quận Bình Tân' },
+      { value: 'Quận 2', label: 'Quận 2' },
+      { value: 'Quận 4', label: 'Quận 4' },
+      { value: 'Quận 5', label: 'Quận 5' },
+      { value: 'Quận 6', label: 'Quận 6' },
+      { value: 'Quận 7', label: 'Quận 7' },
+      { value: 'Quận 8', label: 'Quận 8' },
+      { value: 'Quận 10', label: 'Quận 10' },
+      { value: 'Quận 11', label: 'Quận 11' },
+      { value: 'Huyện Bình Chánh', label: 'Huyện Bình Chánh' },
+      { value: 'Huyện Củ Chi', label: 'Huyện Củ Chi' },
+      { value: 'Huyện Hóc Môn', label: 'Huyện Hóc Môn' },
+      { value: 'Huyện Nhà Bè', label: 'Huyện Nhà Bè' },
+      { value: 'Huyện Cần Giờ', label: 'Huyện Cần Giờ' },
+    ],
+  },
+]
+
+export const getDistrictsByProvince = (provinceValue) => {
+  const province = SHIPPING_PROVINCES.find((item) => item.value === provinceValue)
+  return province ? province.districts : []
+}
