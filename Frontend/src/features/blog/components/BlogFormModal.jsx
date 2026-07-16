@@ -3,8 +3,9 @@ import MDEditor, { commands } from '@uiw/react-md-editor';
 import '@uiw/react-md-editor/markdown-editor.css';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
+import { useAvailableTags } from '../hooks/useBlog';
 
-const empty = { title: '', content: '', thumbnail: '', images: [], status: 'PUBLISHED' };
+const empty = { title: '', content: '', thumbnail: '', images: [], tags: [], status: 'PUBLISHED' };
 const MAX_IMAGES = 4;
 
 function countInlineImages(markdown) {
@@ -14,14 +15,15 @@ function countInlineImages(markdown) {
 
 export default function BlogFormModal({ initial = null, onSubmit, onClose, role }) {
     const [form, setForm] = useState(initial ?? empty);
+    const { tags: availableTags } = useAvailableTags();
     const [error, setError] = useState('');
     const [saving, setSaving] = useState(false);
 
     const textApiRef = useRef(null);
     const fileInputRef = useRef(null);
-    const thumbnailFileInputRef = useRef(null); // NEW: ref for the thumbnail's hidden input
-    const pendingFilesRef = useRef(new Map());  // NEW: blobUrl -> File, not yet uploaded to server
-    const thumbnailFileRef = useRef(null);       // NEW: holds the picked thumbnail File until submit
+    const thumbnailFileInputRef = useRef(null);
+    const pendingFilesRef = useRef(new Map());
+    const thumbnailFileRef = useRef(null);
 
     const imageCount = countInlineImages(form.content);
     const imagesLeft = MAX_IMAGES - imageCount;
@@ -30,7 +32,16 @@ export default function BlogFormModal({ initial = null, onSubmit, onClose, role 
         setForm(f => ({ ...f, [field]: value }));
     }
 
-    // NEW: revokes every blob URL we created, whether it ended up used or not — pure cleanup, no backend calls
+    function toggleTag(value) {
+        setForm(f => ({
+            ...f,
+            tags: f.tags.includes(value)
+                ? f.tags.filter(t => t !== value)
+                : [...f.tags, value],
+        }));
+    }
+
+    //revokes every blob URL we created, whether it ended up used or not — pure cleanup, no backend calls
     function revokeAllBlobUrls() {
         for (const blobUrl of pendingFilesRef.current.keys()) {
             URL.revokeObjectURL(blobUrl);
@@ -42,13 +53,13 @@ export default function BlogFormModal({ initial = null, onSubmit, onClose, role 
         thumbnailFileRef.current = null;
     }
 
-    // NEW: on cancel, just discard everything locally — nothing was ever uploaded
+    //on cancel, just discard everything locally — nothing was ever uploaded
     function handleClose() {
         revokeAllBlobUrls();
         onClose();
     }
 
-    // CHANGED: no fetch here anymore — just create a local preview and stash the File
+    //no fetch here anymore — just create a local preview and stash the File
     function handleInlineFileChange(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -94,13 +105,13 @@ export default function BlogFormModal({ initial = null, onSubmit, onClose, role 
         },
     };
 
-    // CHANGED: thumbnail also deferred — local preview only, no upload yet
+    // thumbnail also deferred — local preview only, no upload yet
     function handleThumbnailFileChange(e) {
         const file = e.target.files[0];
         if (!file) return;
 
         if (thumbnailFileRef.current?.blobUrl) {
-            URL.revokeObjectURL(thumbnailFileRef.current.blobUrl); // replacing a previous unsaved pick
+            URL.revokeObjectURL(thumbnailFileRef.current.blobUrl);
         }
 
         const blobUrl = URL.createObjectURL(file);
@@ -109,12 +120,11 @@ export default function BlogFormModal({ initial = null, onSubmit, onClose, role 
         e.target.value = '';
     }
 
-    // NEW: uploads only the images that survived to submit time, then swaps blob URLs for real ones
+    //uploads only the images that survived to submit time, then swaps blob URLs for real ones
     async function uploadPendingImagesAndFinalize() {
         let finalContent = form.content;
         let finalThumbnail = form.thumbnail;
 
-        // only upload blob URLs that are still actually referenced in the content
         const stillUsed = [...pendingFilesRef.current.entries()]
             .filter(([blobUrl]) => finalContent.includes(blobUrl));
 
@@ -245,6 +255,30 @@ export default function BlogFormModal({ initial = null, onSubmit, onClose, role 
                                 className="w-full h-40 object-cover rounded-lg border border-stone-200 mt-1"
                             />
                         )}
+                    </div>
+
+                    {/*fixed-taxonomy checkbox pills instead of free-text input */}
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium text-stone-700">Danh mục</label>
+                        <div className="flex flex-wrap gap-2">
+                            {availableTags.map(tag => {
+                                const active = form.tags.includes(tag.value);
+                                return (
+                                    <button
+                                        type="button"
+                                        key={tag.value}
+                                        onClick={() => toggleTag(tag.value)}
+                                        className={
+                                            active
+                                                ? 'bg-green-600 text-white px-3 py-1 rounded-full text-sm transition-colors'
+                                                : 'bg-stone-100 text-stone-600 hover:bg-stone-200 px-3 py-1 rounded-full text-sm transition-colors'
+                                        }
+                                    >
+                                        {tag.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
 
                     <div className="flex gap-3 pt-2 border-t border-stone-100">
