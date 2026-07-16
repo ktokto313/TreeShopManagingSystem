@@ -9,6 +9,7 @@ import FeaturedProducts from "../features/homepage/components/FeaturedProducts";
 import TestimonialSlider from "../features/homepage/components/TestimonialSlider";
 import BlogHighlight from "../features/homepage/components/BlogHighlight";
 import NewsletterFAQ from "../features/homepage/components/NewsletterFAQ";
+import RecommendationSection from "../features/recommendations/components/RecommendationSection";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { BiLeaf } from "react-icons/bi";
@@ -104,6 +105,7 @@ export default function HomePage() {
 			<ValuePropositions />
 			<CategoriesGrid />
 			<FeaturedProducts />
+			<RecommendationSection />
 			<TestimonialSlider />
 			<BlogHighlight />
 			<NewsletterFAQ />

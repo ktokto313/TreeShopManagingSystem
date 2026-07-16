@@ -1,4 +1,9 @@
 /*
+ * Created By: MinhLTHE200133
+ * Created At: 2026-05-30
+ * Last Modified: 2026-07-11
+ */
+/*
  * Author: minhlthe200133
  * Created Date: 2026-05-30
  * Name: ProductService.java
@@ -32,6 +37,9 @@ public class ProductService {
     private static final int MAX_NAME_LENGTH = 200;
     private static final int MAX_SKU_LENGTH = 50;
     private static final int MAX_DESCRIPTION_LENGTH = 1000;
+    private static final int MAX_LONG_TEXT_LENGTH = 1000;
+    private static final int MAX_SHORT_TEXT_LENGTH = 255;
+    private static final int MAX_CONTENT_LENGTH = 10000;
     private static final Pattern SKU_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
 
     private final ProductRepository productRepository;
@@ -175,8 +183,21 @@ public class ProductService {
         product.setSku(sku);
 
         String description = trimToNull(request.getDescription());
+        String content = trimToNull(request.getContent());
+        String careGuide = trimToNull(request.getCareGuide());
+        String sunlightLevel = trimToNull(request.getSunlightLevel());
+        String wateringFrequency = trimToNull(request.getWateringFrequency());
+        String difficulty = trimToNull(request.getDifficulty());
+        String fengShuiElement = trimToNull(request.getFengShuiElement());
         String images = trimToNull(request.getImages());
-        boolean hasDetail = description != null || images != null;
+        boolean hasDetail = description != null
+                || content != null
+                || careGuide != null
+                || sunlightLevel != null
+                || wateringFrequency != null
+                || difficulty != null
+                || fengShuiElement != null
+                || images != null;
 
         ProductDetail detail = product.getProductDetail();
         if (detail == null && hasDetail) {
@@ -187,6 +208,12 @@ public class ProductService {
         if (detail != null) {
             detail.setProduct(product);
             detail.setDescription(description);
+            detail.setContent(content);
+            detail.setCareGuide(careGuide);
+            detail.setSunlightLevel(sunlightLevel);
+            detail.setWateringFrequency(wateringFrequency);
+            detail.setDifficulty(difficulty);
+            detail.setFengShuiElement(fengShuiElement);
             detail.setImages(images);
             product.setProductDetail(detail);
         } else {
@@ -206,6 +233,12 @@ public class ProductService {
         ProductDetail detail = resolveProductDetail(product);
         if (detail != null) {
             response.setDescription(detail.getDescription());
+            response.setContent(detail.getContent());
+            response.setCareGuide(detail.getCareGuide());
+            response.setSunlightLevel(detail.getSunlightLevel());
+            response.setWateringFrequency(detail.getWateringFrequency());
+            response.setDifficulty(detail.getDifficulty());
+            response.setFengShuiElement(detail.getFengShuiElement());
             response.setImages(detail.getImages());
         }
         return response;
@@ -232,6 +265,12 @@ public class ProductService {
 
     private boolean isValidProductRequest(ProductRequest request, String name, String sku, BigDecimal price) {
         String description = trimToNull(request.getDescription());
+        String content = trimToNull(request.getContent());
+        String careGuide = trimToNull(request.getCareGuide());
+        String sunlightLevel = trimToNull(request.getSunlightLevel());
+        String wateringFrequency = trimToNull(request.getWateringFrequency());
+        String difficulty = trimToNull(request.getDifficulty());
+        String fengShuiElement = trimToNull(request.getFengShuiElement());
         Integer stock = request.getStock();
 
         return request.getCategoryId() != null
@@ -244,7 +283,13 @@ public class ProductService {
                 && price.compareTo(BigDecimal.ZERO) > 0
                 && stock != null
                 && stock >= 0
-                && (description == null || description.length() <= MAX_DESCRIPTION_LENGTH);
+                && (description == null || description.length() <= MAX_DESCRIPTION_LENGTH)
+                && (content == null || content.length() <= MAX_CONTENT_LENGTH)
+                && (careGuide == null || careGuide.length() <= MAX_LONG_TEXT_LENGTH)
+                && (sunlightLevel == null || sunlightLevel.length() <= MAX_SHORT_TEXT_LENGTH)
+                && (wateringFrequency == null || wateringFrequency.length() <= MAX_SHORT_TEXT_LENGTH)
+                && (difficulty == null || difficulty.length() <= MAX_SHORT_TEXT_LENGTH)
+                && (fengShuiElement == null || fengShuiElement.length() <= MAX_SHORT_TEXT_LENGTH);
     }
 
 }

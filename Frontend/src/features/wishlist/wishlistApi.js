@@ -1,3 +1,8 @@
+/*
+ * Created By: MinhLTHE200133
+ * Created At: 2026-06-23
+ * Last Modified: 2026-06-23
+ */
 import { requestJson } from '../../utils/api'
 
 const WISHLIST_API_BASE = '/api/wishlist'

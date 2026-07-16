@@ -24,6 +24,8 @@ const emptyFilters = { //criteria for filter
   status: '',
   minPrice: '',
   maxPrice: '',
+  careDifficulty: '',
+  fengShuiElement: '',
   sort: 'latest',
 }
 
@@ -393,6 +395,24 @@ export default function CatalogPage() {
                   />
                 </div>
 
+                <div className="rounded-2xl border border-dashed border-green-200 bg-green-50/60 p-4 space-y-4">
+                <div className="space-y-1">
+                    <h3 className="text-sm font-semibold text-green-800">Lọc theo nhu cầu chăm</h3>
+                </div>
+                  <Input
+                    label="Độ khó chăm"
+                    value={filters.careDifficulty}
+                    placeholder="Ví dụ: Dễ"
+                    onChange={(event) => updateFilter('careDifficulty', event.target.value)}
+                  />
+                  <Input
+                    label="Phong thủy"
+                    value={filters.fengShuiElement}
+                    placeholder="Ví dụ: Mộc"
+                    onChange={(event) => updateFilter('fengShuiElement', event.target.value)}
+                  />
+                </div>
+
                 <div className="flex flex-wrap gap-2">
                   <Button className="flex-1 hover:bg-green-400" onClick={clearFilters}>
                     Xoá lọc
@@ -459,7 +479,7 @@ export default function CatalogPage() {
                 <div className="space-y-1">
                   <h2 className="text-2xl font-semibold text-green-800">Danh sách sản phẩm</h2>
                   <p className="text-sm text-green-800">
-                    Hiển thị {displayStart}-{displayEnd} trên {visibleProducts.length} sản phẩm phù hợp
+                    Hiển thị {displayStart}-{displayEnd} trên {visibleProducts.length} sản phẩm
                   </p>
                 </div>
 

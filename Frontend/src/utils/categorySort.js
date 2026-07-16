@@ -1,10 +1,15 @@
+/*
+ * Created By: MinhLTHE200133
+ * Created At: 2026-06-05
+ * Last Modified: 2026-06-05
+ */
 const CATEGORY_ORDER = [
-  'Cây trong nhà',
-  'Cây ngoài trời',
-  'Cây để bàn',
-  'Sen đá & Xương rồng',
-  'Cây phong thủy',
-  'Phụ kiện',
+  'CÃƒÂ¢y trong nhÃƒÂ ',
+  'CÃƒÂ¢y ngoÃƒÂ i trÃ¡Â»Âi',
+  'CÃƒÂ¢y Ã„â€˜Ã¡Â»Æ’ bÃƒÂ n',
+  'Sen Ã„â€˜ÃƒÂ¡ & XÃ†Â°Ã†Â¡ng rÃ¡Â»â€œng',
+  'CÃƒÂ¢y phong thÃ¡Â»Â§y',
+  'PhÃ¡Â»Â¥ kiÃ¡Â»â€¡n',
 ]
 
 const categoryOrderLookup = new Map(

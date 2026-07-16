@@ -1,4 +1,9 @@
 /*
+ * Created By: MinhLTHE200133
+ * Created At: 2026-06-23
+ * Last Modified: 2026-07-11
+ */
+/*
  * Author: minhlthe200133
  * Created Date: 2026-06-23
  * Name: WishlistService.java
@@ -108,6 +113,12 @@ public class WishlistService {
         ProductDetail detail = resolveProductDetail(product);
         if (detail != null) {
             response.setDescription(detail.getDescription());
+            response.setContent(detail.getContent());
+            response.setCareGuide(detail.getCareGuide());
+            response.setSunlightLevel(detail.getSunlightLevel());
+            response.setWateringFrequency(detail.getWateringFrequency());
+            response.setDifficulty(detail.getDifficulty());
+            response.setFengShuiElement(detail.getFengShuiElement());
             response.setImages(detail.getImages());
         }
 
