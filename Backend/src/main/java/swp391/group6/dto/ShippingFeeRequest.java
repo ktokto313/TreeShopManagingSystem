@@ -1,8 +1,12 @@
 package swp391.group6.dto;
 
+import java.math.BigDecimal;
+
 public class ShippingFeeRequest {
     private String province;
     private String district;
+    private BigDecimal totalOrderValue;
+    private int itemCount;
 
     public ShippingFeeRequest() {
     }
@@ -28,8 +32,24 @@ public class ShippingFeeRequest {
         this.district = district;
     }
 
+    public BigDecimal getTotalOrderValue() {
+        return totalOrderValue;
+    }
+
+    public void setTotalOrderValue(BigDecimal totalOrderValue) {
+        this.totalOrderValue = totalOrderValue;
+    }
+
+    public int getItemCount() {
+        return itemCount;
+    }
+
+    public void setItemCount(int itemCount) {
+        this.itemCount = itemCount;
+    }
+
     @Override
     public String toString() {
-        return "ShippingFeeRequest{province='" + province + "', district='" + district + "'}";
+        return "ShippingFeeRequest{province='" + province + "', district='" + district + "', totalOrderValue=" + totalOrderValue + ", itemCount=" + itemCount + "}";
     }
 }

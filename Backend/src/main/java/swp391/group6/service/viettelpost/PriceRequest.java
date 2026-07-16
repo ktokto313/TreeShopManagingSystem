@@ -8,13 +8,12 @@ public class PriceRequest {
     private int PRODUCT_WEIGHT;
     private int PRODUCT_PRICE;
     private int MONEY_COLLECTION;
-    private String PRODUCT_TYPE;
 
-    public PriceRequest() {
-    }
+    public PriceRequest() {}
 
-    public PriceRequest(int senderProvinceId, int senderDistrictId, int receiverProvinceId, int receiverDistrictId, 
-                        int weightGrams, int declaredValue, int codAmount) {
+    public PriceRequest(int senderProvinceId, int senderDistrictId, 
+                       int receiverProvinceId, int receiverDistrictId,
+                       int weightGrams, int declaredValue, int codAmount) {
         this.SENDER_PROVINCE = senderProvinceId;
         this.SENDER_DISTRICT = senderDistrictId;
         this.RECEIVER_PROVINCE = receiverProvinceId;
@@ -22,7 +21,6 @@ public class PriceRequest {
         this.PRODUCT_WEIGHT = weightGrams;
         this.PRODUCT_PRICE = declaredValue;
         this.MONEY_COLLECTION = codAmount;
-        this.PRODUCT_TYPE = "HH";
     }
 
     public int getSENDER_PROVINCE() {
@@ -81,20 +79,16 @@ public class PriceRequest {
         this.MONEY_COLLECTION = MONEY_COLLECTION;
     }
 
-    public String getPRODUCT_TYPE() {
-        return PRODUCT_TYPE;
-    }
-
-    public void setPRODUCT_TYPE(String PRODUCT_TYPE) {
-        this.PRODUCT_TYPE = PRODUCT_TYPE;
-    }
-
     @Override
     public String toString() {
-        return "PriceRequest{senderProvince=" + SENDER_PROVINCE + 
-               ", senderDistrict=" + SENDER_DISTRICT + 
-               ", receiverProvince=" + RECEIVER_PROVINCE + 
-               ", receiverDistrict=" + RECEIVER_DISTRICT + 
-               ", weight=" + PRODUCT_WEIGHT + "g}";
+        return "PriceRequest{" +
+                "SENDER_PROVINCE=" + SENDER_PROVINCE +
+                ", SENDER_DISTRICT=" + SENDER_DISTRICT +
+                ", RECEIVER_PROVINCE=" + RECEIVER_PROVINCE +
+                ", RECEIVER_DISTRICT=" + RECEIVER_DISTRICT +
+                ", PRODUCT_WEIGHT=" + PRODUCT_WEIGHT +
+                ", PRODUCT_PRICE=" + PRODUCT_PRICE +
+                ", MONEY_COLLECTION=" + MONEY_COLLECTION +
+                '}';
     }
 }
