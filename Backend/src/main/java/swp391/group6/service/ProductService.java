@@ -18,9 +18,14 @@ import swp391.group6.repository.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import swp391.group6.dto.HomepageFeaturedResponse;
+import swp391.group6.dto.BestSellingProductDTO;
 
 @Service
 public class ProductService {
@@ -66,6 +71,31 @@ public class ProductService {
 
     public Optional<ProductResponse> getProduct(Long id) {
         return productRepository.findById(id).map(this::toResponse);
+    }
+
+    public HomepageFeaturedResponse getHomepageFeaturedProducts() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfMonth = now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime endOfMonth = now.withDayOfMonth(now.getMonth().length(now.toLocalDate().isLeapYear()))
+                .withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+
+        List<BestSellingProductDTO> topProducts = orderRepository.findBestSellingProducts(startOfMonth, endOfMonth, OrderStatus.RECEIVED);
+        
+        String title = "Sản Phẩm Bán Chạy Nhất Tháng Này";
+        
+        if (topProducts.size() < 4) {
+            LocalDateTime startOfAllTime = LocalDateTime.of(2000, 1, 1, 0, 0);
+            topProducts = orderRepository.findBestSellingProducts(startOfAllTime, endOfMonth, OrderStatus.RECEIVED);
+            title = "Sản Phẩm Bán Chạy Nhất Mọi Thời Đại";
+        }
+        
+        List<ProductResponse> products = topProducts.stream()
+                .limit(4)
+                .map(dto -> getProduct(dto.getProductId()).orElse(null))
+                .filter(p -> p != null)
+                .collect(Collectors.toList());
+                
+        return new HomepageFeaturedResponse(title, products);
     }
 
     /**

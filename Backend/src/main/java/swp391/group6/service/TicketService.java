@@ -1,4 +1,12 @@
 /*
+ * Author: AnhLV
+ * Created Date: 2026-06-05
+ * Name: TicketService.java
+ * Description: Service layer component handling business logic for tickets.
+ * Last Change Author: AnhLV
+ * Last Change Date: 2026-07-03
+ */
+/*
  * Author: PlotChat
  * Created Date: 2026-06-01
  * Name: TicketService.java

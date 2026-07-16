@@ -16,6 +16,7 @@ import CategoryForm from "../features/categories/components/CategoryForm";
 import CategoryTable from "../features/categories/components/CategoryTable";
 import ProductForm from "../features/products/components/ProductForm";
 import ProductTable from "../features/products/components/ProductTable";
+import ReviewSection from "../features/review/components/ReviewSection";
 import {
 	createProduct,
 	deactivateProduct,
@@ -800,23 +801,15 @@ export default function ManagementPage() {
 						]}
 						onChange={updateProductFormField}
 						onSubmit={saveProduct}
-					/>
-
-					<div className="flex flex-wrap">
-						<Button variant="secondary" className={"grow bg-red-500 hover:bg-red-400 text-white"} onClick={resetProductForm}>
+					>
+						<Button type="button" variant="secondary" className="w-full bg-red-500 hover:bg-red-400 text-white" onClick={resetProductForm}>
 							Xóa
 						</Button>
-						<Button
-							variant="secondary"
-							className={"grow border-gray-400 text-black border hover:bg-gray-300/40"}
-							onClick={() => {
-								resetProductForm();
-								closeProductModal();
-							}}
-						>
-							Đóng
-						</Button>
-					</div>
+					</ProductForm>
+
+					{productForm.id && (
+						<ReviewSection productId={productForm.id} canManage={true} />
+					)}
 				</div>
 			</Modal>
 		</main>

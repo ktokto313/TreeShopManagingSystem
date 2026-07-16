@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS blog_votes CASCADE;
+﻿DROP TABLE IF EXISTS blog_votes CASCADE;
 DROP TABLE IF EXISTS blog_posts CASCADE;
 DROP TABLE IF EXISTS comments CASCADE;
 DROP TABLE IF EXISTS tickets CASCADE;
@@ -12,6 +12,8 @@ DROP TABLE IF EXISTS products CASCADE;
 DROP TABLE IF EXISTS categories CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS role CASCADE;
+DROP TABLE IF EXISTS wishlist_items CASCADE;
+DROP TABLE IF EXISTS policies CASCADE;
 
 CREATE TABLE role (
    id      BIGSERIAL PRIMARY KEY,
@@ -126,7 +128,9 @@ CREATE TABLE reviews (
    customer_id BIGINT NOT NULL REFERENCES users(id),
    rating      SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
    comment     TEXT,
-   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   is_curated  BOOLEAN NOT NULL DEFAULT FALSE,
+   is_hidden   BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE INDEX idx_reviews_order    ON reviews(order_id);
@@ -164,6 +168,85 @@ CREATE TABLE comments (
 
 CREATE INDEX idx_comments_ticket ON comments(ticket_id);
 
+-- ============================================================
+
+CREATE TABLE policies (
+   id          BIGSERIAL PRIMARY KEY,
+   title       VARCHAR(300) NOT NULL,
+   description TEXT NOT NULL,
+   status      VARCHAR(50) NOT NULL DEFAULT 'DRAFT',
+   updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO policies (title, description, status) VALUES
+('Chính sách Đổi trả & Hoàn tiền', '## 1. Điều kiện đổi trả
+- Cây bị dập nát, héo úa, gãy cành hoặc chết trong quá trình vận chuyển.
+- Giao sai loại cây, sai kích thước hoặc thiếu phụ kiện so với đơn đặt hàng.
+- Khách hàng cần thông báo và gửi hình ảnh/video tình trạng cây trong vòng **3 ngày** kể từ khi nhận hàng.
+
+## 2. Các trường hợp không hỗ trợ đổi trả
+- Cây chết hoặc héo úa do khách hàng chăm sóc sai cách (tưới quá nhiều nước, để sai vị trí thiếu sáng/quá nắng,...).
+- Sản phẩm phụ kiện đã qua sử dụng hoặc không còn nguyên vẹn bao bì.
+
+## 3. Quy trình hoàn tiền
+- **Thời gian xử lý:** Từ 3-5 ngày làm việc sau khi Greenshop xác nhận yêu cầu hợp lệ.
+- **Phương thức hoàn tiền:** Chuyển khoản ngân hàng hoặc ví điện tử theo thông tin khách hàng cung cấp.', 'PUBLISHED'),
+('Chính sách Vận chuyển & Giao hàng', '## 1. Thời gian giao hàng
+- **Nội thành:** Giao hàng trong vòng 1-2 ngày làm việc.
+- **Ngoại tỉnh/Toàn quốc:** Giao hàng từ 3-5 ngày làm việc tùy thuộc vào đơn vị vận chuyển.
+
+## 2. Chi phí vận chuyển
+- **Phí tiêu chuẩn:** 30.000 VNĐ cho các đơn hàng thông thường.
+- **Miễn phí vận chuyển (Freeship):** Áp dụng cho mọi đơn hàng có giá trị từ **500.000 VNĐ** trở lên.
+
+## 3. Quy cách đóng gói cây xanh
+- Cây luôn được bọc màng bảo vệ chuyên dụng xung quanh tán lá.
+- Bầu đất được quấn màng bọc nilon để tránh rơi vãi đất và giữ ẩm.
+- Cây được cố định chắc chắn trong thùng carton hộp chữ nhật hoặc khung gỗ (đối với cây lớn) để chống sốc và chống lật.', 'PUBLISHED'),
+('Chính sách Bảo hành Cây xanh', '## 1. Thời gian bảo hành
+Tất cả các loại cây xanh mua tại **Greenshop** đều được bảo hành sức khỏe trong vòng **7 ngày** đầu kể từ khi nhận hàng.
+
+## 2. Hỗ trợ trọn đời
+- Chúng tôi cung cấp dịch vụ **tư vấn chăm sóc cây miễn phí trọn đời**. 
+- Bất cứ khi nào cây của bạn có dấu hiệu bất thường (vàng lá, rụng lá, nấm mốc,...), hãy chụp ảnh và gửi qua kênh chat hoặc Zalo của cửa hàng để được đội ngũ kỹ thuật hỗ trợ kịp thời.
+
+## 3. Thay cây mới
+Nếu cây bị chết trong thời gian bảo hành do nguyên nhân bệnh lý có sẵn từ nhà vườn (được xác nhận bởi kỹ thuật viên của chúng tôi), Greenshop sẽ **1 đổi 1** cây mới cùng loại cho bạn.', 'PUBLISHED'),
+('Chính sách Bảo mật Thông tin', '## 1. Mục đích thu thập thông tin
+Greenshop thu thập thông tin cá nhân (Họ tên, Số điện thoại, Địa chỉ, Email) của khách hàng chỉ nhằm mục đích:
+- Xử lý đơn đặt hàng và giao hàng.
+- Cung cấp dịch vụ hỗ trợ khách hàng và giải quyết khiếu nại.
+- Gửi thông tin khuyến mãi, ưu đãi dành cho khách hàng thân thiết (nếu khách hàng đăng ký nhận tin).
+
+## 2. Cam kết bảo mật
+- Mọi thông tin của khách hàng được bảo mật tuyệt đối trên hệ thống máy chủ của chúng tôi.
+- **Greenshop cam kết không bán, trao đổi hay chia sẻ** thông tin của bạn cho bất kỳ bên thứ ba nào vì mục đích thương mại, ngoại trừ việc cung cấp địa chỉ cho đơn vị vận chuyển.
+
+## 3. Quyền của khách hàng
+Khách hàng có quyền yêu cầu Greenshop kiểm tra, cập nhật, điều chỉnh hoặc hủy bỏ thông tin cá nhân của mình bất cứ lúc nào.', 'PUBLISHED'),
+('Chính sách Khách hàng Thân thiết', '## 1. Tích điểm thưởng
+- Cứ mỗi **10.000 VNĐ** giá trị đơn hàng được thanh toán thành công, khách hàng sẽ tích lũy được **1 điểm**.
+- Điểm thưởng được tự động cộng vào tài khoản sau khi đơn hàng chuyển sang trạng thái "Giao hàng thành công".
+
+## 2. Quy đổi và Ưu đãi
+- Điểm thưởng có thể được dùng để quy đổi thành **Mã giảm giá** cho các lần mua sắm tiếp theo.
+- Khách hàng có ngày sinh nhật trong tháng sẽ nhận được Voucher giảm giá **20%** cho một đơn hàng bất kỳ.
+
+## 3. Hạng thành viên
+- **Thành viên Bạc:** Tổng chi tiêu trên 2.000.000 VNĐ - Giảm thêm 5% mọi đơn hàng.
+- **Thành viên Vàng:** Tổng chi tiêu trên 5.000.000 VNĐ - Giảm thêm 10% mọi đơn hàng + Quà tặng kèm theo mùa.', 'PUBLISHED'),
+('Chính sách Thanh toán', '## 1. Các phương thức thanh toán
+Greenshop hiện đang hỗ trợ các phương thức thanh toán linh hoạt và an toàn:
+- **Thanh toán khi nhận hàng (COD):** Khách hàng kiểm tra hàng và thanh toán trực tiếp cho nhân viên giao hàng.
+- **Chuyển khoản ngân hàng:** Khách hàng chuyển khoản qua Internet Banking vào số tài khoản của cửa hàng.
+- **Thanh toán qua Ví điện tử:** Hỗ trợ thanh toán qua VNPay, Momo, ZaloPay tiện lợi.
+
+## 2. Quy định thanh toán đối với đơn hàng lớn
+Đối với các đơn hàng có giá trị lớn hơn **2.000.000 VNĐ** hoặc các đơn hàng đặt thiết kế thi công tiểu cảnh, khách hàng vui lòng đặt cọc trước **30%** giá trị đơn hàng. 
+
+## 3. Bảo mật thanh toán
+Tất cả các giao dịch trực tuyến qua thẻ hay ví điện tử đều được mã hóa an toàn theo tiêu chuẩn SSL, đảm bảo không rò rỉ dữ liệu tài chính của khách hàng.', 'PUBLISHED');
 
 -- ============================================================
 --  THÊM BẢNG BLOG
@@ -560,12 +643,14 @@ INSERT INTO order_detail (order_id, product_id, quantity, price_paid) VALUES
 -- ============================================================
 --  REVIEWS
 -- ============================================================
-INSERT INTO reviews (order_id, product_id, customer_id, rating, comment) VALUES
-(1, 3, 5, 5, 'Cây đẹp đúng như mô tả, đóng gói cẩn thận, giao hàng nhanh. Rất hài lòng!'),
-(1, 76, 5, 4, 'Chậu đẹp, chất lượng tốt, giá hợp lý. Sẽ mua lại lần sau.'),
-(2, 3, 6, 5, 'Monstera đẹp lắm, lá to khỏe, không bị dập nát khi vận chuyển. 5 sao!'),
-(3, 4, 7, 4, 'ZZ Plant khỏe mạnh, đúng size, tuy nhiên chậu hơi nhỏ so với cây.'),
-(7, 5, 5, 5, 'Mua lần 2 vẫn rất hài lòng, kim tiền lên nhanh tốt lắm!');
+INSERT INTO reviews (order_id, product_id, customer_id, rating, comment, is_curated) VALUES
+(1, 3, 5, 5, 'Cây đẹp đúng như mô tả, đóng gói cẩn thận, giao hàng nhanh. Rất hài lòng!', TRUE),
+(1, 76, 5, 4, 'Chậu đẹp, chất lượng tốt, giá hợp lý. Sẽ mua lại lần sau.', TRUE),
+(2, 6, 6, 5, 'Monstera đẹp lắm, lá to khỏe, không bị dập nát khi vận chuyển. 5 sao!', TRUE),
+(3, 14, 7, 4, 'ZZ Plant khỏe mạnh, đúng size, tuy nhiên chậu hơi nhỏ so với cây.', TRUE),
+(7, 3, 5, 5, 'Mua lần 2 vẫn rất hài lòng, kim tiền lên nhanh tốt lắm!', TRUE),
+(9, 11, 5, 5, 'Cây Sanh Bonsai dáng rất nghệ thuật, giao nhanh.', TRUE),
+(10, 24, 5, 3, 'Hoa giấy hơi nhỏ so với ảnh chụp nhưng bù lại cây khá tươi.', FALSE);
 
 -- ============================================================
 --  TICKETS
@@ -629,3 +714,105 @@ ALTER TABLE blog_images
     ADD COLUMN IF NOT EXISTS file_name  VARCHAR(255),
     ADD COLUMN IF NOT EXISTS content_type VARCHAR(100),
     ALTER COLUMN post_id DROP NOT NULL;
+TRUNCATE TABLE policies RESTART IDENTITY;
+
+INSERT INTO policies (title, description, status) VALUES 
+('Chính sách Đổi trả & Hoàn tiền', '## 1. Điều kiện đổi trả
+- Cây bị dập nát, héo úa, gãy cành hoặc chết trong quá trình vận chuyển.
+- Giao sai loại cây, sai kích thước hoặc thiếu phụ kiện so với đơn đặt hàng.
+- Khách hàng cần thông báo và gửi hình ảnh/video tình trạng cây trong vòng **3 ngày** kể từ khi nhận hàng.
+
+## 2. Các trường hợp không hỗ trợ đổi trả
+- Cây chết hoặc héo úa do khách hàng chăm sóc sai cách (tưới quá nhiều nước, để sai vị trí thiếu sáng/quá nắng,...).
+- Sản phẩm phụ kiện đã qua sử dụng hoặc không còn nguyên vẹn bao bì.
+
+## 3. Quy trình hoàn tiền
+- **Thời gian xử lý:** Từ 3-5 ngày làm việc sau khi Greenshop xác nhận yêu cầu hoàn tiền hợp lệ.
+- **Phương thức hoàn tiền:** Chuyển khoản ngân hàng theo thông tin khách hàng cung cấp.
+', 'PUBLISHED'),
+
+('Chính sách Vận chuyển & Giao hàng', '## 1. Thời gian giao hàng
+- **Nội thành Hà Nội:** Giao hàng trong vòng 24 - 48 giờ.
+- **Ngoại thành và các tỉnh lân cận:** Giao hàng từ 3 - 5 ngày làm việc.
+
+## 2. Phí vận chuyển
+- Miễn phí vận chuyển cho đơn hàng từ **500.000 VNĐ** trở lên.
+- Phí đồng giá **30.000 VNĐ** áp dụng cho tất cả các khu vực nội thành.
+
+## 3. Lưu ý khi nhận hàng
+Khách hàng vui lòng:
+1. Kiểm tra kỹ tình trạng cây và số lượng sản phẩm.
+2. Xác nhận tình trạng đơn hàng với người giao hàng.
+3. Liên hệ ngay với bộ phận CSKH nếu có bất kỳ vấn đề nào phát sinh.
+', 'PUBLISHED'),
+
+('Chính sách Bảo mật Thông tin', '## 1. Mục đích thu thập thông tin
+Greenshop cam kết bảo mật mọi thông tin cá nhân của khách hàng. Chúng tôi chỉ sử dụng thông tin nhằm:
+- Xử lý đơn hàng, thanh toán và giao nhận sản phẩm.
+- Hỗ trợ và giải quyết khiếu nại, phản hồi của khách hàng.
+- Cung cấp các thông tin ưu đãi hoặc hướng dẫn chăm sóc cây định kỳ.
+
+## 2. Cam kết bảo mật
+- Không chia sẻ thông tin khách hàng cho bên thứ ba ngoại trừ đối tác vận chuyển.
+- Mọi dữ liệu giao dịch được mã hóa để đảm bảo an toàn tuyệt đối.
+', 'PUBLISHED'),
+
+('Chính sách Khách hàng Thân thiết', '## 1. Hạng thành viên
+Hệ thống hạng thành viên của Greenshop bao gồm:
+* **Hạt Giống (Seed):** Khách hàng mới đăng ký tài khoản.
+* **Mầm Xanh (Sprout):** Tổng chi tiêu từ 2.000.000 VNĐ.
+* **Cây Xanh (Tree):** Tổng chi tiêu từ 5.000.000 VNĐ.
+* **Đại Thụ (Oak):** Tổng chi tiêu từ 15.000.000 VNĐ.
+
+## 2. Quyền lợi tương ứng
+- **Mầm Xanh:** Giảm giá 5% cho mọi đơn hàng.
+- **Cây Xanh:** Giảm giá 10% + Tặng 1 chậu đất nung cỡ nhỏ vào dịp sinh nhật.
+- **Đại Thụ:** Giảm giá 15% + Miễn phí vận chuyển toàn quốc + Dịch vụ chăm sóc cây tại nhà (1 lần/năm).
+', 'PUBLISHED'),
+
+('Chính sách Bảo hành Cây xanh', '> **LƯU Ý:** Chính sách này đã hết hiệu lực từ ngày 01/01/2026 và được sáp nhập vào "Chính sách Đổi trả & Hoàn tiền".
+
+## Nội dung bảo hành (Cũ)
+- Bảo hành 7 ngày đối với tất cả các loại cây để bàn.
+- Khách hàng mang cây đến trực tiếp cửa hàng để được hỗ trợ đổi cây mới nếu cây chết do lỗi kỹ thuật chăm sóc tại vườn ươm.
+', 'ARCHIVED'),
+
+('Chính sách Mua sỉ & Công trình', '## 1. Ưu đãi chiết khấu
+Greenshop cung cấp chính sách giá sỉ hấp dẫn cho:
+- Đơn hàng mua số lượng lớn (từ 20 cây cùng loại trở lên).
+- Doanh nghiệp thiết kế văn phòng, quán cafe, khách sạn.
+- **Mức chiết khấu:** Dao động từ **15% đến 35%** tùy theo giá trị đơn hàng và chủng loại cây.
+
+## 2. Dịch vụ đi kèm
+- Tư vấn khảo sát và thiết kế cảnh quan xanh miễn phí.
+- Hỗ trợ vận chuyển bằng xe tải chuyên dụng đảm bảo cây không bị dập nát.
+- Hợp đồng mua bán và xuất hóa đơn đỏ (VAT) đầy đủ.
+', 'PUBLISHED'),
+
+('Hướng dẫn Đền bù & Khiếu nại', '## 1. Cách thức gửi khiếu nại
+Khách hàng có thể tạo yêu cầu hỗ trợ (Ticket) trực tiếp trên website Greenshop hoặc gọi điện qua Hotline.
+- Yêu cầu cung cấp đầy đủ: Mã đơn hàng, hình ảnh thực tế của cây và lý do khiếu nại.
+
+## 2. Phương án đền bù
+- **Lỗi từ Greenshop (giao sai, gãy hỏng nặng):** Hỗ trợ đổi cây mới hoàn toàn miễn phí hoặc hoàn tiền 100%.
+- **Lỗi do đối tác vận chuyển:** Greenshop chịu trách nhiệm làm việc với đơn vị vận chuyển và bù đắp cho khách hàng cây mới.
+', 'PUBLISHED'),
+
+('Chính sách Chăm sóc Cây tại nhà', '## Giới thiệu dịch vụ chăm sóc định kỳ
+Dự kiến triển khai dịch vụ đăng ký chăm sóc cây xanh tại nhà (tưới nước, bón phân, tỉa cành, phun thuốc phòng sâu bệnh) cho các hộ gia đình hoặc văn phòng bận rộn.
+
+*Chính sách này hiện đang được soạn thảo chi tiết và thử nghiệm vận hành nội bộ.*
+', 'DRAFT'),
+
+('Chính sách Đặt trước Cây hiếm', '## Đăng ký sở hữu các dòng cây Exotic
+Chính sách hướng dẫn khách hàng cách đặt cọc trước (Pre-order) đối với các loại cây đột biến (Variegated) hoặc cây nhập khẩu quý hiếm.
+
+*Nội dung chi tiết đang được xây dựng bởi bộ phận Cung ứng.*
+', 'DRAFT'),
+
+('Chính sách Thu cũ Đổi mới Chậu cây', '> **LƯU Ý:** Chương trình này đã kết thúc từ ngày 31/12/2025.
+
+## Nội dung chương trình (Đã đóng)
+- Khách hàng mang chậu sứ cũ, chậu nhựa cũ đã mua tại Greenshop đến cửa hàng sẽ được giảm giá 20% khi mua chậu đất nung mới.
+', 'ARCHIVED');
+
