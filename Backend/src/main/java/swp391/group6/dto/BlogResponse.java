@@ -1,3 +1,11 @@
+/*
+ * Author: Hung Dao
+ * Created Date: 2026-06-26
+ * Name: BlogResponse.java
+ * Description:
+ * Last Change Author: Hung Dao
+ * Last Change Date: 2026-07-15
+ */
 package swp391.group6.dto;
 
 import lombok.Builder;
@@ -20,6 +28,12 @@ public class BlogResponse {
     private long voteCount;
     private boolean votedByCurrentUser;
     private List<String> images;
+    private List<String> tags;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+    private boolean hasPendingEdit;
+    private String pendingTitle;
+    private String pendingContent;
+    private String pendingThumbnail;
+    private List<String> pendingImages;
 }

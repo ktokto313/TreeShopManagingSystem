@@ -2,7 +2,7 @@
  * Author: lmd100
  * Created Date: 2026-06-20
  * Name: CheckoutService.java
- * Description: 
+ * Description:
  * Last Change Author: lmd100
  * Last Change Date: 2026-06-27
  */
@@ -24,6 +24,7 @@ import swp391.group6.model.Product;
 import swp391.group6.model.ShoppingCart;
 import swp391.group6.model.ShoppingCartEntry;
 import swp391.group6.model.User;
+import swp391.group6.model.NotificationType;
 import swp391.group6.repository.OrderRepository;
 import swp391.group6.repository.ProductRepository;
 import swp391.group6.repository.ShoppingCartRepository;
@@ -53,6 +54,7 @@ public class CheckoutService {
     private final ProductRepository productRepository;
     private final ViettelPostService viettelPostService;
     private final ViettelPostProperties viettelPostProperties;
+    private final NotificationService notificationService;
 
     @Value("${checkout.bank-id:${CHECKOUT_BANK_ID:}}")
     private String bankId;
@@ -75,13 +77,15 @@ public class CheckoutService {
             UserRepository userRepository,
             ProductRepository productRepository,
             ViettelPostService viettelPostService,
-            ViettelPostProperties viettelPostProperties) {
+            ViettelPostProperties viettelPostProperties,
+            NotificationService notificationService) {
         this.shoppingCartRepository = shoppingCartRepository;
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.viettelPostService = viettelPostService;
         this.viettelPostProperties = viettelPostProperties;
+        this.notificationService = notificationService;
     }
 
     public BigDecimal resolveShippingFee(LoginResponse loginResponse, CheckoutRequest request) {
@@ -171,6 +175,21 @@ public class CheckoutService {
         BigDecimal total = subtotal.add(shippingFee).subtract(DISCOUNT);
         cart.getItems().clear();
         shoppingCartRepository.save(cart);
+
+        // Notify the customer their order was placed, and Managers that a new order needs handling.
+        notificationService.notifyUserByTemplate(
+                customer.getId(),
+                customer.getEmail(),
+                NotificationType.ORDER_CONFIRMATION,
+                "ORDER_PLACED_CUSTOMER",
+                savedOrder.getId()
+        );
+        notificationService.notifyRoleByTemplate(
+                "MANAGER",
+                NotificationType.NEW_ORDER_ALERT,
+                "NEW_ORDER_MANAGER",
+                savedOrder.getId()
+        );
 
         CheckoutResponse response = new CheckoutResponse();
         response.setOrderId(savedOrder.getId());

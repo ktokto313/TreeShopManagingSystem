@@ -1,21 +1,35 @@
 //Create: HungDLM on 26/06/2026
 //Lastest update: HungDLM on 29/06/2026
-import { useContext, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container } from '../../../components/global/Container';
 import { Button } from '../../../components/ui/Button';
 import { AuthContext } from '../../../context/AuthContext';
 import BlogCard from '../components/BlogCard';
 import BlogFormModal from '../components/BlogFormModal';
-import { useBlogs, toggleVote, createBlog, deleteBlog } from '../hooks/useBlog';
+import { useBlogs, useAvailableTags, toggleVote, createBlog, deleteBlog } from '../hooks/useBlog';
 
 export default function BlogPage() {
     const { user } = useContext(AuthContext);
     const role = user?.roleName ?? user?.role;
     const navigate = useNavigate();
 
-    const { blogs, loading, error, reload } = useBlogs();
+    const [selectedTags, setSelectedTags] = useState([]);
+    const { blogs, loading, error, reload } = useBlogs(selectedTags);
+    const { tags: availableTags } = useAvailableTags(); // [{ value, label }]
     const [showForm, setShowForm] = useState(false);
+
+    // { CARE_TIPS: "Mẹo chăm sóc", ... } — passed down so cards can show labels, not raw enum values
+    const tagLabelMap = useMemo(
+        () => Object.fromEntries(availableTags.map(t => [t.value, t.label])),
+        [availableTags]
+    );
+
+    function toggleTag(value) {
+        setSelectedTags(prev =>
+            prev.includes(value) ? prev.filter(t => t !== value) : [...prev, value]
+        );
+    }
 
     async function handleVote(id) {
         if (!user) { navigate('/login'); return; }
@@ -80,6 +94,36 @@ export default function BlogPage() {
                     </div>
                 </div>
 
+                {/* Tag filter — fixed taxonomy, always shown regardless of what's currently in use */}
+                {availableTags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                        {availableTags.map(tag => {
+                            const active = selectedTags.includes(tag.value);
+                            return (
+                                <button
+                                    key={tag.value}
+                                    onClick={() => toggleTag(tag.value)}
+                                    className={
+                                        active
+                                            ? 'bg-green-600 text-white px-3 py-1 rounded-full text-sm transition-colors'
+                                            : 'bg-white text-green-700 border border-green-300 hover:bg-green-50 px-3 py-1 rounded-full text-sm transition-colors'
+                                    }
+                                >
+                                    {tag.label}
+                                </button>
+                            );
+                        })}
+                        {selectedTags.length > 0 && (
+                            <button
+                                onClick={() => setSelectedTags([])}
+                                className="text-sm text-stone-400 hover:text-stone-600 px-2"
+                            >
+                                Xóa lọc
+                            </button>
+                        )}
+                    </div>
+                )}
+
                 {/* States */}
                 {loading && (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -95,7 +139,9 @@ export default function BlogPage() {
 
                 {!loading && !error && blogs.length === 0 && (
                     <div className="text-center py-16 text-stone-400 border-2 border-dashed border-stone-200 rounded-2xl">
-                        Chưa có bài viết nào. Hãy là người đầu tiên chia sẻ!
+                        {selectedTags.length > 0
+                            ? 'Không có bài viết nào phù hợp với danh mục đã chọn.'
+                            : 'Chưa có bài viết nào. Hãy là người đầu tiên chia sẻ!'}
                     </div>
                 )}
 
@@ -108,6 +154,7 @@ export default function BlogPage() {
                                 onVote={handleVote}
                                 onDelete={handleDelete}
                                 currentUser={user}
+                                tagLabelMap={tagLabelMap}
                             />
                         ))}
                     </div>

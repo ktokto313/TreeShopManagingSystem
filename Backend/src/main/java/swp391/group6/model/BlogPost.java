@@ -2,15 +2,17 @@
  * Author: Hung Dao
  * Created Date: 2026-06-26
  * Name: BlogPost.java
- * Description: 
+ * Description:
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-06-26
+ * Last Change Date: 2026-07-15
  */
 package swp391.group6.model;
 
 import jakarta.persistence.*;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 @Table(name = "blog_posts")
@@ -46,8 +48,26 @@ public class BlogPost {
     @Column(name = "updated_at")
     private Timestamp updatedAt;
 
+    @Column(name = "pending_title", length = 300)
+    private String pendingTitle;
+
+    @Column(name = "pending_content", columnDefinition = "TEXT")
+    private String pendingContent;
+
+    @Column(name = "pending_thumbnail", columnDefinition = "TEXT")
+    private String pendingThumbnail;
+
+    @Column(name = "has_pending_edit", nullable = false)
+    private boolean hasPendingEdit;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BlogImage> images;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "blog_tags", joinColumns = @JoinColumn(name = "blog_post_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tag", nullable = false, length = 50)
+    private Set<BlogTag> tags = new HashSet<>();
 
     @PrePersist
     void onCreate() {
@@ -80,4 +100,19 @@ public class BlogPost {
     public Timestamp getUpdatedAt() { return updatedAt; }
 
     public List<BlogImage> getImages() { return images; }
+
+    public String getPendingTitle() { return pendingTitle; }
+    public void setPendingTitle(String pendingTitle) { this.pendingTitle = pendingTitle; }
+
+    public String getPendingContent() { return pendingContent; }
+    public void setPendingContent(String pendingContent) { this.pendingContent = pendingContent; }
+
+    public String getPendingThumbnail() { return pendingThumbnail; }
+    public void setPendingThumbnail(String pendingThumbnail) { this.pendingThumbnail = pendingThumbnail; }
+
+    public boolean isHasPendingEdit() { return hasPendingEdit; }
+    public void setHasPendingEdit(boolean hasPendingEdit) { this.hasPendingEdit = hasPendingEdit; }
+
+    public Set<BlogTag> getTags() { return tags; }
+    public void setTags(Set<BlogTag> tags) { this.tags = tags; }
 }

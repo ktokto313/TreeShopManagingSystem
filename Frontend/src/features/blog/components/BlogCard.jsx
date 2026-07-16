@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { HiThumbUp, HiOutlineThumbUp, HiTrash } from 'react-icons/hi';
 
-export default function BlogCard({ blog, onVote, onDelete, currentUser }) {
+export default function BlogCard({ blog, onVote, onDelete, currentUser, tagLabelMap = {} }) {
     const navigate = useNavigate();
     const isManager = currentUser?.role === 'MANAGER';
 
@@ -28,6 +28,19 @@ export default function BlogCard({ blog, onVote, onDelete, currentUser }) {
                 <h3 className="text-green-800 font-semibold text-lg leading-snug line-clamp-2">
                     {blog.title}
                 </h3>
+
+                {blog.tags?.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                        {blog.tags.map(tagValue => (
+                            <span
+                                key={tagValue}
+                                className="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded-full border border-green-200"
+                            >
+                                {tagLabelMap[tagValue] ?? tagValue}
+                            </span>
+                        ))}
+                    </div>
+                )}
 
                 <p className="text-stone-500 text-sm line-clamp-3 flex-1">
                     {blog.content}

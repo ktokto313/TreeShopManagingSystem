@@ -10,7 +10,7 @@
  * Author: PlotChat
  * Created Date: 2026-06-01
  * Name: TicketService.java
- * Description: 
+ * Description:
  * Last Change Author: Aiden
  * Last Change Date: 2026-06-18
  */
@@ -23,6 +23,7 @@ import swp391.group6.dto.LoginResponse;
 import swp391.group6.model.Ticket;
 import swp391.group6.dto.TicketRequest;
 import swp391.group6.model.*;
+import swp391.group6.model.NotificationType;
 import swp391.group6.repository.TicketRepository;
 import swp391.group6.repository.UserRepository;
 
@@ -37,10 +38,13 @@ public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService; // ticket notification triggers
 
-    public TicketService(TicketRepository ticketRepository, UserRepository userRepository) {
+    public TicketService(TicketRepository ticketRepository, UserRepository userRepository,
+                         NotificationService notificationService) {
         this.ticketRepository = ticketRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     // UC 16: Customer creates a ticket
@@ -67,6 +71,15 @@ public class TicketService {
         ticket.setTimeCreated(new Timestamp(System.currentTimeMillis()));
 
         ticketRepository.save(ticket);
+
+        // Notify Support Agents that a new ticket needs attention.
+        notificationService.notifyRoleByTemplate(
+                "SUPPORT_AGENT",
+                NotificationType.NEW_SUPPORT_REQUEST,
+                "NEW_SUPPORT_REQUEST_AGENT",
+                ticket.getTitle(), creator.getFullName()
+        );
+
         return ticket;
     }
 
@@ -170,6 +183,42 @@ public class TicketService {
 
         ticket.setTicketState(newState);
         ticketRepository.save(ticket);
+
+        // Notify the customer once the agent marks their ticket as resolved and awaiting confirmation.
+        if (isAgent && newState == TicketState.PROCESSING) {
+            User creator = ticket.getTicketCreator();
+            notificationService.notifyUserByTemplate(
+                    creator.getId(),
+                    creator.getEmail(),
+                    NotificationType.SUPPORT_TICKET_UPDATE,
+                    "TICKET_PROCESSING_CUSTOMER",
+                    ticket.getTitle()
+            );
+        }
+
+        if (isAgent && newState == TicketState.RESOLVED) {
+            User creator = ticket.getTicketCreator();
+            notificationService.notifyUserByTemplate(
+                    creator.getId(),
+                    creator.getEmail(),
+                    NotificationType.SUPPORT_TICKET_RESOLVED,
+                    "TICKET_RESOLVED_CUSTOMER",
+                    ticket.getTitle()
+            );
+        }
+
+        if (isCustomer && newState == TicketState.PROCESSING) {
+            User agent = ticket.getAssignee();
+            if (agent != null) {
+                notificationService.notifyUserByTemplate(
+                        agent.getId(),
+                        agent.getEmail(),
+                        NotificationType.SUPPORT_TICKET_UPDATE,
+                        "TICKET_REOPENED_AGENT",
+                        ticket.getTitle()
+                );
+            }
+        }
         return ticket;
     }
 
