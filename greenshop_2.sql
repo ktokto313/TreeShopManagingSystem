@@ -671,7 +671,8 @@ CREATE TABLE notifications (
                                content           TEXT,
                                sent_via_email    BOOLEAN NOT NULL DEFAULT FALSE,
                                email_send_failed BOOLEAN NOT NULL DEFAULT FALSE,
-                               created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                               created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                               is_read           BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE INDEX idx_notifications_recipient_user_id ON notifications(recipient_user_id);
