@@ -1,3 +1,11 @@
+/*
+ * Author: Hung Dao
+ * Created Date: 2026-07-16
+ * Name: NotificationController.java
+ * Description:
+ * Last Change Author: Hung Dao
+ * Last Change Date: 2026-07-16
+ */
 package swp391.group6.controller;
 
 import swp391.group6.model.Notification;
