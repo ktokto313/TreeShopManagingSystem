@@ -9,6 +9,7 @@ public class CheckoutRequest {
     private String ward;
     private String address;
     private String deliveryNote;
+    private int weightGrams;
 
     public String getFullName() {
         return fullName;
@@ -72,5 +73,13 @@ public class CheckoutRequest {
 
     public void setDeliveryNote(String deliveryNote) {
         this.deliveryNote = deliveryNote;
+    }
+
+    public int getWeightGrams() {
+        return weightGrams;
+    }
+
+    public void setWeightGrams(int weightGrams) {
+        this.weightGrams = weightGrams;
     }
 }

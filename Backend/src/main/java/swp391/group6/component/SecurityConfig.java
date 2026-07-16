@@ -41,7 +41,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/blogs/**").permitAll()
-                        .requestMatchers("/api/recommendations", "/api/recommendations/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/recommendations", "/api/recommendations/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/debug/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/checkout/shipping-fee").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
