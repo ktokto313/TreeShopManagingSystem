@@ -177,6 +177,17 @@ public class TicketService {
         ticketRepository.save(ticket);
 
         // Notify the customer once the agent marks their ticket as resolved and awaiting confirmation.
+        if (isAgent && newState == TicketState.PROCESSING) {
+            User creator = ticket.getTicketCreator();
+            notificationService.notifyUserByTemplate(
+                    creator.getId(),
+                    creator.getEmail(),
+                    NotificationType.SUPPORT_TICKET_UPDATE,
+                    "TICKET_PROCESSING_CUSTOMER",
+                    ticket.getTitle()
+            );
+        }
+
         if (isAgent && newState == TicketState.RESOLVED) {
             User creator = ticket.getTicketCreator();
             notificationService.notifyUserByTemplate(
@@ -188,6 +199,18 @@ public class TicketService {
             );
         }
 
+        if (isCustomer && newState == TicketState.PROCESSING) {
+            User agent = ticket.getAssignee();
+            if (agent != null) {
+                notificationService.notifyUserByTemplate(
+                        agent.getId(),
+                        agent.getEmail(),
+                        NotificationType.SUPPORT_TICKET_UPDATE,
+                        "TICKET_REOPENED_AGENT",
+                        ticket.getTitle()
+                );
+            }
+        }
         return ticket;
     }
 

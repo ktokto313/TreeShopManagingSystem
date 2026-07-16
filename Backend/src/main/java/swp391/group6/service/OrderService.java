@@ -163,6 +163,28 @@ public class OrderService {
 
         order.setStatus(targetStatus);
 
+        if (targetStatus == OrderStatus.DELIVERING) {
+            User shipper = order.getShipper();
+            if (shipper != null) {
+                notificationService.notifyUserByTemplate(
+                        shipper.getId(),
+                        shipper.getEmail(),
+                        NotificationType.DELIVERY_ASSIGNMENT,
+                        "DELIVERY_STARTED_SHIPPER",
+                        order.getId()
+                );
+            }
+        }
+
+        if (targetStatus == OrderStatus.FAILED || targetStatus == OrderStatus.RETURNING) {
+            notificationService.notifyRoleByTemplate(
+                    "MANAGER",
+                    NotificationType.DELIVERY_EXCEPTION,
+                    "DELIVERY_ISSUE_MANAGER",
+                    order.getId()
+            );
+        }
+
         notifyStatusChange(order, targetStatus);
     }
 

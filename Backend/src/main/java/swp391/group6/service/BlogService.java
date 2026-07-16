@@ -210,6 +210,12 @@ public class BlogService {
         BlogPost post = postRepo.findById(postId).orElse(null);
         if (post == null || post.getStatus() != BlogStatus.PUBLISHED) return false;
 
+        notifyAuthor(post,
+                NotificationType.BLOG_STATUS_UPDATE,
+                "BLOG_DELETED_CUSTOMER",
+                post.getTitle()
+        );
+
         postRepo.delete(post);
         return true;
     }

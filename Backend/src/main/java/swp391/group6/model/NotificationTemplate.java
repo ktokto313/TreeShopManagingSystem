@@ -17,7 +17,8 @@ public class NotificationTemplate {
     private static final Map<String, String> BODIES = new HashMap<>();
 
     static {
-        // ORDER
+
+        //ORDER
         register("ORDER_STATUS_UPDATE_CUSTOMER",
                 "Order status update",
                 "Your order #%s status changed to %s.");
@@ -34,7 +35,15 @@ public class NotificationTemplate {
                 "New delivery assignment",
                 "You have been assigned to order #%s.");
 
-        // BLOG
+        register("DELIVERY_STARTED_SHIPPER",
+                "Delivery started",
+                "You should start delivering order #%s.");
+
+        register("DELIVERY_ISSUE_MANAGER",
+                "Delivery issue",
+                "Order #%s has encountered a delivery issue.");
+
+        //BLOG
         register("BLOG_PENDING_APPROVAL_MANAGER",
                 "New blog post pending approval",
                 "\"%s\" by %s is awaiting review.");
@@ -58,6 +67,27 @@ public class NotificationTemplate {
         register("BLOG_EDIT_REJECTED_CUSTOMER",
                 "Your blog edit was rejected",
                 "Your proposed edit to \"%s\" was not approved.");
+
+        register("BLOG_DELETED_CUSTOMER",
+                "Your blog post was removed",
+                "\"%s\" has been removed by the manager.");
+
+        //TICKET
+        register("NEW_SUPPORT_REQUEST_AGENT",
+                "New support request",
+                "Ticket \"%s\" created by %s.");
+
+        register("TICKET_RESOLVED_CUSTOMER",
+                "Your ticket has been resolved",
+                "Your ticket \"%s\" has been marked as resolved.");
+
+        register("TICKET_PROCESSING_CUSTOMER",
+                "Your ticket is being processed",
+                "Your ticket \"%s\" is now being handled by our support team.");
+
+        register("TICKET_REOPENED_AGENT",
+                "Ticket reopened",
+                "Customer has requested further support for ticket \"%s\".");
     }
 
     private static void register(String key, String subject, String bodyTemplate) {
