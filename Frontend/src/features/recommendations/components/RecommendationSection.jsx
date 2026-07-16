@@ -302,7 +302,7 @@ export default function RecommendationSection() {
 
 				setResults(nextResults);
 
-			} catch (error) {
+			} catch {
 				if (!cancelled) {
 					setResults([]);
 				}
