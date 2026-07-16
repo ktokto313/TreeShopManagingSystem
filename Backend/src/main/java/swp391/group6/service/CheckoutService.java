@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import swp391.group6.dto.CheckoutRequest;
 import swp391.group6.dto.CheckoutResponse;
 import swp391.group6.dto.LoginResponse;
+import swp391.group6.dto.ShippingFeeRequest;
 import swp391.group6.model.Order;
 import swp391.group6.model.OrderDetail;
 import swp391.group6.model.OrderStatus;
@@ -25,6 +26,8 @@ import swp391.group6.repository.OrderRepository;
 import swp391.group6.repository.ProductRepository;
 import swp391.group6.repository.ShoppingCartRepository;
 import swp391.group6.repository.UserRepository;
+import swp391.group6.service.viettelpost.ViettelPostProperties;
+import swp391.group6.service.viettelpost.ViettelPostService;
 
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -37,7 +40,6 @@ import java.util.regex.Pattern;
 
 @Service
 public class CheckoutService {
-    private static final BigDecimal SHIPPING_FEE = BigDecimal.valueOf(30000);
     private static final BigDecimal DISCOUNT = BigDecimal.ZERO;
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^0\\d{8,10}$");
@@ -46,6 +48,8 @@ public class CheckoutService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final ViettelPostService viettelPostService;
+    private final ViettelPostProperties viettelPostProperties;
 
     @Value("${checkout.bank-id:${CHECKOUT_BANK_ID:}}")
     private String bankId;
@@ -66,11 +70,32 @@ public class CheckoutService {
             ShoppingCartRepository shoppingCartRepository,
             OrderRepository orderRepository,
             UserRepository userRepository,
-            ProductRepository productRepository) {
+            ProductRepository productRepository,
+            ViettelPostService viettelPostService,
+            ViettelPostProperties viettelPostProperties) {
         this.shoppingCartRepository = shoppingCartRepository;
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
+        this.viettelPostService = viettelPostService;
+        this.viettelPostProperties = viettelPostProperties;
+    }
+
+    public BigDecimal resolveShippingFee(LoginResponse loginResponse, CheckoutRequest request) {
+        int weightGrams = 1000;
+        if (request.getWeightGrams() > 0) {
+            weightGrams = request.getWeightGrams();
+        }
+        int fee = viettelPostService.calculateShippingFee(
+                request.getProvince(), request.getDistrict(), weightGrams);
+        return BigDecimal.valueOf(fee);
+    }
+
+    public BigDecimal resolveShippingFee(LoginResponse loginResponse, ShippingFeeRequest request) {
+        int weightGrams = 1000;
+        int fee = viettelPostService.calculateShippingFee(
+                request.getProvince(), request.getDistrict(), weightGrams);
+        return BigDecimal.valueOf(fee);
     }
 
     @Transactional
@@ -85,13 +110,14 @@ public class CheckoutService {
             throw new IllegalArgumentException("Cart is empty.");
         }
 
+        BigDecimal shippingFee = resolveShippingFee(loginResponse, request);
         BigDecimal subtotal = BigDecimal.ZERO;
         List<OrderDetail> details = new ArrayList<>();
         Order order = new Order();
         order.setUser(customer);
         order.setShipper(null);
         order.setShippingAddress(formatShippingAddress(request));
-        order.setShippingFee(SHIPPING_FEE);
+        order.setShippingFee(shippingFee);
         order.setDiscount(DISCOUNT);
         order.setCreatedAt(Timestamp.from(Instant.now()));
         order.setStatus(OrderStatus.PROCESSING);
@@ -116,7 +142,7 @@ public class CheckoutService {
         order.setOrderDetailList(details);
         Order savedOrder = orderRepository.save(order);
         String orderCode = transferPrefix.trim() + savedOrder.getId();
-        BigDecimal total = subtotal.add(SHIPPING_FEE).subtract(DISCOUNT);
+        BigDecimal total = subtotal.add(shippingFee).subtract(DISCOUNT);
         cart.getItems().clear();
         shoppingCartRepository.save(cart);
 
@@ -124,7 +150,7 @@ public class CheckoutService {
         response.setOrderId(savedOrder.getId());
         response.setOrderCode(orderCode);
         response.setSubtotal(subtotal);
-        response.setShippingFee(SHIPPING_FEE);
+        response.setShippingFee(shippingFee);
         response.setDiscount(DISCOUNT);
         response.setTotal(total);
         response.setStatus(savedOrder.getStatus());

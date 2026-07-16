@@ -8,11 +8,11 @@ export default defineConfig({
 		proxy: {
 		// Whenever React tries to fetch '/api/...', Vite will forward it to port 8080
 		'/api': {
-			target: 'http://localhost:8081',
+			target: 'http://localhost:8080',
 			changeOrigin: true,
 		},
 		'/product-images': {
-			target: 'http://localhost:8081',
+			target: 'http://localhost:8080',
 			changeOrigin: true,
 		},
 		}
