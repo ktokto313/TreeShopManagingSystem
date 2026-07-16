@@ -656,3 +656,23 @@ CREATE INDEX idx_blog_tags_post_id ON blog_tags(blog_post_id);
 CREATE INDEX idx_blog_tags_tag ON blog_tags(tag);
 
 TRUNCATE TABLE blog_tags;
+
+-- ============================================================
+--  NOTIFICATIONS — email notification log
+-- ============================================================
+
+CREATE TABLE notifications (
+                               id                BIGSERIAL PRIMARY KEY,
+                               type              VARCHAR(50)  NOT NULL,
+                               recipient_user_id BIGINT REFERENCES users(id),
+                               recipient_role_id BIGINT REFERENCES role(id),
+                               recipient_email   VARCHAR(150) NOT NULL,
+                               subject           VARCHAR(255) NOT NULL,
+                               content           TEXT,
+                               sent_via_email    BOOLEAN NOT NULL DEFAULT FALSE,
+                               email_send_failed BOOLEAN NOT NULL DEFAULT FALSE,
+                               created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_notifications_recipient_user_id ON notifications(recipient_user_id);
+CREATE INDEX idx_notifications_recipient_role_id ON notifications(recipient_role_id);

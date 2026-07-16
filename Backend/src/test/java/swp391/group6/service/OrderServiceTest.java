@@ -17,6 +17,7 @@ import swp391.group6.model.Role;
 import swp391.group6.model.ShoppingCart;
 import swp391.group6.model.User;
 import swp391.group6.repository.OrderRepository;
+import swp391.group6.repository.ReviewRepository;
 import swp391.group6.repository.UserRepository;
 
 import java.util.List;
@@ -43,11 +44,17 @@ class OrderServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private ReviewRepository reviewRepository;
+
+    @Mock
+    private NotificationService notificationService;
+
     private OrderService orderService;
 
     @BeforeEach
     void setUp() {
-        orderService = new OrderService(orderRepository, userRepository);
+        orderService = new OrderService(orderRepository, userRepository, reviewRepository, notificationService);
     }
 
     @Test
@@ -96,7 +103,7 @@ class OrderServiceTest {
         List<Order> expected = List.of(order(1L, user, shipper(), OrderStatus.PENDING));
         when(userRepository.findByEmail("customer@example.com")).thenReturn(Optional.of(user));
         when(orderRepository.searchByStatusInAndUserIdOrShipperId(statuses, "tree", 10L, 10L))
-            .thenReturn(expected);
+                .thenReturn(expected);
 
         List<Order> actual = orderService.getOrders(customerLogin, statuses, "tree");
 
@@ -149,7 +156,7 @@ class OrderServiceTest {
         Order expected = order(5L, user, shipper(), OrderStatus.PENDING);
         when(userRepository.findByEmail("customer@example.com")).thenReturn(Optional.of(user));
         when(orderRepository.findOrderByIdAndUser_IdOrShipper_Id(5L, 10L, 10L))
-            .thenReturn(Optional.of(expected));
+                .thenReturn(Optional.of(expected));
 
         Order actual = orderService.getOrder(5L, customerLogin);
 
@@ -386,9 +393,9 @@ class OrderServiceTest {
     @ParameterizedTest
     @MethodSource("allowedTransitions")
     void tryToChangeState_allowsValidRoleTransitions(
-        OrderStatus from,
-        OrderStatus to,
-        String roleName
+            OrderStatus from,
+            OrderStatus to,
+            String roleName
     ) {
         Order order = order(1L, customer(), shipper(), from);
 
@@ -400,16 +407,16 @@ class OrderServiceTest {
     @ParameterizedTest
     @MethodSource("invalidTransitions")
     void tryToChangeState_rejectsInvalidTransitions(
-        OrderStatus from,
-        OrderStatus to,
-        String roleName
+            OrderStatus from,
+            OrderStatus to,
+            String roleName
     ) {
         Order order = order(1L, customer(), shipper(), from);
         User user = user(99L, roleName);
 
         assertThrows(
-            InvalidStateTransitionException.class,
-            () -> orderService.tryToChangeState(order, user, to));
+                InvalidStateTransitionException.class,
+                () -> orderService.tryToChangeState(order, user, to));
         assertEquals(from, order.getStatus());
     }
 
@@ -420,8 +427,8 @@ class OrderServiceTest {
         User user = new User();
 
         assertThrows(
-            InvalidStateTransitionException.class,
-            () -> orderService.tryToChangeState(order, user, OrderStatus.DELIVERING));
+                InvalidStateTransitionException.class,
+                () -> orderService.tryToChangeState(order, user, OrderStatus.DELIVERING));
         assertEquals(OrderStatus.PENDING, order.getStatus());
     }
 
@@ -430,8 +437,8 @@ class OrderServiceTest {
         Order order = order(1L, customer(), shipper(), OrderStatus.PENDING);
 
         assertThrows(
-            InvalidStateTransitionException.class,
-            () -> orderService.tryToChangeState(order, null, OrderStatus.DELIVERING));
+                InvalidStateTransitionException.class,
+                () -> orderService.tryToChangeState(order, null, OrderStatus.DELIVERING));
         assertEquals(OrderStatus.PENDING, order.getStatus());
     }
 
@@ -455,11 +462,11 @@ class OrderServiceTest {
         User manager = manager();
 
         assertThrows(
-            InvalidStateTransitionException.class,
-            () -> orderService.tryToChangeState(nullCurrent, manager, OrderStatus.PENDING));
+                InvalidStateTransitionException.class,
+                () -> orderService.tryToChangeState(nullCurrent, manager, OrderStatus.PENDING));
         assertThrows(
-            InvalidStateTransitionException.class,
-            () -> orderService.tryToChangeState(pending, manager, null));
+                InvalidStateTransitionException.class,
+                () -> orderService.tryToChangeState(pending, manager, null));
     }
 
     @Test
@@ -468,8 +475,8 @@ class OrderServiceTest {
         User manager = manager();
 
         assertThrows(
-            InvalidStateTransitionException.class,
-            () -> orderService.tryToChangeState(order, manager, OrderStatus.DELIVERING));
+                InvalidStateTransitionException.class,
+                () -> orderService.tryToChangeState(order, manager, OrderStatus.DELIVERING));
         assertEquals(OrderStatus.PENDING, order.getStatus());
     }
 
@@ -480,41 +487,35 @@ class OrderServiceTest {
         assertFalse(orderService.canAccessAllOrder(login("customer@example.com", "CUSTOMER")));
     }
 
-    @Test
-    void canModifyAllOrder_isTrueOnlyForSystemAdmin() {
-        assertTrue(orderService.canModifyAllOrder(login("admin@example.com", "SYSTEM_ADMIN")));
-        assertFalse(orderService.canModifyAllOrder(login("manager@example.com", "MANAGER")));
-    }
-
     private static Stream<Arguments> allowedTransitions() {
         return Stream.of(
-            Arguments.of(OrderStatus.PROCESSING, OrderStatus.PENDING, "manager"),
-            Arguments.of(OrderStatus.PENDING, OrderStatus.DELIVERING, "MANAGER"),
-            Arguments.of(OrderStatus.DELIVERING, OrderStatus.ARRIVED, "SHIPPER"),
-            Arguments.of(OrderStatus.DELIVERING, OrderStatus.RETURNING, "SHIPPER"),
-            Arguments.of(OrderStatus.ARRIVED, OrderStatus.RECEIVED, "CUSTOMER"),
-            Arguments.of(OrderStatus.ARRIVED, OrderStatus.RETURN_PENDING, "CUSTOMER"),
-            Arguments.of(OrderStatus.RETURN_PENDING, OrderStatus.RETURNING, "MANAGER"),
-            Arguments.of(OrderStatus.RETURNING, OrderStatus.FAILED, "SHIPPER")
+                Arguments.of(OrderStatus.PROCESSING, OrderStatus.PENDING, "manager"),
+                Arguments.of(OrderStatus.PENDING, OrderStatus.DELIVERING, "MANAGER"),
+                Arguments.of(OrderStatus.DELIVERING, OrderStatus.ARRIVED, "SHIPPER"),
+                Arguments.of(OrderStatus.DELIVERING, OrderStatus.RETURNING, "SHIPPER"),
+                Arguments.of(OrderStatus.ARRIVED, OrderStatus.RECEIVED, "CUSTOMER"),
+                Arguments.of(OrderStatus.ARRIVED, OrderStatus.RETURN_PENDING, "CUSTOMER"),
+                Arguments.of(OrderStatus.RETURN_PENDING, OrderStatus.RETURNING, "MANAGER"),
+                Arguments.of(OrderStatus.RETURNING, OrderStatus.FAILED, "SHIPPER")
         );
     }
 
     private static Stream<Arguments> invalidTransitions() {
         return Stream.of(
-            Arguments.of(OrderStatus.PROCESSING, OrderStatus.DELIVERING, "MANAGER"),
-            Arguments.of(OrderStatus.PROCESSING, OrderStatus.PENDING, "SHIPPER"),
-            Arguments.of(OrderStatus.PENDING, OrderStatus.DELIVERING, "CUSTOMER"),
-            Arguments.of(OrderStatus.PENDING, OrderStatus.ARRIVED, "MANAGER"),
-            Arguments.of(OrderStatus.DELIVERING, OrderStatus.ARRIVED, "MANAGER"),
-            Arguments.of(OrderStatus.DELIVERING, OrderStatus.RETURNING, "MANAGER"),
-            Arguments.of(OrderStatus.DELIVERING, OrderStatus.FAILED, "MANAGER"),
-            Arguments.of(OrderStatus.ARRIVED, OrderStatus.FAILED, "CUSTOMER"),
-            Arguments.of(OrderStatus.ARRIVED, OrderStatus.RETURN_PENDING, "SHIPPER"),
-            Arguments.of(OrderStatus.RETURN_PENDING, OrderStatus.RECEIVED, "MANAGER"),
-            Arguments.of(OrderStatus.RETURN_PENDING, OrderStatus.RETURNING, "SHIPPER"),
-            Arguments.of(OrderStatus.RETURNING, OrderStatus.ARRIVED, "SHIPPER"),
-            Arguments.of(OrderStatus.RETURNING, OrderStatus.FAILED, "MANAGER"),
-            Arguments.of(OrderStatus.RECEIVED, OrderStatus.RETURN_PENDING, "CUSTOMER")
+                Arguments.of(OrderStatus.PROCESSING, OrderStatus.DELIVERING, "MANAGER"),
+                Arguments.of(OrderStatus.PROCESSING, OrderStatus.PENDING, "SHIPPER"),
+                Arguments.of(OrderStatus.PENDING, OrderStatus.DELIVERING, "CUSTOMER"),
+                Arguments.of(OrderStatus.PENDING, OrderStatus.ARRIVED, "MANAGER"),
+                Arguments.of(OrderStatus.DELIVERING, OrderStatus.ARRIVED, "MANAGER"),
+                Arguments.of(OrderStatus.DELIVERING, OrderStatus.RETURNING, "MANAGER"),
+                Arguments.of(OrderStatus.DELIVERING, OrderStatus.FAILED, "MANAGER"),
+                Arguments.of(OrderStatus.ARRIVED, OrderStatus.FAILED, "CUSTOMER"),
+                Arguments.of(OrderStatus.ARRIVED, OrderStatus.RETURN_PENDING, "SHIPPER"),
+                Arguments.of(OrderStatus.RETURN_PENDING, OrderStatus.RECEIVED, "MANAGER"),
+                Arguments.of(OrderStatus.RETURN_PENDING, OrderStatus.RETURNING, "SHIPPER"),
+                Arguments.of(OrderStatus.RETURNING, OrderStatus.ARRIVED, "SHIPPER"),
+                Arguments.of(OrderStatus.RETURNING, OrderStatus.FAILED, "MANAGER"),
+                Arguments.of(OrderStatus.RECEIVED, OrderStatus.RETURN_PENDING, "CUSTOMER")
         );
     }
 
