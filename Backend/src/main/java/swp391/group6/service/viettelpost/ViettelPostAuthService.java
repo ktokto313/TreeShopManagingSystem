@@ -2,7 +2,7 @@ package swp391.group6.service.viettelpost;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -65,39 +65,40 @@ public class ViettelPostAuthService {
         }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        MultiValueMap<String, String> loginBody = new LinkedMultiValueMap<>();
-        loginBody.add("USERNAME", username);
-        loginBody.add("PASSWORD", password);
+        String loginJson = String.format("{\"USERNAME\":\"%s\",\"PASSWORD\":\"%s\"}", username, password);
+        HttpEntity<String> loginRequest = new HttpEntity<>(loginJson, headers);
 
-        HttpEntity<MultiValueMap<String, String>> loginRequest = new HttpEntity<>(loginBody, headers);
-        
         log.info("Step 1: Login with username={}", username);
         LoginResponse loginResp = restTemplate.postForObject("/v2/user/login", loginRequest, LoginResponse.class);
+        log.info("Step 1 raw response: status={} message={} error={} data={}", loginResp.getStatus(), loginResp.getMessage(), loginResp.getError(), loginResp.getData());
         
         if (loginResp == null || !loginResp.isSuccess()) {
             throw new IllegalStateException("ViettelPost login failed: " + (loginResp != null ? loginResp.getMessage() : "null response"));
         }
         
-        String tempToken = loginResp.getData();
+        String tempToken = loginResp.getToken();
         log.info("Step 1 SUCCESS: tempToken={}", tempToken);
 
-        MultiValueMap<String, String> connectBody = new LinkedMultiValueMap<>();
-        connectBody.add("USERNAME", username);
-        connectBody.add("PASSWORD", password);
-        connectBody.add("TOKEN", tempToken);
+        HttpHeaders connectHeaders = new HttpHeaders();
+        connectHeaders.setContentType(MediaType.APPLICATION_JSON);
+        connectHeaders.set("Token", tempToken);
+        log.info("Step 2 headers before request: {}", connectHeaders);
+        log.info("Step 2 headers Token: {}", connectHeaders.getFirst("Token"));
 
-        HttpEntity<MultiValueMap<String, String>> connectRequest = new HttpEntity<>(connectBody, headers);
+        String connectJson = String.format("{\"USERNAME\":\"%s\",\"PASSWORD\":\"%s\"}", username, password);
+        HttpEntity<String> connectRequest = new HttpEntity<>(connectJson, connectHeaders);
         
         log.info("Step 2: OwnerConnect");
         LoginResponse connectResp = restTemplate.postForObject("/v2/user/ownerconnect", connectRequest, LoginResponse.class);
+        log.info("Step 2 raw response: status={} message={} error={} data={}", connectResp.getStatus(), connectResp.getMessage(), connectResp.getError(), connectResp.getData());
         
         if (connectResp == null || !connectResp.isSuccess()) {
             throw new IllegalStateException("ViettelPost ownerconnect failed: " + (connectResp != null ? connectResp.getMessage() : "null response"));
         }
         
-        String finalToken = connectResp.getData();
+        String finalToken = connectResp.getToken();
         log.info("Step 2 SUCCESS: finalToken={}", finalToken);
         
         return finalToken;

@@ -1,18 +1,17 @@
 package swp391.group6.service.viettelpost;
 
 public class PriceOption {
-    private String MA_DV_CHINH;
+    private String MA_DICHVU;
     private String TEN_DICHVU;
     private int GIA_CUOC;
     private String THOI_GIAN;
-    private int EXCHANGE_WEIGHT;
 
-    public String getMA_DV_CHINH() {
-        return MA_DV_CHINH;
+    public String getMA_DICHVU() {
+        return MA_DICHVU;
     }
 
-    public void setMA_DV_CHINH(String MA_DV_CHINH) {
-        this.MA_DV_CHINH = MA_DV_CHINH;
+    public void setMA_DICHVU(String MA_DICHVU) {
+        this.MA_DICHVU = MA_DICHVU;
     }
 
     public String getTEN_DICHVU() {
@@ -37,18 +36,5 @@ public class PriceOption {
 
     public void setTHOI_GIAN(String THOI_GIAN) {
         this.THOI_GIAN = THOI_GIAN;
-    }
-
-    public int getEXCHANGE_WEIGHT() {
-        return EXCHANGE_WEIGHT;
-    }
-
-    public void setEXCHANGE_WEIGHT(int EXCHANGE_WEIGHT) {
-        this.EXCHANGE_WEIGHT = EXCHANGE_WEIGHT;
-    }
-
-    @Override
-    public String toString() {
-        return "PriceOption{service=" + TEN_DICHVU + ", price=" + GIA_CUOC + ", time=" + THOI_GIAN + "}";
     }
 }

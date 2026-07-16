@@ -41,7 +41,7 @@ public class CheckoutController {
 
     @PostMapping("/shipping-fee")
     public ResponseEntity<?> calculateShippingFee(@RequestBody ShippingFeeRequest shippingFeeRequest) {
-        log.info("calculateShippingFee request province={} district={}", shippingFeeRequest.getProvince(), shippingFeeRequest.getDistrict());
+        log.info("calculateShippingFee request province={} district={} totalOrderValue={} itemCount={}", shippingFeeRequest.getProvince(), shippingFeeRequest.getDistrict(), shippingFeeRequest.getTotalOrderValue(), shippingFeeRequest.getItemCount());
         BigDecimal fee = checkoutService.resolveShippingFee(null, shippingFeeRequest);
         int feeInt = fee != null ? fee.intValue() : 0;
         log.info("calculateShippingFee response fee={}", feeInt);
