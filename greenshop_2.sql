@@ -1,4 +1,7 @@
-﻿DROP TABLE IF EXISTS blog_votes CASCADE;
+﻿DROP TABLE IF EXISTS notifications CASCADE;
+DROP TABLE IF EXISTS blog_votes CASCADE;
+DROP TABLE IF EXISTS blog_images CASCADE;
+DROP TABLE IF EXISTS blog_tags CASCADE;
 DROP TABLE IF EXISTS blog_posts CASCADE;
 DROP TABLE IF EXISTS comments CASCADE;
 DROP TABLE IF EXISTS tickets CASCADE;
@@ -42,9 +45,9 @@ CREATE INDEX idx_users_role_id ON users(role_id);
 CREATE TABLE categories (
    id          BIGSERIAL PRIMARY KEY,
    name        VARCHAR(100) NOT NULL UNIQUE,
-   description TEXT
-,
-   parent_id BIGINT REFERENCES categories(id) ON DELETE SET NULL);
+   description TEXT,
+   parent_id   BIGINT REFERENCES categories(id) ON DELETE SET NULL
+);
 
 -- ============================================================
 
@@ -64,30 +67,24 @@ CREATE INDEX idx_products_sku      ON products(sku);
 -- ============================================================
 
 CREATE TABLE product_details (
-    id          BIGSERIAL PRIMARY KEY,
-    product_id  BIGINT NOT NULL UNIQUE REFERENCES products(id) ON DELETE CASCADE,
-    description TEXT,
-    content     TEXT,
-    care_guide  TEXT,
-    sunlight_level TEXT,
-    water_freq  TEXT,
-    difficulty  TEXT,
-    feng_shui_element TEXT,
-    images      JSON
+    id              BIGSERIAL PRIMARY KEY,
+    product_id      BIGINT NOT NULL UNIQUE REFERENCES products(id) ON DELETE CASCADE,
+    description     TEXT,
+    content         TEXT,
+    care_guide      TEXT,
+    sunlight_level  VARCHAR(50),
+    water_freq      VARCHAR(50),
+    difficulty      VARCHAR(50),
+    feng_shui_element VARCHAR(50),
+    images          JSON
 );
-
-ALTER TABLE product_details ADD COLUMN IF NOT EXISTS care_guide TEXT;
-ALTER TABLE product_details ADD COLUMN IF NOT EXISTS sunlight_level TEXT;
-ALTER TABLE product_details ADD COLUMN IF NOT EXISTS water_freq TEXT;
-ALTER TABLE product_details ADD COLUMN IF NOT EXISTS difficulty TEXT;
-ALTER TABLE product_details ADD COLUMN IF NOT EXISTS feng_shui_element TEXT;
 
 -- ============================================================
 
 CREATE TABLE orders (
    id               BIGSERIAL PRIMARY KEY,
    customer_id      BIGINT NOT NULL REFERENCES users(id),
-   shipper_id BIGINT REFERENCES users(id),
+   shipper_id       BIGINT REFERENCES users(id),
    shipping_address TEXT,
    shipping_fee     DECIMAL(10,2) NOT NULL DEFAULT 0.00,
    discount         DECIMAL(10,2) NOT NULL DEFAULT 0.00,
@@ -135,8 +132,8 @@ CREATE TABLE wishlist_items (
 
 CREATE TABLE reviews (
    id          BIGSERIAL PRIMARY KEY,
-   order_id    BIGINT NOT NULL REFERENCES orders(id) ,
-   product_id BIGINT NOT NULL REFERENCES products(id)ON DELETE CASCADE,
+   order_id    BIGINT NOT NULL REFERENCES orders(id),
+   product_id  BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
    customer_id BIGINT NOT NULL REFERENCES users(id),
    rating      SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
    comment     TEXT,
@@ -157,9 +154,9 @@ CREATE TABLE tickets (
    title        VARCHAR(255) NOT NULL,
    detail       TEXT NOT NULL,
    state        VARCHAR(20) NOT NULL DEFAULT 'CREATED'
-                CHECK (state IN ('CREATED','PROCESSING','RESOLVED','DONE')),
+               CHECK (state IN ('CREATED','PROCESSING','RESOLVED','DONE')),
    priority     VARCHAR(10) NOT NULL DEFAULT 'MEDIUM'
-                CHECK (priority IN ('LOW','MEDIUM','HIGH','CRITICAL')),
+               CHECK (priority IN ('LOW','MEDIUM','HIGH','CRITICAL')),
    time_created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
    time_resolved TIMESTAMP
 );
@@ -266,19 +263,174 @@ INSERT INTO policies (title, description, status) VALUES
 -- ============================================================
 
 CREATE TABLE blog_posts (
-   id           BIGSERIAL PRIMARY KEY,
-   author_id    BIGINT NOT NULL REFERENCES users(id),
-   title        VARCHAR(300) NOT NULL,
-   content      TEXT NOT NULL,
-   thumbnail    TEXT,
-   is_published BOOLEAN NOT NULL DEFAULT FALSE,
-   created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-   updated_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    id                  BIGSERIAL PRIMARY KEY,
+    author_id           BIGINT NOT NULL REFERENCES users(id),
+
+    title               VARCHAR(300) NOT NULL,
+    content             TEXT NOT NULL,
+    thumbnail           TEXT,
+
+    is_published        BOOLEAN NOT NULL DEFAULT FALSE,
+
+    status              VARCHAR(20) NOT NULL DEFAULT 'DRAFT'
+                        CHECK (
+                            status IN (
+                                'DRAFT',
+                                'PENDING',
+                                'PUBLISHED',
+                                'REJECTED'
+                            )
+                        ),
+
+    pending_reason      TEXT,
+
+    -- staged edit
+    pending_title       VARCHAR(300),
+    pending_content     TEXT,
+    pending_thumbnail   TEXT,
+    has_pending_edit    BOOLEAN NOT NULL DEFAULT FALSE,
+
+    view_count          INT NOT NULL DEFAULT 0,
+
+    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    published_at        TIMESTAMP
 );
 
-CREATE INDEX idx_blog_author    ON blog_posts(author_id);
-CREATE INDEX idx_blog_published ON blog_posts(is_published);
+CREATE INDEX idx_blog_author
+ON blog_posts(author_id);
 
+CREATE INDEX idx_blog_published
+ON blog_posts(is_published);
+
+CREATE INDEX idx_blog_status
+ON blog_posts(status);
+
+-- ============================================================
+--  BLOG IMAGES
+-- ============================================================
+
+CREATE TABLE blog_images (
+    id              BIGSERIAL PRIMARY KEY,
+
+    -- giữ blog_id cho code/seed từ branch cũ
+    blog_id         BIGINT REFERENCES blog_posts(id) ON DELETE CASCADE,
+
+    -- giữ post_id cho code blog mới
+    post_id         BIGINT REFERENCES blog_posts(id) ON DELETE CASCADE,
+
+    image_url       TEXT NOT NULL,
+
+    -- binary image
+    image_data      BYTEA,
+    file_name       VARCHAR(255),
+    content_type    VARCHAR(100),
+
+    -- staged edit
+    is_pending      BOOLEAN NOT NULL DEFAULT FALSE,
+
+    -- metadata từ branch hiện tại
+    is_primary      BOOLEAN NOT NULL DEFAULT FALSE,
+    sort_order      INT NOT NULL DEFAULT 0,
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_blog_images_blog
+ON blog_images(blog_id);
+
+CREATE INDEX idx_blog_images_post
+ON blog_images(post_id);
+
+-- ============================================================
+--  BLOG TAGS
+-- ============================================================
+
+CREATE TABLE blog_tags (
+   id            BIGSERIAL PRIMARY KEY,
+   blog_post_id  BIGINT NOT NULL REFERENCES blog_posts(id) ON DELETE CASCADE,
+   tag           VARCHAR(100) NOT NULL,
+   created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   UNIQUE(blog_post_id, tag)
+);
+
+CREATE INDEX idx_blog_tags_blog ON blog_tags(blog_post_id);
+CREATE INDEX idx_blog_tags_name ON blog_tags(tag);
+
+-- ============================================================
+--  BLOG VOTES
+-- ============================================================
+
+CREATE TABLE blog_votes (
+    id          BIGSERIAL PRIMARY KEY,
+
+    -- branch cũ
+    blog_id     BIGINT REFERENCES blog_posts(id) ON DELETE CASCADE,
+
+    -- branch mới
+    post_id     BIGINT REFERENCES blog_posts(id) ON DELETE CASCADE,
+
+    user_id     BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+    is_upvote   BOOLEAN NOT NULL DEFAULT TRUE,
+
+    created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_blog_votes_blog
+ON blog_votes(blog_id);
+
+CREATE INDEX idx_blog_votes_post
+ON blog_votes(post_id);
+
+CREATE INDEX idx_blog_votes_user
+ON blog_votes(user_id);
+
+-- ============================================================
+--  NOTIFICATIONS
+-- ============================================================
+
+CREATE TABLE notifications (
+    id                  BIGSERIAL PRIMARY KEY,
+
+    -- notification hệ thống hiện tại
+    user_id             BIGINT REFERENCES users(id) ON DELETE CASCADE,
+
+    -- notification email từ branch merge
+    recipient_user_id   BIGINT REFERENCES users(id),
+    recipient_role_id   BIGINT REFERENCES role(id),
+
+    type                VARCHAR(50) NOT NULL,
+
+    title               VARCHAR(255),
+    message             TEXT,
+    reference_id        BIGINT,
+
+    recipient_email     VARCHAR(150),
+    subject             VARCHAR(255),
+    content             TEXT,
+
+    sent_via_email      BOOLEAN NOT NULL DEFAULT FALSE,
+    email_send_failed   BOOLEAN NOT NULL DEFAULT FALSE,
+
+    is_read             BOOLEAN NOT NULL DEFAULT FALSE,
+
+    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_notifications_user
+ON notifications(user_id);
+
+CREATE INDEX idx_notifications_recipient_user
+ON notifications(recipient_user_id);
+
+CREATE INDEX idx_notifications_recipient_role
+ON notifications(recipient_role_id);
+
+CREATE INDEX idx_notifications_read
+ON notifications(is_read);
+
+CREATE INDEX idx_notifications_created
+ON notifications(created_at DESC);
 -- ============================================================
 --  DỮ LIỆU MẪU
 -- ============================================================
@@ -569,146 +721,129 @@ INSERT INTO product_details (product_id, description, images) VALUES
 -- ============================================================
 --  BLOG POSTS — 10 bài viết
 -- ============================================================
-UPDATE product_details
-  SET content = description
-  WHERE content IS NULL;
-
-UPDATE product_details
-  SET care_guide = 'Đặt nơi sáng nhẹ, tưới khi mặt đất khô, lau lá định kỳ.',
-      sunlight_level = 'Ánh sáng gián tiếp thấp đến trung bình',
-      water_freq = '1 lần/tuần',
-      difficulty = 'Dễ',
-      feng_shui_element = 'Mộc'
-  WHERE product_id = 1;
-
-UPDATE product_details
-  SET care_guide = 'Để nơi sáng dịu, tránh nắng gắt buổi trưa, tưới ít nhưng đều.',
-      sunlight_level = 'Ánh sáng gián tiếp thấp',
-      water_freq = '7-10 ngày/lần',
-      difficulty = 'Dễ',
-      feng_shui_element = 'Mộc'
-  WHERE product_id = 2;
-
-UPDATE product_details
-  SET care_guide = 'Ưa sáng vừa, tưới khi đất ráo, phù hợp góc phòng thoáng.',
-      sunlight_level = 'Ánh sáng trung bình',
-      water_freq = '1 lần/tuần',
-      difficulty = 'Dễ',
-      feng_shui_element = 'Kim'
-  WHERE product_id = 3;
-
-UPDATE product_details
-  SET care_guide = 'Cần ánh sáng ổn định, tưới vừa phải và kiểm tra thoát nước.',
-      sunlight_level = 'Ánh sáng trung bình đến cao',
-      water_freq = '1 lần/tuần',
-      difficulty = 'Trung bình',
-      feng_shui_element = 'Mộc'
-  WHERE product_id = 4;
-
-UPDATE product_details
-  SET care_guide = 'Có thể treo hoặc đặt kệ, chịu thiếu sáng tốt, tưới khi khô bề mặt.',
-      sunlight_level = 'Ánh sáng thấp đến trung bình',
-      water_freq = '1 lần/tuần',
-      difficulty = 'Dễ',
-      feng_shui_element = 'Thủy'
-  WHERE product_id = 5;
-
-UPDATE product_details
-  SET care_guide = 'Ưa nơi sáng, giữ ẩm vừa phải, lau lá để giữ bề mặt đẹp.',
-      sunlight_level = 'Ánh sáng gián tiếp sáng',
-      water_freq = '5-7 ngày/lần',
-      difficulty = 'Trung bình',
-      feng_shui_element = 'Mộc'
-  WHERE product_id = 6;
-
-UPDATE product_details
-  SET care_guide = 'Phù hợp người mới, chăm đơn giản, tưới khi đất khô nhẹ.',
-      sunlight_level = 'Ánh sáng thấp đến trung bình',
-      water_freq = '7-10 ngày/lần',
-      difficulty = 'Dễ',
-      feng_shui_element = 'Mộc'
-  WHERE product_id = 7;
-
-UPDATE product_details
-  SET care_guide = 'Thân cao, cần ánh sáng tốt và chỗ đứng ổn định.',
-      sunlight_level = 'Ánh sáng trung bình',
-      water_freq = '7-10 ngày/lần',
-      difficulty = 'Dễ',
-      feng_shui_element = 'Mộc'
-  WHERE product_id = 8;
-
-UPDATE product_details
-  SET care_guide = 'Ưa không gian sáng nhẹ, tưới vừa đủ để giữ tán lá cân đối.',
-      sunlight_level = 'Ánh sáng trung bình',
-      water_freq = '1 lần/tuần',
-      difficulty = 'Dễ',
-      feng_shui_element = 'Mộc'
-  WHERE product_id = 9;
-
-UPDATE product_details
-  SET care_guide = 'Rất dễ chăm, tưới ít, tránh ngập nước và giữ nơi thoáng.',
-      sunlight_level = 'Ánh sáng thấp',
-      water_freq = '10 ngày/lần',
-      difficulty = 'Dễ',
-      feng_shui_element = 'Thủy'
-  WHERE product_id = 10;
-
-UPDATE product_details
-  SET care_guide = 'Ưa nơi sáng nhưng không gắt, giữ độ ẩm đều để lá đẹp.',
-      sunlight_level = 'Ánh sáng gián tiếp sáng',
-      water_freq = '5-7 ngày/lần',
-      difficulty = 'Trung bình',
-      feng_shui_element = 'Kim'
-  WHERE product_id = 11;
-
-UPDATE product_details
-  SET care_guide = 'Hợp không gian sảnh hoặc phòng khách, tưới vừa phải và cắt tỉa gọn.',
-      sunlight_level = 'Ánh sáng trung bình',
-      water_freq = '1 lần/tuần',
-      difficulty = 'Dễ',
-      feng_shui_element = 'Mộc'
-  WHERE product_id = 12;
-
-INSERT INTO blog_posts (author_id, title, content, thumbnail, is_published) VALUES
+INSERT INTO blog_posts (author_id, title, content, thumbnail, is_published, status, published_at) VALUES
 (2, 'Top 10 cây trong nhà dễ chăm nhất cho người bận rộn',
 'Bạn yêu cây nhưng không có nhiều thời gian chăm sóc? Đây là danh sách 10 loại cây cực dễ chăm: Lưỡi hổ, ZZ Plant, Pothos, Trầu bà... Những loại cây này chỉ cần tưới 1-2 lần mỗi tuần, chịu bóng tốt và vẫn phát triển khỏe mạnh.',
-'top10_cay_de_cham.jpg', TRUE),
+'top10_cay_de_cham.jpg', TRUE, 'PUBLISHED', CURRENT_TIMESTAMP),
 
 (2, 'Hướng dẫn chăm sóc sen đá cho người mới bắt đầu',
 'Sen đá là lựa chọn hoàn hảo cho người mới chơi cây. Bài viết này hướng dẫn chi tiết: cách chọn đất, tưới nước đúng cách, chọn vị trí đặt cây, và cách nhân giống sen đá tại nhà đơn giản.',
-'cham_soc_sen_da.jpg', TRUE),
+'cham_soc_sen_da.jpg', TRUE, 'PUBLISHED', CURRENT_TIMESTAMP),
 
 (2, 'Cây phong thủy nào phù hợp với từng không gian trong nhà?',
 'Mỗi không gian trong nhà có những cây phong thủy phù hợp khác nhau. Cùng Greenshop tìm hiểu cây nào đặt phòng khách, cây nào đặt phòng ngủ, và cây nào cho nhà bếp để mang lại may mắn và tài lộc.',
-'cay_phong_thuy.jpg', TRUE),
+'cay_phong_thuy.jpg', TRUE, 'PUBLISHED', CURRENT_TIMESTAMP),
 
 (2, '5 sai lầm phổ biến khi chăm sóc cây xanh trong nhà',
 'Chăm sóc cây xanh tưởng dễ nhưng không phải ai cũng làm đúng. Bài viết liệt kê 5 sai lầm phổ biến nhất: tưới quá nhiều nước, đặt cây ở nơi thiếu ánh sáng, không bón phân đúng cách... và cách khắc phục.',
-'sai_lam_cham_cay.jpg', TRUE),
+'sai_lam_cham_cay.jpg', TRUE, 'PUBLISHED', CURRENT_TIMESTAMP),
 
 (2, 'Xu hướng trồng cây xanh trong văn phòng 2026',
 'Trồng cây xanh trong văn phòng không chỉ giúp không gian đẹp hơn mà còn tăng năng suất làm việc. Khám phá những loại cây được ưa chuộng nhất trong văn phòng hiện đại và cách bố trí hợp lý.',
-'xu_huong_cay_van_phong.jpg', TRUE),
+'xu_huong_cay_van_phong.jpg', TRUE, 'PUBLISHED', CURRENT_TIMESTAMP),
 
 (2, 'Trồng rau thơm tại nhà: Hướng dẫn từ A đến Z',
 'Bạn muốn có rau thơm tươi ngon ngay tại bếp nhà mình? Hướng dẫn chi tiết cách trồng rau mùi, húng quế, bạc hà và các loại rau thơm phổ biến trong chậu nhỏ, trên ban công.',
-'trong_rau_thom.jpg', TRUE),
+'trong_rau_thom.jpg', TRUE, 'PUBLISHED', CURRENT_TIMESTAMP),
 
 (2, 'Cách phòng và trị bệnh phổ biến ở cây trồng trong nhà',
 'Cây trồng trong nhà thường gặp các bệnh như vàng lá, rụng lá, nấm mốc. Bài viết hướng dẫn cách nhận biết sớm các dấu hiệu bệnh và phương pháp điều trị an toàn bằng thuốc sinh học.',
-'benh_cay_trong_nha.jpg', TRUE),
+'benh_cay_trong_nha.jpg', TRUE, 'PUBLISHED', CURRENT_TIMESTAMP),
 
 (2, 'Bonsai mini: Nghệ thuật thu nhỏ thiên nhiên',
 'Bonsai không chỉ dành cho người lớn tuổi. Xu hướng bonsai mini đang rất hot với những cây nhỏ xinh trồng trong chậu, phù hợp trang trí bàn làm việc, kệ sách. Cùng Greenshop khám phá nghệ thuật này.',
-'bonsai_mini.jpg', TRUE),
+'bonsai_mini.jpg', TRUE, 'PUBLISHED', CURRENT_TIMESTAMP),
 
 (2, 'Terrarium: Khu vườn thu nhỏ trong lòng bàn tay',
 'Terrarium là xu hướng trồng cây rất được yêu thích, đặc biệt với những người sống trong căn hộ nhỏ. Tạo một terrarium xanh mát với sen đá, xương rồng và các loại cây nhỏ để bàn.',
-'terrarium.jpg', TRUE),
+'terrarium.jpg', TRUE, 'PUBLISHED', CURRENT_TIMESTAMP),
 
 (2, 'Cây lọc không khí tốt nhất theo nghiên cứu của NASA',
 'NASA đã nghiên cứu và chứng minh nhiều loại cây có khả năng lọc các chất độc hại trong không khí. Bài viết điểm danh top 5 loại cây hiệu quả nhất: Lan ý, Lưỡi hổ, Dây leo vàng, Peace Lily và Dracaena.',
-'cay_loc_khong_khi.jpg', TRUE);
+'cay_loc_khong_khi.jpg', TRUE, 'PUBLISHED', CURRENT_TIMESTAMP);
+
+-- ============================================================
+--  BLOG TAGS
+-- ============================================================
+INSERT INTO blog_tags (blog_post_id, tag) VALUES
+(1, 'cây-trong-nhà'),
+(1, 'cây-dễ-chăm'),
+(2, 'sen-đá'),
+(2, 'hướng-dẫn'),
+(3, 'phong-thủy'),
+(3, 'cây-trong-nhà'),
+(4, 'chăm-sóc-cây'),
+(5, 'cây-văn-phòng'),
+(6, 'rau-thơm'),
+(6, 'trồng-cây'),
+(7, 'bệnh-cây'),
+(8, 'bonsai'),
+(9, 'terrarium'),
+(10, 'cây-lọc-không-khí');
+
+-- ============================================================
+--  BLOG IMAGES
+-- ============================================================
+INSERT INTO blog_images (blog_id, image_url, is_primary, sort_order) VALUES
+(1, 'blog/top10_cay_1.jpg', TRUE, 0),
+(2, 'blog/senda_huongdan_1.jpg', TRUE, 0),
+(2, 'blog/senda_huongdan_2.jpg', FALSE, 1),
+(3, 'blog/phongthuy_1.jpg', TRUE, 0),
+(4, 'blog/sailam_1.jpg', TRUE, 0),
+(5, 'blog/vanphong_1.jpg', TRUE, 0),
+(6, 'blog/rauthom_1.jpg', TRUE, 0),
+(6, 'blog/rauthom_2.jpg', FALSE, 1),
+(7, 'blog/benhcay_1.jpg', TRUE, 0),
+(8, 'blog/bonsai_1.jpg', TRUE, 0),
+(9, 'blog/terrarium_1.jpg', TRUE, 0),
+(10, 'blog/loc_khong_khi_1.jpg', TRUE, 0);
+UPDATE blog_images
+SET post_id = blog_id
+WHERE post_id IS NULL
+  AND blog_id IS NOT NULL;
+-- ============================================================
+--  BLOG VOTES
+-- ============================================================
+
+INSERT INTO blog_votes (blog_id, user_id, is_upvote) VALUES
+(1, 5, TRUE),
+(1, 6, TRUE),
+(1, 7, TRUE),
+(2, 5, TRUE),
+(2, 6, TRUE),
+(3, 5, TRUE),
+(3, 6, TRUE),
+(3, 7, TRUE),
+(4, 6, TRUE),
+(5, 5, TRUE),
+(5, 7, TRUE),
+(6, 5, TRUE),
+(7, 6, TRUE),
+(8, 5, TRUE),
+(8, 6, TRUE),
+(9, 5, TRUE),
+(10, 5, TRUE),
+(10, 6, TRUE),
+(10, 7, TRUE);
+
+UPDATE blog_votes
+SET post_id = blog_id
+WHERE post_id IS NULL
+  AND blog_id IS NOT NULL;
+
+-- ============================================================
+--  NOTIFICATIONS
+-- ============================================================
+INSERT INTO notifications (user_id, type, title, message, reference_id) VALUES
+(5, 'ORDER_STATUS', 'Đơn hàng đang được giao', 'Đơn hàng #1 của bạn đang được giao đến địa chỉ 123 Nguyễn Trãi, Quận 1, TP.HCM', 1),
+(6, 'ORDER_STATUS', 'Đơn hàng đang được giao', 'Đơn hàng #2 của bạn đang được giao đến địa chỉ 45 Lê Lợi, Quận Hải Châu, Đà Nẵng', 2),
+(7, 'ORDER_STATUS', 'Giao hàng thành công', 'Đơn hàng #3 của bạn đã được giao thành công', 3),
+(5, 'TICKET_UPDATE', 'Ticket đã được xử lý', 'Ticket "Yêu cầu đổi cây bị hư" đã được xử lý', 1),
+(5, 'BLOG', 'Bài viết mới', 'Greenshop vừa đăng bài viết mới: "Top 10 cây trong nhà dễ chăm nhất cho người bận rộn"', 1),
+(6, 'BLOG', 'Bài viết mới', 'Greenshop vừa đăng bài viết mới: "Hướng dẫn chăm sóc sen đá cho người mới bắt đầu"', 2),
+(7, 'BLOG', 'Bài viết mới', 'Greenshop vừa đăng bài viết mới: "Cây phong thủy nào phù hợp với từng không gian trong nhà?"', 3),
+(1, 'PROMOTION', 'Khuyến mãi mới', 'Giảm 20% cho đơn hàng đầu tiên! Mã: GREENSHOOT20', NULL),
+(2, 'SYSTEM', 'Chào mừng', 'Chào mừng bạn đến với Greenshop! Hãy khám phá các sản phẩm cây xanh của chúng tôi.', NULL);
 
 -- ============================================================
 --  SHOPPING CARTS — tạo cart cho 6 customer
@@ -784,22 +919,3 @@ INSERT INTO comments (ticket_id, creator_id, detail) VALUES
 (1, 4, 'Cảm ơn bạn đã phản hồi. Chúng tôi sẽ gửi cây thay thế trong 24h.'),
 (2, 4, 'Cây được bảo hành 7 ngày. Bạn cung cấp hình ảnh để chúng tôi kiểm tra nhé.'),
 (1, 5, 'Cảm ơn shop đã hỗ trợ nhanh chóng!');
-
--- ============================================================
---  BLOG TAGS
--- ============================================================
-INSERT INTO blog_tags (blog_post_id, tag) VALUES
-(1, 'cây-trong-nhà'),
-(1, 'cây-dễ-chăm'),
-(2, 'sen-đá'),
-(2, 'hướng-dẫn'),
-(3, 'phong-thủy'),
-(3, 'cây-trong-nhà'),
-(4, 'chăm-sóc-cây'),
-(5, 'cây-văn-phòng'),
-(6, 'rau-thơm'),
-(6, 'trồng-cây'),
-(7, 'bệnh-cây'),
-(8, 'bonsai'),
-(9, 'terrarium'),
-(10, 'cây-lọc-không-khí');

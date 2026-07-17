@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import process from 'node:process'
 
-const apiTarget = process.env.VITE_API_TARGET ?? 'http://localhost:8081'
+// Default to localhost:8080 for local development
+const apiTarget = process.env.VITE_API_TARGET ?? 'http://localhost:8080'
 
 export default defineConfig({
 	plugins: [react(), tailwindcss()],

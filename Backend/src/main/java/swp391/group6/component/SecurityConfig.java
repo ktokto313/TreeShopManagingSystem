@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/statistic/products").permitAll()
                         .requestMatchers("/api/recommendations", "/api/recommendations/**").permitAll()
                         .anyRequest().authenticated()
+                )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> ResponseUtil
                                 .writeErrorResponse(response, HttpStatus.UNAUTHORIZED))
