@@ -766,20 +766,24 @@ INSERT INTO blog_posts (author_id, title, content, thumbnail, is_published, stat
 --  BLOG TAGS
 -- ============================================================
 INSERT INTO blog_tags (blog_post_id, tag) VALUES
-(1, 'cây-trong-nhà'),
-(1, 'cây-dễ-chăm'),
-(2, 'sen-đá'),
-(2, 'hướng-dẫn'),
-(3, 'phong-thủy'),
-(3, 'cây-trong-nhà'),
-(4, 'chăm-sóc-cây'),
-(5, 'cây-văn-phòng'),
-(6, 'rau-thơm'),
-(6, 'trồng-cây'),
-(7, 'bệnh-cây'),
-(8, 'bonsai'),
-(9, 'terrarium'),
-(10, 'cây-lọc-không-khí');
+(1, 'BEGINNER_GUIDE'),
+(1, 'CARE_TIPS'),
+(2, 'CARE_TIPS'),
+(2, 'BEGINNER_GUIDE'),
+(3, 'DECOR_IDEAS'),
+(3, 'PLANT_SPOTLIGHT'),
+(4, 'CARE_TIPS'),
+(5, 'DECOR_IDEAS'),
+(5, 'NEWS_EVENT'),
+(6, 'DIY_PROJECT'),
+(6, 'BEGINNER_GUIDE'),
+(7, 'PEST_DISEASE'),
+(8, 'DIY_PROJECT'),
+(8, 'DECOR_IDEAS'),
+(9, 'DIY_PROJECT'),
+(9, 'DECOR_IDEAS'),
+(10, 'PLANT_SPOTLIGHT'),
+(10, 'NEWS_EVENT');
 
 -- ============================================================
 --  BLOG IMAGES
