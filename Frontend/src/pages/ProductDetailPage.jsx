@@ -52,7 +52,7 @@ function createDetailParagraphs(product, categoryName) {
 	];
 }
 
-function createDetailMarkdownContent(product, categoryName, imageUrl) {
+function createDetailMarkdownContent(product, categoryName) {
 	const stock = Number(product?.stock ?? 0);
 	const price = formatCurrency(product?.price);
 	const careGuide = product?.careGuide || "Chưa cập nhật";
@@ -60,9 +60,6 @@ function createDetailMarkdownContent(product, categoryName, imageUrl) {
 	const wateringFrequency = product?.wateringFrequency || "Chưa cập nhật";
 	const difficulty = product?.difficulty || "Chưa cập nhật";
 	const fengShuiElement = product?.fengShuiElement || "Chưa cập nhật";
-	const imageBlock = imageUrl
-		? `![${product?.name || "Sản phẩm"}](${imageUrl})`
-		: "Chưa có ảnh minh họa riêng cho sản phẩm này.";
 
 	const sample = [
 		`# ${product?.name || "Thông tin chi tiết của sản phẩm"}`,
@@ -70,10 +67,6 @@ function createDetailMarkdownContent(product, categoryName, imageUrl) {
 		`## ${categoryName && categoryName !== "-" ? categoryName : "Danh mục sản phẩm"}`,
 		"",
 		`Sản phẩm phù hợp để bố trí trong không gian sống, bàn làm việc hoặc khu vực thư giãn. Hiện tại sản phẩm đang có **${stock}** sản phẩm với mức giá **${price}**.`,
-		"",
-		"### Hình ảnh minh họa",
-		"",
-		imageBlock,
 		"",
 		"### Thông tin nhanh",
 		"",
@@ -378,7 +371,7 @@ export default function ProductDetailPage() {
 		categoryName
 	);
 	const detailParagraphs = createDetailParagraphs(product, categoryName);
-	const detailMarkdownContent = createDetailMarkdownContent(product, categoryName, imagePreview);
+	const detailMarkdownContent = createDetailMarkdownContent(product, categoryName);
 	const plantDetails = [
 		{ label: "Hướng dẫn chăm sóc", value: product?.careGuide },
 		{ label: "Ánh sáng", value: product?.sunlightLevel },
