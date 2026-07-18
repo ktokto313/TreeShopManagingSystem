@@ -13,6 +13,7 @@ import { getProductAvailability } from "../features/products/utils/productAvaila
 import { resolveProductImageSource } from "../features/products/utils/productImageResolver";
 import { formatCurrency, parseCatalogImages } from "../features/catalog/utils/catalogUtils";
 import { getWishlistProducts, removeWishlistProduct } from "../features/wishlist/wishlistApi";
+import { addCartItem } from "../features/cart/cartApi";
 
 function getProductImage(product) {
 	const images = parseCatalogImages(product.images);
@@ -24,6 +25,27 @@ export default function WishlistPage() {
 	const [products, setProducts] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [notice, setNotice] = useState("");
+	const [addingProductId, setAddingProductId] = useState(null);
+
+	async function handleAddToCart(product) {
+		if (!product?.id) return;
+		setAddingProductId(product.id);
+		setNotice("");
+
+		try {
+			await addCartItem(Number(product.id), 1);
+			window.dispatchEvent(new Event("cart-updated"));
+			setNotice(`${product.name} đã được thêm vào giỏ hàng.`);
+		} catch (error) {
+			if (error?.status === 401) {
+				navigate("/login", { replace: true, state: { from: { pathname: "/wishlist" } } });
+				return;
+			}
+			setNotice(error.message || "Không thể thêm sản phẩm vào giỏ hàng.");
+		} finally {
+			setAddingProductId(null);
+		}
+	}
 
 	async function loadWishlist() {
 		setIsLoading(true);
@@ -148,16 +170,10 @@ export default function WishlistPage() {
 												<td className="px-5 py-4 text-sm text-green-900">{availability.label}</td>
 												<td className="px-5 py-4 text-right">
 													<Button
-														disabled={!availability.canPurchase}
-														onClick={() =>
-															setNotice(
-																availability.canPurchase
-																	? `${product.name} có thể thêm vào giỏ hàng khi luồng mua hàng được bật.`
-																	: availability.helper,
-															)
-														}
+														disabled={!availability.canPurchase || addingProductId === product.id}
+														onClick={() => void handleAddToCart(product)}
 													>
-														Thêm vào giỏ
+														{addingProductId === product.id ? "Đang thêm..." : "Thêm vào giỏ"}
 													</Button>
 												</td>
 											</tr>
