@@ -22,9 +22,13 @@ public class BlogCleanupScheduler {
     @Transactional
     public void deleteExpiredDrafts() {
         Timestamp cutoff = new Timestamp(System.currentTimeMillis() - 12L * 60 * 60 * 1000);
-        int deleted = postRepo.deleteByStatusAndUpdatedAtBefore(BlogStatus.DRAFT, cutoff);
-        if (deleted > 0) {
-            log.info("Auto-deleted {} expired draft(s)", deleted);
+        int deletedD = postRepo.deleteByStatusAndUpdatedAtBefore(BlogStatus.DRAFT, cutoff);
+        int deletedR = postRepo.deleteByStatusAndUpdatedAtBefore(BlogStatus.REJECTED, cutoff);
+        if (deletedD > 0) {
+            log.info("Auto-deleted {} expired draft(s)", deletedR);
+        }
+        if(deletedR > 0){
+            log.info("Auto-deleted {} expired rejected blog(s)", deletedR);
         }
     }
 }
