@@ -63,8 +63,18 @@ export function AuthProvider({ children }) {
 				body: JSON.stringify(credentials),
 			});
 			if (!response.ok) {
-				const loginError = new Error("Login failed. Check your credentials.");
+				let body = null;
+				try {
+					body = await response.json();
+				} catch {
+				}
+				const message =
+					response.status === 429
+						? body?.message || "Too many failed attempts. Try again later."
+						: "Login failed. Check your credentials.";
+				const loginError = new Error(message);
 				loginError.status = response.status;
+				loginError.remainingSeconds = body?.remainingSeconds ?? null;
 				throw loginError;
 			}
 			const loggedInUser = normalizeUser(await response.json());
