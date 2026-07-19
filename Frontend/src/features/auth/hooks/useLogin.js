@@ -1,5 +1,6 @@
 //6/8: Dao Hung: Separate the hook from the UI file
-import { useContext, useState } from 'react'
+//7/19: Dao Hung: Add login block countdown handling (429 rate limit response)
+import { useContext, useState, useEffect, useRef } from 'react'
 import { AuthContext } from '../../../context/AuthContext'
 import {getDefaultRouteForRole} from "../../../utils/authRoutes"
 
@@ -10,6 +11,25 @@ export function useLogin() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [pendingGoogle, setPendingGoogle] = useState(null)
+    const [blockedSeconds, setBlockedSeconds] = useState(0)
+    const intervalRef = useRef(null)
+
+    useEffect(() => {
+        if (blockedSeconds <= 0) {
+            clearInterval(intervalRef.current)
+            return
+        }
+        intervalRef.current = setInterval(() => {
+            setBlockedSeconds((prev) => {
+                if (prev <= 1) {
+                    clearInterval(intervalRef.current)
+                    return 0
+                }
+                return prev - 1
+            })
+        }, 1000)
+        return () => clearInterval(intervalRef.current)
+    }, [blockedSeconds])
 
     function handleChange(e) {
         const { name, value } = e.target
@@ -17,7 +37,7 @@ export function useLogin() {
     }
 
     async function handleLogin() {
-        if (loading) return
+        if (loading || blockedSeconds > 0) return
 
         setLoading(true)
         setError('')
@@ -27,6 +47,9 @@ export function useLogin() {
 
             return { success: true, redirect: getDefaultRouteForRole(user) }
         } catch (err) {
+            if (err.status === 429 && err.remainingSeconds) {
+                setBlockedSeconds(err.remainingSeconds)
+            }
             setError(err.message || 'Invalid email or password')
             return { success: false }
         } finally {
@@ -76,6 +99,7 @@ export function useLogin() {
         loading,
         error,
         pendingGoogle,
+        blockedSeconds,
         handleChange,
         handleLogin,
         handleGoogleLogin,

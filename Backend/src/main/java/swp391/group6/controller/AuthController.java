@@ -8,6 +8,7 @@
  */
 package swp391.group6.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import swp391.group6.dto.*;
 import swp391.group6.model.User;
 import jakarta.servlet.http.HttpServletResponse;
@@ -48,13 +49,25 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request,
-                                               HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request,
+                                   HttpServletRequest httpRequest,
+                                   HttpServletResponse response) {
+        String clientIp = resolveClientIp(httpRequest);
+
         if (authService.isGoogleAccount(request.getEmail())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        LoginResponse loginResponse = authService.login(request);
+        if (authService.isBlocked(clientIp)) {
+            long remaining = authService.getRemainingBlockSeconds(clientIp);
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(Map.of(
+                            "message", "Too many failed attempts. Try again later.",
+                            "remainingSeconds", remaining
+                    ));
+        }
+
+        LoginResponse loginResponse = authService.login(request, clientIp);
         if (loginResponse == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
@@ -64,6 +77,14 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(loginResponse);
+    }
+
+    private String resolveClientIp(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            return forwarded.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 
     @PostMapping("/register")

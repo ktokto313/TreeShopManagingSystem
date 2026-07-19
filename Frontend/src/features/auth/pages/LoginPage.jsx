@@ -16,11 +16,14 @@ export default function LoginPage() {
     loading,
     error,
     pendingGoogle,
+    blockedSeconds,
     handleChange,
     handleLogin,
     handleGoogleLogin,
     setPendingGoogle,
   } = useLogin()
+
+  const isDisabled = loading || blockedSeconds > 0
 
   return (
       <div className="flex flex-col-reverse md:flex-row min-h-screen bg-green-200/50">
@@ -84,7 +87,7 @@ export default function LoginPage() {
                     name="email"
                     value={values.email}
                     onChange={handleChange}
-                    disabled={loading}
+                    disabled={isDisabled}
                     className="w-full border-[0.01rem] border-green-600 focus:border-[0.12rem] px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 disabled:opacity-50"
                 />
               </div>
@@ -99,7 +102,7 @@ export default function LoginPage() {
                       name="password"
                       value={values.password}
                       onChange={handleChange}
-                      disabled={loading}
+                      disabled={isDisabled}
                       className="w-full border-[0.01rem] border-green-600 focus:border-[0.12rem] px-3 py-2.5 pr-10 text-sm focus:outline-none focus:border-green-500 disabled:opacity-50"
                   />
                   <button
@@ -140,10 +143,14 @@ export default function LoginPage() {
 
               <button
                   type="submit"
-                  disabled={loading}
+                  disabled={isDisabled}
                   className="px-8 py-3 text-xs w-full font-bold uppercase bg-green-600 text-white hover:bg-green-500 disabled:opacity-50 transition cursor-pointer"
               >
-                {loading ? 'Logging in...' : 'Log in'}
+                {blockedSeconds > 0
+                    ? `Try again in ${blockedSeconds}s`
+                    : loading
+                        ? 'Logging in...'
+                        : 'Log in'}
               </button>
             </form>
 
