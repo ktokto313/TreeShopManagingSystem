@@ -6,18 +6,12 @@
  * Last Change Author: AnhLV
  * Last Change Date: 2026-07-12
  */
-/*
- * Author: Aiden
- * Created Date: 2026-06-24
- * Name: ReviewRepository.java
- * Description: 
- * Last Change Author: Aiden
- * Last Change Date: 2026-06-28
- */
+
 package swp391.group6.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import swp391.group6.model.Review;
 

@@ -16,7 +16,6 @@ export default function ReviewModal({orderId, productId, hasReviewed, onReviewSu
             <div className="p-4 max-h-[70vh] overflow-y-auto">
                 <ReviewSection productId={productId} orderId={orderId} onReviewSubmitted={onReviewSubmitted}/>
             </div>
-
         </ModalButton>
     );
 }
