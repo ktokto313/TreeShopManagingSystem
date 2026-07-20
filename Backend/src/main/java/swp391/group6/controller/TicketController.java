@@ -6,30 +6,31 @@
  * Last Change Author: AnhLV
  * Last Change Date: 2026-07-03
  */
-/*
- * Author: PlotChat
- * Created Date: 2026-06-01
- * Name: TicketController.java
- * Description: 
- * Last Change Author: lmd100
- * Last Change Date: 2026-06-27
- */
+
 package swp391.group6.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.servlet.http.HttpServletRequest;
 import swp391.group6.dto.LoginResponse;
-import swp391.group6.model.Ticket;
 import swp391.group6.dto.TicketRequest;
+import swp391.group6.model.Ticket;
 import swp391.group6.service.TicketService;
 import swp391.group6.util.JWTUtil;
-
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/tickets")

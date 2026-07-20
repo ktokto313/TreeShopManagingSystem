@@ -6,25 +6,19 @@
  * Last Change Author: AnhLV
  * Last Change Date: 2026-07-03
  */
-/*
- * Author: PlotChat
- * Created Date: 2026-06-01
- * Name: TicketRepository.java
- * Description: 
- * Last Change Author: Aiden
- * Last Change Date: 2026-06-15
- */
+
 package swp391.group6.repository;
+
+import java.util.List;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 import swp391.group6.model.Priority;
 import swp391.group6.model.Ticket;
 import swp391.group6.model.TicketState;
-
-import java.util.List;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByTicketCreator(long id);
