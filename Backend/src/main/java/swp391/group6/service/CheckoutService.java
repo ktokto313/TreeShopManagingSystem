@@ -127,7 +127,6 @@ public class CheckoutService {
         // Notify the customer their order was placed, and Managers that a new order needs handling.
         notificationService.notifyUserByTemplate(
                 customer.getId(),
-                customer.getEmail(),
                 NotificationType.ORDER_CONFIRMATION,
                 "ORDER_PLACED_CUSTOMER",
                 savedOrder.getId()
