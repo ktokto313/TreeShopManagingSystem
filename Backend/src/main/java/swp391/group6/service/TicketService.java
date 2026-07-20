@@ -181,7 +181,6 @@ public class TicketService {
             User creator = ticket.getTicketCreator();
             notificationService.notifyUserByTemplate(
                     creator.getId(),
-                    creator.getEmail(),
                     NotificationType.SUPPORT_TICKET_UPDATE,
                     "TICKET_PROCESSING_CUSTOMER",
                     ticket.getTitle()
@@ -192,7 +191,6 @@ public class TicketService {
             User creator = ticket.getTicketCreator();
             notificationService.notifyUserByTemplate(
                     creator.getId(),
-                    creator.getEmail(),
                     NotificationType.SUPPORT_TICKET_RESOLVED,
                     "TICKET_RESOLVED_CUSTOMER",
                     ticket.getTitle()
@@ -204,7 +202,6 @@ public class TicketService {
             if (agent != null) {
                 notificationService.notifyUserByTemplate(
                         agent.getId(),
-                        agent.getEmail(),
                         NotificationType.SUPPORT_TICKET_UPDATE,
                         "TICKET_REOPENED_AGENT",
                         ticket.getTitle()

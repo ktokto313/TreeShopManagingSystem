@@ -2,9 +2,9 @@
  * Author: DucLM
  * Created Date: 2026-05-29
  * Name: User Service
- * Description: Business logic for user CRUD, ban/unban, role validation, and DTO conversion; protects SYSTEM_ADMIN accounts.
- * Last Change Author: lmd100
- * Last Change Date: 2026-06-28
+ * Description: Add comment for Business Rule
+ * Last Change Author: Hung Dao
+ * Last Change Date: 2026-07-20
  */
 package swp391.group6.service;
 
@@ -31,6 +31,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    // BR-19: used to hash passwords on create/update.
     private final BCryptPasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository, RoleRepository roleRepository) {
@@ -52,6 +53,7 @@ public class UserService {
                 .map(this::convertToDTO);
     }
 
+    // BR-19: new user's password is BCrypt-hashed before persisting (passwordEncoder.encode).
     public UserDTO createUser(UserDTO userDTO) {
         validateUserForCreate(userDTO);
         User user = convertToEntity(userDTO);
@@ -78,6 +80,7 @@ public class UserService {
         }
     }
 
+    // BR-19: if a new password is supplied, it's BCrypt-hashed before saving.
     public UserDTO updateUser(long id, UserDTO userDTO) {
         if (userDTO == null) throw new IllegalArgumentException("User data is required");
 
@@ -95,6 +98,7 @@ public class UserService {
         return convertToDTO(userRepository.save(user));
     }
 
+    // BR-19: if a new password is supplied, it's BCrypt-hashed before saving.
     public UserDTO updateOwnProfile(long id, UserDTO userDTO) {
         if (userDTO == null) {
             throw new IllegalArgumentException("User data is required");
@@ -130,10 +134,12 @@ public class UserService {
         return true;
     }
 
+    // BR-55 (supporting): sets user.status to "banned"
     public UserDTO banUser(long id) {
         return updateUserStatus(id, false);
     }
 
+    // BR-55 (supporting): reverses a ban, restoring the "active" state
     public UserDTO unbanUser(long id) {
         return updateUserStatus(id, true);
     }
@@ -155,20 +161,20 @@ public class UserService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-    
+
     public List<UserDTO> searchUsersByRole(String roleName) {
         return userRepository.findByRole_Name(roleName).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-    
+
     public Optional<UserDTO> getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .filter(user -> !hasRole(user, PROTECTED_ROLE_NAME))
                 .map(this::convertToDTO);
     }
 
-    // Allow users to view their own profile regardless of role protection
+
     public Optional<UserDTO> getUserByEmailUnprotected(String email) {
         return userRepository.findByEmail(email)
                 .map(this::convertToDTO);
@@ -205,7 +211,7 @@ public class UserService {
         user.setStatus(dto.getStatus() != null ? dto.getStatus() : true);
 
         user.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
-        
+
         return user;
     }
 

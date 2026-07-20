@@ -2,9 +2,9 @@
  * Author: Hung Dao
  * Created Date: 2026-06-03
  * Name: ProfileController.java
- * Description: 
- * Last Change Author: lmd100
- * Last Change Date: 2026-06-27
+ * Description:
+ * Last Change Author: Hung Da0
+ * Last Change Date: 2026-07-20
  */
 package swp391.group6.controller;
 
@@ -63,6 +63,7 @@ public class ProfileController {
         }
     }
 
+    // Helper
     private ProfileResponse toProfileResponse(UserDTO user) {
         boolean hasPassword = user.getIsHasPassword();
 
@@ -75,6 +76,7 @@ public class ProfileController {
         );
     }
 
+    // BR-19: all user passwords must be encrypted using BCrypt
     @PostMapping("/change-password")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest req,

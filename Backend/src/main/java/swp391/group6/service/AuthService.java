@@ -1,13 +1,11 @@
 /*
- * Author: Hung Dao
- * Created Date: 2026-05-30
- * Name: AuthService.java
+ * Author: HungDLM
+ * Created Date: 2026-06-26
+ * Name: BlogService.java
  * Description:
- * Last Change Author: Hung Dao
- * Last Change Date: 2026-06-07
+ * Last Change Author: HungDLM
+ * Last Change Date: 2026-07-20
  */
-//6/7: Hung Dao: Add handler for user who create account via GoogleSSO try to log in normally
-//Add login rate limiting - block after 5 failed attempts in 5 min, escalating 30s block
 package swp391.group6.service;
 
 import swp391.group6.dto.LoginRequest;
@@ -26,15 +24,16 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class AuthService {
 
+    // BR-01: If a user inputs incorrect login details 5 times continuously,
+    // the system will temporarily lock their login action for 30s, time increases by 30s per locked time.
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final long ATTEMPT_WINDOW_MS = 5 * 60 * 1000L; // 5 minutes
     private static final long BASE_BLOCK_MS = 30 * 1000L;         // 30 seconds
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    // BR-19: passwords are hashed/verified using BCrypt via this encoder.
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-    // email -> attempt tracking, in-memory (same pattern as OtpService's ConcurrentHashMap)
     private final Map<String, LoginAttemptInfo> loginAttempts = new ConcurrentHashMap<>();
 
     public AuthService(UserRepository userRepository,
@@ -43,6 +42,9 @@ public class AuthService {
         this.roleRepository = roleRepository;
     }
 
+    // BR-01: If a user inputs incorrect login details 5 times continuously,
+    // the system will temporarily lock their login action for 30s, time increases by 30s per locked time.
+    // BR-19: password check uses passwordEncoder.matches against a BCrypt hash.
     public LoginResponse login(LoginRequest request, String clientIp) {
         String email = request.getEmail();
 
@@ -75,11 +77,15 @@ public class AuthService {
         return new LoginResponse(user.getEmail(), user.getFullName(), role);
     }
 
+    // BR-01: If a user inputs incorrect login details 5 times continuously,
+    // the system will temporarily lock their login action for 30s, time increases by 30s per locked time.
     public boolean isBlocked(String clientIp) {
         LoginAttemptInfo info = loginAttempts.get(clientIp);
         return info != null && info.blockedUntil > System.currentTimeMillis();
     }
 
+    // BR-01: If a user inputs incorrect login details 5 times continuously,
+    // the system will temporarily lock their login action for 30s, time increases by 30s per locked time.
     public long getRemainingBlockSeconds(String clientIp) {
         LoginAttemptInfo info = loginAttempts.get(clientIp);
         if (info == null) return 0;
@@ -87,6 +93,8 @@ public class AuthService {
         return remaining > 0 ? (remaining + 999) / 1000 : 0;
     }
 
+    // BR-01: If a user inputs incorrect login details 5 times continuously,
+    // the system will temporarily lock their login action for 30s, time increases by 30s per locked time.
     private void registerFailedAttempt(String clientIp) {
         long now = System.currentTimeMillis();
         loginAttempts.compute(clientIp, (key, info) -> {
@@ -107,6 +115,7 @@ public class AuthService {
 
     }
 
+    // BR-19: new user's password is stored via passwordEncoder.encode (BCrypt hash).
     public User register(RegisterRequest request) {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {

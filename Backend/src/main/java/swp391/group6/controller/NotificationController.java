@@ -4,13 +4,12 @@
  * Name: NotificationController.java
  * Description:
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-07-16
+ * Last Change Date: 2026-07-20
  */
 package swp391.group6.controller;
 
 import swp391.group6.model.Notification;
 import swp391.group6.repository.NotificationRepository;
-import swp391.group6.service.NotificationService;
 import swp391.group6.model.User;
 
 import org.springframework.http.ResponseEntity;
@@ -25,14 +24,12 @@ import java.util.Map;
 public class NotificationController {
 
     private final NotificationRepository notificationRepository;
-    private final NotificationService notificationService;
 
-    public NotificationController(NotificationRepository notificationRepository,
-                                  NotificationService notificationService) {
+    public NotificationController(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
-        this.notificationService = notificationService;
     }
 
+    // BR-77: a notification is sent to (and here, retrieved for) a specific user —
     @GetMapping
     public ResponseEntity<List<Notification>> getMyNotifications(@AuthenticationPrincipal User currentUser) {
         List<Notification> notifications =
@@ -40,12 +37,14 @@ public class NotificationController {
         return ResponseEntity.ok(notifications);
     }
 
+    // BR-78: each notification has a read/unread status
     @GetMapping("/unread-count")
     public ResponseEntity<Map<String, Long>> getUnreadCount(@AuthenticationPrincipal User currentUser) {
         long count = notificationRepository.countByRecipientUserIdAndIsReadFalse(currentUser.getId());
         return ResponseEntity.ok(Map.of("unreadCount", count));
     }
 
+    // BR-78: each notification has a read/unread status
     @PatchMapping("/{id}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
         Notification notification = notificationRepository.findById(id).orElse(null);
@@ -57,6 +56,7 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
+    // BR-78: each notification has a read/unread status
     @PatchMapping("/read-all")
     public ResponseEntity<Void> markAllAsRead(@AuthenticationPrincipal User currentUser) {
         List<Notification> notifications =
@@ -66,4 +66,4 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
-    }
+}
