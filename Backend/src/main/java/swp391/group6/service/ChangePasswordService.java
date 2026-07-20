@@ -2,9 +2,9 @@
  * Author: Hung Dao
  * Created Date: 2026-06-10
  * Name: ChangePasswordService.java
- * Description: 
+ * Description:
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-06-22
+ * Last Change Date: 2026-07-20
  */
 package swp391.group6.service;
 
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class ChangePasswordService {
 
     private final UserRepository userRepository;
+    // BR-19: all user passwords must be encrypted using BCrypt.
     private final BCryptPasswordEncoder passwordEncoder;
 
     public ChangePasswordService(UserRepository userRepository) {
@@ -28,6 +29,11 @@ public class ChangePasswordService {
     public enum Result { SUCCESS, NO_PASSWORD, WRONG_OLD_PASSWORD, INVALID_INPUT }
 
     //CHANGE PASSWORD
+
+    // BR-19: verifies the old password against its BCrypt hash (passwordEncoder.matches)
+    // and stores the new password re-hashed with BCrypt (passwordEncoder.encode) —
+    // plaintext is never persisted.
+    // NO_PASSWORD correctly blocks Google SSO accounts (no local password to change),
     public Result changePassword(String email, ChangePasswordRequest req) {
         if (req.getOldPassword() == null || req.getOldPassword().isBlank()
                 || req.getNewPassword() == null || req.getNewPassword().isBlank()) {
@@ -50,6 +56,10 @@ public class ChangePasswordService {
     }
 
     //RESET PASSWORD (forgot password)
+
+    // BR-19: the reset password is stored BCrypt-hashed (passwordEncoder.encode), never
+    // in plaintext. Also guards against resetting a Google SSO account's (nonexistent)
+    // password
     public boolean resetPassword(String email, String newPassword) {
 
         if (newPassword == null || newPassword.isBlank()) {

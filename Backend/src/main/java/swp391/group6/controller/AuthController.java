@@ -4,7 +4,7 @@
  * Name: AuthController.java
  * Description: Handles login and secure logout via JWT HTTP cookies using CookieUtil.
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-06-24
+ * Last Change Date: 2026-07-20
  */
 package swp391.group6.controller;
 
@@ -48,6 +48,8 @@ public class AuthController {
         this.changePasswordService = changePasswordService;
     }
 
+    // BR-01: If a user inputs incorrect login details 5 times continuously, the system will temporarily lock their action for 30s, time increases by 30s per locked time.
+    // BR-19: password comparison inside authService.login must be done against a BCrypt hash, and this endpoint must only be reachable over HTTPS (verify at the service/security-config level).
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request,
                                    HttpServletRequest httpRequest,
@@ -79,6 +81,7 @@ public class AuthController {
                 .body(loginResponse);
     }
 
+    // Support helper for BR-01: resolves the identity (client IP) that failed-attempt tracking and the 15-minute lockout are keyed on.
     private String resolveClientIp(HttpServletRequest request) {
         String forwarded = request.getHeader("X-Forwarded-For");
         if (forwarded != null && !forwarded.isBlank()) {
@@ -87,6 +90,7 @@ public class AuthController {
         return request.getRemoteAddr();
     }
 
+    // BR-19: the new password must ultimately be persisted BCrypt-hashed
     @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody RegisterRequest request) {
 
@@ -110,7 +114,6 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "OTP sent"));
     }
 
-
     @PostMapping("/register/verify-otp")
     public ResponseEntity<?> verifyRegisterOtp(@RequestBody OtpRequest request) {
         boolean valid = otpService.verify(
@@ -126,6 +129,7 @@ public class AuthController {
 
         return ResponseEntity.ok(Map.of("message", "OTP verified"));
     }
+
     @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@RequestBody GoogleAuthRequest request,
                                          HttpServletResponse response) {
@@ -147,7 +151,6 @@ public class AuthController {
     }
 
     //FORGOT PASSWORD
-
     @PostMapping("/forgot-password/send-otp")
     public ResponseEntity<?> sendResetOtp(@RequestBody OtpRequest request) {
         if (authService.isGoogleAccount(request.getEmail())) {
@@ -184,6 +187,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "OTP verified"));
     }
 
+    // BR-19: the new password must ultimately be persisted BCrypt-hashed
     @PostMapping("/forgot-password/reset")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
 

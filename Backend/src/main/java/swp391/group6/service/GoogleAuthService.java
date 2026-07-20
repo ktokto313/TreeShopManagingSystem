@@ -2,11 +2,10 @@
  * Author: Hung Dao
  * Created Date: 2026-06-07
  * Name: GoogleAuthService.java
- * Description: 
+ * Description:
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-06-07
+ * Last Change Date: 2026-07-20
  */
-//6/7: Hung Dao: Add Google Authorization Service for Google SSO, update for an alter flow
 package swp391.group6.service;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;

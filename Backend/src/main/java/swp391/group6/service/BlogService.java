@@ -4,7 +4,7 @@
  * Name: BlogService.java
  * Description:
  * Last Change Author: HungDLM
- * Last Change Date: 2026-07-15
+ * Last Change Date: 2026-07-20
  */
 package swp391.group6.service;
 
@@ -354,7 +354,7 @@ public class BlogService {
     // Notify the post's author when their blogs status got published/rejected
     private void notifyAuthor(BlogPost post, NotificationType type, String templateKey, Object... args) {
         User author = post.getAuthor();
-        notificationService.notifyUserByTemplate(author.getId(), author.getEmail(), type, templateKey, args);
+        notificationService.notifyUserByTemplate(author.getId(), type, templateKey, args);
     }
 
     private BlogResponse toResponse(BlogPost post, Long userId) {

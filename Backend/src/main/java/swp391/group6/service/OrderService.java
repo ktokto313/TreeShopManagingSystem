@@ -110,7 +110,6 @@ public class OrderService {
                 // Notify the newly assigned shipper.
                 notificationService.notifyUserByTemplate(
                         newShipper.getId(),
-                        newShipper.getEmail(),
                         NotificationType.DELIVERY_ASSIGNMENT,
                         "DELIVERY_ASSIGNMENT_SHIPPER",
                         existingOrder.getId()
@@ -168,7 +167,6 @@ public class OrderService {
             if (shipper != null) {
                 notificationService.notifyUserByTemplate(
                         shipper.getId(),
-                        shipper.getEmail(),
                         NotificationType.DELIVERY_ASSIGNMENT,
                         "DELIVERY_STARTED_SHIPPER",
                         order.getId()
@@ -196,7 +194,6 @@ public class OrderService {
         if (targetStatus == OrderStatus.ARRIVED) {
             notificationService.notifyUserByTemplate(
                     customer.getId(),
-                    customer.getEmail(),
                     NotificationType.DELIVERY_COMPLETED,
                     "ORDER_DELIVERED_CUSTOMER",
                     order.getId()
@@ -204,7 +201,6 @@ public class OrderService {
         } else {
             notificationService.notifyUserByTemplate(
                     customer.getId(),
-                    customer.getEmail(),
                     NotificationType.ORDER_STATUS_UPDATE,
                     "ORDER_STATUS_UPDATE_CUSTOMER",
                     order.getId(), targetStatus
