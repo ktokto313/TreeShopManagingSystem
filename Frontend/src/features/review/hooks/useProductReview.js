@@ -84,7 +84,13 @@ export const useProductReview = (productId, onSuccess) => {
 			setStarValue(null);
 			if (onSuccess) onSuccess();
 		} catch (error) {
-			setReviewValidationError(error.message || "Có lỗi xảy ra khi gửi đánh giá.");
+			let errorMsg = error.message;
+			if (errorMsg && errorMsg.includes("For input string")) {
+				errorMsg = "Dữ liệu gửi lên không hợp lệ. Vui lòng tải lại trang và thử lại.";
+			}
+			setReviewValidationError(
+				errorMsg || "Có lỗi xảy ra khi gửi đánh giá.",
+			);
 		} finally {
 			setIsReviewSubmitLoading(false);
 		}
