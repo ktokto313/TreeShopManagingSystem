@@ -1,13 +1,8 @@
 /*
- * Created By: MinhLTHE200133
- * Created At: 2026-06-23
- * Last Modified: 2026-07-03
- */
-/*
  * Author: minhlthe200133
  * Created Date: 2026-06-23
  * Name: WishlistController.java
- * Description: 
+ * Description:
  * Last Change Author: minhlthe200133
  * Last Change Date: 2026-06-23
  */

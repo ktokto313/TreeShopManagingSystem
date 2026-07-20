@@ -3,7 +3,6 @@
  * Created At: 2026-06-03
  * Last Modified: 2026-07-15
  */
-// Created by minhlthe200133
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { Badge } from "../../../components/ui/Badge";
 import { Button } from "../../../components/ui/Button";

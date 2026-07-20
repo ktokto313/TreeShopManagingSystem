@@ -1,13 +1,8 @@
 /*
- * Created By: MinhLTHE200133
- * Created At: 2026-05-30
- * Last Modified: 2026-07-11
- */
-/*
  * Author: minhlthe200133
  * Created Date: 2026-05-30
  * Name: ProductService.java
- * Description: 
+ * Description:
  * Last Change Author: Aiden
  * Last Change Date: 2026-06-25
  */

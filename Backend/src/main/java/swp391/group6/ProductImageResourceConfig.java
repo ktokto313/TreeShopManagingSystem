@@ -3,7 +3,7 @@
  * Created At: 2026-06-05
  * Last Modified: 2026-06-07
  */
-// Created by minhlthe200133
+
 package swp391.group6;
 
 import org.springframework.context.annotation.Configuration;
