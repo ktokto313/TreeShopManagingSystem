@@ -3,7 +3,7 @@
  * Created At: 2026-05-30
  * Last Modified: 2026-07-11
  */
-// Created by minhlthe200133
+
 package swp391.group6.dto;
 
 import java.math.BigDecimal;

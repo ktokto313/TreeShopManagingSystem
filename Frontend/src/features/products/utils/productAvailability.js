@@ -3,7 +3,6 @@
  * Created At: 2026-06-09
  * Last Modified: 2026-07-15
  */
-// Created by minhlthe200133
 export const LOW_STOCK_THRESHOLD = 10;
 
 export function isProductActive(status) {

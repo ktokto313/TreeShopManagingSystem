@@ -3,7 +3,6 @@
  * Created At: 2026-06-03
  * Last Modified: 2026-07-15
  */
-// Created by minhlthe200133
 import { Button } from "../../../components/ui/Button";
 import { formatCurrency, parseCatalogImages } from "../../catalog/utils/catalogUtils";
 import ProductImageFrame from "./ProductImageFrame";

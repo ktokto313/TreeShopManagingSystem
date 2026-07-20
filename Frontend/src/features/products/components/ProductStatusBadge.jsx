@@ -3,7 +3,6 @@
  * Created At: 2026-06-03
  * Last Modified: 2026-07-15
  */
-// Created by minhlthe200133
 import { Badge } from "../../../components/ui/Badge";
 import { getProductAvailability } from "../utils/productAvailability";
 

@@ -3,7 +3,6 @@
  * Created At: 2026-06-05
  * Last Modified: 2026-06-07
  */
-// Created by minhlthe200133
 import { parseCatalogImages } from '../../catalog/utils/catalogUtils'
 
 const localImageModules = import.meta.glob('../images/*.{jpg,jpeg,png,webp,gif}', {
