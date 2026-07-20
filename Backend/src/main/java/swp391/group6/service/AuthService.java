@@ -51,22 +51,22 @@ public class AuthService {
         User user = userRepository.findByEmail(email).orElse(null);
 
         if (user == null) {
-            registerFailedAttempt(clientIp);
+            recordFailedAttempt(clientIp);
             return null;
         }
 
         if (user.getPassword() == null) {
-            registerFailedAttempt(clientIp);
+            recordFailedAttempt(clientIp);
             return null;
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            registerFailedAttempt(clientIp);
+            recordFailedAttempt(clientIp);
             return null;
         }
 
         if (!user.isStatus()) {
-            registerFailedAttempt(clientIp);
+            recordFailedAttempt(clientIp);
             return null;
         }
 
@@ -95,7 +95,7 @@ public class AuthService {
 
     // BR-01: If a user inputs incorrect login details 5 times continuously,
     // the system will temporarily lock their login action for 30s, time increases by 30s per locked time.
-    private void registerFailedAttempt(String clientIp) {
+    private void recordFailedAttempt(String clientIp) {
         long now = System.currentTimeMillis();
         loginAttempts.compute(clientIp, (key, info) -> {
             if (info == null || now - info.windowStart > ATTEMPT_WINDOW_MS) {
