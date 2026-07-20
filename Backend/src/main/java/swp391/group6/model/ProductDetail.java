@@ -1,9 +1,4 @@
 /*
- * Created By: MinhLTHE200133
- * Created At: 2026-05-29
- * Last Modified: 2026-07-11
- */
-/*
  * Author: ktokto313
  * Created Date: 2026-05-29
  * Name: ProductDetail.java
