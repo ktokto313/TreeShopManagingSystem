@@ -75,7 +75,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 				<Button
 					className="hover:bg-green-400 w-full"
 					onClick={() => {
-						executeFetchAllTickets(ticketState, ticketPriority, ticketSort);
+						executeFetchAllTickets(ticketState, ticketPriority, ticketSort, dashboardState.currentPage);
 					}}
 				>
 					<div
@@ -115,6 +115,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 								const isSuccess = await handleCreateTicketSubmit(e);
 
 								if (isSuccess) {
+									executeFetchAllTickets(ticketState, ticketPriority, ticketSort, dashboardState.currentPage);
 									close();
 								}
 							}}
@@ -174,8 +175,9 @@ const StatusFilter = ({dashboardState, className}) => {
 
 			<div className="flex flex-wrap gap-1">
 				{getSelectOption("status").map(
-					s => (
+					(s, index) => (
 						<Button 
+						key={`status-filter-${s.value}-${index}`}
 						onClick={() => {dashboardState.handleFilterChange("status", s.value)}}
 
 						className={cn(
@@ -246,6 +248,7 @@ export const TicketDashboardFilterBtn = ({ dashboardState, modalButtonClasses, r
 										ticketState,
 										ticketPriority,
 										ticketSort,
+										dashboardState.currentPage
 									);
 									setIsSelectAutoFilterSort(true);
 									close(); // Closes the parent
@@ -260,7 +263,7 @@ export const TicketDashboardFilterBtn = ({ dashboardState, modalButtonClasses, r
 			<Button
 				className={cn("hover:bg-green-600! w-full", reloadButtonClasses)}
 				onClick={() => {
-					executeFetchAllTickets(ticketState, ticketPriority, ticketSort);
+					executeFetchAllTickets(ticketState, ticketPriority, ticketSort, dashboardState.currentPage);
 				}}
 			>
 				<div className={cn("flex flex-row items-center justify-center gap-2", reloadButtonContentClasses)}>

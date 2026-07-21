@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const useFilterAndSortTickets = (executeFetchAllTickets) => {
+const useFilterAndSortTickets = (executeFetchAllTickets, setCurrentPage) => {
 	const [ticketState, setTicketState] = useState("");
 	const [ticketPriority, setTicketPriority] = useState("");
 	const [ticketSort, setTicketSort] = useState("");
@@ -12,11 +12,16 @@ const useFilterAndSortTickets = (executeFetchAllTickets) => {
 		if (ticketParam === "priority") setTicketPriority(value);
 		if (ticketParam === "sort") setTicketSort(value);
 
+		if (setCurrentPage) {
+			setCurrentPage(0);
+		}
+
 		if(isSelectAutoFilterSort){
 			executeFetchAllTickets(
 				ticketParam === "status" ? value : ticketState,
 				ticketParam === "priority" ? value : ticketPriority,
 				ticketParam === "sort" ? value : ticketSort,
+				0
 			);
 		}
 	};

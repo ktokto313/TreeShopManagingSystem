@@ -4,7 +4,7 @@ import { requestJson } from '../../../utils/api';
 export function useHomepageProducts() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [title, setTitle] = useState('Sản Phẩm Bán Chạy Mọi Thời Đại'); // Default fallback title
+    const [title, setTitle] = useState('Sản Phẩm Bán Chạy Mọi Thời Đại'); 
     const [error, setError] = useState(null);
 
     const loadProducts = useCallback(async () => {

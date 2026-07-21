@@ -10,7 +10,7 @@ export function useHomepageTestimonials() {
         setLoading(true);
         setError(null);
         try {
-            const data = await requestJson('/api/orders/reviews/curated');
+            const data = await requestJson('/api/reviews/curated');
             setTestimonials(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error('Failed to load testimonials', err);

@@ -7,7 +7,7 @@ const TicketManagement = () => {
 	const dashboardState = useTicketDashboard();
 
 	return (
-		<div className="flex flex-row gap-2 w-full px-4 mt-5 relative mb-5">
+		<div className="flex flex-row gap-2 w-full px-4 mt-5 relative mb-5 max-w-450 mx-auto">
 			<TicketDashboardFilterBoard
 				classNames="hidden md:flex flex-2 max-w-60 top-20 sticky"
 				dashboardState={dashboardState}

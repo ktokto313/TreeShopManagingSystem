@@ -47,3 +47,8 @@
 				return "Chưa Xác Định";
 		}
 	};
+
+	export const getTicketPriorityStyles = (priority) => {
+		if (!priority) return;
+		return "border-red-500 border text-red-500";
+	};

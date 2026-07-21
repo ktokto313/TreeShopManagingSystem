@@ -87,7 +87,7 @@ const PolicyList = ({ state }) => {
 				))}
 			</div>
 
-			<div className="w-full gap-2.5 grid grid-cols-1 lg:grid-cols-2">
+			<div className="w-full gap-2.5 sm:gap-4 grid grid-cols-1 lg:grid-cols-2">
 				{loading ? (
 					<div className="col-span-full">
 						<LoadingScreen className="h-100"></LoadingScreen>

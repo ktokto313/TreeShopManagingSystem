@@ -325,8 +325,8 @@ export default function RecommendationSection() {
 	}
 
 	return (
-		<section className="bg-gradient-to-b from-green-50 via-white to-green-100/80">
-			<Card className="mx-auto max-w-7xl border-green-200 bg-white/90 p-6 shadow-lg shadow-green-900/5">
+		<section>
+			<Card className="border-green-200 bg-white/90 p-6 shadow-lg shadow-green-900/5">
 				<div className="mb-6 space-y-2">
 					<p className="text-xs font-semibold uppercase tracking-[0.3em] text-green-700">
 						Gợi ý mua hàng

@@ -19,7 +19,7 @@ export default function TestimonialSlider() {
     const handleToggleCurate = async (reviewId) => {
         if (!isManager) return;
         try {
-            await requestJson(`/api/orders/reviews/${reviewId}/curate`, { method: 'PUT' });
+            await requestJson(`/api/reviews/${reviewId}/curate`, { method: 'PUT' });
             reload();
         } catch (error) {
             console.error('Failed to toggle curate status', error);
@@ -41,7 +41,7 @@ export default function TestimonialSlider() {
         return () => clearInterval(timer);
     }, [testimonials.length, nextSlide]);
 
-    if (!loading && !isManager && testimonials.length < 5) {
+    if (!loading && !isManager && testimonials.length === 0) {
         return null;
     }   
 
@@ -72,7 +72,7 @@ export default function TestimonialSlider() {
                         >
                             <button 
                                 onClick={prevSlide}
-                                className="absolute left-0 z-10 p-3 bg-white text-green-700 rounded-full shadow-lg hover:bg-green-50 hover:scale-110 transition-all focus:outline-none"
+                                className="absolute left-0 z-10 p-3 bg-white text-green-700 rounded-full shadow-lg hover:bg-green-50 cursor-pointer transition-all focus:outline-none"
                             >
                                 <FiChevronLeft size={24} />
                             </button>
@@ -131,7 +131,7 @@ export default function TestimonialSlider() {
 
                             <button 
                                 onClick={nextSlide}
-                                className="absolute right-0 z-10 p-3 bg-white text-green-700 rounded-full shadow-lg hover:bg-green-50 hover:scale-110 transition-all focus:outline-none"
+                                className="absolute right-0 z-10 p-3 bg-white text-green-700 rounded-full shadow-lg hover:bg-green-50 cursor-pointer transition-all focus:outline-none"
                             >
                                 <FiChevronRight size={24} />
                             </button>

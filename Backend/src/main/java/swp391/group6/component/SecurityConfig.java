@@ -45,10 +45,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/debug/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/checkout/shipping-fee").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/policy/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/orders/products/*/reviews").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/orders/reviews/curated").permitAll()
-                        //TODO: funny security vulnerability
-                        .requestMatchers(HttpMethod.GET, "/api/statistic/products").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/product/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/curated").permitAll()
+                        .requestMatchers("/api/statistic/**").hasAnyRole("SYSTEM_ADMIN", "MANAGER")
                         .anyRequest().authenticated()
                     )
                 .exceptionHandling(ex -> ex
