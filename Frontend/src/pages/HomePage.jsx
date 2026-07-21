@@ -3,7 +3,7 @@ import { Container } from "../components/global/Container";
 import { cn } from "../utils/cn";
 import bg from "../assets/images/home-bg.jpg";
 import { MdOutlineTipsAndUpdates } from "react-icons/md";
-import RecommendationSection from "../features/recommendations/components/RecommendationSection";
+
 import ValuePropositions from "../features/homepage/components/ValuePropositions";
 import CategoriesGrid from "../features/homepage/components/CategoriesGrid";
 import FeaturedProducts from "../features/homepage/components/FeaturedProducts";
@@ -102,7 +102,7 @@ export default function HomePage() {
 				</Container>
 			</section>
 
-			<RecommendationSection />
+
 
 			<section className="bg-green-400">
 				<Container className="py-12">

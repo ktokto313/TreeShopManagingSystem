@@ -28,6 +28,7 @@ import ProductImageFrame from "../features/products/components/ProductImageFrame
 import { getProductAvailability, isProductActive } from "../features/products/utils/productAvailability";
 import { resolveProductImages } from "../features/products/utils/productImageResolver";
 import ReviewSection from "../features/review/components/ReviewSection";
+import RecommendationSection from "../features/recommendations/components/RecommendationSection";
 import { addWishlistProduct, checkWishlistProduct } from "../features/wishlist/wishlistApi";
 
 function summarizeDescription(value) {
@@ -622,6 +623,10 @@ export default function ProductDetailPage() {
 								</div>
 							</Card>
 						) : null}
+						
+						<div className="mt-8">
+							<RecommendationSection />
+						</div>
 
 						<Card className="mt-8 space-y-5 border-green-200 bg-white/90 p-6 shadow-lg shadow-green-900/5">
 							<SectionTitle eyebrow="Đánh giá sản phẩm" title="Trải nghiệm từ khách hàng" />
