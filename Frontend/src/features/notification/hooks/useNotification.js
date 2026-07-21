@@ -13,7 +13,8 @@ export default function useNotifications() {
             if (!res.ok) return;
             const data = await res.json();
             setUnreadCount(data.unreadCount ?? 0);
-        } catch {
+        } catch (err) {
+            console.log(err);
         }
     }, []);
 
@@ -26,7 +27,8 @@ export default function useNotifications() {
             if (!res.ok) return;
             const data = await res.json();
             setNotifications(data);
-        } catch {
+        } catch (err) {
+            console.log(err);
         } finally {
             setIsLoading(false);
         }
@@ -48,7 +50,8 @@ export default function useNotifications() {
                 method: "PATCH",
                 credentials: "include",
             });
-        } catch {
+        } catch (err) {
+            console.log(err);
         }
     }, []);
 
@@ -60,7 +63,8 @@ export default function useNotifications() {
                 method: "PATCH",
                 credentials: "include",
             });
-        } catch {
+        } catch (err) {
+            console.log(err);
         }
     }, []);
 
