@@ -75,10 +75,7 @@ export default function ProductForm({
 			/>
 			<div className="space-y-3">
 				<div className="space-y-1">
-					<label className="block text-sm font-medium text-[var(--text-h)]">Nội dung markdown</label>
-					<p className="text-sm text-[var(--text)]">
-						Dùng cho đoạn văn dài, tiêu đề, danh sách và ảnh xen giữa các đoạn mô tả.
-					</p>
+					<label className="block text-sm font-medium text-[var(--text-h)]">Nội dung chi tiết cho sản phẩm</label>
 				</div>
 
 				<div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">

@@ -15,48 +15,48 @@ const linkClass = ({ isActive }) =>
 
 const navItemsByRole = {
   anonymous: [
-    { label: 'Home', to: '/' },
-    { label: 'Catalog', to: '/catalog' },
-    { label: 'Login', to: '/login' },
-    { label: 'Register', to: '/register' },
+    { label: 'Trang chủ', to: '/' },
+    { label: 'Cửa hàng', to: '/catalog' },
+    { label: 'Đăng nhập', to: '/login' },
+    { label: 'Đăng ký', to: '/register' },
     { label: 'Blog', to: '/blogs' },
   ],
   CUSTOMER: [
-    { label: 'Home', to: '/' },
-    { label: 'Catalog', to: '/catalog' },
+    { label: 'Trang chủ', to: '/' },
+    { label: 'Cửa hàng', to: '/catalog' },
     { label: 'Yêu thích', to: '/wishlist' },
-    { label: 'Profile', to: '/profile' },
-    { label: 'Orders', to: '/orders' },
-    { label: 'Tickets', to: '/tickets/' },
+    { label: 'Tài khoản', to: '/profile' },
+    { label: 'Đơn hàng', to: '/orders' },
+    { label: 'Khiếu nại', to: '/tickets/' },
     { label: 'Blog', to: '/blogs' },
   ],
   MANAGER: [
-    { label: 'Home', to: '/' },
-    { label: 'Catalog', to: '/catalog' },
-    { label: 'Manage', to: '/manage' },
-    { label: 'Orders', to: '/orders' },
-    { label: 'Statistics', to: '/statistic' },
-    { label: 'Profile', to: '/profile' },
+    { label: 'Trang chủ', to: '/' },
+    { label: 'Cửa hàng', to: '/catalog' },
+    { label: 'Quản lý sản phẩm', to: '/manage' },
+    { label: 'Đơn hàng', to: '/orders' },
+    { label: 'Thống kê', to: '/statistic' },
+    { label: 'Tài khoản', to: '/profile' },
     { label: 'Blog', to: '/blogs' },
   ],
   SUPPORT_AGENT: [
-    { label: 'Home', to: '/' },
-    { label: 'Tickets', to: '/tickets/' },
-    { label: 'Orders', to: '/orders' },
-    { label: 'Profile', to: '/profile' },
+    { label: 'Trang chủ', to: '/' },
+    { label: 'Khiếu nại', to: '/tickets/' },
+    { label: 'Đơn hàng', to: '/orders' },
+    { label: 'Tài khoản', to: '/profile' },
   ],
   SHIPPER: [
-    { label: 'Home', to: '/' },
-    { label: 'Orders', to: '/orders' },
-    { label: 'Profile', to: '/profile' },
+    { label: 'Trang chủ', to: '/' },
+    { label: 'Đơn hàng', to: '/orders' },
+    { label: 'Tài khoản', to: '/profile' },
   ],
   SYSTEM_ADMIN: [
-    { label: 'Home', to: '/' },
-    { label: 'Catalog', to: '/catalog' },
-    { label: 'User Management', to: '/admin/users' },
-    { label: 'Manage', to: '/manage' },
-    { label: 'Orders', to: '/orders' },
-    { label: 'Profile', to: '/profile' },
+    { label: 'Trang chủ', to: '/' },
+    { label: 'Cửa hàng', to: '/catalog' },
+    { label: 'Quản lý người dùng', to: '/admin/users' },
+    { label: 'Quản lý sản phẩm', to: '/manage' },
+    { label: 'Đơn hàng', to: '/orders' },
+    { label: 'Tài khoản', to: '/profile' },
   ],
 };
 
@@ -177,7 +177,7 @@ export function Header({ className = '', ...props }) {
                         onClick={logout}
                         className="cursor-pointer text-2xl font-medium px-3 py-1.5 rounded-lg border-2 border-stone-400 text-stone-600 hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
                     >
-                      Logout
+                      Đăng xuất
                     </button>
                   </div>
               )}
