@@ -1,10 +1,10 @@
-﻿import { useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import {Container} from '../components/global/Container'
-import {Button} from '../components/ui/Button'
-import {Card} from '../components/ui/Card'
-import {Input} from '../components/ui/Input'
-import {Select} from '../components/ui/Select'
+import { Container } from '../components/global/Container'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { Input } from '../components/ui/Input'
+import { Select } from '../components/ui/Select'
 import { AuthContext } from '../context/AuthContext'
 import CatalogProductCard from '../features/catalog/components/CatalogProductCard'
 import { addCartItem } from '../features/cart/cartApi'
@@ -24,6 +24,8 @@ const emptyFilters = { //criteria for filter
   status: '',
   minPrice: '',
   maxPrice: '',
+  careDifficulty: '',
+  fengShuiElement: '',
   sort: 'latest',
 }
 
@@ -66,12 +68,20 @@ export default function CatalogPage() {
     ...emptyFilters,
     categoryId: routeCategoryId ?? '',
   }))
+
   const [showFilters, setShowFilters] = useState(true)
   const [notice, setNotice] = useState('')
   const [addingProductId, setAddingProductId] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [wishlistIds, setWishlistIds] = useState(new Set())
   const itemsPerPage = 12
+
+  useEffect(() => {
+    if (routeCategoryId !== undefined) {
+      setFilters(prev => ({ ...prev, categoryId: routeCategoryId }))
+      setCurrentPage(1)
+    }
+  }, [routeCategoryId])
 
   function handleAuthError(error) {
     if (error?.status !== 401) {
@@ -300,7 +310,7 @@ export default function CatalogPage() {
       setNotice(error.message)
     }
   }
-  
+
   const displayStart = visibleProducts.length === 0 ? 0 : (effectiveCurrentPage - 1) * itemsPerPage + 1
   const displayEnd = Math.min(effectiveCurrentPage * itemsPerPage, visibleProducts.length)
 
@@ -385,6 +395,24 @@ export default function CatalogPage() {
                   />
                 </div>
 
+                <div className="rounded-2xl border border-dashed border-green-200 bg-green-50/60 p-4 space-y-4">
+                <div className="space-y-1">
+                    <h3 className="text-sm font-semibold text-green-800">Lọc theo nhu cầu chăm</h3>
+                </div>
+                  <Input
+                    label="Độ khó chăm"
+                    value={filters.careDifficulty}
+                    placeholder="Ví dụ: Dễ"
+                    onChange={(event) => updateFilter('careDifficulty', event.target.value)}
+                  />
+                  <Input
+                    label="Phong thủy"
+                    value={filters.fengShuiElement}
+                    placeholder="Ví dụ: Mộc"
+                    onChange={(event) => updateFilter('fengShuiElement', event.target.value)}
+                  />
+                </div>
+
                 <div className="flex flex-wrap gap-2">
                   <Button className="flex-1 hover:bg-green-400" onClick={clearFilters}>
                     Xoá lọc
@@ -406,7 +434,7 @@ export default function CatalogPage() {
                 <div className="flex flex-wrap gap-2">
                   {categoryCounts.map((category) => (
                     <Button
-                      className={cn("hover:bg-green-400", {"bg-surface border-green-400 border text-green-600 hover:bg-green-200/50": (String(filters.categoryId) !== String(category.id))})}
+                      className={cn("hover:bg-green-400", { "bg-surface border-green-400 border text-green-600 hover:bg-green-200/50": (String(filters.categoryId) !== String(category.id)) })}
                       key={category.id || 'all'}
                       onClick={() =>
                         selectCategory(category.id ?? '')
@@ -451,7 +479,7 @@ export default function CatalogPage() {
                 <div className="space-y-1">
                   <h2 className="text-2xl font-semibold text-green-800">Danh sách sản phẩm</h2>
                   <p className="text-sm text-green-800">
-                    Hiển thị {displayStart}-{displayEnd} trên {visibleProducts.length} sản phẩm phù hợp
+                    Hiển thị {displayStart}-{displayEnd} trên {visibleProducts.length} sản phẩm
                   </p>
                 </div>
 
@@ -513,7 +541,7 @@ export default function CatalogPage() {
                       </Button>
                     ))}
                     <Button
-                    
+
                       size="sm"
                       disabled={effectiveCurrentPage === totalPages}
                       onClick={() => setCurrentPage((value) => Math.min(totalPages, value + 1))}

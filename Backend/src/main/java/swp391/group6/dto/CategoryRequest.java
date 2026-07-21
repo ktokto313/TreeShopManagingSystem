@@ -1,4 +1,9 @@
-// Created by minhlthe200133
+/*
+ * Created By: MinhLTHE200133
+ * Created At: 2026-05-30
+ * Last Modified: 2026-06-07
+ */
+
 package swp391.group6.dto;
 
 public class CategoryRequest {

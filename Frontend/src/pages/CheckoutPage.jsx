@@ -1,24 +1,28 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Container } from '../components/global/Container'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
 import { AuthContext } from '../context/AuthContext'
-import { fetchCart, submitCheckout } from '../features/cart/cartApi'
+import { fetchCart, submitCheckout, fetchShippingFee } from '../features/cart/cartApi'
 import { formatCurrency } from '../features/catalog/utils/catalogUtils'
+import { SHIPPING_PROVINCES, getDistrictsByProvince } from '../features/cart/shippingLocations'
+import { Select } from '../components/ui/Select'
 
-const SHIPPING_FEE = 30000
+const DEFAULT_SHIPPING_FEE = 30000
+const PRODUCT_WEIGHT_GRAMS = 500
 
 const initialForm = {
   fullName: '',
   email: '',
   phone: '',
-  province: '',
+  province: 'Hà Nội',
   district: '',
   ward: '',
   address: '',
   deliveryNote: '',
+  weightGrams: 0,
 }
 
 export default function CheckoutPage() {
@@ -34,6 +38,9 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [shippingFee, setShippingFee] = useState(DEFAULT_SHIPPING_FEE)
+  const [calculatingShipping, setCalculatingShipping] = useState(false)
+  const districtOptions = useMemo(() => getDistrictsByProvince(form.province), [form.province])
 
   async function loadCart() {
     setError('')
@@ -61,7 +68,59 @@ export default function CheckoutPage() {
 
   const items = cart?.items || []
   const subtotal = Number(cart?.subtotal || 0)
-  const total = items.length ? subtotal + SHIPPING_FEE : 0
+  const totalItemQuantity = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)
+  const totalOrderValue = subtotal
+  const total = useMemo(
+    () => (items.length ? subtotal + shippingFee : 0),
+    [items.length, shippingFee, subtotal],
+  )
+  const weightGrams = useMemo(
+    () => items.length * PRODUCT_WEIGHT_GRAMS,
+    [items.length],
+  )
+  const shippingFeeAmount = items.length ? shippingFee : 0
+
+  useEffect(() => {
+    if (!form.province) {
+      return
+    }
+    const hasValidDistrict = Boolean(form.district)
+    if (!hasValidDistrict) {
+      setForm((current) => ({ ...current, district: '' }))
+      setShippingFee(DEFAULT_SHIPPING_FEE)
+      return
+    }
+    let cancelled = false
+    let timeoutId
+    setCalculatingShipping(true)
+    timeoutId = window.setTimeout(() => {
+      void fetchShippingFee({
+          province: form.province,
+          district: form.district,
+          totalOrderValue,
+          itemCount: totalItemQuantity,
+        })
+        .then((data) => {
+          if (cancelled) return
+          if (data && typeof data.shippingFee === 'number') {
+            setShippingFee(data.shippingFee)
+          } else {
+            setShippingFee(DEFAULT_SHIPPING_FEE)
+          }
+        })
+        .catch(() => {
+          if (cancelled) return
+          setShippingFee(DEFAULT_SHIPPING_FEE)
+        })
+        .finally(() => {
+          if (!cancelled) setCalculatingShipping(false)
+        })
+    }, 300)
+    return () => {
+      cancelled = true
+      window.clearTimeout(timeoutId)
+    }
+  }, [form.province, form.district, totalOrderValue, totalItemQuantity])
 
   function updateField(name, value) {
     setForm((current) => ({ ...current, [name]: value }))
@@ -73,10 +132,7 @@ export default function CheckoutPage() {
   }
 
   function handlePhoneInput(event) {
-    const raw = event.target.value.replace(/\D/g, '')
-    if (raw.length <= 10) {
-      updateField('phone', raw)
-    }
+    updateField('phone', event.target.value.replace(/\D/g, ''))
   }
 
   function handleAddressOnlyFields(event, fieldName) {
@@ -99,7 +155,12 @@ export default function CheckoutPage() {
     setSubmitting(true)
     setError('')
     try {
-      const response = await submitCheckout(form)
+      const response = await submitCheckout({
+        ...form,
+        weightGrams,
+        totalOrderValue,
+        itemCount: totalItemQuantity,
+      })
       window.sessionStorage.setItem(`checkout:${response.orderId}`, JSON.stringify(response))
       navigate(`/checkout/success/${response.orderId}`, { state: { checkout: response } })
     } catch (err) {
@@ -153,8 +214,19 @@ export default function CheckoutPage() {
                   <Input label="Họ và tên*" value={form.fullName} onChange={(event) => updateField('fullName', event.target.value)} />
                   <Input label="Email*" type="email" value={form.email} onChange={(event) => updateField('email', event.target.value)} />
                   <Input label="Số điện thoại*" type="tel" inputMode="numeric" pattern="[0-9]*" value={form.phone} onChange={handlePhoneInput} />
-                  <Input label="Tỉnh/Thành phố*" value={form.province} onChange={(event) => handleAddressOnlyFields(event, 'province')} />
-                  <Input label="Quận/Huyện*" value={form.district} onChange={(event) => handleAddressOnlyFields(event, 'district')} />
+                  <Select
+                    label="Tỉnh/Thành phố*"
+                    options={SHIPPING_PROVINCES.map((province) => ({ value: province.value, label: province.label }))}
+                    value={form.province}
+                    onChange={(event) => updateField('province', event.target.value)}
+                  />
+                  <Select
+                    label="Quận/Huyện*"
+                    options={districtOptions.map((district) => ({ value: district.value, label: district.label }))}
+                    value={form.district}
+                    onChange={(event) => updateField('district', event.target.value)}
+                    disabled={!form.province}
+                  />
                   <Input label="Phường/Xã*" value={form.ward} onChange={(event) => handleAddressOnlyFields(event, 'ward')} />
                 </div>
                 <Input label="Địa chỉ*" value={form.address} onChange={(event) => updateField('address', event.target.value)} />
@@ -174,7 +246,7 @@ export default function CheckoutPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between"><span>Thành tiền</span><span>{formatCurrency(subtotal)}</span></div>
                 <div className="flex justify-between"><span>Giảm giá</span><span>{formatCurrency(0)}</span></div>
-                <div className="flex justify-between"><span>Phí vận chuyển</span><span>{items.length ? formatCurrency(SHIPPING_FEE) : formatCurrency(0)}</span></div>
+                <div className="flex justify-between"><span>Phí vận chuyển</span><span>{calculatingShipping ? 'Đang cập nhật...' : formatCurrency(shippingFeeAmount)}</span></div>
                 <div className="border-t border-[var(--border)] pt-3 text-base font-semibold text-[var(--text-h)]">
                   <div className="flex justify-between"><span>Tổng cộng</span><span>{formatCurrency(total)}</span></div>
                 </div>

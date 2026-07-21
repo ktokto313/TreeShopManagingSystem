@@ -27,7 +27,7 @@ CREATE TABLE role (
 -- ============================================================
 
 CREATE TABLE users (
-   id          BIGSERIAL PRIMARY KEY,
+   idBIGSERIAL PRIMARY KEY,
    role_id     BIGINT NOT NULL DEFAULT 1 REFERENCES role(id),
    email       VARCHAR(150) NOT NULL UNIQUE,
    password    VARCHAR(255),
@@ -43,7 +43,7 @@ CREATE INDEX idx_users_role_id ON users(role_id);
 -- ============================================================
 
 CREATE TABLE categories (
-        id          BIGSERIAL PRIMARY KEY,
+        idBIGSERIAL PRIMARY KEY,
         name        VARCHAR(100) NOT NULL UNIQUE,
         description TEXT,
         parent_id   BIGINT REFERENCES categories(id) ON DELETE SET NULL
@@ -52,7 +52,7 @@ CREATE TABLE categories (
 -- ============================================================
 
 CREATE TABLE products (
-      id          BIGSERIAL PRIMARY KEY,
+      idBIGSERIAL PRIMARY KEY,
       category_id BIGINT REFERENCES categories(id) ON DELETE SET NULL,
       name        VARCHAR(200) NOT NULL,
       price       DECIMAL(15,2) NOT NULL CHECK (price >= 0),
@@ -67,17 +67,23 @@ CREATE INDEX idx_products_sku      ON products(sku);
 -- ============================================================
 
 CREATE TABLE product_details (
-   id              BIGSERIAL PRIMARY KEY,
+   id    BIGSERIAL PRIMARY KEY,
    product_id      BIGINT NOT NULL UNIQUE REFERENCES products(id) ON DELETE CASCADE,
    description     TEXT,
-   content         TEXT,
+   contentTEXT,
    care_guide      TEXT,
    sunlight_level  VARCHAR(50),
    water_freq      VARCHAR(50),
    difficulty      VARCHAR(50),
    feng_shui_element VARCHAR(50),
-   images           JSON
+   images            JSON
 );
+
+ALTER TABLE product_details ADD COLUMN IF NOT EXISTS care_guide TEXT;
+ALTER TABLE product_details ADD COLUMN IF NOT EXISTS sunlight_level TEXT;
+ALTER TABLE product_details ADD COLUMN IF NOT EXISTS water_freq TEXT;
+ALTER TABLE product_details ADD COLUMN IF NOT EXISTS difficulty TEXT;
+ALTER TABLE product_details ADD COLUMN IF NOT EXISTS feng_shui_element TEXT;
 
 -- ============================================================
 
@@ -111,7 +117,7 @@ PRIMARY KEY (order_id, product_id)
 -- ============================================================
 
 CREATE TABLE shopping_carts (
-  id            BIGSERIAL PRIMARY KEY,
+  idBIGSERIAL PRIMARY KEY,
   customer_id BIGINT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -131,15 +137,15 @@ CREATE TABLE wishlist_items (
 -- ============================================================
 
 CREATE TABLE reviews (
-     id         BIGSERIAL PRIMARY KEY,
-     order_id    BIGINT NOT NULL REFERENCES orders(id),
-     product_id  BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-     customer_id BIGINT NOT NULL REFERENCES users(id),
-     rating      SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
-     comment     TEXT,
-     created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-     is_curated  BOOLEAN NOT NULL DEFAULT FALSE,
-     is_hidden   BOOLEAN NOT NULL DEFAULT FALSE
+   id          BIGSERIAL PRIMARY KEY,
+   order_id    BIGINT NOT NULL REFERENCES orders(id) ,
+   product_id BIGINT NOT NULL REFERENCES products(id)ON DELETE CASCADE,
+   customer_id BIGINT NOT NULL REFERENCES users(id),
+   rating      SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+   comment     TEXT,
+   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   is_curated  BOOLEAN NOT NULL DEFAULT FALSE,
+   is_hidden   BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE INDEX idx_reviews_order    ON reviews(order_id);
@@ -180,83 +186,82 @@ CREATE INDEX idx_comments_ticket ON comments(ticket_id);
 -- ============================================================
 
 CREATE TABLE policies (
-      id        BIGSERIAL PRIMARY KEY,
-      title       VARCHAR(300) NOT NULL,
-      description TEXT NOT NULL,
-      status      VARCHAR(50) NOT NULL DEFAULT 'DRAFT',
-      updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+   id          BIGSERIAL PRIMARY KEY,
+   title       VARCHAR(300) NOT NULL,
+   description TEXT NOT NULL,
+   status      VARCHAR(50) NOT NULL DEFAULT 'DRAFT',
+   updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 INSERT INTO policies (title, description, status) VALUES
-        ('Chính sách Đổi trả & Hoàn tiền', '## 1. Điều kiện đổi trả
-|- Cây bị dập nát, héo úa, gãy cành hoặc chết trong quá trình vận chuyển.
-|- Giao sai loại cây, sai kích thước hoặc thiếu phụ kiện so với đơn đặt hàng.
-|- Khách hàng cần thông báo và gửi hình ảnh/video tình trạng cây trong vòng **3 ngày** kể từ khi nhận hàng.
+('Chính sách Đổi trả & Hoàn tiền', '## 1. Điều kiện đổi trả
+- Cây bị dập nát, héo úa, gãy cành hoặc chết trong quá trình vận chuyển.
+- Giao sai loại cây, sai kích thước hoặc thiếu phụ kiện so với đơn đặt hàng.
+- Khách hàng cần thông báo và gửi hình ảnh/video tình trạng cây trong vòng **3 ngày** kể từ khi nhận hàng.
 
 ## 2. Các trường hợp không hỗ trợ đổi trả
-|- Cây chết hoặc héo úa do khách hàng chăm sóc sai cách (tưới quá nhiều nước, để sai vị trí thiếu sáng/quá nắng,...).
-|- Sản phẩm phụ kiện đã qua sử dụng hoặc không còn nguyên vẹn bao bì.
+- Cây chết hoặc héo úa do khách hàng chăm sóc sai cách (tưới quá nhiều nước, để sai vị trí thiếu sáng/quá nắng,...).
+- Sản phẩm phụ kiện đã qua sử dụng hoặc không còn nguyên vẹn bao bì.
 
 ## 3. Quy trình hoàn tiền
-|- **Thời gian xử lý:** Từ 3-5 ngày làm việc sau khi Greenshop xác nhận yêu cầu hợp lệ.
-|- **Phương thức hoàn tiền:** Chuyển khoản ngân hàng hoặc ví điện tử theo thông tin khách hàng cung cấp.', 'PUBLISHED'),
-
-        ('Chính sách Vận chuyển & Giao hàng', '## 1. Thời gian giao hàng
-|- **Nội thành:** Giao hàng trong vòng 1-2 ngày làm việc.
-|- **Ngoại tỉnh/Toàn quốc:** Giao hàng từ 3-5 ngày làm việc tùy thuộc vào đơn vị vận chuyển.
+- **Thời gian xử lý:** Từ 3-5 ngày làm việc sau khi Greenshop xác nhận yêu cầu hợp lệ.
+- **Phương thức hoàn tiền:** Chuyển khoản ngân hàng hoặc ví điện tử theo thông tin khách hàng cung cấp.', 'PUBLISHED'),
+('Chính sách Vận chuyển & Giao hàng', '## 1. Thời gian giao hàng
+- **Nội thành:** Giao hàng trong vòng 1-2 ngày làm việc.
+- **Ngoại tỉnh/Toàn quốc:** Giao hàng từ 3-5 ngày làm việc tùy thuộc vào đơn vị vận chuyển.
 
 ## 2. Chi phí vận chuyển
-|- **Phí tiêu chuẩn:** 30.000 VNĐ cho các đơn hàng thông thường.
-|- **Miễn phí vận chuyển (Freeship):** Áp dụng cho mọi đơn hàng có giá trị từ **500.000 VNĐ** trở lên.
+- **Phí tiêu chuẩn:** 30.000 VNĐ cho các đơn hàng thông thường.
+- **Miễn phí vận chuyển (Freeship):** Áp dụng cho mọi đơn hàng có giá trị từ **500.000 VNĐ** trở lên.
 
 ## 3. Quy cách đóng gói cây xanh
-|- Cây luôn được bọc màng bảo vệ chuyên dụng xung quanh tán lá.
-|- Bầu đất được quấn màng bọc nilon để tránh rơi vãi đất và giữ ẩm.
-|- Cây được cố định chắc chắn trong thùng carton hộp chữ nhật hoặc khung gỗ (đối với cây lớn) để chống sốc và chống lật.', 'PUBLISHED'),
-        ('Chính sách Bảo hành Cây xanh', '## 1. Thời gian bảo hành
-|Tất cả các loại cây xanh mua tại **Greenshop** đều được bảo hành sức khỏe trong vòng **7 ngày** đầu kể từ khi nhận hàng.
+- Cây luôn được bọc màng bảo vệ chuyên dụng xung quanh tán lá.
+- Bầu đất được quấn màng bọc nilon để tránh rơi vãi đất và giữ ẩm.
+- Cây được cố định chắc chắn trong thùng carton hộp chữ nhật hoặc khung gỗ (đối với cây lớn) để chống sốc và chống lật.', 'PUBLISHED'),
+('Chính sách Bảo hành Cây xanh', '## 1. Thời gian bảo hành
+Tất cả các loại cây xanh mua tại **Greenshop** đều được bảo hành sức khỏe trong vòng **7 ngày** đầu kể từ khi nhận hàng.
 
 ## 2. Hỗ trợ trọn đời
-|- Chúng tôi cung cấp dịch vụ **tư vấn chăm sóc cây miễn phí trọn đời**.
-|- Bất cứ khi nào cây của bạn có dấu hiệu bất thường (vàng lá, rụng lá, nấm mốc,...), hãy chụp ảnh và gửi qua kênh chat hoặc Zalo của cửa hàng để được đội ngũ kỹ thuật hỗ trợ kịp thời.
+- Chúng tôi cung cấp dịch vụ **tư vấn chăm sóc cây miễn phí trọn đời**. 
+- Bất cứ khi nào cây của bạn có dấu hiệu bất thường (vàng lá, rụng lá, nấm mốc,...), hãy chụp ảnh và gửi qua kênh chat hoặc Zalo của cửa hàng để được đội ngũ kỹ thuật hỗ trợ kịp thời.
 
 ## 3. Thay cây mới
-|Nếu cây bị chết trong thời gian bảo hành do nguyên nhân bệnh lý có sẵn từ nhà vườn (được xác nhận bởi kỹ thuật viên của chúng tôi), Greenshop sẽ **1 đổi 1** cây mới cùng loại cho bạn.', 'PUBLISHED'),
-        ('Chính sách Bảo mật Thông tin', '## 1. Mục đích thu thập thông tin
-|Greenshop thu thập thông tin cá nhân (Họ tên, Số điện thoại, Địa chỉ, Email) của khách hàng chỉ nhằm mục đích:
-|- Xử lý đơn đặt hàng và giao hàng.
-|- Cung cấp dịch vụ hỗ trợ khách hàng và giải quyết khiếu nại.
-|- Gửi thông tin khuyến mãi, ưu đãi dành cho khách hàng thân thiết (nếu khách hàng đăng ký nhận tin).
+Nếu cây bị chết trong thời gian bảo hành do nguyên nhân bệnh lý có sẵn từ nhà vườn (được xác nhận bởi kỹ thuật viên của chúng tôi), Greenshop sẽ **1 đổi 1** cây mới cùng loại cho bạn.', 'PUBLISHED'),
+('Chính sách Bảo mật Thông tin', '## 1. Mục đích thu thập thông tin
+Greenshop thu thập thông tin cá nhân (Họ tên, Số điện thoại, Địa chỉ, Email) của khách hàng chỉ nhằm mục đích:
+- Xử lý đơn đặt hàng và giao hàng.
+- Cung cấp dịch vụ hỗ trợ khách hàng và giải quyết khiếu nại.
+- Gửi thông tin khuyến mãi, ưu đãi dành cho khách hàng thân thiết (nếu khách hàng đăng ký nhận tin).
 
 ## 2. Cam kết bảo mật
-|- Mọi thông tin của khách hàng được bảo mật tuyệt đối trên hệ thống máy chủ của chúng tôi.
-|- **Greenshop cam kết không bán, trao đổi hay chia sẻ** thông tin của bạn cho bất kỳ bên thứ ba nào vì mục đích thương mại, ngoại trừ việc cung cấp địa chỉ cho đơn vị vận chuyển.
+- Mọi thông tin của khách hàng được bảo mật tuyệt đối trên hệ thống máy chủ của chúng tôi.
+- **Greenshop cam kết không bán, trao đổi hay chia sẻ** thông tin của bạn cho bất kỳ bên thứ ba nào vì mục đích thương mại, ngoại trừ việc cung cấp địa chỉ cho đơn vị vận chuyển.
 
 ## 3. Quyền của khách hàng
-|Khách hàng có quyền yêu cầu Greenshop kiểm tra, cập nhật, điều chỉnh hoặc hủy bỏ thông tin cá nhân của mình bất cứ lúc nào.', 'PUBLISHED'),
-        ('Chính sách Khách hàng Thân thiết', '## 1. Tích điểm thưởng
-|- Cứ mỗi **10.000 VNĐ** giá trị đơn hàng được thanh toán thành công, khách hàng sẽ tích lũy được **1 điểm**.
-|- Điểm thưởng được tự động cộng vào tài khoản sau khi đơn hàng chuyển sang trạng thái "Giao hàng thành công".
+Khách hàng có quyền yêu cầu Greenshop kiểm tra, cập nhật, điều chỉnh hoặc hủy bỏ thông tin cá nhân của mình bất cứ lúc nào.', 'PUBLISHED'),
+('Chính sách Khách hàng Thân thiết', '## 1. Tích điểm thưởng
+- Cứ mỗi **10.000 VNĐ** giá trị đơn hàng được thanh toán thành công, khách hàng sẽ tích lũy được **1 điểm**.
+- Điểm thưởng được tự động cộng vào tài khoản sau khi đơn hàng chuyển sang trạng thái "Giao hàng thành công".
 
 ## 2. Quy đổi và Ưu đãi
-|- Điểm thưởng có thể được dùng để quy đổi thành **Mã giảm giá** cho các lần mua sắm tiếp theo.
-|- Khách hàng có ngày sinh nhật trong tháng sẽ nhận được Voucher giảm giá **20%** cho một đơn hàng bất kỳ.
+- Điểm thưởng có thể được dùng để quy đổi thành **Mã giảm giá** cho các lần mua sắm tiếp theo.
+- Khách hàng có ngày sinh nhật trong tháng sẽ nhận được Voucher giảm giá **20%** cho một đơn hàng bất kỳ.
 
 ## 3. Hạng thành viên
-|- **Thành viên Bạc:** Tổng chi tiêu trên 2.000.000 VNĐ - Giảm thêm 5% mọi đơn hàng.
-|- **Thành viên Vàng:** Tổng chi tiêu trên 5.000.000 VNĐ - Giảm thêm 10% mọi đơn hàng + Quà tặng kèm theo mùa.', 'PUBLISHED'),
-        ('Chính sách Thanh toán', '## 1. Các phương thức thanh toán
-|Greenshop hiện đang hỗ trợ các phương thức thanh toán linh hoạt và an toàn:
-|- **Thanh toán khi nhận hàng (COD):** Khách hàng kiểm tra hàng và thanh toán trực tiếp cho nhân viên giao hàng.
-|- **Chuyển khoản ngân hàng:** Khách hàng chuyển khoản qua Internet Banking vào số tài khoản của cửa hàng.
-|- **Thanh toán qua Ví điện tử:** Hỗ trợ thanh toán qua VNPay, Momo, ZaloPay tiện lợi.
+- **Thành viên Bạc:** Tổng chi tiêu trên 2.000.000 VNĐ - Giảm thêm 5% mọi đơn hàng.
+- **Thành viên Vàng:** Tổng chi tiêu trên 5.000.000 VNĐ - Giảm thêm 10% mọi đơn hàng + Quà tặng kèm theo mùa.', 'PUBLISHED'),
+('Chính sách Thanh toán', '## 1. Các phương thức thanh toán
+Greenshop hiện đang hỗ trợ các phương thức thanh toán linh hoạt và an toàn:
+- **Thanh toán khi nhận hàng (COD):** Khách hàng kiểm tra hàng và thanh toán trực tiếp cho nhân viên giao hàng.
+- **Chuyển khoản ngân hàng:** Khách hàng chuyển khoản qua Internet Banking vào số tài khoản của cửa hàng.
+- **Thanh toán qua Ví điện tử:** Hỗ trợ thanh toán qua VNPay, Momo, ZaloPay tiện lợi.
 
 ## 2. Quy định thanh toán đối với đơn hàng lớn
-|Đối với các đơn hàng có giá trị lớn hơn **2.000.000 VNĐ** hoặc các đơn hàng đặt thiết kế thi công tiểu cảnh, khách hàng vui lòng đặt cọc trước **30%** giá trị đơn hàng.
+Đối với các đơn hàng có giá trị lớn hơn **2.000.000 VNĐ** hoặc các đơn hàng đặt thiết kế thi công tiểu cảnh, khách hàng vui lòng đặt cọc trước **30%** giá trị đơn hàng. 
 
 ## 3. Bảo mật thanh toán
-|Tất cả các giao dịch trực tuyến qua thẻ hay ví điện tử đều được mã hóa an toàn theo tiêu chuẩn SSL, đảm bảo không rò rỉ dữ liệu tài chính của khách hàng.', 'PUBLISHED');
+Tất cả các giao dịch trực tuyến qua thẻ hay ví điện tử đều được mã hóa an toàn theo tiêu chuẩn SSL, đảm bảo không rò rỉ dữ liệu tài chính của khách hàng.', 'PUBLISHED');
 
 -- ============================================================
 --  THÊM BẢNG BLOG
@@ -292,8 +297,8 @@ CREATE TABLE blog_posts (
 
         view_countINT NOT NULL DEFAULT 0,
 
-        created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        created_atTIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_atTIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         published_at        TIMESTAMP
 );
 
@@ -314,10 +319,10 @@ CREATE TABLE blog_images (
 id    BIGSERIAL PRIMARY KEY,
 
     -- giữ blog_id cho code/seed từ branch cũ
-blog_id BIGINT REFERENCES blog_posts(id) ON DELETE CASCADE,
+blog_idBIGINT REFERENCES blog_posts(id) ON DELETE CASCADE,
 
     -- giữ post_id cho code blog mới
-post_id BIGINT REFERENCES blog_posts(id) ON DELETE CASCADE,
+post_idBIGINT REFERENCES blog_posts(id) ON DELETE CASCADE,
 
 image_url       TEXT NOT NULL,
 
@@ -361,7 +366,7 @@ CREATE INDEX idx_blog_tags_name ON blog_tags(tag);
 -- ============================================================
 
 CREATE TABLE blog_votes (
-        id          BIGSERIAL PRIMARY KEY,
+        idBIGSERIAL PRIMARY KEY,
 
     -- branch cũ
         blog_id     BIGINT REFERENCES blog_posts(id) ON DELETE CASCADE,
@@ -414,7 +419,7 @@ CREATE TABLE notifications (
 
  is_read   BOOLEAN NOT NULL DEFAULT FALSE,
 
- created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+ created_atTIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_notifications_user
@@ -721,6 +726,106 @@ INSERT INTO product_details (product_id, description, images) VALUES
 -- ============================================================
 --  BLOG POSTS — 10 bài viết
 -- ============================================================
+UPDATE product_details
+  SET content = description
+  WHERE content IS NULL;
+
+UPDATE product_details
+  SET care_guide = 'Đặt nơi sáng nhẹ, tưới khi mặt đất khô, lau lá định kỳ.',
+      sunlight_level = 'Ánh sáng gián tiếp thấp đến trung bình',
+      water_freq = '1 lần/tuần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 1;
+
+UPDATE product_details
+  SET care_guide = 'Để nơi sáng dịu, tránh nắng gắt buổi trưa, tưới ít nhưng đều.',
+      sunlight_level = 'Ánh sáng gián tiếp thấp',
+      water_freq = '7-10 ngày/lần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 2;
+
+UPDATE product_details
+  SET care_guide = 'Ưa sáng vừa, tưới khi đất ráo, phù hợp góc phòng thoáng.',
+      sunlight_level = 'Ánh sáng trung bình',
+      water_freq = '1 lần/tuần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Kim'
+  WHERE product_id = 3;
+
+UPDATE product_details
+  SET care_guide = 'Cần ánh sáng ổn định, tưới vừa phải và kiểm tra thoát nước.',
+      sunlight_level = 'Ánh sáng trung bình đến cao',
+      water_freq = '1 lần/tuần',
+      difficulty = 'Trung bình',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 4;
+
+UPDATE product_details
+  SET care_guide = 'Có thể treo hoặc đặt kệ, chịu thiếu sáng tốt, tưới khi khô bề mặt.',
+      sunlight_level = 'Ánh sáng thấp đến trung bình',
+      water_freq = '1 lần/tuần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Thủy'
+  WHERE product_id = 5;
+
+UPDATE product_details
+  SET care_guide = 'Ưa nơi sáng, giữ ẩm vừa phải, lau lá để giữ bề mặt đẹp.',
+      sunlight_level = 'Ánh sáng gián tiếp sáng',
+      water_freq = '5-7 ngày/lần',
+      difficulty = 'Trung bình',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 6;
+
+UPDATE product_details
+  SET care_guide = 'Phù hợp người mới, chăm đơn giản, tưới khi đất khô nhẹ.',
+      sunlight_level = 'Ánh sáng thấp đến trung bình',
+      water_freq = '7-10 ngày/lần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 7;
+
+UPDATE product_details
+  SET care_guide = 'Thân cao, cần ánh sáng tốt và chỗ đứng ổn định.',
+      sunlight_level = 'Ánh sáng trung bình',
+      water_freq = '7-10 ngày/lần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 8;
+
+UPDATE product_details
+  SET care_guide = 'Ưa không gian sáng nhẹ, tưới vừa đủ để giữ tán lá cân đối.',
+      sunlight_level = 'Ánh sáng trung bình',
+      water_freq = '1 lần/tuần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 9;
+
+UPDATE product_details
+  SET care_guide = 'Rất dễ chăm, tưới ít, tránh ngập nước và giữ nơi thoáng.',
+      sunlight_level = 'Ánh sáng thấp',
+      water_freq = '10 ngày/lần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Thủy'
+  WHERE product_id = 10;
+
+UPDATE product_details
+  SET care_guide = 'Ưa nơi sáng nhưng không gắt, giữ độ ẩm đều để lá đẹp.',
+      sunlight_level = 'Ánh sáng gián tiếp sáng',
+      water_freq = '5-7 ngày/lần',
+      difficulty = 'Trung bình',
+      feng_shui_element = 'Kim'
+  WHERE product_id = 11;
+
+UPDATE product_details
+  SET care_guide = 'Hợp không gian sảnh hoặc phòng khách, tưới vừa phải và cắt tỉa gọn.',
+      sunlight_level = 'Ánh sáng trung bình',
+      water_freq = '1 lần/tuần',
+      difficulty = 'Dễ',
+      feng_shui_element = 'Mộc'
+  WHERE product_id = 12;
+
 INSERT INTO blog_posts (author_id, title, content, thumbnail, is_published, status, published_at) VALUES
 (2, 'Top 10 cây trong nhà dễ chăm nhất cho người bận rộn',
  'Bạn yêu cây nhưng không có nhiều thời gian chăm sóc? Đây là danh sách 10 loại cây cực dễ chăm: Lưỡi hổ, ZZ Plant, Pothos, Trầu bà... Những loại cây này chỉ cần tưới 1-2 lần mỗi tuần, chịu bóng tốt và vẫn phát triển khỏe mạnh.',
@@ -907,6 +1012,13 @@ INSERT INTO reviews (order_id, product_id, customer_id, rating, comment, is_cura
         (2, 6,  6, 5, 'Monstera đẹp vượt mong đợi! Lá xẻ đều, tươi tắn. Đóng gói rất chuyên nghiệp.', TRUE, FALSE),
         (4, 41, 5, 3, 'Sen đá nhỏ hơn hình, nhưng chất lượng OK.', FALSE, FALSE),
         (5, 76, 6, 5, 'Sedum tricolor đẹp mê ly! Đã đặt thêm 2 chậu nữa.', TRUE, FALSE);
+        (1, 3, 5, 5, 'Cây đẹp đúng như mô tả, đóng gói cẩn thận, giao hàng nhanh. Rất hài lòng!', TRUE, FALSE),
+        (1, 76, 5, 4, 'Chậu đẹp, chất lượng tốt, giá hợp lý. Sẽ mua lại lần sau.', TRUE, FALSE),
+        (2, 6, 6, 5, 'Monstera đẹp lắm, lá to khỏe, không bị dập nát khi vận chuyển. 5 sao!', TRUE, FALSE),
+        (3, 14, 7, 4, 'ZZ Plant khỏe mạnh, đúng size, tuy nhiên chậu hơi nhỏ so với cây.', TRUE, FALSE),
+        (7, 3, 5, 5, 'Mua lần 2 vẫn rất hài lòng, kim tiền lên nhanh tốt lắm!', TRUE, FALSE),
+        (9, 11, 5, 5, 'Cây Sanh Bonsai dáng rất nghệ thuật, giao nhanh.', TRUE, FALSE),
+        (10, 24, 5, 3, 'Hoa giấy hơi nhỏ so với ảnh chụp nhưng bù lại cây khá tươi.', FALSE, FALSE);
 
 -- ============================================================
 --  TICKETS
@@ -920,6 +1032,156 @@ INSERT INTO tickets (creator_id, assignee_id, title, detail, state, priority) VA
 --  COMMENTS
 -- ============================================================
 INSERT INTO comments (ticket_id, creator_id, detail) VALUES
- (1, 4, 'Cảm ơn bạn đã phản hồi. Chúng tôi sẽ gửi cây thay thế trong 24h.'),
- (2, 4, 'Cây được bảo hành 7 ngày. Bạn cung cấp hình ảnh để chúng tôi kiểm tra nhé.'),
- (1, 5, 'Cảm ơn shop đã hỗ trợ nhanh chóng!');
+(1, 4, 'Cảm ơn bạn đã phản hồi. Chúng tôi sẽ gửi cây thay thế trong 24h.'),
+(2, 4, 'Cây được bảo hành 7 ngày. Bạn cung cấp hình ảnh để chúng tôi kiểm tra nhé.'),
+(1, 5, 'Cảm ơn shop đã hỗ trợ nhanh chóng!');
+(1, 4, 'Chào bạn, cảm ơn đã liên hệ. Bạn đang để cây ở đâu và tưới bao nhiêu nước mỗi lần? Cho mình biết thêm để hỗ trợ tốt hơn nhé.'),
+(1, 5, 'Tôi để cây gần cửa sổ có ánh sáng gián tiếp và tưới khoảng nửa ly nước mỗi ngày.'),
+(1, 4, 'Bạn đang tưới hơi nhiều rồi. Kim tiền chỉ cần tưới 2-3 ngày một lần, để đất khô nhẹ mới tưới. Thử giảm tưới xem cây có phục hồi không nhé!'),
+(2, 4, 'Xin lỗi bạn vì sự cố này. Mình đã kiểm tra đơn hàng và xác nhận có nhầm lẫn. Shop sẽ giao đúng sản phẩm Monstera cho bạn trong 1-2 ngày tới, hoàn toàn miễn phí.'),
+(4, 4, 'Sen đá cần ít nước hơn bạn nghĩ. Nguyên tắc là: để đất khô hoàn toàn rồi mới tưới, mỗi lần tưới đẫm. Nên đặt nơi có nhiều ánh sáng, tối thiểu 4-6 tiếng nắng mỗi ngày.'),
+(4, 8, 'Cảm ơn shop đã tư vấn chi tiết, tôi đã hiểu rồi. Chắc trước giờ tôi tưới nhiều quá nên cây bị úng.');
+
+-- ============================================================
+--  BLOG VOTES — bảng vote cho blog posts
+-- ============================================================
+CREATE TABLE IF NOT EXISTS blog_votes (
+   user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+   post_id BIGINT NOT NULL REFERENCES blog_posts(id) ON DELETE CASCADE,
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   PRIMARY KEY (user_id, post_id)
+);
+
+-- ============================================================
+--  BLOG POSTS — chuyển is_published sang status
+-- ============================================================
+ALTER TABLE blog_posts
+   ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'DRAFT'
+   CHECK (status IN ('DRAFT','PENDING','REJECTED','PUBLISHED'));
+
+UPDATE blog_posts
+SET status = CASE
+   WHEN is_published = TRUE THEN 'PUBLISHED'
+   ELSE 'DRAFT'
+END;
+
+CREATE INDEX IF NOT EXISTS idx_blog_status ON blog_posts(status);
+
+-- ==============================================================
+-- BLOG IMAGE - bảng lưu trữ ảnh cho blog post
+-- ==============================================================
+CREATE TABLE IF NOT EXISTS blog_images (
+    id BIGSERIAL PRIMARY KEY,
+    post_id BIGINT NOT NULL REFERENCES blog_posts(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL
+    );
+
+CREATE INDEX IF NOT EXISTS idx_blog_images_post ON blog_images(post_id);
+
+ALTER TABLE blog_images
+    ADD COLUMN IF NOT EXISTS image_data BYTEA,
+    ADD COLUMN IF NOT EXISTS file_name  VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS content_type VARCHAR(100),
+    ALTER COLUMN post_id DROP NOT NULL;
+TRUNCATE TABLE policies RESTART IDENTITY;
+
+INSERT INTO policies (title, description, status) VALUES 
+('Chính sách Đổi trả & Hoàn tiền', '## 1. Điều kiện đổi trả
+- Cây bị dập nát, héo úa, gãy cành hoặc chết trong quá trình vận chuyển.
+- Giao sai loại cây, sai kích thước hoặc thiếu phụ kiện so với đơn đặt hàng.
+- Khách hàng cần thông báo và gửi hình ảnh/video tình trạng cây trong vòng **3 ngày** kể từ khi nhận hàng.
+
+## 2. Các trường hợp không hỗ trợ đổi trả
+- Cây chết hoặc héo úa do khách hàng chăm sóc sai cách (tưới quá nhiều nước, để sai vị trí thiếu sáng/quá nắng,...).
+- Sản phẩm phụ kiện đã qua sử dụng hoặc không còn nguyên vẹn bao bì.
+
+## 3. Quy trình hoàn tiền
+- **Thời gian xử lý:** Từ 3-5 ngày làm việc sau khi Greenshop xác nhận yêu cầu hoàn tiền hợp lệ.
+- **Phương thức hoàn tiền:** Chuyển khoản ngân hàng theo thông tin khách hàng cung cấp.
+', 'PUBLISHED'),
+
+('Chính sách Vận chuyển & Giao hàng', '## 1. Thời gian giao hàng
+- **Nội thành Hà Nội:** Giao hàng trong vòng 24 - 48 giờ.
+- **Ngoại thành và các tỉnh lân cận:** Giao hàng từ 3 - 5 ngày làm việc.
+
+## 2. Phí vận chuyển
+- Miễn phí vận chuyển cho đơn hàng từ **500.000 VNĐ** trở lên.
+- Phí đồng giá **30.000 VNĐ** áp dụng cho tất cả các khu vực nội thành.
+
+## 3. Lưu ý khi nhận hàng
+Khách hàng vui lòng:
+1. Kiểm tra kỹ tình trạng cây và số lượng sản phẩm.
+2. Xác nhận tình trạng đơn hàng với người giao hàng.
+3. Liên hệ ngay với bộ phận CSKH nếu có bất kỳ vấn đề nào phát sinh.
+', 'PUBLISHED'),
+
+('Chính sách Bảo mật Thông tin', '## 1. Mục đích thu thập thông tin
+Greenshop cam kết bảo mật mọi thông tin cá nhân của khách hàng. Chúng tôi chỉ sử dụng thông tin nhằm:
+- Xử lý đơn hàng, thanh toán và giao nhận sản phẩm.
+- Hỗ trợ và giải quyết khiếu nại, phản hồi của khách hàng.
+- Cung cấp các thông tin ưu đãi hoặc hướng dẫn chăm sóc cây định kỳ.
+
+## 2. Cam kết bảo mật
+- Không chia sẻ thông tin khách hàng cho bên thứ ba ngoại trừ đối tác vận chuyển.
+- Mọi dữ liệu giao dịch được mã hóa để đảm bảo an toàn tuyệt đối.
+', 'PUBLISHED'),
+
+('Chính sách Khách hàng Thân thiết', '## 1. Hạng thành viên
+Hệ thống hạng thành viên của Greenshop bao gồm:
+* **Hạt Giống (Seed):** Khách hàng mới đăng ký tài khoản.
+* **Mầm Xanh (Sprout):** Tổng chi tiêu từ 2.000.000 VNĐ.
+* **Cây Xanh (Tree):** Tổng chi tiêu từ 5.000.000 VNĐ.
+* **Đại Thụ (Oak):** Tổng chi tiêu từ 15.000.000 VNĐ.
+
+## 2. Quyền lợi tương ứng
+- **Mầm Xanh:** Giảm giá 5% cho mọi đơn hàng.
+- **Cây Xanh:** Giảm giá 10% + Tặng 1 chậu đất nung cỡ nhỏ vào dịp sinh nhật.
+- **Đại Thụ:** Giảm giá 15% + Miễn phí vận chuyển toàn quốc + Dịch vụ chăm sóc cây tại nhà (1 lần/năm).
+', 'PUBLISHED'),
+
+('Chính sách Bảo hành Cây xanh', '> **LƯU Ý:** Chính sách này đã hết hiệu lực từ ngày 01/01/2026 và được sáp nhập vào "Chính sách Đổi trả & Hoàn tiền".
+
+## Nội dung bảo hành (Cũ)
+- Bảo hành 7 ngày đối với tất cả các loại cây để bàn.
+- Khách hàng mang cây đến trực tiếp cửa hàng để được hỗ trợ đổi cây mới nếu cây chết do lỗi kỹ thuật chăm sóc tại vườn ươm.
+', 'ARCHIVED'),
+
+('Chính sách Mua sỉ & Công trình', '## 1. Ưu đãi chiết khấu
+Greenshop cung cấp chính sách giá sỉ hấp dẫn cho:
+- Đơn hàng mua số lượng lớn (từ 20 cây cùng loại trở lên).
+- Doanh nghiệp thiết kế văn phòng, quán cafe, khách sạn.
+- **Mức chiết khấu:** Dao động từ **15% đến 35%** tùy theo giá trị đơn hàng và chủng loại cây.
+
+## 2. Dịch vụ đi kèm
+- Tư vấn khảo sát và thiết kế cảnh quan xanh miễn phí.
+- Hỗ trợ vận chuyển bằng xe tải chuyên dụng đảm bảo cây không bị dập nát.
+- Hợp đồng mua bán và xuất hóa đơn đỏ (VAT) đầy đủ.
+', 'PUBLISHED'),
+
+('Hướng dẫn Đền bù & Khiếu nại', '## 1. Cách thức gửi khiếu nại
+Khách hàng có thể tạo yêu cầu hỗ trợ (Ticket) trực tiếp trên website Greenshop hoặc gọi điện qua Hotline.
+- Yêu cầu cung cấp đầy đủ: Mã đơn hàng, hình ảnh thực tế của cây và lý do khiếu nại.
+
+## 2. Phương án đền bù
+- **Lỗi từ Greenshop (giao sai, gãy hỏng nặng):** Hỗ trợ đổi cây mới hoàn toàn miễn phí hoặc hoàn tiền 100%.
+- **Lỗi do đối tác vận chuyển:** Greenshop chịu trách nhiệm làm việc với đơn vị vận chuyển và bù đắp cho khách hàng cây mới.
+', 'PUBLISHED'),
+
+('Chính sách Chăm sóc Cây tại nhà', '## Giới thiệu dịch vụ chăm sóc định kỳ
+Dự kiến triển khai dịch vụ đăng ký chăm sóc cây xanh tại nhà (tưới nước, bón phân, tỉa cành, phun thuốc phòng sâu bệnh) cho các hộ gia đình hoặc văn phòng bận rộn.
+
+*Chính sách này hiện đang được soạn thảo chi tiết và thử nghiệm vận hành nội bộ.*
+', 'DRAFT'),
+
+('Chính sách Đặt trước Cây hiếm', '## Đăng ký sở hữu các dòng cây Exotic
+Chính sách hướng dẫn khách hàng cách đặt cọc trước (Pre-order) đối với các loại cây đột biến (Variegated) hoặc cây nhập khẩu quý hiếm.
+
+*Nội dung chi tiết đang được xây dựng bởi bộ phận Cung ứng.*
+', 'DRAFT'),
+
+('Chính sách Thu cũ Đổi mới Chậu cây', '> **LƯU Ý:** Chương trình này đã kết thúc từ ngày 31/12/2025.
+
+## Nội dung chương trình (Đã đóng)
+- Khách hàng mang chậu sứ cũ, chậu nhựa cũ đã mua tại Greenshop đến cửa hàng sẽ được giảm giá 20% khi mua chậu đất nung mới.
+', 'ARCHIVED');
+

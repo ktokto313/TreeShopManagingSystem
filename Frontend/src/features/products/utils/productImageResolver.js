@@ -1,4 +1,8 @@
-// Created by minhlthe200133
+/*
+ * Created By: MinhLTHE200133
+ * Created At: 2026-06-05
+ * Last Modified: 2026-06-07
+ */
 import { parseCatalogImages } from '../../catalog/utils/catalogUtils'
 
 const localImageModules = import.meta.glob('../images/*.{jpg,jpeg,png,webp,gif}', {

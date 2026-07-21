@@ -1,16 +1,26 @@
 /*
- * Author: ktokto313
+ * Author: AnhLV
  * Created Date: 2026-05-29
  * Name: Ticket.java
- * Description: 
- * Last Change Author: PlotChat
- * Last Change Date: 2026-06-06
+ * Description: Entity model representing a ticket in the system.
+ * Last Change Author: AnhLV
+ * Last Change Date: 2026-07-03
  */
+
 package swp391.group6.model;
 
-import jakarta.persistence.*;
-
 import java.sql.Timestamp;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "tickets")

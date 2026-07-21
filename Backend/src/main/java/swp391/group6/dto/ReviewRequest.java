@@ -1,3 +1,11 @@
+/*
+ * Author: AnhLV
+ * Created Date: 2026-06-24
+ * Name: ReviewRequest.java
+ * Description: Data Transfer Object (DTO) for encapsulating review request data.
+ * Last Change Author: AnhLV
+ * Last Change Date: 2026-06-25
+ */
 package swp391.group6.dto;
 
 import swp391.group6.model.Product;

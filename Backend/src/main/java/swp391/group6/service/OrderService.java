@@ -250,10 +250,27 @@ public class OrderService {
 
     public Page<Review> getProductReviews(Long productId, Short rating, Pageable pageable) {
         if (rating != null) {
-            return reviewRepository.findByOrderDetail_Product_IdAndRating(productId, rating, pageable);
+            return reviewRepository.findByOrderDetail_Product_IdAndRatingAndIsHiddenFalse(productId, rating, pageable);
         }
 
+        return reviewRepository.findByOrderDetail_Product_IdAndIsHiddenFalse(productId, pageable);
+    }
+    
+    @PreAuthorize("hasAnyRole('MANAGER')")
+    public Page<Review> getAllProductReviewsForManager(Long productId, Pageable pageable) {
         return reviewRepository.findByOrderDetail_Product_Id(productId, pageable);
+    }
+    
+    @PreAuthorize("hasAnyRole('MANAGER')")
+    public boolean toggleReviewHidden(long reviewId) {
+        Review review = reviewRepository.findById(reviewId).orElse(null);
+        if (review == null) {
+            return false;
+        }
+
+        review.setHidden(!review.isHidden());
+        reviewRepository.save(review);
+        return true;
     }
 
     public Review createProductReview(long orderId, long productId, swp391.group6.dto.ReviewRequest request, LoginResponse loginResponse) {
@@ -289,7 +306,24 @@ public class OrderService {
         review.setComment(request.getComment());
         review.setRating((short) request.getRating());
         review.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
+        review.setCurated(false);
 
         return reviewRepository.save(review);
+    }
+
+    public List<Review> getCuratedReviews() {
+        return reviewRepository.findByIsCuratedTrue();
+    }
+
+    @PreAuthorize("hasAnyRole('MANAGER')")
+    public boolean toggleReviewCurated(long reviewId) {
+        Review review = reviewRepository.findById(reviewId).orElse(null);
+        if (review == null) {
+            return false;
+        }
+
+        review.setCurated(!review.isCurated());
+        reviewRepository.save(review);
+        return true;
     }
 }

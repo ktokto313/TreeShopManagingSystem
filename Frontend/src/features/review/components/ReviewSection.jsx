@@ -37,7 +37,9 @@ const ReviewSection = ({
 
 	return (
 		<div className={cn(className)}>
-			<ReviewForm reviewState={reviewState} orderId={orderId}></ReviewForm>
+			{!reviewState.canManage && (
+				<ReviewForm reviewState={reviewState} orderId={orderId}></ReviewForm>
+			)}
 
 			<ReviewCommentSection className="mt-5">
 				<div className="w-full mb-3">
@@ -64,7 +66,13 @@ const ReviewSection = ({
 					) : (
 						<>
 							{reviews.map((r) => (
-								<ReviewCommentCard key={r.id} review={r}></ReviewCommentCard>
+								<ReviewCommentCard 
+									key={r.id} 
+									review={r} 
+									canManage={reviewState.canManage}
+									onHideToggle={() => reviewState.toggleReviewHide(r.id)}
+									onCurateToggle={() => reviewState.toggleReviewCurate(r.id)}
+								/>
 							))}
 
 							{reviews.length === 0 && <h2>Chưa có đánh giá nào</h2>}

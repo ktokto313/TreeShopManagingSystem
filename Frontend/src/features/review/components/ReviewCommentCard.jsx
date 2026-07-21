@@ -5,12 +5,13 @@ import {
 	CardFooter,
 	CardHeader,
 } from "../../../components/ui/Card";
+import { Button } from "../../../components/ui/Button";
 import { cn } from "../../../utils/cn";
 import { timeFormat } from "../../../utils/timeFormat";
 import plantPfp from "../../products/assets/images/plantPfp.png";
 
-const ReviewCommentCard = ({ review = {}, className }) => {
-	const { user, rating = null, comment = null, createdAt = null } = review;
+const ReviewCommentCard = ({ review = {}, className, canManage, onHideToggle, onCurateToggle }) => {
+	const { user, rating = null, comment = null, createdAt = null, hidden = false, curated = false } = review;
 	const maxRating = 5;
 	
 	return (
@@ -38,8 +39,28 @@ const ReviewCommentCard = ({ review = {}, className }) => {
 			</CardContent>
 
 			{/* Footer */}
-			<CardFooter>
+			<CardFooter className="flex justify-between items-center">
 				<h4 className="text-xs text-gray-600">{timeFormat(createdAt)}</h4>
+				{canManage && (
+					<div className="flex gap-2">
+						<Button 
+							size="sm" 
+							variant={hidden ? "primary" : "secondary"}
+							onClick={onHideToggle}
+							className={hidden ? "bg-gray-600 hover:bg-gray-700 text-white" : "border-gray-300 text-gray-700 hover:bg-gray-100"}
+						>
+							{hidden ? 'Đã ẩn' : 'Ẩn'}
+						</Button>
+						<Button 
+							size="sm" 
+							variant={curated ? "primary" : "secondary"}
+							onClick={onCurateToggle}
+							className={curated ? "bg-green-600 hover:bg-green-700 text-white" : "border-green-300 text-green-700 hover:bg-green-50"}
+						>
+							{curated ? 'Đã chọn tiêu biểu' : 'Chọn tiêu biểu'}
+						</Button>
+					</div>
+				)}
 			</CardFooter>
 		</Card>
 	);

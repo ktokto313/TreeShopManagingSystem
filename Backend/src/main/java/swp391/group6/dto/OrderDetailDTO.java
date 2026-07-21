@@ -10,6 +10,7 @@ public class OrderDetailDTO {
     private String productName;
     private String sku;
     private boolean hasReviewed;
+    private Long productId;
 
     public OrderDetailDTO(OrderDetail orderDetail, boolean hasReviewed) {
         this.quantity = orderDetail.getQuantity();
@@ -17,6 +18,7 @@ public class OrderDetailDTO {
         this.productName = orderDetail.getProduct().getName();
         this.sku = orderDetail.getProduct().getSku();
         this.hasReviewed = hasReviewed;
+        this.productId = orderDetail.getProduct().getId();
     }
 
     public OrderDetailDTO(int quantity, BigDecimal pricePaid) {
@@ -58,4 +60,7 @@ public class OrderDetailDTO {
 
     public boolean isHasReviewed() { return hasReviewed; }
     public void setHasReviewed(boolean hasReviewed) { this.hasReviewed = hasReviewed; }
+    
+    public Long getProductId() { return productId; }
+    public void setProductId(Long productId) { this.productId = productId; }
 }

@@ -1,8 +1,13 @@
+/*
+ * Created By: MinhLTHE200133
+ * Created At: 2026-06-25
+ * Last Modified: 2026-07-15
+ */
 import { useCallback, useContext, useState } from "react";
 import { AuthContext } from "../../../context/AuthContext";
-import { createProductReview, getProductReviews } from "../reviewApi";
+import { createProductReview, getProductReviews, toggleReviewHideApi, toggleReviewCurateApi } from "../reviewApi";
 import { useReviewForm } from "./useReviewForm";
-import { REVIEWS_PER_PAGE } from './../data/reviewsData';
+import { REVIEWS_PER_PAGE } from "../data/reviewsData";
 
 export const useProductReview = (productId, onSuccess) => {
 	const {
@@ -13,7 +18,7 @@ export const useProductReview = (productId, onSuccess) => {
 		reviewValidationError,
 		setReviewValidationError,
 		isReviewSubmitLoading,
-		setIsReviewSubmitLoading
+		setIsReviewSubmitLoading,
 	} = useReviewForm();
 
 	const [reviews, setReviews] = useState([]);
@@ -22,19 +27,20 @@ export const useProductReview = (productId, onSuccess) => {
 	const [totalElements, setTotalElements] = useState(0);
 	const [ratingFilter, setRatingFilter] = useState(null);
 	
-	const { user } = useContext(AuthContext);
+	const { user, canManage } = useContext(AuthContext);
 
-	const loadReviews = useCallback(async (page = 1) => {
+	const loadReviews = useCallback(
+	async (page = 1) => {
 		try {
 			setIsReviewsLoading(true);
 			const backendPage = Math.max(0, page - 1);
-			
+
 			let cleanRating = null;
 			if (ratingFilter !== undefined && ratingFilter !== null && ratingFilter !== "" && ratingFilter !== "null") {
 				cleanRating = Number(ratingFilter);
 			}
-			
-			const result = await getProductReviews(productId, backendPage, REVIEWS_PER_PAGE, cleanRating);
+
+			const result = await getProductReviews(productId, backendPage, REVIEWS_PER_PAGE, cleanRating, canManage);
 
 			setReviews(result.content || []);
 			setTotalPages(result.totalPages || 1);
@@ -45,7 +51,7 @@ export const useProductReview = (productId, onSuccess) => {
 		} finally {
 			setIsReviewsLoading(false);
 		}
-	}, [productId, setIsReviewsLoading, ratingFilter]);
+	}, [productId, setIsReviewsLoading, ratingFilter, canManage]);
 
 	const handleStarOnClick = (starValue) => {
 		setStarValue(starValue);
@@ -68,7 +74,7 @@ export const useProductReview = (productId, onSuccess) => {
 
 			const payload = {
 				rating: parseInt(rating, 10),
-				comment: comment,
+				comment,
 			};
 
 			await createProductReview(orderId, productId, payload);
@@ -78,8 +84,12 @@ export const useProductReview = (productId, onSuccess) => {
 			setStarValue(null);
 			if (onSuccess) onSuccess();
 		} catch (error) {
+			let errorMsg = error.message;
+			if (errorMsg && errorMsg.includes("For input string")) {
+				errorMsg = "Dữ liệu gửi lên không hợp lệ. Vui lòng tải lại trang và thử lại.";
+			}
 			setReviewValidationError(
-				error.message || "Có lỗi xảy ra khi gửi đánh giá.",
+				errorMsg || "Có lỗi xảy ra khi gửi đánh giá.",
 			);
 		} finally {
 			setIsReviewSubmitLoading(false);
@@ -93,13 +103,29 @@ export const useProductReview = (productId, onSuccess) => {
 		}
 
 		if (!rating || !comment) {
-			setReviewValidationError(
-				"Vui lòng chọn số sao và nhập bình luận để gửi đánh giá.",
-			);
+			setReviewValidationError("Vui lòng chọn số sao và nhập bình luận để gửi đánh giá.");
 			return false;
 		}
 
 		return true;
+	};
+
+	const toggleReviewHide = async (reviewId) => {
+		try {
+			await toggleReviewHideApi(reviewId);
+			setReviews(reviews.map(r => r.id === reviewId ? { ...r, hidden: !r.hidden } : r));
+		} catch (err) {
+			console.error('Lỗi ẩn đánh giá:', err);
+		}
+	};
+
+	const toggleReviewCurate = async (reviewId) => {
+		try {
+			await toggleReviewCurateApi(reviewId);
+			setReviews(reviews.map(r => r.id === reviewId ? { ...r, curated: !r.curated } : r));
+		} catch (err) {
+			console.error('Lỗi curate đánh giá:', err);
+		}
 	};
 
 	return {
@@ -120,5 +146,8 @@ export const useProductReview = (productId, onSuccess) => {
 		reviewValidationError,
 		isReviewSubmitLoading,
 		pageSize: REVIEWS_PER_PAGE,
+		canManage,
+		toggleReviewHide,
+		toggleReviewCurate,
 	};
 };

@@ -1,18 +1,21 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import process from 'node:process'
+
+const apiTarget = process.env.SERVER_PORT ?? 'http://localhost:8080'
 
 export default defineConfig({
 	plugins: [react(), tailwindcss()],
 	server: {
 		proxy: {
-		// Whenever React tries to fetch '/api/...', Vite will forward it to port 8080
+		// Whenever React tries to fetch '/api/...', Vite will forward it to the backend port
 		'/api': {
-			target: 'http://localhost:8081',
+			target: apiTarget,
 			changeOrigin: true,
 		},
 		'/product-images': {
-			target: 'http://localhost:8081',
+			target: apiTarget,
 			changeOrigin: true,
 		},
 		}

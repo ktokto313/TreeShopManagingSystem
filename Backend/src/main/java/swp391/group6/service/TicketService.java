@@ -1,28 +1,33 @@
-/*
- * Author: PlotChat
- * Created Date: 2026-06-01
- * Name: TicketService.java
- * Description:
- * Last Change Author: Aiden
- * Last Change Date: 2026-06-18
- */
-package swp391.group6.service;
 
-import jakarta.transaction.Transactional;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import swp391.group6.dto.LoginResponse;
-import swp391.group6.model.Ticket;
-import swp391.group6.dto.TicketRequest;
-import swp391.group6.model.*;
-import swp391.group6.model.NotificationType;
-import swp391.group6.repository.TicketRepository;
-import swp391.group6.repository.UserRepository;
+/*
+ * Author: AnhLV
+ * Created Date: 2026-06-05
+ * Name: TicketService.java
+ * Description: Service layer component handling business logic for tickets.
+ * Last Change Author: AnhLV
+ * Last Change Date: 2026-07-03
+ */
+
+package swp391.group6.service;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
+import swp391.group6.dto.LoginResponse;
+import swp391.group6.dto.TicketRequest;
+import swp391.group6.model.Priority;
+import swp391.group6.model.Ticket;
+import swp391.group6.model.TicketState;
+import swp391.group6.model.NotificationType;
+import swp391.group6.model.User;
+import swp391.group6.repository.TicketRepository;
+import swp391.group6.repository.UserRepository;
 
 @Service
 @Transactional

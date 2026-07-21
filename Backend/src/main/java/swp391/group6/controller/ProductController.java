@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import swp391.group6.dto.ProductRequest;
 import swp391.group6.dto.ProductResponse;
 import swp391.group6.dto.ReviewRequest;
+import swp391.group6.dto.HomepageFeaturedResponse;
 import swp391.group6.model.Product;
 import swp391.group6.model.Review;
 import swp391.group6.service.ProductImageStorageService;
@@ -61,6 +62,12 @@ public class ProductController {
         return productService.getProduct(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/homepage-featured")
+    public ResponseEntity<HomepageFeaturedResponse> getHomepageFeaturedProducts() {
+        HomepageFeaturedResponse response = productService.getHomepageFeaturedProducts();
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping

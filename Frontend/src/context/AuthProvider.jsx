@@ -64,10 +64,8 @@ export function AuthProvider({ children }) {
 			});
 			if (!response.ok) {
 				let body = null;
-				try {
-					body = await response.json();
-				} catch {
-				}
+				body = await response.json();
+				
 				const message =
 					response.status === 429
 						? body?.message || "Too many failed attempts. Try again later."

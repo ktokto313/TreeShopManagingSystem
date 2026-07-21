@@ -16,6 +16,7 @@ import CategoryForm from "../features/categories/components/CategoryForm";
 import CategoryTable from "../features/categories/components/CategoryTable";
 import ProductForm from "../features/products/components/ProductForm";
 import ProductTable from "../features/products/components/ProductTable";
+import ReviewSection from "../features/review/components/ReviewSection";
 import {
 	createProduct,
 	deactivateProduct,
@@ -39,6 +40,12 @@ const emptyProductForm = {
 	status: true,
 	sku: "",
 	description: "",
+	content: "",
+	careGuide: "",
+	sunlightLevel: "",
+	wateringFrequency: "",
+	difficulty: "",
+	fengShuiElement: "",
 	images: [],
 	imageFiles: [],
 };
@@ -51,7 +58,9 @@ const emptyFilters = {
 const SKU_PATTERN = /^[A-Za-z0-9_-]+$/;
 const MAX_IMAGE_FILES = 5;
 const MAX_IMAGE_FILE_SIZE = 5 * 1024 * 1024;
-
+const MAX_DESCRIPTION_LENGTH = 1000;
+const MAX_SHORT_TEXT_LENGTH = 255;
+const MAX_PRODUCT_CONTENT_LENGTH = 10000;
 function hasErrors(errors) {
 	return Object.keys(errors).length > 0;
 }
@@ -109,6 +118,7 @@ function validateProductForm(values) {
 	const name = String(values.name ?? "").trim();
 	const sku = String(values.sku ?? "").trim();
 	const description = String(values.description ?? "").trim();
+	const content = String(values.content ?? "").trim();
 	const price = values.price === "" ? null : Number(values.price);
 	const stock = values.stock === "" ? null : Number(values.stock);
 
@@ -146,6 +156,36 @@ function validateProductForm(values) {
 
 	if (description.length > 1000) {
 		errors.description = "Mô tả tối đa 1000 ký tự.";
+	}
+
+	if (content.length > MAX_PRODUCT_CONTENT_LENGTH) {
+		errors.content = `Nội dung markdown tối đa ${MAX_PRODUCT_CONTENT_LENGTH} ký tự.`;
+	}
+
+	const careGuide = String(values.careGuide ?? "").trim();
+	const sunlightLevel = String(values.sunlightLevel ?? "").trim();
+	const wateringFrequency = String(values.wateringFrequency ?? "").trim();
+	const difficulty = String(values.difficulty ?? "").trim();
+	const fengShuiElement = String(values.fengShuiElement ?? "").trim();
+
+	if (careGuide.length > MAX_DESCRIPTION_LENGTH) {
+		errors.careGuide = "Hướng dẫn chăm sóc tối đa 1000 ký tự.";
+	}
+
+	if (sunlightLevel.length > MAX_SHORT_TEXT_LENGTH) {
+		errors.sunlightLevel = "Ánh sáng tối đa 255 ký tự.";
+	}
+
+	if (wateringFrequency.length > MAX_SHORT_TEXT_LENGTH) {
+		errors.wateringFrequency = "Tần suất tưới tối đa 255 ký tự.";
+	}
+
+	if (difficulty.length > MAX_SHORT_TEXT_LENGTH) {
+		errors.difficulty = "Độ khó chăm tối đa 255 ký tự.";
+	}
+
+	if (fengShuiElement.length > MAX_SHORT_TEXT_LENGTH) {
+		errors.fengShuiElement = "Phong thủy tối đa 255 ký tự.";
 	}
 
 	const imageError = validateProductImages(values.imageFiles);
@@ -373,6 +413,12 @@ export default function ManagementPage() {
 			status: Boolean(product.status),
 			sku: product.sku ?? "",
 			description: product.description ?? "",
+			content: product.content ?? "",
+			careGuide: product.careGuide ?? "",
+			sunlightLevel: product.sunlightLevel ?? "",
+			wateringFrequency: product.wateringFrequency ?? "",
+			difficulty: product.difficulty ?? "",
+			fengShuiElement: product.fengShuiElement ?? "",
 			images: parseImageList(product.images),
 			imageFiles: [],
 		});
@@ -447,6 +493,12 @@ export default function ManagementPage() {
 				status: productForm.status,
 				sku: productForm.sku.trim(),
 				description: productForm.description.trim(),
+				content: productForm.content.trim(),
+				careGuide: productForm.careGuide.trim(),
+				sunlightLevel: productForm.sunlightLevel.trim(),
+				wateringFrequency: productForm.wateringFrequency.trim(),
+				difficulty: productForm.difficulty.trim(),
+				fengShuiElement: productForm.fengShuiElement.trim(),
 				images: imageNames.length ? JSON.stringify(imageNames) : null,
 			};
 
@@ -712,6 +764,7 @@ export default function ManagementPage() {
 							/>
 						</div>
 					</div>
+
 				</section>
 			</Container>
 
@@ -766,6 +819,7 @@ export default function ManagementPage() {
 
 			<Modal
 				isOpen={isProductModalOpen}
+				className="max-w-6xl min-w-[min(1120px,94vw)]"
 				onClose={() => {
 					closeProductModal();
 				}}
@@ -800,23 +854,15 @@ export default function ManagementPage() {
 						]}
 						onChange={updateProductFormField}
 						onSubmit={saveProduct}
-					/>
-
-					<div className="flex flex-wrap">
-						<Button variant="secondary" className={"grow bg-red-500 hover:bg-red-400 text-white"} onClick={resetProductForm}>
+					>
+						<Button type="button" variant="secondary" className="w-full bg-red-500 hover:bg-red-400 text-white" onClick={resetProductForm}>
 							Xóa
 						</Button>
-						<Button
-							variant="secondary"
-							className={"grow border-gray-400 text-black border hover:bg-gray-300/40"}
-							onClick={() => {
-								resetProductForm();
-								closeProductModal();
-							}}
-						>
-							Đóng
-						</Button>
-					</div>
+					</ProductForm>
+
+					{productForm.id && (
+						<ReviewSection productId={productForm.id} canManage={true} />
+					)}
 				</div>
 			</Modal>
 		</main>

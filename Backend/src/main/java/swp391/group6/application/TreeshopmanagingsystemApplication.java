@@ -3,11 +3,13 @@ package swp391.group6.application;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(scanBasePackages = "swp391.group6")
 @EnableScheduling
+@EnableConfigurationProperties(swp391.group6.service.viettelpost.ViettelPostProperties.class)
 // Two annotation below serve JPA, do not remove
 @EnableJpaRepositories(basePackages = "swp391.group6.repository")
 @EntityScan(basePackages = "swp391.group6.model")

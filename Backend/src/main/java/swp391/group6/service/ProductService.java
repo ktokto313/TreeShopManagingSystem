@@ -2,7 +2,7 @@
  * Author: minhlthe200133
  * Created Date: 2026-05-30
  * Name: ProductService.java
- * Description: 
+ * Description:
  * Last Change Author: Aiden
  * Last Change Date: 2026-06-25
  */
@@ -18,15 +18,23 @@ import swp391.group6.repository.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import swp391.group6.dto.HomepageFeaturedResponse;
+import swp391.group6.dto.BestSellingProductDTO;
 
 @Service
 public class ProductService {
     private static final int MAX_NAME_LENGTH = 200;
     private static final int MAX_SKU_LENGTH = 50;
     private static final int MAX_DESCRIPTION_LENGTH = 1000;
+    private static final int MAX_LONG_TEXT_LENGTH = 1000;
+    private static final int MAX_SHORT_TEXT_LENGTH = 255;
+    private static final int MAX_CONTENT_LENGTH = 10000;
     private static final Pattern SKU_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
 
     private final ProductRepository productRepository;
@@ -66,6 +74,31 @@ public class ProductService {
 
     public Optional<ProductResponse> getProduct(Long id) {
         return productRepository.findById(id).map(this::toResponse);
+    }
+
+    public HomepageFeaturedResponse getHomepageFeaturedProducts() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfMonth = now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime endOfMonth = now.withDayOfMonth(now.getMonth().length(now.toLocalDate().isLeapYear()))
+                .withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+
+        List<BestSellingProductDTO> topProducts = orderRepository.findBestSellingProducts(startOfMonth, endOfMonth, OrderStatus.RECEIVED);
+        
+        String title = "Sản Phẩm Bán Chạy Nhất Tháng Này";
+        
+        if (topProducts.size() < 4) {
+            LocalDateTime startOfAllTime = LocalDateTime.of(2000, 1, 1, 0, 0);
+            topProducts = orderRepository.findBestSellingProducts(startOfAllTime, endOfMonth, OrderStatus.RECEIVED);
+            title = "Sản Phẩm Bán Chạy Nhất Mọi Thời Đại";
+        }
+        
+        List<ProductResponse> products = topProducts.stream()
+                .limit(4)
+                .map(dto -> getProduct(dto.getProductId()).orElse(null))
+                .filter(p -> p != null)
+                .collect(Collectors.toList());
+                
+        return new HomepageFeaturedResponse(title, products);
     }
 
     /**
@@ -145,8 +178,21 @@ public class ProductService {
         product.setSku(sku);
 
         String description = trimToNull(request.getDescription());
+        String content = trimToNull(request.getContent());
+        String careGuide = trimToNull(request.getCareGuide());
+        String sunlightLevel = trimToNull(request.getSunlightLevel());
+        String wateringFrequency = trimToNull(request.getWateringFrequency());
+        String difficulty = trimToNull(request.getDifficulty());
+        String fengShuiElement = trimToNull(request.getFengShuiElement());
         String images = trimToNull(request.getImages());
-        boolean hasDetail = description != null || images != null;
+        boolean hasDetail = description != null
+                || content != null
+                || careGuide != null
+                || sunlightLevel != null
+                || wateringFrequency != null
+                || difficulty != null
+                || fengShuiElement != null
+                || images != null;
 
         ProductDetail detail = product.getProductDetail();
         if (detail == null && hasDetail) {
@@ -157,6 +203,12 @@ public class ProductService {
         if (detail != null) {
             detail.setProduct(product);
             detail.setDescription(description);
+            detail.setContent(content);
+            detail.setCareGuide(careGuide);
+            detail.setSunlightLevel(sunlightLevel);
+            detail.setWateringFrequency(wateringFrequency);
+            detail.setDifficulty(difficulty);
+            detail.setFengShuiElement(fengShuiElement);
             detail.setImages(images);
             product.setProductDetail(detail);
         } else {
@@ -176,6 +228,12 @@ public class ProductService {
         ProductDetail detail = resolveProductDetail(product);
         if (detail != null) {
             response.setDescription(detail.getDescription());
+            response.setContent(detail.getContent());
+            response.setCareGuide(detail.getCareGuide());
+            response.setSunlightLevel(detail.getSunlightLevel());
+            response.setWateringFrequency(detail.getWateringFrequency());
+            response.setDifficulty(detail.getDifficulty());
+            response.setFengShuiElement(detail.getFengShuiElement());
             response.setImages(detail.getImages());
         }
         return response;
@@ -202,6 +260,12 @@ public class ProductService {
 
     private boolean isValidProductRequest(ProductRequest request, String name, String sku, BigDecimal price) {
         String description = trimToNull(request.getDescription());
+        String content = trimToNull(request.getContent());
+        String careGuide = trimToNull(request.getCareGuide());
+        String sunlightLevel = trimToNull(request.getSunlightLevel());
+        String wateringFrequency = trimToNull(request.getWateringFrequency());
+        String difficulty = trimToNull(request.getDifficulty());
+        String fengShuiElement = trimToNull(request.getFengShuiElement());
         Integer stock = request.getStock();
 
         return request.getCategoryId() != null
@@ -214,7 +278,13 @@ public class ProductService {
                 && price.compareTo(BigDecimal.ZERO) > 0
                 && stock != null
                 && stock >= 0
-                && (description == null || description.length() <= MAX_DESCRIPTION_LENGTH);
+                && (description == null || description.length() <= MAX_DESCRIPTION_LENGTH)
+                && (content == null || content.length() <= MAX_CONTENT_LENGTH)
+                && (careGuide == null || careGuide.length() <= MAX_LONG_TEXT_LENGTH)
+                && (sunlightLevel == null || sunlightLevel.length() <= MAX_SHORT_TEXT_LENGTH)
+                && (wateringFrequency == null || wateringFrequency.length() <= MAX_SHORT_TEXT_LENGTH)
+                && (difficulty == null || difficulty.length() <= MAX_SHORT_TEXT_LENGTH)
+                && (fengShuiElement == null || fengShuiElement.length() <= MAX_SHORT_TEXT_LENGTH);
     }
 
 }

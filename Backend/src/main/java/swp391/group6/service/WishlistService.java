@@ -108,6 +108,12 @@ public class WishlistService {
         ProductDetail detail = resolveProductDetail(product);
         if (detail != null) {
             response.setDescription(detail.getDescription());
+            response.setContent(detail.getContent());
+            response.setCareGuide(detail.getCareGuide());
+            response.setSunlightLevel(detail.getSunlightLevel());
+            response.setWateringFrequency(detail.getWateringFrequency());
+            response.setDifficulty(detail.getDifficulty());
+            response.setFengShuiElement(detail.getFengShuiElement());
             response.setImages(detail.getImages());
         }
 

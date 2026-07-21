@@ -69,3 +69,10 @@ export function submitCheckout(payload) {
     body: JSON.stringify(payload),
   })
 }
+
+export async function fetchShippingFee(payload) {
+  return requestJson('/api/checkout/shipping-fee', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}

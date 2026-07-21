@@ -1,4 +1,12 @@
 /*
+ * Author: AnhLV
+ * Created Date: 2026-05-29
+ * Name: Review.java
+ * Description: Entity model representing a review in the system.
+ * Last Change Author: AnhLV
+ * Last Change Date: 2026-07-12
+ */
+/*
  * Author: ktokto313
  * Created Date: 2026-05-29
  * Name: Review.java
@@ -40,6 +48,12 @@ public class Review {
 
     @Column(nullable = false)
     private Timestamp createdAt;
+
+    @Column(name = "is_curated", nullable = false)
+    private boolean isCurated = false;
+
+    @Column(name = "is_hidden", nullable = false)
+    private boolean isHidden = false;
 
     public long getId() {
         return id;
@@ -87,5 +101,21 @@ public class Review {
 
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public boolean isCurated() {
+        return isCurated;
+    }
+
+    public void setCurated(boolean curated) {
+        isCurated = curated;
+    }
+
+    public boolean isHidden() {
+        return isHidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        isHidden = hidden;
     }
 }

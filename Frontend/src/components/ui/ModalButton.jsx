@@ -12,6 +12,7 @@ const ModalButton = ({
 	modalTitle,
 	buttonLabel,
 	children,
+	onOpen,
 }) => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [formError, setFormError] = useState(null);
@@ -27,7 +28,12 @@ const ModalButton = ({
 			<Button
 				disabled={buttonDisabled}
 				className={cn(buttonClasses)}
-				onClick={() => setIsModalOpen(true)}
+				onClick={(e) => {
+					e.stopPropagation();
+					e.preventDefault();
+					if (onOpen) onOpen();
+					setIsModalOpen(true);
+				}}
 			>
 				{buttonLabel}
 			</Button>

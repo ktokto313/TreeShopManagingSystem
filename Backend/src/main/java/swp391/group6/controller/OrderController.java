@@ -129,4 +129,38 @@ public class OrderController {
             return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage() != null ? e.getMessage() : "Unknown error"));
         }
     }
+
+    @GetMapping("/reviews/curated")
+    public ResponseEntity<List<swp391.group6.model.Review>> getCuratedReviews() {
+        return ResponseEntity.ok(orderService.getCuratedReviews());
+    }
+
+    @PutMapping("/reviews/{reviewId}/curate")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<Void> toggleReviewCurated(
+            @PathVariable Long reviewId) {
+        if (orderService.toggleReviewCurated(reviewId)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/products/{productId}/reviews/all")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<Page<swp391.group6.model.Review>> getAllProductReviews(
+            @PathVariable Long productId,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<swp391.group6.model.Review> reviews = orderService.getAllProductReviewsForManager(productId, pageable);
+        return ResponseEntity.ok(reviews);
+    }
+
+    @PutMapping("/reviews/{reviewId}/hide")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<Void> toggleReviewHidden(
+            @PathVariable Long reviewId) {
+        if (orderService.toggleReviewHidden(reviewId)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 }

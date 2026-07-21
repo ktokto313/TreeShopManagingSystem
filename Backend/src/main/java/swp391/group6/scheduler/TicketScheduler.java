@@ -1,0 +1,37 @@
+package swp391.group6.scheduler;
+
+import jakarta.transaction.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import swp391.group6.model.Ticket;
+import swp391.group6.model.TicketState;
+import swp391.group6.repository.TicketRepository;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+@Component
+public class TicketScheduler {
+    private final TicketRepository ticketRepository;
+
+    public TicketScheduler(TicketRepository ticketRepository) {
+        this.ticketRepository = ticketRepository;
+    }
+
+    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.DAYS)
+    @Transactional
+    public void autoCloseResolvedTickets() {
+        List<Ticket> resolvedTickets = ticketRepository.findByTicketState(TicketState.RESOLVED);
+        long threeDaysInMillis = TimeUnit.DAYS.toMillis(3);
+        long currentTime = System.currentTimeMillis();
+        
+        for (Ticket ticket : resolvedTickets) {
+            if (ticket.getTimeResolved() != null && (currentTime - ticket.getTimeResolved().getTime() >= threeDaysInMillis)) {
+                ticket.setTicketState(TicketState.DONE);
+                // Note: Not setting timeResolved to a new time here, as it indicates when it was actually resolved. 
+                // DONE just means it's closed.
+                ticketRepository.save(ticket);
+            }
+        }
+    }
+}
