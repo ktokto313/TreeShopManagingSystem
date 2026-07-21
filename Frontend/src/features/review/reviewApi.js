@@ -7,7 +7,7 @@ export const getProductReviews = (productId, page, size, rating, canManage) => {
 	if(rating !== undefined && rating !== null) params.append("rating", rating);
 
 	const queryString = params.toString();
-	const basePath = canManage ? `/api/orders/products/${productId}/reviews/all` : `/api/orders/products/${productId}/reviews`;
+	const basePath = canManage ? `/api/reviews/product/${productId}/all` : `/api/reviews/product/${productId}`;
 	const url = `${basePath}${queryString ? `?${queryString}` : ""}`;
 
 	return requestJson(url, {
@@ -16,15 +16,15 @@ export const getProductReviews = (productId, page, size, rating, canManage) => {
 };
 
 export const toggleReviewHideApi = (reviewId) => {
-	return requestJson(`/api/orders/reviews/${reviewId}/hide`, { method: "PUT" });
+	return requestJson(`/api/reviews/${reviewId}/hide`, { method: "PUT" });
 };
 
 export const toggleReviewCurateApi = (reviewId) => {
-	return requestJson(`/api/orders/reviews/${reviewId}/curate`, { method: "PUT" });
+	return requestJson(`/api/reviews/${reviewId}/curate`, { method: "PUT" });
 };
 
 export const createProductReview = (orderId, productId, payload) => {
-	return requestJson(`/api/orders/${orderId}/details/${productId}/review`, {
+	return requestJson(`/api/reviews/order/${orderId}/product/${productId}`, {
 		method: "POST",
 		body: payload,
 	});

@@ -4,16 +4,9 @@
  * Name: Review.java
  * Description: Entity model representing a review in the system.
  * Last Change Author: AnhLV
- * Last Change Date: 2026-07-12
+ * Last Change Date: 2026-07-21
  */
-/*
- * Author: ktokto313
- * Created Date: 2026-05-29
- * Name: Review.java
- * Description: 
- * Last Change Author: Aiden
- * Last Change Date: 2026-06-25
- */
+
 package swp391.group6.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -29,7 +22,8 @@ public class Review {
     private long id;
 
     @JsonIgnore
-    @ManyToOne
+    @org.hibernate.annotations.NotFound(action = org.hibernate.annotations.NotFoundAction.IGNORE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
         @JoinColumn(name = "order_id", referencedColumnName = "order_id", nullable = false),
         @JoinColumn(name = "product_id", referencedColumnName = "product_id", nullable = false)

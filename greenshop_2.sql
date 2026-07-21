@@ -1282,9 +1282,9 @@ VALUES (1, 3, 2),
 --  ORDERS — 8 đơn hàng
 -- ============================================================
 INSERT INTO orders (customer_id, shipper_id, shipping_address, shipping_fee, discount, status)
-VALUES (5, 3, '123 Nguyễn Trãi, Quận 1, TP.HCM', 30000, 0, 'DELIVERING'),
-       (6, 3, '45 Lê Lợi, Quận Hải Châu, Đà Nẵng', 30000, 15000, 'DELIVERING'),
-       (7, 3, '78 Hoàn Kiếm, Hà Nội', 30000, 0, 'ARRIVED'),
+VALUES (5, 3, '123 Nguyễn Trãi, Quận 1, TP.HCM', 30000, 0, 'RECEIVED'),
+       (6, 3, '45 Lê Lợi, Quận Hải Châu, Đà Nẵng', 30000, 15000, 'RECEIVED'),
+       (7, 3, '78 Hoàn Kiếm, Hà Nội', 30000, 0, 'RECEIVED'),
        (5, NULL, '56 Trần Hưng Đạo, Quận 5, TP.HCM', 30000, 0, 'PROCESSING'),
        (6, NULL, '89 Lý Thường Kiệt, Quận 10, TP.HCM', 30000, 0, 'PROCESSING'),
        (8, NULL, '12 Hai Bà Trưng, Quận 1, TP.HCM', 30000, 30000, 'PENDING'),
@@ -1522,4 +1522,41 @@ Chính sách hướng dẫn khách hàng cách đặt cọc trước (Pre-order)
 ## Nội dung chương trình (Đã đóng)
 - Khách hàng mang chậu sứ cũ, chậu nhựa cũ đã mua tại Greenshop đến cửa hàng sẽ được giảm giá 20% khi mua chậu đất nung mới.
 ', 'ARCHIVED');
+
+INSERT INTO tickets (title, detail, creator_id, assignee_id, state, priority, time_created, time_resolved)
+SELECT 
+    'Sample Ticket for User ' || id,
+    'This is an automatically generated ticket to test the dashboard for user ' || id || '.',
+    id,
+    NULL,
+    'CREATED',
+    'MEDIUM',
+    CURRENT_TIMESTAMP,
+    NULL
+FROM users;
+
+INSERT INTO reviews (order_id, product_id, customer_id, rating, comment, is_curated, is_hidden, created_at)
+SELECT 
+    od.order_id,
+    od.product_id,
+    o.customer_id,
+    floor(random() * 2 + 4)::int,
+    (ARRAY[
+        'Cây đẹp, tươi tốt, đóng gói rất cẩn thận. Sẽ ủng hộ shop dài dài!', 
+        'Sản phẩm tuyệt vời, giao hàng siêu nhanh. Rất đáng tiền!', 
+        'Cây y như hình, shop tư vấn nhiệt tình. Cảm ơn shop nhiều nhé.', 
+        'Rất hài lòng với chất lượng sản phẩm. Trưng trong nhà rất đẹp.',
+        'Mua lần thứ 2 rồi và vẫn rất ưng ý. Khuyên mọi người nên mua!'
+    ])[floor(random() * 5) + 1],
+    random() < 0.5,
+    false,
+    CURRENT_TIMESTAMP
+FROM order_detail od
+JOIN orders o ON od.order_id = o.id
+WHERE (od.product_id % 10) < 8
+  AND NOT EXISTS (
+      SELECT 1 FROM reviews r 
+      WHERE r.order_id = od.order_id 
+        AND r.product_id = od.product_id
+  );
 
