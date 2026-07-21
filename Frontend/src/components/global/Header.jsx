@@ -147,7 +147,7 @@ export function Header({ className = '', ...props }) {
                     onClick={logout}
                     className="hidden sm:block cursor-pointer text-sm font-medium px-3 py-1.5 rounded-lg border border-stone-300 text-stone-600 hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
                 >
-                  Logout
+                  Đăng xuất
                 </button>
 
               </div>
