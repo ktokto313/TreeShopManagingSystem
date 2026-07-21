@@ -27,7 +27,7 @@ CREATE TABLE role (
 -- ============================================================
 
 CREATE TABLE users (
-   idBIGSERIAL PRIMARY KEY,
+   id          BIGSERIAL PRIMARY KEY,
    role_id     BIGINT NOT NULL DEFAULT 1 REFERENCES role(id),
    email       VARCHAR(150) NOT NULL UNIQUE,
    password    VARCHAR(255),
@@ -43,7 +43,7 @@ CREATE INDEX idx_users_role_id ON users(role_id);
 -- ============================================================
 
 CREATE TABLE categories (
-        idBIGSERIAL PRIMARY KEY,
+        id          BIGSERIAL PRIMARY KEY,
         name        VARCHAR(100) NOT NULL UNIQUE,
         description TEXT,
         parent_id   BIGINT REFERENCES categories(id) ON DELETE SET NULL
@@ -52,7 +52,7 @@ CREATE TABLE categories (
 -- ============================================================
 
 CREATE TABLE products (
-      idBIGSERIAL PRIMARY KEY,
+      id          BIGSERIAL PRIMARY KEY,
       category_id BIGINT REFERENCES categories(id) ON DELETE SET NULL,
       name        VARCHAR(200) NOT NULL,
       price       DECIMAL(15,2) NOT NULL CHECK (price >= 0),
@@ -67,16 +67,16 @@ CREATE INDEX idx_products_sku      ON products(sku);
 -- ============================================================
 
 CREATE TABLE product_details (
-   id    BIGSERIAL PRIMARY KEY,
+   id              BIGSERIAL PRIMARY KEY,
    product_id      BIGINT NOT NULL UNIQUE REFERENCES products(id) ON DELETE CASCADE,
    description     TEXT,
-   contentTEXT,
+   content         TEXT,
    care_guide      TEXT,
    sunlight_level  VARCHAR(50),
    water_freq      VARCHAR(50),
    difficulty      VARCHAR(50),
    feng_shui_element VARCHAR(50),
-   imagesJSON
+   images           JSON
 );
 
 -- ============================================================
@@ -111,7 +111,7 @@ PRIMARY KEY (order_id, product_id)
 -- ============================================================
 
 CREATE TABLE shopping_carts (
-  idBIGSERIAL PRIMARY KEY,
+  id            BIGSERIAL PRIMARY KEY,
   customer_id BIGINT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -131,7 +131,7 @@ CREATE TABLE wishlist_items (
 -- ============================================================
 
 CREATE TABLE reviews (
-     idBIGSERIAL PRIMARY KEY,
+     id         BIGSERIAL PRIMARY KEY,
      order_id    BIGINT NOT NULL REFERENCES orders(id),
      product_id  BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
      customer_id BIGINT NOT NULL REFERENCES users(id),
@@ -180,7 +180,7 @@ CREATE INDEX idx_comments_ticket ON comments(ticket_id);
 -- ============================================================
 
 CREATE TABLE policies (
-      idBIGSERIAL PRIMARY KEY,
+      id        BIGSERIAL PRIMARY KEY,
       title       VARCHAR(300) NOT NULL,
       description TEXT NOT NULL,
       status      VARCHAR(50) NOT NULL DEFAULT 'DRAFT',
@@ -292,8 +292,8 @@ CREATE TABLE blog_posts (
 
         view_countINT NOT NULL DEFAULT 0,
 
-        created_atTIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_atTIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         published_at        TIMESTAMP
 );
 
@@ -314,10 +314,10 @@ CREATE TABLE blog_images (
 id    BIGSERIAL PRIMARY KEY,
 
     -- giữ blog_id cho code/seed từ branch cũ
-blog_idBIGINT REFERENCES blog_posts(id) ON DELETE CASCADE,
+blog_id BIGINT REFERENCES blog_posts(id) ON DELETE CASCADE,
 
     -- giữ post_id cho code blog mới
-post_idBIGINT REFERENCES blog_posts(id) ON DELETE CASCADE,
+post_id BIGINT REFERENCES blog_posts(id) ON DELETE CASCADE,
 
 image_url       TEXT NOT NULL,
 
@@ -361,7 +361,7 @@ CREATE INDEX idx_blog_tags_name ON blog_tags(tag);
 -- ============================================================
 
 CREATE TABLE blog_votes (
-        idBIGSERIAL PRIMARY KEY,
+        id          BIGSERIAL PRIMARY KEY,
 
     -- branch cũ
         blog_id     BIGINT REFERENCES blog_posts(id) ON DELETE CASCADE,
@@ -414,7 +414,7 @@ CREATE TABLE notifications (
 
  is_read   BOOLEAN NOT NULL DEFAULT FALSE,
 
- created_atTIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+ created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_notifications_user
