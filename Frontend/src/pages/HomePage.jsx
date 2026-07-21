@@ -102,33 +102,15 @@ export default function HomePage() {
 				</Container>
 			</section>
 
-
-
-			<section className="bg-green-400">
-				<Container className="py-12">
-					<div className="flex flex-col items-start justify-between gap-5 rounded-3xl bg-bg-surface p-8 shadow-xl lg:flex-row lg:items-center">
-						<div className="space-y-2">
-							<h2 className="text-2xl font-semibold text-green-700">
-								Mở catalog để xem cây, hoặc vào quản lý nếu cần cập nhật sản
-								phẩm
-							</h2>
-							<p className="max-w-2xl text-sm text-green-600">
-								Trang đầu giữ vai trò dẫn hướng đơn giản cho khách xem cây và
-								cho quản trị viên cập nhật dữ liệu.
-							</p>
-						</div>
-						<ActionLink to="/catalog" variant="primary">
-							Mở catalog
-						</ActionLink>
-					</div>
-				</Container>
+			<section>
+				<ValuePropositions />
+				<CategoriesGrid />
+				<FeaturedProducts />
+				<TestimonialSlider />
+				<BlogHighlight />
+				<NewsletterFAQ />
 			</section>
-			<ValuePropositions />
-			<CategoriesGrid />
-			<FeaturedProducts />
-			<TestimonialSlider />
-			<BlogHighlight />
-			<NewsletterFAQ />
+
 		</main>
 	);
 }

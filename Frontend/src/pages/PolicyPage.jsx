@@ -5,7 +5,7 @@ const PolicyPage = () => {
 	const state = usePolicy();
 
 	return (
-		<div className="p-6 sm:p-10 lg:pt-10 lg:px-25">
+		<div className="p-6 sm:p-10 lg:pt-10 lg:px-25 max-w-390 mx-auto">
 			<PolicyList state={state}></PolicyList>
 		</div>
 	);
