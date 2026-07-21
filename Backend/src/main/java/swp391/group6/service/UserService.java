@@ -2,7 +2,7 @@
  * Author: DucLM
  * Created Date: 2026-05-29
  * Name: User Service
- * Description: Add comment for Business Rule
+ * Description:
  * Last Change Author: Hung Dao
  * Last Change Date: 2026-07-20
  */
