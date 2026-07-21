@@ -12,6 +12,9 @@ package swp391.group6.controller;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,15 +58,18 @@ public class TicketController {
 
     @GetMapping("/")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<Ticket>> getAuthorizedTickets(
+    public ResponseEntity<Page<Ticket>> getAuthorizedTickets(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String priority,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
             Sort sort,
             HttpServletRequest request) {
 
         LoginResponse currentUser = JWTUtil.getUser(request);
         String email = currentUser.getEmail();
-        List<Ticket> tickets = ticketService.getAuthorizedTicketsByEmail(email, status, priority, sort);
+        Pageable pageable = PageRequest.of(page, size, sort != null ? sort : Sort.unsorted());
+        Page<Ticket> tickets = ticketService.getAuthorizedTicketsByEmail(email, status, priority, pageable);
         return ResponseEntity.ok(tickets);
     }
 

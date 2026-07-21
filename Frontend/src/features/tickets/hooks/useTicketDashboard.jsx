@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/AuthContext";
 import useFetchAllTickets from "./useFetchAllTickets";
@@ -10,10 +10,14 @@ export const useTicketDashboard = () => {
 	const { user } = useContext(AuthContext);
 	const isAgent = user?.roleName?.toLowerCase() === "support_agent";
 
+	const [currentPage, setCurrentPage] = useState(0);
+
 	const {
 		fetchAllTicketsError,
 		isFetchAllTicketsLoading,
 		fetchedTickets,
+		totalPages,
+		totalElements,
 		executeFetchAllTickets,
 	} = useFetchAllTickets();
 
@@ -25,7 +29,7 @@ export const useTicketDashboard = () => {
 		setIsSelectAutoFilterSort,
 		getFilterValue,
 		handleFilterChange,
-	} = useFilterAndSortTickets(executeFetchAllTickets);
+	} = useFilterAndSortTickets(executeFetchAllTickets, setCurrentPage);
 
 	const {
 		ticketCreateError,
@@ -38,13 +42,18 @@ export const useTicketDashboard = () => {
 	} = useCreateTicket();
 
 	useEffect(() => {
-		executeFetchAllTickets();
-	}, [executeFetchAllTickets]); 
+		executeFetchAllTickets(ticketState, ticketPriority, ticketSort, currentPage);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [currentPage]);
 
 	return {
 		// UI State
 		isFetchAllTicketsLoading,
 		fetchedTickets,
+		totalPages,
+		totalElements,
+		currentPage,
+		setCurrentPage,
 		user,
 		isAgent,
 

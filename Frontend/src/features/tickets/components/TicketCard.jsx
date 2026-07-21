@@ -7,9 +7,12 @@ import {
 } from "../../../components/ui/Card";
 import { cn } from "../../../utils/cn";
 import { timeFormat } from "../../../utils/timeFormat";
+import { IoWarning } from "react-icons/io5";
 import {
 	getTicketStatusStyles,
 	translateTicketStatus,
+	getTicketPriorityStyles,
+	translateTicketPriority,
 } from "../utils/ticketUtils";
 
 export function TicketCard({ ticket, variant = "default" }) {
@@ -23,12 +26,24 @@ export function TicketCard({ ticket, variant = "default" }) {
 								<span className="text-xs font-semibold tracking-wider text-gray-500 uppercase">
 									#{ticket.id}
 								</span>
-								{/* Ticket's status */}
-								<span
-									className={`px-2 py-1 rounded-xl text-[0.7rem] font-bold gap-1 ${getTicketStatusStyles(ticket.ticketState)}`}
-								>
-									{translateTicketStatus(ticket.ticketState)}
-								</span>
+								{/* Ticket's status and priority */}
+								<div className="flex gap-2 items-center">
+									{ticket.priority && (
+										<span
+											className={`px-2 py-1 rounded-xl text-[0.7rem] font-bold gap-0.5 flex items-center ${getTicketPriorityStyles(ticket.priority)}`}
+											title={translateTicketPriority(ticket.priority)}
+										>
+											{Array.from({ length: { low: 1, medium: 2, high: 3, critical: 4 }[ticket.priority.toLowerCase()] || 1 }).map((_, i) => (
+												<IoWarning key={i} className="text-sm" />
+											))}
+										</span>
+									)}
+									<span
+										className={`px-2 py-1 rounded-xl text-[0.7rem] font-bold gap-1 ${getTicketStatusStyles(ticket.ticketState)}`}
+									>
+										{translateTicketStatus(ticket.ticketState)}
+									</span>
+								</div>
 							</div>
 							{/* Ticket's title */}
 							<CardTitle className="transition-colors truncate">
@@ -76,10 +91,15 @@ export function TicketCard({ ticket, variant = "default" }) {
 								<span className="font-semibold tracking-wider text-gray-300 text-base uppercase">
 									#
 								</span>
-								{/* Ticket's status */}
-								<span className={`px-2 py-1 rounded-xl text-[0.7rem] gap-1 `}>
-									<div className="rounded-full bg-gray-300 w-15 h-5"></div>
-								</span>
+								{/* Ticket's status and priority skeleton */}
+								<div className="flex gap-2 items-center">
+									<span className={`px-2 py-1 rounded-xl text-[0.7rem] gap-1 `}>
+										<div className="rounded-full bg-gray-300 w-12 h-5"></div>
+									</span>
+									<span className={`px-2 py-1 rounded-xl text-[0.7rem] gap-1 `}>
+										<div className="rounded-full bg-gray-300 w-15 h-5"></div>
+									</span>
+								</div>
 							</div>
 							{/* Ticket's title */}
 							<CardTitle className="group-hover:text-interactive transition-colors truncate">

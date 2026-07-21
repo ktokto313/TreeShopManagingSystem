@@ -3,12 +3,14 @@ import { fetchAllTickets } from "../data/ticketApi.js";
 
 const useFetchAllTickets = (initialTickets = []) => {
 	const [fetchedTickets, setFetchedTickets] = useState(initialTickets);
+	const [totalPages, setTotalPages] = useState(1);
+	const [totalElements, setTotalElements] = useState(0);
 	const [isFetchAllTicketsLoading, setIsFetchAllTicketsLoading] =
 		useState(false);
 	const [fetchAllTicketsError, setFetchAllTicketsError] = useState(null);
 
 	const executeFetchAllTickets = useCallback(
-		async (ticketFilter, ticketPiority, ticketSort) => {
+		async (ticketFilter, ticketPiority, ticketSort, page = 0) => {
 			setIsFetchAllTicketsLoading(true);
 			setFetchAllTicketsError(null);
 
@@ -17,8 +19,11 @@ const useFetchAllTickets = (initialTickets = []) => {
 					ticketFilter,
 					ticketPiority,
 					ticketSort,
+					page
 				);
-				setFetchedTickets(data);
+				setFetchedTickets(data.content || []);
+				setTotalPages(data.totalPages || 1);
+				setTotalElements(data.totalElements || 0);
 			} catch {
 				const errorMessage = "Đã xảy ra lỗi khi tải dữ liệu."; // Hardcoded message
 
@@ -34,6 +39,8 @@ const useFetchAllTickets = (initialTickets = []) => {
 		isFetchAllTicketsLoading,
 		fetchAllTicketsError,
 		fetchedTickets,
+		totalPages,
+		totalElements,
 		executeFetchAllTickets,
 	};
 };

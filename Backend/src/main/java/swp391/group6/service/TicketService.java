@@ -15,7 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -85,7 +86,7 @@ public class TicketService {
         return new ArrayList<>(ticketRepository.findTicketsByCreator(userId));
     }
 
-    public List<Ticket> getAuthorizedTicketsByEmail(String email, String statusStr, String priorityStr, Sort sort) {
+    public Page<Ticket> getAuthorizedTicketsByEmail(String email, String statusStr, String priorityStr, Pageable pageable) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found for email: " + email));
 
@@ -97,11 +98,11 @@ public class TicketService {
                 ? Priority.valueOf(priorityStr.toUpperCase()) : null;
 
         // Pass everything to the repository
-        List<Ticket> ticketsResult = null;
+        Page<Ticket> ticketsResult = null;
         if (user.getRole().getId() == 1) { // Id of customer
-            ticketsResult = ticketRepository.findTicketsByCreatorWithFilters(user.getId(), state, priority, sort);
+            ticketsResult = ticketRepository.findTicketsByCreatorWithFilters(user.getId(), state, priority, pageable);
         } else if (user.getRole().getId() == 4) { // Id of support agent
-            ticketsResult = ticketRepository.findAllWithFiltersAndIsAssigned(user.getId(), state, priority, sort);
+            ticketsResult = ticketRepository.findAllWithFiltersAndIsAssigned(user.getId(), state, priority, pageable);
         }
 
         return ticketsResult;

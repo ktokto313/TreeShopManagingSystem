@@ -11,7 +11,8 @@ package swp391.group6.repository;
 
 import java.util.List;
 
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,25 +33,25 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
             "AND (:state IS NULL OR t.ticketState = :state) " +
             "AND (:priority IS NULL OR t.priority = :priority)")
 
-    List<Ticket> findTicketsByCreatorWithFilters(
+    Page<Ticket> findTicketsByCreatorWithFilters(
             @Param("userId") long userId,
             @Param("state") TicketState state,
             @Param("priority") Priority priority,
-            Sort sort);
+            Pageable pageable);
 
     @Query("SELECT t FROM Ticket t WHERE (:state IS NULL OR t.ticketState = :state) " +
             "AND (:priority IS NULL OR t.priority = :priority)")
-    List<Ticket> findAllWithFilters(
+    Page<Ticket> findAllWithFilters(
             @Param("state") TicketState state,
             @Param("priority") Priority priority,
-            Sort sort);
+            Pageable pageable);
 
     @Query("SELECT t FROM Ticket t WHERE (:state IS NULL OR t.ticketState = :state) " +
             "AND (:priority IS NULL OR t.priority = :priority)" +
             "AND (t.assignee.id IS NULL OR t.assignee.id = :userId)")
-    List<Ticket> findAllWithFiltersAndIsAssigned(
+    Page<Ticket> findAllWithFiltersAndIsAssigned(
             @Param("userId") long userId,
             @Param("state") TicketState state,
             @Param("priority") Priority priority,
-            Sort sort);
+            Pageable pageable);
 }

@@ -36,12 +36,14 @@ export const createComment = async (ticketId, detail) => {
 	return response.json();
 };
 
-export const fetchAllTickets = async (status, priority, sort) => {
+export const fetchAllTickets = async (status, priority, sort, page = 0, size = 8) => {
 	const params = new URLSearchParams();
 
 	if (status) params.append("status", status);
 	if (priority) params.append("priority", priority);
 	if (sort) params.append("sort", sort);
+	params.append("page", page);
+	params.append("size", size);
 
 	const url = `/api/tickets/?${params.toString()}`;
 
