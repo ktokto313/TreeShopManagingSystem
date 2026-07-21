@@ -49,8 +49,8 @@ public class OtpService {
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
-        message.setSubject("Greenshop - Your OTP Code");
-        message.setText("Your OTP code is: " + otp + "\nThis code will expire in 5 minutes.");
+        message.setSubject("Greenshop - Mã OTP của bạn");
+        message.setText("OTP của bạn: " + otp + "\nSẽ hết hạn sau 5 phút. Xin vui lòng không chia sẻ cho bất kì ai.");
         mailSender.send(message);
     }
 

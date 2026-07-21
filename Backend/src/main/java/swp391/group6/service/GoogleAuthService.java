@@ -55,7 +55,7 @@ public class GoogleAuthService {
         if (existing.isPresent()) {
             User user = existing.get();
             if (user.getPassword() != null) {
-                throw new RuntimeException("Invalid email.");
+                throw new RuntimeException("Email không hợp lệ.");
             }
 
             LoginResponse loginResponse = new LoginResponse(
@@ -113,10 +113,10 @@ public class GoogleAuthService {
                     .setAudience(Collections.singletonList(clientId))
                     .build();
             GoogleIdToken idToken = verifier.verify(credential);
-            if (idToken == null) throw new RuntimeException("Invalid Google token");
+            if (idToken == null) throw new RuntimeException("Google token không hợp lệ.");
             return idToken.getPayload();
         } catch (Exception e) {
-            throw new RuntimeException("Google token verification failed", e);
+            throw new RuntimeException("Xác thực Google thất bại.", e);
         }
     }
 }

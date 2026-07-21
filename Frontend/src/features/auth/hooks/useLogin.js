@@ -50,7 +50,7 @@ export function useLogin() {
             if (err.status === 429 && err.remainingSeconds) {
                 setBlockedSeconds(err.remainingSeconds)
             }
-            setError(err.message || 'Invalid email or password')
+            setError(err.message || 'Email hoặc mật khẩu không chính xác.')
             return { success: false }
         } finally {
             setLoading(false)
@@ -69,7 +69,7 @@ export function useLogin() {
             const data = await res.json()
 
             if (!res.ok) {
-                setError(data.message || 'Google login failed')
+                setError(data.message || 'Đăng nhập Google thất bại')
                 return { success: false }
             }
 
@@ -89,7 +89,7 @@ export function useLogin() {
                 redirect: getDefaultRouteForRole(data.role),
             }
         } catch {
-            setError('Google login failed, please try again')
+            setError('Đăng nhập Google thất bại')
             return { success: false }
         }
     }

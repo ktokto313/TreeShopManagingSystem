@@ -64,7 +64,7 @@ public class AuthController {
             long remaining = authService.getRemainingBlockSeconds(clientIp);
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                     .body(Map.of(
-                            "message", "Too many failed attempts. Try again later.",
+                            "message", "Nhập sai quá nhiều. Thử lại sau: ",
                             "remainingSeconds", remaining
                     ));
         }
@@ -107,11 +107,11 @@ public class AuthController {
     public ResponseEntity<?> sendRegisterOtp(@RequestBody OtpRequest request) {
         if (authService.emailExists(request.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("message", "Email already exists"));
+                    .body(Map.of("message", "Email đã tồn tại"));
         }
 
         otpService.generateAndSend(request.getEmail(), OtpType.REGISTER);
-        return ResponseEntity.ok(Map.of("message", "OTP sent"));
+        return ResponseEntity.ok(Map.of("message", "Đã gửi OTP"));
     }
 
     @PostMapping("/register/verify-otp")
@@ -124,10 +124,10 @@ public class AuthController {
 
         if (!valid) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("message", "Invalid or expired OTP"));
+                    .body(Map.of("message", "OTP sai hoặc hết hạn"));
         }
 
-        return ResponseEntity.ok(Map.of("message", "OTP verified"));
+        return ResponseEntity.ok(Map.of("message", "OTP đã được xác minh"));
     }
 
     @PostMapping("/google")
@@ -155,17 +155,17 @@ public class AuthController {
     public ResponseEntity<?> sendResetOtp(@RequestBody OtpRequest request) {
         if (authService.isGoogleAccount(request.getEmail())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "This account uses Google login"));
+                    .body(Map.of("message", "Đây là tài khoản Google."));
         }
 
         if (!authService.emailExists(request.getEmail())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "Email not found"));
+                    .body(Map.of("message", "Email không tồn tại trên dữ liệu."));
         }
 
         otpService.generateAndSend(request.getEmail(), OtpType.RESET_PASSWORD);
 
-        return ResponseEntity.ok(Map.of("message", "OTP sent"));
+        return ResponseEntity.ok(Map.of("message", "Đã gửi OTP"));
     }
 
     @PostMapping("/forgot-password/verify-otp")
@@ -179,12 +179,12 @@ public class AuthController {
 
         if (!valid) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("message", "Invalid or expired OTP"));
+                    .body(Map.of("message", "OTP sai hoặc hết hạn"));
         }
 
         verifiedReset.put(request.getEmail(), true);
 
-        return ResponseEntity.ok(Map.of("message", "OTP verified"));
+        return ResponseEntity.ok(Map.of("message", "OTP đã xác thực"));
     }
 
     // BR-19: the new password must ultimately be persisted BCrypt-hashed
@@ -193,7 +193,7 @@ public class AuthController {
 
         if (!verifiedReset.getOrDefault(request.getEmail(), false)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "OTP not verified"));
+                    .body(Map.of("message", "OTP không được xác thực."));
         }
 
         boolean success = changePasswordService.resetPassword(
@@ -203,12 +203,12 @@ public class AuthController {
 
         if (!success) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("message", "Reset password failed"));
+                    .body(Map.of("message", "Đặt lại mật khẩu thất bại."));
         }
 
         verifiedReset.remove(request.getEmail());
 
-        return ResponseEntity.ok(Map.of("message", "Password reset successful"));
+        return ResponseEntity.ok(Map.of("message", "Đặt lại mật khẩu thành công."));
     }
 
     //LOGOUT
@@ -218,6 +218,6 @@ public class AuthController {
         ResponseCookie deadCookie = CookieUtil.invalidateCookie();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, deadCookie.toString())
-                .body("Logged out successfully");
+                .body("Đăng xuất thành công.");
     }
 }

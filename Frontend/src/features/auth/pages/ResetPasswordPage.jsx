@@ -36,7 +36,7 @@ export default function ResetPasswordPage() {
                 {/* EMAIL + SEND OTP */}
                 <div className="flex gap-2 mb-2">
                     <input
-                        placeholder="Enter your email"
+                        placeholder="Nhập email của bạn: "
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={loading}
@@ -50,20 +50,20 @@ export default function ResetPasswordPage() {
                                    hover:bg-green-500 transition
                                    disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {countdown > 0 ? `${countdown}s` : "Send OTP"}
+                        {countdown > 0 ? `${countdown}s` : "Gửi OTP"}
                     </button>
                 </div>
 
                 {/* EMAIL ERROR */}
                 {email && !isValidEmail(email) && (
                     <p className="text-xs text-red-500 mb-3">
-                        Invalid email format
+                        Email không hợp lệ
                     </p>
                 )}
 
                 {/* OTP INPUT */}
                 <input
-                    placeholder="Enter OTP"
+                    placeholder="Nhập OTP: "
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
                     disabled={step < 2 || loading}
@@ -79,7 +79,7 @@ export default function ResetPasswordPage() {
                                    hover:bg-gray-100 transition
                                    disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Cancel
+                        Hủy
                     </button>
 
                     <button
@@ -89,14 +89,14 @@ export default function ResetPasswordPage() {
                                    hover:bg-green-500 transition
                                    disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Verify OTP
+                        OTP
                     </button>
                 </div>
 
                 {/* NEW PASSWORD */}
                 <input
                     type="password"
-                    placeholder="New password"
+                    placeholder="Mật khẩu mới"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     disabled={step < 3 || loading}
@@ -110,7 +110,7 @@ export default function ResetPasswordPage() {
                                hover:bg-green-500 transition
                                disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    Reset Password
+                    Đặt lại mật khẩu
                 </button>
             </div>
         </div>

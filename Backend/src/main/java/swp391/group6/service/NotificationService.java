@@ -54,7 +54,7 @@ public class NotificationService {
     public void notifyRole(String roleName, NotificationType type,
                            String subject, String content) {
         Role role = roleRepository.findByNameIgnoreCase(roleName)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown role: " + roleName));
+                .orElseThrow(() -> new IllegalArgumentException("Vai trò không xác định: " + roleName));
 
         List<User> recipients = userRepository.findByRole_Name(role.getName());
 

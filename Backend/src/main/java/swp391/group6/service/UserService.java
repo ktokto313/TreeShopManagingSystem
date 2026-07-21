@@ -66,23 +66,23 @@ public class UserService {
 
     private void validateUserForCreate(UserDTO userDTO) {
         if (userDTO == null) {
-            throw new IllegalArgumentException("User data is required");
+            throw new IllegalArgumentException("Yêu cầu dữ liệu hợp lệ.");
         }
         if (userDTO.getEmail() == null
                 || !EMAIL_PATTERN.matcher(userDTO.getEmail().trim()).matches()) {
-            throw new IllegalArgumentException("A valid email is required");
+            throw new IllegalArgumentException("Yêu cầu email hợp lệ.");
         }
         if (userDTO.getPassword() == null || userDTO.getPassword().isBlank()) {
-            throw new IllegalArgumentException("Password is required");
+            throw new IllegalArgumentException("Yêu cầu mật khẩu.");
         }
         if (userRepository.findByEmail(userDTO.getEmail().trim()).isPresent()) {
-            throw new IllegalArgumentException("Email is already in use");
+            throw new IllegalArgumentException("Email đã được sử dụng.");
         }
     }
 
     // BR-19: if a new password is supplied, it's BCrypt-hashed before saving.
     public UserDTO updateUser(long id, UserDTO userDTO) {
-        if (userDTO == null) throw new IllegalArgumentException("User data is required");
+        if (userDTO == null) throw new IllegalArgumentException("Yêu cầu dữ liệu hợp lệ");
 
         User user = userRepository.findById(id).orElse(null);
         if (user == null || hasRole(user, PROTECTED_ROLE_NAME)) return null;
@@ -101,7 +101,7 @@ public class UserService {
     // BR-19: if a new password is supplied, it's BCrypt-hashed before saving.
     public UserDTO updateOwnProfile(long id, UserDTO userDTO) {
         if (userDTO == null) {
-            throw new IllegalArgumentException("User data is required");
+            throw new IllegalArgumentException("Yêu cầu dữ liệu hợp lệ");
         }
 
         User user = userRepository.findById(id).orElse(null);

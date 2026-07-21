@@ -9,15 +9,15 @@ export async function login(email, password) {
   })
 
   if (res.status === 403) {
-    throw new Error('This account was created using Google Sign-In.')
+    throw new Error('Tài khoản được tạo bởi Google SSO.')
   }
 
   if (res.status === 401) {
-    throw new Error('Invalid email or password')
+    throw new Error('Sai email hoặc mật khẩu.')
   }
 
   if (!res.ok) {
-    throw new Error('Login failed')
+    throw new Error('Đăng nhập thất bại.')
   }
 
   return res.json()
@@ -32,11 +32,11 @@ export async function register(fullName, email, password) {
   })
 
   if (res.status === 409) {
-    throw new Error('Email already registered')
+    throw new Error('Email đã được đăng ký bởi một tài khoản khác.')
   }
 
   if (!res.ok) {
-    throw new Error('Registration failed')
+    throw new Error('Đăng ký thất bại.')
   }
 
   return true
@@ -50,11 +50,11 @@ export async function sendOtp(email) {
   })
 
   if (res.status === 409) {
-    throw new Error('Email already registered')
+    throw new Error('Email đã được đăng ký bởi một tài khoản khác')
   }
 
   if (!res.ok) {
-    throw new Error('Failed to send OTP')
+    throw new Error('Gửi OTP thất bại.')
   }
 
   return true
@@ -68,7 +68,7 @@ export async function verifyOtp(email, otp) {
   })
 
   if (!res.ok) {
-    throw new Error('Invalid or expired OTP')
+    throw new Error('OTP không hợp lệ hoặc đã hết hạn.')
   }
 
   return true
@@ -81,7 +81,7 @@ export async function logout() {
   })
 
   if (!res.ok) {
-    throw new Error('Failed to logout')
+    throw new Error('Đăng xuất thất bại.')
   }
 
   return true
@@ -96,7 +96,7 @@ export async function completeGoogleProfile(email, fullName, phoneNumber) {
   })
 
   if (!res.ok) {
-    throw new Error('Failed to complete profile')
+    throw new Error('Không hoàn thành dữ liệu cá nhân.')
   }
 
   return true
@@ -110,15 +110,15 @@ export async function sendResetOtp(email) {
   })
 
   if (res.status === 404) {
-    throw new Error('Email not found')
+    throw new Error('Email không tồn tại trong dữ liệu.')
   }
 
   if (res.status === 403) {
-    throw new Error('This account uses Google login')
+    throw new Error('Tài khoản này sử dụng Google SSO')
   }
 
   if (!res.ok) {
-    throw new Error('Failed to send OTP')
+    throw new Error('Gửi OTP thất bại')
   }
 
   return true
@@ -132,7 +132,7 @@ export async function verifyResetOtp(email, otp) {
   })
 
   if (!res.ok) {
-    throw new Error('Invalid or expired OTP')
+    throw new Error('OTP không hợp lệ hoặc đã hết hạn.')
   }
 
   return true
@@ -146,7 +146,7 @@ export async function resetPassword(email, newPassword) {
   })
 
   if (!res.ok) {
-    throw new Error('Reset password failed')
+    throw new Error('Đặt lại mật khẩu thất bại.')
   }
 
   return true

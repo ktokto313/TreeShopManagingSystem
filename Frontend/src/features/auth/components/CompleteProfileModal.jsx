@@ -10,8 +10,8 @@ export default function CompleteProfileModal({ email, fullName, onComplete }) {
   const vnPhoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/
 
   async function handleSubmit() {
-    if (!name.trim()) { setError('Full name is required'); return }
-    if (!vnPhoneRegex.test(phone)) { setError('Invalid Vietnamese phone number (e.g. 0912345678)'); return }
+    if (!name.trim()) { setError('Yêu cầu tên'); return }
+    if (!vnPhoneRegex.test(phone)) { setError('Sai mấu số điện thoại (e.g. 0912345678)'); return }
 
     setLoading(true)
     setError('')
@@ -25,14 +25,14 @@ export default function CompleteProfileModal({ email, fullName, onComplete }) {
       })
 
       if (!res.ok) {
-        setError('Something went wrong, please try again')
+        setError('Một vấn đề bất ngờ đã xảy ra, xin vui lòng thử lại.')
         return
       }
 
       loginWithGoogle({ email, fullName: name, role: 'CUSTOMER' })
       onComplete()
     } catch {
-      setError('Something went wrong, please try again')
+      setError('Một vấn đề bất ngờ đã xảy ra, xin vui lòng thử lại.')
     } finally {
       setLoading(false)
     }
@@ -54,7 +54,7 @@ export default function CompleteProfileModal({ email, fullName, onComplete }) {
                 className="w-full border border-white-subtle px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="Your full name"
+                placeholder="Tên đầy đủ"
             />
           </div>
 
@@ -77,7 +77,7 @@ export default function CompleteProfileModal({ email, fullName, onComplete }) {
               disabled={loading}
               className="py-3 text-xs font-bold tracking-widest uppercase bg-green-700 text-white hover:bg-green-600 disabled:opacity-50 transition cursor-pointer"
           >
-            {loading ? 'Saving...' : 'Finish'}
+            {loading ? 'Lưu...' : 'Hoàn thành'}
           </button>
         </div>
       </div>

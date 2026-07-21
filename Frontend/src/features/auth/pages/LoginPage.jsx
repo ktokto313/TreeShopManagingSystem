@@ -81,7 +81,7 @@ export default function LoginPage() {
             >
               <div className="mb-5">
                 <label className="block text-sm mb-1.5 text-green-800">
-                  Username or email address *
+                  Email *
                 </label>
                 <input
                     name="email"
@@ -94,7 +94,7 @@ export default function LoginPage() {
 
               <div className="mb-5">
                 <label className="block text-sm mb-1.5 text-green-800">
-                  Password *
+                  Mật khẩu *
                 </label>
                 <div className="relative">
                   <input
@@ -129,7 +129,7 @@ export default function LoginPage() {
                 <div className='flex gap-2'>
                   <input type="checkbox" id="remember" className="cursor-pointer" />
                   <label htmlFor="remember" className="text-sm text-green-800 cursor-pointer">
-                    Remember me
+                    Nhớ mật khẩu
                   </label>
                 </div>
 
@@ -137,7 +137,7 @@ export default function LoginPage() {
                     to="/reset-password"
                     className="text-sm text-green-700 hover:underline"
                 >
-                  Lost your password?
+                  Quên mật khẩu?
                 </Link>
               </div>
 

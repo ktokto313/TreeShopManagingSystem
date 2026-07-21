@@ -21,73 +21,73 @@ public class NotificationTemplate {
         //ORDER
         register("ORDER_STATUS_UPDATE_CUSTOMER",
                 "Order status update",
-                "Your order #%s status changed to %s.");
+                "Đơn hàng #%s của bạn đã đổi trạng thái thành %s.");
 
         register("ORDER_DELIVERED_CUSTOMER",
                 "Your order has been delivered",
-                "Your order #%s has been delivered.");
+                "Đơn hàng #%s của bạn đã đến nơi.");
 
         register("ORDER_DELIVERED_MANAGER",
                 "Order delivered",
-                "Order #%s was delivered to the customer.");
+                "Đơn hàng #%s đã được giao.");
 
         register("DELIVERY_ASSIGNMENT_SHIPPER",
                 "New delivery assignment",
-                "You have been assigned to order #%s.");
+                "Bạn được giao đơn hàng #%s.");
 
         register("DELIVERY_STARTED_SHIPPER",
                 "Delivery started",
-                "You should start delivering order #%s.");
+                "Đã đến lúc giao đơn hàng #%s.");
 
         register("DELIVERY_ISSUE_MANAGER",
                 "Delivery issue",
-                "Order #%s has encountered a delivery issue.");
+                "Đơn hàng #%s đã gặp vấn đề trong lúc vận chuyển.");
 
         //BLOG
         register("BLOG_PENDING_APPROVAL_MANAGER",
                 "New blog post pending approval",
-                "\"%s\" by %s is awaiting review.");
+                "\"%s\" bởi %s đang đợi duyệt.");
 
         register("BLOG_EDIT_PENDING_APPROVAL_MANAGER",
                 "Blog edit pending approval",
-                "An edit to \"%s\" by %s is awaiting review.");
+                "Một bản cập nhật của bài viết \"%s\" của %s đang đợi duyệt.");
 
         register("BLOG_APPROVED_CUSTOMER",
                 "Your blog post was approved",
-                "\"%s\" has been approved and is now published.");
+                "\"%s\" đã được duyệt và công khai.");
 
         register("BLOG_EDIT_APPROVED_CUSTOMER",
                 "Your blog edit was approved",
-                "Your edit to \"%s\" has been approved and is now live.");
+                "Cập nhật cho \"%s\" đã được duyệt.");
 
         register("BLOG_REJECTED_CUSTOMER",
                 "Your blog post was rejected",
-                "\"%s\" was not approved for publishing.");
+                "\"%s\" bị từ chối.");
 
         register("BLOG_EDIT_REJECTED_CUSTOMER",
                 "Your blog edit was rejected",
-                "Your proposed edit to \"%s\" was not approved.");
+                "Cập nhật cho \"%s\" không được duyệt.");
 
         register("BLOG_DELETED_CUSTOMER",
                 "Your blog post was removed",
-                "\"%s\" has been removed by the manager.");
+                "\"%s\" đã được xóa bởi quản lý.");
 
         //TICKET
         register("NEW_SUPPORT_REQUEST_AGENT",
                 "New support request",
-                "Ticket \"%s\" created by %s.");
+                "Phiếu yêu cầu hỗ trợ \"%s\" tạo bởi %s.");
 
         register("TICKET_RESOLVED_CUSTOMER",
                 "Your ticket has been resolved",
-                "Your ticket \"%s\" has been marked as resolved.");
+                "Phiếu yêu cầu hỗ trợ \"%s\" của bạn đã được xử lý.");
 
         register("TICKET_PROCESSING_CUSTOMER",
                 "Your ticket is being processed",
-                "Your ticket \"%s\" is now being handled by our support team.");
+                "Phiếu yêu cầu hỗ trợ \"%s\" của bạn đang được xử lý.");
 
         register("TICKET_REOPENED_AGENT",
                 "Ticket reopened",
-                "Customer has requested further support for ticket \"%s\".");
+                "Khách hàng yêu cầu xem xét thêm cho phiếu yêu cầu hỗ trợ \"%s\".");
     }
 
     private static void register(String key, String subject, String bodyTemplate) {
@@ -98,7 +98,7 @@ public class NotificationTemplate {
     public static String subject(String key) {
         String subject = SUBJECTS.get(key);
         if (subject == null) {
-            throw new IllegalArgumentException("Unknown notification template key: " + key);
+            throw new IllegalArgumentException("Không xác định: " + key);
         }
         return subject;
     }
@@ -106,7 +106,7 @@ public class NotificationTemplate {
     public static String body(String key, Object... args) {
         String template = BODIES.get(key);
         if (template == null) {
-            throw new IllegalArgumentException("Unknown notification template key: " + key);
+            throw new IllegalArgumentException("Không xác định: " + key);
         }
         return String.format(template, args);
     }

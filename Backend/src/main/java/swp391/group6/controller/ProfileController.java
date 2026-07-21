@@ -87,11 +87,11 @@ public class ProfileController {
         return switch (changePasswordService.changePassword(user.getEmail(), req)) {
             case SUCCESS -> ResponseEntity.ok().build();
             case NO_PASSWORD -> ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "Google account"));
+                    .body(Map.of("message", "Tài khoản Google."));
             case WRONG_OLD_PASSWORD -> ResponseEntity.badRequest()
-                    .body(Map.of("message", "Wrong old password"));
+                    .body(Map.of("message", "Sai mật khẩu."));
             default -> ResponseEntity.badRequest()
-                    .body(Map.of("message", "Invalid input"));
+                    .body(Map.of("message", "Dữ liệu không phù hợp."));
         };
     }
 }

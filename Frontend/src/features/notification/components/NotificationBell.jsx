@@ -65,7 +65,7 @@ export default function NotificationBell() {
                                 className="text-xs font-medium text-interactive hover:underline"
                                 onClick={markAllAsRead}
                             >
-                                Mark all as read
+                                Đánh dấu đã đọc
                             </button>
                         )}
                     </div>
@@ -73,13 +73,13 @@ export default function NotificationBell() {
                     <div className="max-h-[360px] overflow-y-auto">
                         {isLoading && (
                             <div className="px-4 py-6 text-center text-sm text-stone-400">
-                                Loading…
+                                Đang tải...
                             </div>
                         )}
 
                         {!isLoading && notifications.length === 0 && (
                             <div className="px-4 py-6 text-center text-sm text-stone-400">
-                                No notifications yet.
+                                Không có thông báo.
                             </div>
                         )}
 
@@ -135,11 +135,11 @@ function formatRelativeTime(isoString) {
     const diffMs = Date.now() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
 
-    if (diffMins < 1) return "just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffMins < 1) return "gần đây";
+    if (diffMins < 60) return `${diffMins}phút trước`;
     const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffHours < 24) return `${diffHours}giờ trước`;
     const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffDays < 7) return `${diffDays}ngày trước`;
     return date.toLocaleDateString();
 }

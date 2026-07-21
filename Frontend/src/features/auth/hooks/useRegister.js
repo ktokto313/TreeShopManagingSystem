@@ -35,7 +35,7 @@ export function useRegister() {
         if (loading) return
 
         if (!values.email) {
-            setError('Email is required')
+            setError('Yêu cầu email.')
             return
         }
 
@@ -46,7 +46,7 @@ export function useRegister() {
             await sendOtp(values.email)
             setOtpSent(true)
         } catch (err) {
-            setError(err.message || 'Failed to send OTP')
+            setError(err.message || 'Gửi OTP thất bại.')
         } finally {
             setLoading(false)
         }
@@ -56,7 +56,7 @@ export function useRegister() {
         if (loading) return
 
         if (otp.length !== 6) {
-            setError('OTP must be 6 digits')
+            setError('OTP phải có 6 ký tự.')
             return false
         }
 
@@ -68,7 +68,7 @@ export function useRegister() {
             await register(values.fullName, values.email, values.password)
             return true
         } catch (err) {
-            setError(err.message || 'Registration failed')
+            setError(err.message || 'Đăng ký thất bại.')
             return false
         } finally {
             setLoading(false)
