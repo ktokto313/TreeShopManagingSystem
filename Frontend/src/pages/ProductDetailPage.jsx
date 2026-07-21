@@ -399,7 +399,7 @@ export default function ProductDetailPage() {
 						) : null}
 						<Link to="/policy">
 							<Button variant="secondary" className="rounded-full">
-								Policy
+								Chính sách
 							</Button>
 						</Link>
 						<Link to="/catalog">
