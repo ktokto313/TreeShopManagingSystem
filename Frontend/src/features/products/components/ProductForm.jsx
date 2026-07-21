@@ -19,7 +19,6 @@ export default function ProductForm({
   isSubmitting = false,
   onChange,
   onSubmit,
-  children,
 }) {
 	function handleInputChange(event) {
 		const { name, value, type, checked } = event.target;
