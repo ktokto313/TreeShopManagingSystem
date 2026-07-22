@@ -4,7 +4,7 @@ import { Container } from '../components/global/Container'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { formatCurrency } from '../features/catalog/utils/catalogUtils'
-import { requestJson } from '../features/cart/cartApi'
+import { requestJson, clearCart } from '../features/cart/cartApi'
 
 function loadStoredCheckout(orderId, stateCheckout) {
   if (stateCheckout) return stateCheckout
@@ -29,7 +29,12 @@ export default function CheckoutSuccessPage() {
     async function verify() {
       try {
         const order = await requestJson(`/api/orders/${orderId}`)
-        if (!cancelled) setVerifiedOrder(order)
+        if (!cancelled) {
+          setVerifiedOrder(order)
+          clearCart().then(() => {
+            window.dispatchEvent(new Event('cart-updated'))
+          })
+        }
       } catch {
         if (!cancelled) setVerifyError(true)
       }

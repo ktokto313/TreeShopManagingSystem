@@ -61,7 +61,7 @@ export default function CartPage() {
 
   const items = cart?.items || []
   const subtotal = Number(cart?.subtotal || 0)
-  const total = items.length ? subtotal + SHIPPING_FEE : 0
+  const total = subtotal
   const productOptions = useMemo(
     () => [
       { value: '', label: products.length ? 'Chọn sản phẩm' : 'Không có sản phẩm nào' },
@@ -192,10 +192,10 @@ export default function CartPage() {
                         <h3 className="font-semibold text-[var(--text-h)]">{item.name}</h3>
                         <p className="text-sm text-[var(--text)]">Kho: {item.stock}</p>
                         <p className="font-medium text-[var(--accent)]">{formatCurrency(item.price)}</p>
-                        <div className="inline-flex items-center overflow-hidden rounded-md border border-[var(--border)]">
+                        <div className="inline-flex items-center overflow-hidden rounded-lg border border-[var(--border)] shadow-sm">
                           <button
                             type="button"
-                            className="h-9 w-9 bg-[var(--social-bg)] text-lg disabled:opacity-40"
+                            className="flex h-10 w-10 items-center justify-center bg-[var(--bg)] text-base font-medium text-[var(--text-h)] transition-colors hover:bg-[var(--social-bg)] disabled:cursor-not-allowed disabled:opacity-40"
                             disabled={isBusy || item.quantity <= 1}
                             onClick={() => changeQuantity(item, item.quantity - 1)}
                           >
@@ -205,7 +205,7 @@ export default function CartPage() {
                             type="text"
                             inputMode="numeric"
                             pattern="[0-9]*"
-                            className="h-9 w-14 border-x border-[var(--border)] bg-[var(--bg)] px-1 text-center text-sm focus:border-[var(--accent)] focus:outline-none"
+                            className="h-10 w-16 border-x border-[var(--border)] bg-[var(--bg)] px-2 text-center text-base font-medium text-[var(--text-h)] focus:border-[var(--accent)] focus:outline-none"
                             value={isBusy ? '...' : item.quantity}
                             disabled={isBusy}
                             onChange={(event) => handleQuantityInput(item, event.target.value)}
@@ -220,7 +220,7 @@ export default function CartPage() {
                           />
                           <button
                             type="button"
-                            className="h-9 w-9 bg-[var(--social-bg)] text-lg disabled:opacity-40"
+                            className="flex h-10 w-10 items-center justify-center bg-[var(--accent)] text-base font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
                             disabled={isBusy || item.quantity >= item.stock}
                             onClick={() => changeQuantity(item, item.quantity + 1)}
                           >
@@ -256,10 +256,6 @@ export default function CartPage() {
                 <div className="flex justify-between">
                   <span>Thành tiền</span>
                   <span className="font-medium">{formatCurrency(subtotal)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Phí vận chuyển ước tính</span>
-                  <span className="font-medium">{items.length ? formatCurrency(SHIPPING_FEE) : formatCurrency(0)}</span>
                 </div>
                 <div className="border-t border-[var(--border)] pt-3 text-base font-semibold text-[var(--text-h)]">
                   <div className="flex justify-between">

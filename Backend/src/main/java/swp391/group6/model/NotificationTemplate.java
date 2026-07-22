@@ -19,6 +19,14 @@ public class NotificationTemplate {
     static {
 
         //ORDER
+        register("ORDER_PLACED_CUSTOMER",
+                 "Order placed successfully",
+                 "Đơn hàng #%s của bạn đã được tạo thành công.");
+
+        register("NEW_ORDER_MANAGER",
+                 "New order",
+                 "Có đơn hàng mới #%s cần được xử lý.");
+
         register("ORDER_STATUS_UPDATE_CUSTOMER",
                 "Order status update",
                 "Đơn hàng #%s của bạn đã đổi trạng thái thành %s.");

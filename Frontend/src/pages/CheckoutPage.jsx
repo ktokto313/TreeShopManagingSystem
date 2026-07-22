@@ -13,6 +13,8 @@ import { Select } from '../components/ui/Select'
 const DEFAULT_SHIPPING_FEE = 30000
 const PRODUCT_WEIGHT_GRAMS = 500
 
+const CHECKOUT_FORM_KEY = 'checkoutForm'
+
 const initialForm = {
   fullName: '',
   email: '',
@@ -25,16 +27,32 @@ const initialForm = {
   weightGrams: 0,
 }
 
+function loadSavedForm() {
+  try {
+    const saved = localStorage.getItem(CHECKOUT_FORM_KEY)
+    if (saved) {
+      return { ...initialForm, ...JSON.parse(saved) }
+    }
+  } catch {
+    // ignore
+  }
+  return null
+}
+
 export default function CheckoutPage() {
   const navigate = useNavigate()
   const { user } = useContext(AuthContext)
   const [cart, setCart] = useState(null)
-  const [form, setForm] = useState(() => ({
-    ...initialForm,
-    fullName: user?.fullName || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-  }))
+  const [form, setForm] = useState(() => {
+    const saved = loadSavedForm()
+    if (saved) return saved
+    return {
+      ...initialForm,
+      fullName: user?.fullName || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+    }
+  })
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -126,6 +144,29 @@ export default function CheckoutPage() {
     setForm((current) => ({ ...current, [name]: value }))
   }
 
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      try {
+        localStorage.setItem(CHECKOUT_FORM_KEY, JSON.stringify(form))
+      } catch {
+        // ignore quota errors
+      }
+    }, 300)
+    return () => window.clearTimeout(timeoutId)
+  }, [form])
+
+  useEffect(() => {
+    if (submitting) return
+    const orderId = window.sessionStorage.getItem('lastOrderId')
+    if (orderId) {
+      try {
+        localStorage.removeItem(CHECKOUT_FORM_KEY)
+      } catch {
+        // ignore
+      }
+    }
+  }, [submitting])
+
   function validateForm() {
     const requiredFields = ['fullName', 'email', 'phone', 'province', 'district', 'ward', 'address']
     return requiredFields.every((field) => String(form[field] || '').trim())
@@ -162,6 +203,12 @@ export default function CheckoutPage() {
         itemCount: totalItemQuantity,
       })
       window.sessionStorage.setItem(`checkout:${response.orderId}`, JSON.stringify(response))
+      window.sessionStorage.setItem('lastOrderId', response.orderId)
+      try {
+        localStorage.removeItem(CHECKOUT_FORM_KEY)
+      } catch {
+        // ignore
+      }
       navigate(`/checkout/success/${response.orderId}`, { state: { checkout: response } })
     } catch (err) {
       setError(err.message)
