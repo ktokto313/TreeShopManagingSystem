@@ -34,6 +34,13 @@ export default function ProductForm({
 		);
 	}
 
+	function handleDeleteImage(index) {
+		const newImages = values.images.filter((_, i) => i !== index);
+		const newImageFiles = values.imageFiles?.filter((_, i) => i !== index) || [];
+		onChange?.("images", newImages);
+		onChange?.("imageFiles", newImageFiles);
+	}
+
 	return (
 		<Form onSubmit={onSubmit} className="gap-5">
 			<Input
@@ -110,7 +117,67 @@ export default function ProductForm({
 				</div>
 				{errors.content ? <p className="text-sm text-red-600">{errors.content}</p> : null}
 			</div>
+			<div className="grid gap-4 sm:grid-cols-2">
+				<Input
+					label="Giá"
+					name="price"
+					type="number"
+					required
+					min="1"
+					step="1"
+					value={values.price}
+					error={errors.price}
+					onChange={handleInputChange}
+				/>
+				<Input
+					label="Tồn kho"
+					name="stock"
+					type="number"
+					required
+					min="0"
+					step="1"
+					value={values.stock}
+					error={errors.stock}
+					onChange={handleInputChange}
+				/>
+			</div>
+			<div className="space-y-2">
+				<span className="block text-sm font-medium text-[var(--text-h)]">Hình ảnh</span>
+				<label className="inline-flex cursor-pointer items-center rounded-md border border-[var(--border)] bg-[var(--social-bg)] px-4 py-2 text-sm font-medium text-[var(--text-h)] transition hover:bg-[var(--border)]">
+					Tải ảnh lên
+					<input type="file" accept="image/*" multiple className="hidden" onChange={handleImageChange} />
+				</label>
+				{Array.isArray(values.images) && values.images.length > 0 ? (
+					<div className="rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--text)]">
+						<div className="font-medium text-[var(--text-h)]">Tệp đã chọn</div>
+						<ul className="mt-2 space-y-2">
+							{values.images.map((image, index) => (
+								<li key={index} className="flex items-center justify-between rounded bg-white p-2 pl-3">
+									<span className="flex items-center gap-2">
+										<span className="text-gray-400">•</span>
+										{image}
+									</span>
+									<button
+										type="button"
+										onClick={() => handleDeleteImage(index)}
+										className="text-xs font-medium text-red-600 hover:text-red-700 transition"
+									>
+										Xóa
+									</button>
+								</li>
+							))}
+						</ul>
+					</div>
+				) : (
+					<p className="text-sm text-[var(--text)]">Chưa chọn ảnh nào.</p>
+				)}
+				{errors.images ? <p className="text-sm text-red-600">{errors.images}</p> : null}
+			</div>
 
+			<div className="space-y-1">
+				<h3 className="text-sm font-semibold text-[var(--text-h)]">Thông tin tùy chọn</h3>
+				<p className="text-xs text-[var(--text)]">Chỉ cần điền khi sản phẩm là cây/cỏ hoặc các sản phẩm liên quan đến chăm sóc cây</p>
+			</div>
 			<div className="grid gap-4 md:grid-cols-2">
 				<Textarea
 					label="Hướng dẫn chăm sóc"
@@ -157,51 +224,6 @@ export default function ProductForm({
 					placeholder="Ví dụ: Mộc"
 					onChange={handleInputChange}
 				/>
-			</div>
-
-			<div className="grid gap-4 sm:grid-cols-2">
-				<Input
-					label="Giá"
-					name="price"
-					type="number"
-					required
-					min="1"
-					step="1"
-					value={values.price}
-					error={errors.price}
-					onChange={handleInputChange}
-				/>
-				<Input
-					label="Tồn kho"
-					name="stock"
-					type="number"
-					required
-					min="0"
-					step="1"
-					value={values.stock}
-					error={errors.stock}
-					onChange={handleInputChange}
-				/>
-			</div>
-			<div className="space-y-2">
-				<span className="block text-sm font-medium text-[var(--text-h)]">Hình ảnh</span>
-				<label className="inline-flex cursor-pointer items-center rounded-md border border-[var(--border)] bg-[var(--social-bg)] px-4 py-2 text-sm font-medium text-[var(--text-h)] transition hover:bg-[var(--border)]">
-					Tải ảnh lên
-					<input type="file" accept="image/*" multiple className="hidden" onChange={handleImageChange} />
-				</label>
-				{Array.isArray(values.images) && values.images.length > 0 ? (
-					<div className="rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--text)]">
-						<div className="font-medium text-[var(--text-h)]">Tệp đã chọn</div>
-						<ul className="mt-1 list-disc space-y-1 pl-5">
-							{values.images.map((image) => (
-								<li key={image}>{image}</li>
-							))}
-						</ul>
-					</div>
-				) : (
-					<p className="text-sm text-[var(--text)]">Chưa chọn ảnh nào.</p>
-				)}
-				{errors.images ? <p className="text-sm text-red-600">{errors.images}</p> : null}
 			</div>
 			<div className="space-y-1">
 				<label className="flex items-center gap-2 text-sm font-medium text-[var(--text-h)]">
