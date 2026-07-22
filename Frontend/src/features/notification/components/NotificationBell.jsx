@@ -59,7 +59,7 @@ export default function NotificationBell() {
                     role="menu"
                 >
                     <div className="flex items-center justify-between border-b border-border px-4 py-3 text-sm font-semibold text-stone-800">
-                        <span>Notifications</span>
+                        <span>Thông báo</span>
                         {unreadCount > 0 && (
                             <button
                                 className="text-xs font-medium text-interactive hover:underline"

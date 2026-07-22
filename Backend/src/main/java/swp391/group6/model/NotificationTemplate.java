@@ -20,81 +20,81 @@ public class NotificationTemplate {
 
         //ORDER
         register("ORDER_PLACED_CUSTOMER",
-                 "Order placed successfully",
+                 "Đặt hàng thành công",
                  "Đơn hàng #%s của bạn đã được tạo thành công.");
 
         register("NEW_ORDER_MANAGER",
-                 "New order",
+                 "Đơn hàng mới",
                  "Có đơn hàng mới #%s cần được xử lý.");
 
         register("ORDER_STATUS_UPDATE_CUSTOMER",
-                "Order status update",
+                "Cập nhật trạng thái đơn hàng",
                 "Đơn hàng #%s của bạn đã đổi trạng thái thành %s.");
 
         register("ORDER_DELIVERED_CUSTOMER",
-                "Your order has been delivered",
+                "Đơn hàng của bạn đã đến",
                 "Đơn hàng #%s của bạn đã đến nơi.");
 
         register("ORDER_DELIVERED_MANAGER",
-                "Order delivered",
+                "Đơn hàng đã giao thành công",
                 "Đơn hàng #%s đã được giao.");
 
         register("DELIVERY_ASSIGNMENT_SHIPPER",
-                "New delivery assignment",
+                "Đơn hàng phải giao",
                 "Bạn được giao đơn hàng #%s.");
 
         register("DELIVERY_STARTED_SHIPPER",
-                "Delivery started",
+                "Bắt đầu giao hàng",
                 "Đã đến lúc giao đơn hàng #%s.");
 
         register("DELIVERY_ISSUE_MANAGER",
-                "Delivery issue",
+                "Vấn đề khi giao hàng",
                 "Đơn hàng #%s đã gặp vấn đề trong lúc vận chuyển.");
 
         //BLOG
         register("BLOG_PENDING_APPROVAL_MANAGER",
-                "New blog post pending approval",
+                "Bài viết chờ duyệt",
                 "\"%s\" bởi %s đang đợi duyệt.");
 
         register("BLOG_EDIT_PENDING_APPROVAL_MANAGER",
-                "Blog edit pending approval",
+                "Cập nhật đợi duyệt",
                 "Một bản cập nhật của bài viết \"%s\" của %s đang đợi duyệt.");
 
         register("BLOG_APPROVED_CUSTOMER",
-                "Your blog post was approved",
+                "Bài viết đã được duyệt",
                 "\"%s\" đã được duyệt và công khai.");
 
         register("BLOG_EDIT_APPROVED_CUSTOMER",
-                "Your blog edit was approved",
+                "Cập nhật đã được duyệt",
                 "Cập nhật cho \"%s\" đã được duyệt.");
 
         register("BLOG_REJECTED_CUSTOMER",
-                "Your blog post was rejected",
+                "Bài viết bị từ chối",
                 "\"%s\" bị từ chối.");
 
         register("BLOG_EDIT_REJECTED_CUSTOMER",
-                "Your blog edit was rejected",
+                "Cập nhật bị từ chối",
                 "Cập nhật cho \"%s\" không được duyệt.");
 
         register("BLOG_DELETED_CUSTOMER",
-                "Your blog post was removed",
+                "Bài viết đã bị xóa",
                 "\"%s\" đã được xóa bởi quản lý.");
 
         //TICKET
         register("NEW_SUPPORT_REQUEST_AGENT",
-                "New support request",
+                "Yêu cầu hỗ trợ",
                 "Phiếu yêu cầu hỗ trợ \"%s\" tạo bởi %s.");
 
         register("TICKET_RESOLVED_CUSTOMER",
-                "Your ticket has been resolved",
+                "Hoàn thành yêu cầu",
                 "Phiếu yêu cầu hỗ trợ \"%s\" của bạn đã được xử lý.");
 
         register("TICKET_PROCESSING_CUSTOMER",
-                "Your ticket is being processed",
+                "Xử lý yêu cầu",
                 "Phiếu yêu cầu hỗ trợ \"%s\" của bạn đang được xử lý.");
 
         register("TICKET_REOPENED_AGENT",
-                "Ticket reopened",
+                "Phiếu yêu cầu được mở lại",
                 "Khách hàng yêu cầu xem xét thêm cho phiếu yêu cầu hỗ trợ \"%s\".");
     }
 
