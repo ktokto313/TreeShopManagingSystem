@@ -191,7 +191,7 @@ export default function CartPage() {
                       <div className="space-y-2">
                         <h3 className="font-semibold text-[var(--text-h)]">{item.name}</h3>
                         <p className="text-sm text-[var(--text)]">Kho: {item.stock}</p>
-                        <p className="font-medium text-[var(--accent)]">{formatCurrency(item.price)}</p>
+                        <p className="font-medium text-interactive">{formatCurrency(item.price)}</p>
                         <div className="inline-flex items-center overflow-hidden rounded-lg border border-[var(--border)] shadow-sm">
                           <button
                             type="button"
@@ -205,7 +205,7 @@ export default function CartPage() {
                             type="text"
                             inputMode="numeric"
                             pattern="[0-9]*"
-                            className="h-10 w-16 border-x border-[var(--border)] bg-[var(--bg)] px-2 text-center text-base font-medium text-[var(--text-h)] focus:border-[var(--accent)] focus:outline-none"
+                            className="h-10 w-16 border-x border-[var(--border)] bg-[var(--bg)] px-2 text-center text-base font-medium text-[var(--text-h)] focus:border-interactive focus:outline-none"
                             value={isBusy ? '...' : item.quantity}
                             disabled={isBusy}
                             onChange={(event) => handleQuantityInput(item, event.target.value)}
@@ -220,7 +220,7 @@ export default function CartPage() {
                           />
                           <button
                             type="button"
-                            className="flex h-10 w-10 items-center justify-center bg-[var(--accent)] text-base font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                            className="flex h-10 w-10 items-center justify-center bg-interactive text-base font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
                             disabled={isBusy || item.quantity >= item.stock}
                             onClick={() => changeQuantity(item, item.quantity + 1)}
                           >

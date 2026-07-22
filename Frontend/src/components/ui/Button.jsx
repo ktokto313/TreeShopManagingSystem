@@ -14,6 +14,7 @@ export const Button = forwardRef(({
     primary: "bg-interactive hover:bg-interactive-hover text-white focus-visible:ring-interactive",
     secondary: "bg-bg-surface border border-border text-black hover:bg-border focus-visible:ring-border",
     error: "bg-bg-error text-text-error focus-visible:ring-bg-error hover:opacity-90",
+    danger: "bg-red-500 hover:bg-red-600 text-white focus-visible:ring-red-400",
   };
 
   return (

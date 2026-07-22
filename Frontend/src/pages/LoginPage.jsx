@@ -92,7 +92,7 @@ export default function LoginPage() {
 
         <Card className="space-y-6 border-emerald-100 bg-white/95 p-6 shadow-lg">
           <div className="space-y-2">
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-[var(--accent)]">
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-interactive">
               GreenShop
             </p>
             <h2 className="text-2xl font-semibold text-[var(--text-h)]">Đăng nhập</h2>

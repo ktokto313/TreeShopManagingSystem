@@ -58,7 +58,7 @@ export default function CheckoutSuccessPage() {
       <Container className="max-w-[70rem] py-10">
         <Card className="space-y-6 p-6">
           <div className="text-center">
-            <p className="text-sm uppercase tracking-[0.2em] text-[var(--accent)]">Hoàn tất thanh toán</p>
+            <p className="text-sm uppercase tracking-[0.2em] text-interactive">Hoàn tất thanh toán</p>
             <h1 className="mt-2 text-3xl font-semibold text-[var(--text-h)]">Đặt hàng thành công</h1>
             <p className="mt-2 text-sm text-[var(--text)]">
               Đơn hàng của bạn đã được tạo và sẽ được xử lý sau khi thanh toán được xác nhận.

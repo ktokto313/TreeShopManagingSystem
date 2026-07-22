@@ -20,7 +20,7 @@ const initialForm = {
   email: '',
   phone: '',
   province: 'Hà Nội',
-  district: '',
+  district: 'Quận Hoàn Kiếm',
   ward: '',
   address: '',
   deliveryNote: '',
@@ -280,7 +280,7 @@ export default function CheckoutPage() {
                 <label className="block text-left">
                   <span className="mb-1 block text-sm font-medium text-[var(--text-h)]">Ghi chú giao hàng</span>
                   <textarea
-                    className="min-h-24 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--text-h)] outline-none transition focus:border-[var(--accent)]"
+                    className="min-h-24 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--text-h)] outline-none transition focus:border-interactive"
                     value={form.deliveryNote}
                     onChange={(event) => updateField('deliveryNote', event.target.value)}
                   />
@@ -301,7 +301,7 @@ export default function CheckoutPage() {
               <Button type="submit" className="w-full" disabled={submitting || !items.length}>
                 {submitting ? 'Đang xử lý...' : 'Đặt hàng ngay'}
               </Button>
-              <Link to="/cart" className="block text-center text-sm text-[var(--accent)] hover:underline">
+              <Link to="/cart" className="block text-center text-sm text-interactive hover:underline">
                 Quay lại giỏ hàng
               </Link>
             </Card>
