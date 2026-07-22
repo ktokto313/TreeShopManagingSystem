@@ -1428,7 +1428,12 @@ VALUES
     (10, 3, '89 Lý Thường Kiệt, Quận Hoàn Kiếm, Hà Nội', 30000, 0, 'ARRIVED', '2026-04-21 15:52:27', '2026-04-25 15:52:27'),
     (10, 3, '78 Hoàn Kiếm, Hà Nội', 30000, 0, 'RECEIVED', '2026-03-22 15:52:27', '2026-03-28 15:52:27'),
     (10, 3, '123 Nguyễn Trãi, Quận Thanh Xuân, Hà Nội', 30000, 0, 'RECEIVED', '2026-06-26 15:52:27', '2026-07-01 15:52:27'),
-    (10, NULL, '45 Quán Sứ, Quận Hoàn Kiếm, Hà Nội', 30000, 0, 'FAILED', '2026-04-12 15:52:27', NULL);
+    (10, NULL, '45 Quán Sứ, Quận Hoàn Kiếm, Hà Nội', 30000, 0, 'FAILED', '2026-04-12 15:52:27', NULL),
+    (5, 3, '123 Nguyễn Trãi, Quận Thanh Xuân, Hà Nội', 30000, 0, 'RECEIVED', '2026-07-01 10:00:00', '2026-07-04 15:00:00'),
+    (5, 3, '123 Nguyễn Trãi, Quận Thanh Xuân, Hà Nội', 30000, 0, 'RECEIVED', '2026-07-05 10:00:00', '2026-07-08 15:00:00'),
+    (5, 3, '123 Nguyễn Trãi, Quận Thanh Xuân, Hà Nội', 30000, 0, 'RECEIVED', '2026-07-10 10:00:00', '2026-07-13 15:00:00'),
+    (5, 3, '123 Nguyễn Trãi, Quận Thanh Xuân, Hà Nội', 30000, 0, 'RECEIVED', '2026-07-15 10:00:00', '2026-07-18 15:00:00'),
+    (5, 3, '123 Nguyễn Trãi, Quận Thanh Xuân, Hà Nội', 30000, 0, 'RECEIVED', '2026-07-19 10:00:00', '2026-07-21 15:00:00');
 
 -- Additional generated order details
 INSERT INTO order_detail (order_id, product_id, quantity, price_paid)
@@ -1717,7 +1722,32 @@ VALUES
     (127, 53, 2, 100000),
     (128, 10, 1, 220000),
     (128, 23, 3, 320000),
-    (128, 98, 3, 430000);
+    (128, 98, 3, 430000),
+    (129, 1, 1, 85000),
+    (129, 5, 1, 75000),
+    (129, 8, 1, 180000),
+    (129, 10, 1, 120000),
+    (129, 15, 1, 220000),
+    (130, 20, 1, 75000),
+    (130, 25, 1, 85000),
+    (130, 30, 1, 420000),
+    (130, 35, 1, 45000),
+    (130, 40, 1, 45000),
+    (131, 45, 1, 75000),
+    (131, 50, 1, 55000),
+    (131, 55, 1, 130000),
+    (131, 60, 1, 85000),
+    (131, 65, 1, 95000),
+    (132, 70, 1, 65000),
+    (132, 75, 1, 180000),
+    (132, 80, 1, 65000),
+    (132, 85, 1, 280000),
+    (132, 90, 1, 180000),
+    (133, 95, 1, 550000),
+    (133, 98, 1, 150000),
+    (133, 99, 1, 35000),
+    (133, 100, 1, 15000),
+    (133, 2, 1, 95000);
 
 
 -- ============================================================
@@ -1973,4 +2003,59 @@ WHERE (od.product_id % 10) < 8
       WHERE r.order_id = od.order_id 
         AND r.product_id = od.product_id
   );
+
+-- ============================================================
+--  25 DEDICATED REVIEWS & ORDERS FOR "Xương Rồng Gỗ Nhỏ" (product_id = 75)
+-- ============================================================
+DO $$
+DECLARE
+    u_ids INT[] := ARRAY[5, 6, 7, 8, 9, 10];
+    comments TEXT[] := ARRAY[
+        'Xương rồng gỗ nhỏ hình dáng rất độc đáo, cây khỏe đẹp, đóng gói cẩn thận 5 sao!',
+        'Cây xinh xắn, để trên bàn làm việc rất hợp phong thủy. Giao hàng siêu nhanh.',
+        'Rất ưng ý với sản phẩm này của shop. Cây tươi tốt, không bị gẫy gai hay dập.',
+        'Xương rồng đẹp, nhưng kích thước hơi nhỏ hơn mình tưởng tượng một chút.',
+        'Shop bọc bong bóng khí rất kỹ, cây đến tay vẫn xanh tươi rạng rỡ!',
+        'Chậu đẹp, cây khỏe, tưới ít nước rất dễ chăm sóc cho người bận rộn.',
+        'Giao hàng đúng hẹn, nhân viên giao hàng thân thiện, cây y như trong ảnh.',
+        'Cây đáng yêu lắm, mình đã mua 2 cây để tặng bạn bè đều rất thích.',
+        'Xương rồng gỗ tạo dáng độc lạ, nhìn rất nghệ thuật. Đánh giá 5 sao!',
+        'Cây rồng gỗ nhỏ gọn, gai chắc chắn, chậu đất nung đi kèm rất xinh.',
+        'Nhận được cây rất tươi, đất còn hơi ẩm nhẹ, đóng gói 10/10.',
+        'Sản phẩm tốt, giá cả hợp lý so với thị trường. Sẽ tiếp tục mua ủng hộ.',
+        'Cây nhỏ xinh để cạnh laptop vừa vặn, tạo không gian xanh rất thư thái.',
+        'Giao hàng trễ mất 1 ngày do bên vận chuyển, nhưng cây vẫn rất tươi tốt.',
+        'Xương rồng khá đẹp nhưng đất bị vung ra ngoài một ít khi bóc hộp.',
+        'Hình dáng cây độc đáo, bạn bè ghé chơi ai cũng khen.',
+        'Rất hài lòng về thái độ phục vụ của shop và chất lượng cây.',
+        'Cây bị gãy 1 nhánh nhỏ do vận chuyển đường xa. Shop hỗ trợ nhiệt tình.',
+        'Xương rồng gỗ màu xanh rất mướt, gai không quá nhọn, dễ thương.',
+        'Tuyệt vời! Đã mua nhiều lần ở shop và lần nào cũng rất hài lòng.',
+        'Cây không đúng kích thước mô tả, nhỏ hơn khá nhiều.',
+        'Spam test review comment 123',
+        'Cây xanh đẹp, giao hàng thần tốc trong ngày.',
+        'Xương rồng khỏe mạnh, sống tốt sau 2 tuần trồng.',
+        'Rất thích dáng cây này, nhìn như một tác phẩm mini bonsai.'
+    ];
+    ratings INT[] := ARRAY[5, 5, 5, 4, 5, 5, 5, 5, 5, 4, 5, 4, 5, 4, 3, 5, 5, 3, 4, 5, 2, 1, 5, 5, 5];
+    is_curated_arr BOOLEAN[] := ARRAY[true, true, false, false, true, false, false, true, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, true];
+    is_hidden_arr BOOLEAN[] := ARRAY[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false];
+    new_order_id BIGINT;
+    cust_id INT;
+    i INT;
+BEGIN
+    FOR i IN 1..25 LOOP
+        cust_id := u_ids[(i % 6) + 1];
+
+        INSERT INTO orders (customer_id, shipper_id, shipping_address, shipping_fee, discount, status, created_at, delivery_date)
+        VALUES (cust_id, 3, 'Địa chỉ giao hàng đơn #' || i, 30000, 0, 'RECEIVED', CURRENT_TIMESTAMP - (i || ' days')::INTERVAL, CURRENT_TIMESTAMP - (i || ' days')::INTERVAL + INTERVAL '2 days')
+        RETURNING id INTO new_order_id;
+
+        INSERT INTO order_detail (order_id, product_id, quantity, price_paid)
+        VALUES (new_order_id, 75, 1, 180000);
+
+        INSERT INTO reviews (order_id, product_id, customer_id, rating, comment, is_curated, is_hidden, created_at)
+        VALUES (new_order_id, 75, cust_id, ratings[i], comments[i], is_curated_arr[i], is_hidden_arr[i], CURRENT_TIMESTAMP - (i || ' days')::INTERVAL + INTERVAL '2 days');
+    END LOOP;
+END $$;
 
