@@ -10,8 +10,6 @@ import { loadPublicJson } from '../features/catalog/utils/catalogApi'
 import { formatCurrency, parseCatalogImages } from '../features/catalog/utils/catalogUtils'
 import { resolveProductImageSource } from '../features/products/utils/productImageResolver'
 
-const SHIPPING_FEE = 30000
-
 export default function CartPage() {
   const navigate = useNavigate()
   const [cart, setCart] = useState(null)
