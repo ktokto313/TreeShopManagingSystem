@@ -136,10 +136,10 @@ function formatRelativeTime(isoString) {
     const diffMins = Math.floor(diffMs / 60000);
 
     if (diffMins < 1) return "gần đây";
-    if (diffMins < 60) return `${diffMins}phút trước`;
+    if (diffMins < 60) return `${diffMins} phút trước`;
     const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours}giờ trước`;
+    if (diffHours < 24) return `${diffHours} giờ trước`;
     const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `${diffDays}ngày trước`;
+    if (diffDays < 7) return `${diffDays} ngày trước`;
     return date.toLocaleDateString();
 }

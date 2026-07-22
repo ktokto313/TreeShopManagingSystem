@@ -325,19 +325,19 @@ public class BlogService {
     private void validate(BlogRequest req) {
 
         if (req.getTitle() == null || req.getTitle().isBlank())
-            throw new IllegalArgumentException("Title required");
+            throw new IllegalArgumentException("Yêu cầu tiêu đề");
 
         if (req.getContent() == null || req.getContent().isBlank())
-            throw new IllegalArgumentException("Content required");
+            throw new IllegalArgumentException("Yêu cầu nội dung");
 
         if (req.getThumbnail() == null || req.getThumbnail().isBlank())
-            throw new IllegalArgumentException("Thumbnail required");
+            throw new IllegalArgumentException("Yêu cầu ảnh nền");
 
         if (req.getTitle().trim().split("\\s+").length > MAX_TITLE_WORDS)
-            throw new IllegalArgumentException("Title exceeds 100 words");
+            throw new IllegalArgumentException("Tiêu đề quá dài");
 
         if (req.getImages() != null && req.getImages().size() > MAX_IMAGES)
-            throw new IllegalArgumentException("Too many images");
+            throw new IllegalArgumentException("Quá nhiều ảnh");
     }
 
     // HELPERS
