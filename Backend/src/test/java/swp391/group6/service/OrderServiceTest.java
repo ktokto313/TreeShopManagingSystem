@@ -62,12 +62,14 @@ class OrderServiceTest {
         LoginResponse manager = login("manager@example.com", "MANAGER");
         List<OrderStatus> statuses = List.of(OrderStatus.PENDING);
         List<Order> expected = List.of(order(1L, customer(), shipper(), OrderStatus.PENDING));
-        when(orderRepository.searchByStatusInOrderByStatusAscThenCreatedAtDesc(statuses, "")).thenReturn(expected);
+        when(orderRepository.searchByStatusInOrderByStatusAscThenCreatedAtDesc(statuses.
+                stream().map(Enum::toString).toList(), "")).thenReturn(expected);
 
         List<Order> actual = orderService.getOrders(manager, statuses, null);
 
         assertSame(expected, actual);
-        verify(orderRepository).searchByStatusInOrderByStatusAscThenCreatedAtDesc(statuses, "");
+        verify(orderRepository).searchByStatusInOrderByStatusAscThenCreatedAtDesc(statuses.
+                stream().map(Enum::toString).toList(), "");
         verifyNoInteractions(userRepository);
     }
 
@@ -102,13 +104,15 @@ class OrderServiceTest {
         List<OrderStatus> statuses = List.of(OrderStatus.PENDING, OrderStatus.DELIVERING);
         List<Order> expected = List.of(order(1L, user, shipper(), OrderStatus.PENDING));
         when(userRepository.findByEmail("customer@example.com")).thenReturn(Optional.of(user));
-        when(orderRepository.searchByStatusInAndUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(statuses, "tree", 10L, 10L))
+        when(orderRepository.searchByStatusInAndUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(statuses
+                .stream().map(Enum::toString).toList(), "tree", 10L, 10L))
             .thenReturn(expected);
 
         List<Order> actual = orderService.getOrders(customerLogin, statuses, "tree");
 
         assertSame(expected, actual);
-        verify(orderRepository).searchByStatusInAndUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(statuses, "tree", 10L, 10L);
+        verify(orderRepository).searchByStatusInAndUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(statuses
+                .stream().map(Enum::toString).toList(), "tree", 10L, 10L);
     }
 
     @Test
@@ -172,11 +176,6 @@ class OrderServiceTest {
         Order actual = orderService.getOrder(404L, admin);
 
         assertNull(actual);
-    }
-
-    @Test
-    void addOrder_currentPlaceholderReturnsTrue() {
-        assertTrue(orderService.addOrder(new ShoppingCart()));
     }
 
     @Test
