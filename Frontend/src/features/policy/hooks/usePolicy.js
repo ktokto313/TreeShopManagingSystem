@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useContext } from "react";
 import { AuthContext } from "../../../context/AuthContext";
-import { fetchAllPolicies, updatePolicy, createPolicy } from "./policyApi";
+import { fetchAllPolicies, fetchPolicyById, updatePolicy, createPolicy } from "./policyApi";
 
 export const usePolicy = (id = null) => {
 	const { canManage } = useContext(AuthContext);
@@ -8,6 +8,9 @@ export const usePolicy = (id = null) => {
 	const [policy, setPolicy] = useState(null);
 	const [searchTitle, setSearchTitle] = useState("");
 	const [filterStatus, setFilterStatus] = useState(canManage ? "" : "PUBLISHED");
+	const [currentPage, setCurrentPage] = useState(1);
+	const [totalPages, setTotalPages] = useState(1);
+	const [totalElements, setTotalElements] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [policyError, setPolicyError] = useState("");
 
@@ -17,13 +20,26 @@ export const usePolicy = (id = null) => {
 		e.preventDefault();
 		const search = new FormData(e.target).get("search");
 		setSearchTitle(search || "");
+		setCurrentPage(1);
 	};
 
-	const getAllPolicies = useCallback(async (title, status) => {
+	const getAllPolicies = useCallback(async (title, status, page = 1) => {
 		setLoading(true);
 		try {
-			const data = await fetchAllPolicies(title, status);
-			setPolicies(data || []);
+			const backendPage = Math.max(0, page - 1);
+			const result = await fetchAllPolicies(title, status, backendPage, 6);
+			if (result && Array.isArray(result.content)) {
+				setPolicies(result.content);
+				setTotalPages(result.totalPages || 1);
+				setTotalElements(result.totalElements || 0);
+				setCurrentPage((result.number ?? 0) + 1);
+			} else if (Array.isArray(result)) {
+				setPolicies(result);
+				setTotalPages(1);
+				setCurrentPage(1);
+			} else {
+				setPolicies([]);
+			}
 		} catch (error) {
 			console.error("Failed to fetch policies:", error);
 			setPolicies([]);
@@ -32,21 +48,27 @@ export const usePolicy = (id = null) => {
 		}
 	}, []);
 
-	const handleUpdatePolicy = useCallback(async (id, newPolicyInfo) => {
+	const loadPage = useCallback((page) => {
+		getAllPolicies(searchTitle, filterStatus, page);
+	}, [getAllPolicies, searchTitle, filterStatus]);
+
+	const handleUpdatePolicy = useCallback(async (targetId, newPolicyInfo) => {
 		setUpdateLoading(true);
+		setPolicyError("");
 		try {
-			const updatedPolicy = await updatePolicy(id, newPolicyInfo);
+			const updatedPolicy = await updatePolicy(targetId, newPolicyInfo);
 
 			setPolicies((prevPolicies) =>
-				prevPolicies.map((p) => (p.id == id ? updatedPolicy : p)),
+				prevPolicies.map((p) => (p.id == targetId ? updatedPolicy : p)),
 			);
+			setPolicy(updatedPolicy);
 		} catch (error) {
 			console.error("Failed to update policy", error);
-            if (error.payload) {
-                setPolicyError(error.payload);
-            } else {
-                setPolicyError("Đã xảy ra lỗi khi cập nhật chính sách.");
-            }
+			if (error.payload) {
+				setPolicyError(error.payload);
+			} else {
+				setPolicyError(error.message || "Đã xảy ra lỗi khi cập nhật chính sách.");
+			}
 		} finally {
 			setUpdateLoading(false);
 		}
@@ -54,50 +76,62 @@ export const usePolicy = (id = null) => {
 
 	const handleCreatePolicy = useCallback(async (newPolicyInfo) => {
 		setUpdateLoading(true);
+		setPolicyError("");
 		try {
 			const newPolicy = await createPolicy(newPolicyInfo);
 			setPolicies((prevPolicies) => [...prevPolicies, newPolicy]);
-            return newPolicy;
+			return newPolicy;
 		} catch (error) {
 			console.error("Failed to create policy", error);
-            if (error.payload) {
-                setPolicyError(error.payload);
-            } else {
-                setPolicyError("Đã xảy ra lỗi khi tạo chính sách.");
-            }
-            throw error;
+			if (error.payload) {
+				setPolicyError(error.payload);
+			} else {
+				setPolicyError(error.message || "Đã xảy ra lỗi khi tạo chính sách.");
+			}
+			throw error;
 		} finally {
 			setUpdateLoading(false);
 		}
 	}, []);
 
 	useEffect(() => {
-		getAllPolicies(searchTitle, filterStatus);
-	}, [getAllPolicies, searchTitle, filterStatus]);
-
-	useEffect(() => {
-		if (id && policies.length > 0) {
-			const found = policies.find((p) => p.id == id);
-			if (found) {
-				setPolicy(found);
-			}
+		if (id) {
+			const getSinglePolicy = async () => {
+				setLoading(true);
+				try {
+					const data = await fetchPolicyById(id);
+					setPolicy(data);
+				} catch (error) {
+					console.error("Failed to fetch policy by id:", error);
+					setPolicy(null);
+				} finally {
+					setLoading(false);
+				}
+			};
+			getSinglePolicy();
+		} else {
+			getAllPolicies(searchTitle, filterStatus, 1);
 		}
-	}, [id, policies]);
+	}, [id, getAllPolicies, searchTitle, filterStatus]);
 
 	return {
 		policies,
 		policy,
 		searchTitle,
 		setSearchTitle,
-        filterStatus,
-        setFilterStatus,
+		filterStatus,
+		setFilterStatus,
+		currentPage,
+		totalPages,
+		totalElements,
+		loadPage,
 		loading,
 		handleUpdatePolicy,
-        handleCreatePolicy,
+		handleCreatePolicy,
 		updateLoading,
 		setUpdateLoading,
-        handleSearch,
-        policyError,
-        setPolicyError,
+		handleSearch,
+		policyError,
+		setPolicyError,
 	};
 };

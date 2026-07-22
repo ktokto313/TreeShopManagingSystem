@@ -17,10 +17,30 @@ const policyStates = [
 	{ label: "Lưu trữ", value: "ARCHIVED" },
 ];
 
+const getPageNumbers = (currentPage, totalPages) => {
+	const startPage = Math.max(1, currentPage - 2);
+	const endPage = Math.min(totalPages, currentPage + 2);
+
+	return Array.from(
+		{ length: Math.max(0, endPage - startPage + 1) },
+		(_, index) => startPage + index,
+	);
+};
+
 const PolicyList = ({ state }) => {
-	const { policies, handleSearch, loading, filterStatus, setFilterStatus } =
-		state;
+	const {
+		policies,
+		handleSearch,
+		loading,
+		filterStatus,
+		setFilterStatus,
+		currentPage = 1,
+		totalPages = 1,
+		loadPage,
+	} = state;
 	const { canManage } = useContext(AuthContext);
+
+	const pageNumbers = getPageNumbers(currentPage, totalPages);
 
 	return (
 		<>
@@ -65,27 +85,31 @@ const PolicyList = ({ state }) => {
 						className="border-2 border-green-500 rounded p-2 text-green-700 bg-white"
 					>
 						<option value="">Tất cả</option>
-						{policyStates.map(s => <option value={s.value}>
+						{policyStates.map(s => <option key={s.value} value={s.value}>
 							{s.label}
 						</option>)}
 					</select>
 				)}
 			</Form>
 
-			<div className="flex gap-4 mt-3 mb-4.5 ms-1">
-				{policyStates.map((s) => (
-					<div className="flex gap-1 items-center">
-						<div
-							className={cn("w-3.5 h-3.5 -mt-0.5 sm:w-5 sm:h-5 rounded-sm", {
-								"bg-green-500": s.value === "PUBLISHED",
-								"bg-gray-500": s.value === "DRAFT",
-								"bg-red-500": s.value === "ARCHIVED",
-							})}
-						></div>
-						<p className="text-sm sm:text-base">{s.label}</p>
-					</div>
-				))}
-			</div>
+			{canManage ? (
+				<div className="flex gap-4 mt-3 mb-4.5 ms-1">
+					{policyStates.map((s) => (
+						<div key={s.value} className="flex gap-1 items-center">
+							<div
+								className={cn("w-3.5 h-3.5 -mt-0.5 sm:w-5 sm:h-5 rounded-sm", {
+									"bg-green-500": s.value === "PUBLISHED",
+									"bg-gray-500": s.value === "DRAFT",
+									"bg-red-500": s.value === "ARCHIVED",
+								})}
+							></div>
+							<p className="text-sm sm:text-base">{s.label}</p>
+						</div>
+					))}
+				</div>
+			) : (
+				<div className="h-5" />
+			)}
 
 			<div className="w-full gap-2.5 sm:gap-4 grid grid-cols-1 lg:grid-cols-2">
 				{loading ? (
@@ -103,6 +127,41 @@ const PolicyList = ({ state }) => {
 					</div>
 				)}
 			</div>
+
+			{totalPages > 1 ? (
+				<div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 mt-6 pt-4">
+					<div className="text-sm flex-1 text-green-800 font-medium">
+						Trang {currentPage} / {totalPages}
+					</div>
+					<div className="flex flex-nowrap flex-1 items-center justify-center gap-2">
+						<Button
+							className="px-3 py-1 text-xs"
+							disabled={currentPage === 1}
+							onClick={() => loadPage(currentPage - 1)}
+						>
+							Trước
+						</Button>
+						{pageNumbers.map((pageNumber) => (
+							<Button
+								key={pageNumber}
+								variant={pageNumber === currentPage ? "primary" : "secondary"}
+								className="px-3 py-1 text-xs"
+								onClick={() => loadPage(pageNumber)}
+							>
+								{pageNumber}
+							</Button>
+						))}
+						<Button
+							className="px-3 py-1 text-xs"
+							disabled={currentPage === totalPages}
+							onClick={() => loadPage(currentPage + 1)}
+						>
+							Sau
+						</Button>
+					</div>
+					<div className="flex-1"></div>
+				</div>
+			) : null}
 		</>
 	);
 };

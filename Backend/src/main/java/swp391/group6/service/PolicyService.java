@@ -8,13 +8,12 @@
  */
 package swp391.group6.service;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import swp391.group6.model.Policy;
 import swp391.group6.model.PolicyStatus;
 import swp391.group6.repository.PolicyRepository;
-
-import java.util.List;
 
 @Service
 public class PolicyService {
@@ -24,10 +23,10 @@ public class PolicyService {
         this.policyRepository = policyRepository;
     }
 
-    public List<Policy> getAllPolicy(String title, PolicyStatus status, Pageable pageable) {
+    public Page<Policy> getAllPolicy(String title, PolicyStatus status, Pageable pageable) {
         if (status == null) {
             if (title == null || title.trim().isEmpty()) {
-                return policyRepository.findAll(pageable).getContent();
+                return policyRepository.findAll(pageable);
             }
             return policyRepository.findAllByTitleContainingIgnoreCase(title.trim(), pageable);
         } else {
@@ -44,19 +43,40 @@ public class PolicyService {
     }
 
     public Policy createPolicy(Policy policy) {
-        if (policyRepository.existsByTitleIgnoreCase(policy.getTitle())) {
+        if (policy.getTitle() == null || policy.getTitle().trim().isEmpty()) {
+            throw new IllegalArgumentException("Tiêu đề chính sách không được để trống.");
+        }
+        if (policy.getDescription() == null || policy.getDescription().trim().isEmpty()) {
+            throw new IllegalArgumentException("Nội dung chính sách không được để trống.");
+        }
+        if (policyRepository.existsByTitleIgnoreCase(policy.getTitle().trim())) {
             throw new IllegalArgumentException("Tiêu đề chính sách này đã tồn tại. Vui lòng chọn một tên khác.");
         }
+        policy.setTitle(policy.getTitle().trim());
+        policy.setDescription(policy.getDescription().trim());
         return policyRepository.save(policy);
     }
 
     public Policy updatePolicy(Long id, Policy policyDetails) {
-        if (policyDetails.getTitle() != null && policyRepository.existsByTitleIgnoreCaseAndIdNot(policyDetails.getTitle(), id)) {
-            throw new IllegalArgumentException("Tiêu đề chính sách này đã tồn tại. Vui lòng chọn một tên khác.");
-        }
         Policy policy = getPolicyById(id);
-        policy.setTitle(policyDetails.getTitle());
-        policy.setDescription(policyDetails.getDescription());
+
+        if (policyDetails.getTitle() != null) {
+            if (policyDetails.getTitle().trim().isEmpty()) {
+                throw new IllegalArgumentException("Tiêu đề chính sách không được để trống.");
+            }
+            if (policyRepository.existsByTitleIgnoreCaseAndIdNot(policyDetails.getTitle().trim(), id)) {
+                throw new IllegalArgumentException("Tiêu đề chính sách này đã tồn tại. Vui lòng chọn một tên khác.");
+            }
+            policy.setTitle(policyDetails.getTitle().trim());
+        }
+
+        if (policyDetails.getDescription() != null) {
+            if (policyDetails.getDescription().trim().isEmpty()) {
+                throw new IllegalArgumentException("Nội dung chính sách không được để trống.");
+            }
+            policy.setDescription(policyDetails.getDescription().trim());
+        }
+
         if (policyDetails.getStatus() != null) {
             policy.setStatus(policyDetails.getStatus());
         }

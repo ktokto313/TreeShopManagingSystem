@@ -40,13 +40,21 @@ const PolicyDetails = ({ policy, onUpdate, onCreate, isCreate = false, updateLoa
 	const hasChanged = editDesc !== description || editTitle !== title;
 
 	const handleSave = async (newStatus) => {
+		if (!editTitle || !editTitle.trim()) {
+			if (setPolicyError) setPolicyError("Tiêu đề chính sách không được để trống.");
+			return;
+		}
+		if (!editDesc || !editDesc.trim()) {
+			if (setPolicyError) setPolicyError("Nội dung chính sách không được để trống.");
+			return;
+		}
 		if (isCreate) {
-			const newPolicy = await onCreate({ title: editTitle, description: editDesc, status: newStatus });
+			const newPolicy = await onCreate({ title: editTitle.trim(), description: editDesc.trim(), status: newStatus });
 			if (newPolicy && newPolicy.id) {
 				navigate(`/policy`);
 			}
 		} else {
-			await onUpdate(id, { title: editTitle, description: editDesc, status: newStatus });
+			await onUpdate(id, { title: editTitle.trim(), description: editDesc.trim(), status: newStatus });
 			setIsEdit(false);
 		}
 	};
@@ -81,6 +89,17 @@ const PolicyDetails = ({ policy, onUpdate, onCreate, isCreate = false, updateLoa
 						</Button>
 					)}
 
+					{!isEdit && (status === "ARCHIVED" || status === "DRAFT") && (
+						<Button
+							onClick={() => handleSave("PUBLISHED")}
+							className="bg-green-500 hover:bg-green-600 flex items-center gap-1 text-white"
+							disabled={updateLoading}
+						>
+							{updateLoading ? <IoReload className="animate-spin" /> : <FaSave className="text-sm" />}
+							<span>{status === "ARCHIVED" ? "Khôi phục & Xuất bản" : "Xuất bản"}</span>
+						</Button>
+					)}
+
 					{isEdit && (
 						<>
 							<Button
@@ -92,7 +111,7 @@ const PolicyDetails = ({ policy, onUpdate, onCreate, isCreate = false, updateLoa
 								<span>Lưu bản nháp</span>
 							</Button>
 
-							{hasChanged && (
+							{(hasChanged || status === "ARCHIVED" || status === "DRAFT") && (
 								<Button
 									onClick={() => handleSave("PUBLISHED")}
 									className="bg-green-500 hover:bg-green-600 flex items-center gap-1 text-white"

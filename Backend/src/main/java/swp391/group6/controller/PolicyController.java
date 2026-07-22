@@ -8,6 +8,7 @@
  */
 package swp391.group6.controller;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import swp391.group6.model.Policy;
 import swp391.group6.model.PolicyStatus;
 import swp391.group6.service.PolicyService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/policy")
@@ -29,11 +28,11 @@ public class PolicyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Policy>> getAllPolicy(
+    public ResponseEntity<Page<Policy>> getAllPolicy(
             @RequestParam(name = "title", required = false) String title,
             @RequestParam(name = "status", required = false) PolicyStatus status,
-            @PageableDefault(sort = "createdAt") Pageable pageable) {
-        List<Policy> policies = policyService.getAllPolicy(title, status, pageable);
+            @PageableDefault(size = 6, sort = "createdAt") Pageable pageable) {
+        Page<Policy> policies = policyService.getAllPolicy(title, status, pageable);
         return ResponseEntity.ok(policies);
     }
 

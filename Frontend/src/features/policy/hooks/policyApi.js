@@ -2,20 +2,27 @@ import { requestJson } from "../../cart/cartApi";
 
 const POLICY_API_BASE = "/api/policy";
 
-export const fetchAllPolicies = (search, status) => {
+export const fetchAllPolicies = (search, status, page = 0, size = 6) => {
     const params = new URLSearchParams();
 
-	if(search){
-        params.append("title", search)
+    if (search) {
+        params.append("title", search);
     }
     
     if (status) {
-        params.append("status", status)
+        params.append("status", status);
     }
+
+    params.append("page", page);
+    params.append("size", size);
 
     const queryString = params.toString();
 
-	return requestJson(queryString ? `${POLICY_API_BASE}?${queryString}` : POLICY_API_BASE, { method: "GET" });
+    return requestJson(`${POLICY_API_BASE}?${queryString}`, { method: "GET" });
+};
+
+export const fetchPolicyById = (id) => {
+    return requestJson(`${POLICY_API_BASE}/${id}`, { method: "GET" });
 };
 
 export const updatePolicy = (id, newPolicy) => {
