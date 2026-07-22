@@ -86,7 +86,6 @@ export default function CatalogProductCard({
 					<span className="text-green-800">Tồn kho</span>
 					<span className="font-medium">{product.stock ?? 0}</span>
 				</div>
-				<div className="text-xs text-green-800">{availability.helper}</div>
 			</div>
 
 			<div className="mt-auto flex justify-center gap-2">
