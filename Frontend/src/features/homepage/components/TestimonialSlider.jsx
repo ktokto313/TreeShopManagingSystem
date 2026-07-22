@@ -16,13 +16,18 @@ export default function TestimonialSlider() {
     const { ref, isVisible } = useScrollReveal({ threshold: 0.1 });
     const [currentIndex, setCurrentIndex] = useState(0);
 
+    const [togglingId, setTogglingId] = useState(null);
+
     const handleToggleCurate = async (reviewId) => {
-        if (!isManager) return;
+        if (!isManager || togglingId) return;
+        setTogglingId(reviewId);
         try {
             await requestJson(`/api/reviews/${reviewId}/curate`, { method: 'PUT' });
-            reload();
+            await reload();
         } catch (error) {
             console.error('Failed to toggle curate status', error);
+        } finally {
+            setTogglingId(null);
         }
     };
 
@@ -119,9 +124,10 @@ export default function TestimonialSlider() {
                                             {isManager && (
                                                 <button 
                                                     onClick={() => handleToggleCurate(review.id)}
-                                                    className="mt-4 px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-semibold hover:bg-red-200 transition pointer-events-auto"
+                                                    disabled={togglingId === review.id}
+                                                    className="mt-4 px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-semibold hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition pointer-events-auto"
                                                 >
-                                                    Gỡ Khỏi Trang Chủ
+                                                    {togglingId === review.id ? 'Đang xử lý...' : 'Gỡ Khỏi Trang Chủ'}
                                                 </button>
                                             )}
                                         </div>

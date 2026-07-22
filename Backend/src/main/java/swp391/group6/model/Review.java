@@ -25,8 +25,8 @@ public class Review {
     @org.hibernate.annotations.NotFound(action = org.hibernate.annotations.NotFoundAction.IGNORE)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
-        @JoinColumn(name = "order_id", referencedColumnName = "order_id", nullable = false),
-        @JoinColumn(name = "product_id", referencedColumnName = "product_id", nullable = false)
+        @JoinColumn(name = "order_id", referencedColumnName = "order_id", nullable = false, updatable = false),
+        @JoinColumn(name = "product_id", referencedColumnName = "product_id", nullable = false, updatable = false)
     })
     private OrderDetail orderDetail;
 
