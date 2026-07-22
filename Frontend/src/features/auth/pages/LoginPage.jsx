@@ -156,7 +156,7 @@ export default function LoginPage() {
 
             <div className="my-6 flex items-center gap-4">
               <div className="flex-1 h-px bg-white-subtle" />
-              <span className="text-sm text-gray-400">or</span>
+              <span className="text-sm text-gray-400">Hoặc</span>
               <div className="flex-1 h-px bg-white-subtle" />
             </div>
 

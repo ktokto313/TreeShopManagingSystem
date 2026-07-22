@@ -5,6 +5,7 @@ import { Button } from '../../../components/ui/Button';
 import { AuthContext } from '../../../context/AuthContext';
 import { useBlogDetail, toggleVote } from '../hooks/useBlog';
 import { HiThumbUp, HiOutlineThumbUp, HiArrowLeft } from 'react-icons/hi';
+import MDEditor from '@uiw/react-md-editor';
 
 export default function BlogDetailPage() {
     const { id } = useParams();
@@ -78,8 +79,8 @@ export default function BlogDetailPage() {
                 </div>
 
                 {/* Content */}
-                <div className="prose prose-green max-w-none text-stone-700 leading-relaxed whitespace-pre-wrap">
-                    {blog.content}
+                <div className="prose prose-green max-w-none">
+                    <MDEditor.Markdown source={blog.content} style={{ backgroundColor: 'transparent' }} />
                 </div>
 
                 {/* Gallery */}
