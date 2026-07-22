@@ -60,11 +60,6 @@ export default function useFetchAllOrders() {
 		}
 	}, [searchQuery, selectedFilter]);
 
-	const changeFilter = (newFilter) => {
-		setSelectedFilter(newFilter);
-		fetchOrders();
-	};
-
 	const changeSearchQuery = (newQuery) => {
 		setSearchQuery(newQuery);
 
@@ -90,7 +85,7 @@ export default function useFetchAllOrders() {
 		isLoading,
 		error,
 		selectedFilter,
-		setSelectedFilter: changeFilter,
+		setSelectedFilter,
 		searchQuery,
 		setSearchQuery: changeSearchQuery,
 		fetchOrders,
