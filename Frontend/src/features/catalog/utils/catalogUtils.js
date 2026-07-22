@@ -135,6 +135,7 @@ export function matchesCatalogFilters(product, filters, categoryName, options = 
   }
 
   if (
+    careDifficulty &&
     !matchesAnyText(careDifficulty, [
       product.difficulty,
       product.careGuide,
@@ -146,6 +147,7 @@ export function matchesCatalogFilters(product, filters, categoryName, options = 
   }
 
   if (
+    fengShuiElement &&
     !matchesAnyText(fengShuiElement, [
       product.fengShuiElement,
       categoryName,
