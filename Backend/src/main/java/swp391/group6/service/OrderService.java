@@ -80,12 +80,6 @@ public class OrderService {
         return order.orElse(null);
     }
 
-    public boolean addOrder(ShoppingCart shoppingCart) {
-
-        //TODO placeholder, implement this
-        return true;
-    }
-
     @PreAuthorize("hasAnyRole('MANAGER')")
     public boolean changeOrder(LoginResponse loginResponse, long id, OrderDTO order) {
         User user = userRepository.findByEmail(loginResponse.getEmail()).orElse(null);

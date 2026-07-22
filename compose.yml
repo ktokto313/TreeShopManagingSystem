@@ -60,6 +60,7 @@ services:
       context: ./Frontend
       dockerfile: ./Dockerfile
     image: frontend:latest
+    env_file: ".env"
     restart: unless-stopped
     networks:
       - frontend

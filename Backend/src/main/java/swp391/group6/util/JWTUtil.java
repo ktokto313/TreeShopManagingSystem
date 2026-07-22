@@ -14,38 +14,18 @@ import java.time.Instant;
 @Component
 public class JWTUtil {
 
-    //TODO: remove hardcode value when migrate to docker
-    private static Algorithm algorithm = Algorithm.HMAC256("a-string-for-testing");
-    private static String jwtIssuer = "a";
-    private static long lifetime = 86400L;
-    private static String cookieName = "hihi";
+    private static Algorithm algorithm;
+    private static String jwtIssuer;
+    private static long lifetime;
+    private static String cookieName;
 
     private JWTUtil() {}
 
     static {
-        // TODO remove try catch when moving to docker
-        // Allow override via environment for docker
-        String secret = System.getenv("JWT_SECRET");
-        if (secret != null && !secret.isBlank()) {
-            algorithm = Algorithm.HMAC256(secret);
-        }
-
-        String issuer = System.getenv("JWT_ISSUER");
-        if (issuer != null && !issuer.isBlank()) {
-            jwtIssuer = issuer;
-        }
-
-        String lifetimeEnv = System.getenv("JWT_LIFETIME");
-        if (lifetimeEnv != null) {
-            try {
-                lifetime = Long.parseLong(lifetimeEnv);
-            } catch (Exception ignored) {}
-        }
-
-        String name = System.getenv("JWT_COOKIE_NAME");
-        if (name != null && !name.isBlank()) {
-            cookieName = name;
-        }
+        algorithm = Algorithm.HMAC256(System.getenv("JWT_SECRET"));
+        jwtIssuer = System.getenv("JWT_ISSUER");
+        lifetime = Long.parseLong(System.getenv("JWT_LIFETIME"));
+        cookieName = System.getenv("JWT_COOKIE_NAME");
     }
 
     public static String getCookieName() {

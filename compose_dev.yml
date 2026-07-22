@@ -63,10 +63,11 @@ services:
       dockerfile: ./Dockerfile_dev
     image: frontend:latest
     restart: unless-stopped
+    env_file: ".env"
     networks:
       - frontend
     ports: 
-      - 3000:3000
+      - 5173:5173
 
 networks:
   frontend:

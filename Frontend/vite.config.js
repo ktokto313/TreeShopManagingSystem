@@ -5,11 +5,7 @@ import process from 'node:process'
 import path from 'node:path'
 
 export default defineConfig(({ mode }) => {
-	// Load env file from the parent directory where the .env is located
-	const env = loadEnv(mode, path.resolve(process.cwd(), '..'), '');
-	
-	const serverPort = env.SERVER_PORT || process.env.SERVER_PORT || '8080';
-	const apiTarget = serverPort.startsWith('http') ? serverPort : `http://localhost:${serverPort}`;
+	const apiTarget = process.env.SERVER_PORT ? ("http://app:" + process.env.SERVER_PORT) : 'http://localhost:8080'
 
 	return {
 		plugins: [react(), tailwindcss()],

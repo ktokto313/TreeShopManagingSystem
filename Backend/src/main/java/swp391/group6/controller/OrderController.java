@@ -73,11 +73,8 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<Void> addOrder(@RequestBody ShoppingCart shoppingCart) {
-        if (orderService.addOrder(shoppingCart)) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
+        //This is in Checkout controller sadly
+        return ResponseEntity.notFound().build();
     }
 
     @PutMapping("{id}")

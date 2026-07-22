@@ -8,25 +8,16 @@ import org.springframework.stereotype.Component;
 
 @Component
 public final class CookieUtil {
-    //TODO: remove hardcode value when migrate to docker
-    private static Long cookieMaxAge = 86400L;
-    private static String cookieName = "hihi";
-    private static boolean cookieSecure = true;
+    private static Long cookieMaxAge;
+    private static String cookieName;
+    private static boolean cookieSecure;
 
     private CookieUtil() {}
 
-    // TODO enforce wihtout try when migrate to docker from environment when available (useful for docker / dev)
     static {
-        try {
-            String lifetime = System.getenv("JWT_LIFETIME");
-            if (lifetime != null) cookieMaxAge = Long.parseLong(lifetime);
-        } catch (Exception ignored) {}
-
-        String envName = System.getenv("JWT_COOKIE_NAME");
-        if (envName != null && !envName.isBlank()) cookieName = envName;
-
-        String secure = System.getenv("JWT_COOKIE_SECURE");
-        if (secure != null) cookieSecure = Boolean.parseBoolean(secure);
+        cookieMaxAge = Long.parseLong(System.getenv("JWT_LIFETIME"));
+        cookieName = System.getenv("JWT_COOKIE_NAME");
+        cookieSecure = Boolean.parseBoolean(System.getenv("JWT_COOKIE_SECURE"));
     }
 
     public static ResponseCookie makeCookieFromJWT(String jwt) {

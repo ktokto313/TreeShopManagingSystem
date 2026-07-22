@@ -8,7 +8,7 @@ RUN npm install
 #Copy the code in
 COPY --chown=frontend:frontend ./*.* ./
 COPY --chown=frontend:frontend ./src/. ./src/
-RUN chown frontend:frontend ./
+RUN chown frontend:frontend ./ && chown frontend:frontend /usr/src/node_modules/
 USER frontend:frontend
 EXPOSE 5173
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev", "--", "--host"]
