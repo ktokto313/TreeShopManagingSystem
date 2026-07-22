@@ -51,11 +51,23 @@ function toChipText(category) {
   return `${category.name} (${category.count})`
 }
 
-function getPageNumbers(currentPage, totalPages) {
-  const startPage = Math.max(1, currentPage - 2)
-  const endPage = Math.min(totalPages, currentPage + 2)
+function getPageNumbers(currentPage, totalPages, maxVisible = 5) {
+  if (totalPages <= maxVisible) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1)
+  }
 
-  return Array.from({ length: Math.max(0, endPage - startPage + 1) }, (_, index) => startPage + index)
+  let startPage = currentPage - Math.floor(maxVisible / 2)
+  let endPage = currentPage + Math.floor(maxVisible / 2)
+
+  if (startPage < 1) {
+    startPage = 1
+    endPage = maxVisible
+  } else if (endPage > totalPages) {
+    endPage = totalPages
+    startPage = totalPages - maxVisible + 1
+  }
+
+  return Array.from({ length: endPage - startPage + 1 }, (_, index) => startPage + index)
 }
 
 export default function CatalogPage() {
