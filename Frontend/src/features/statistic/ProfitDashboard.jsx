@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Container } from '../../components/global/Container';
 import useFetchProfit from './hooks/useFetchProfit';
-import useFetchProducts from './hooks/useFetchOrders';
+import useFetchProducts from './hooks/useFetchProducts';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 export default function ProfitDashboard() {
