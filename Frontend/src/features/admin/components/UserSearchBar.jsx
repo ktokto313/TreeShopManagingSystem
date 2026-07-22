@@ -41,17 +41,17 @@ export function UserSearchBar({ onSearch, onClear, isSearching }) {
         </svg>
         <Input
           className="pl-9 pr-3"
-          placeholder="Search name, email…"
+          placeholder="Tìm tên người dùng, email..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
       </div>
       <Button type="submit" size="sm" disabled={isSearching}>
-        {isSearching ? "Searching…" : "Search"}
+        {isSearching ? "Đang tìm kiếm" : "Tìm kiếm"}
       </Button>
       {query && (
         <Button type="button" variant="ghost" size="sm" onClick={handleClear}>
-          Clear
+          Xóa
         </Button>
       )}
     </form>

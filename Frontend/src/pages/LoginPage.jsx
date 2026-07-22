@@ -67,11 +67,11 @@ export default function LoginPage() {
           </Badge>
           <div className="space-y-4">
             <h1 className="text-4xl font-semibold tracking-tight text-[var(--text-h)]">
-              Truy cập khu CRUD dành cho quản lý
+              Truy cập khu dành cho quản lý
             </h1>
             <p className="max-w-2xl text-base leading-7 text-[var(--text)]">
               Trang này mở danh sách danh mục và sản phẩm sau khi xác thực. Nếu tài khoản của bạn là
-              quản lý hoặc quản trị viên, hãy đăng nhập để tải dữ liệu và thao tác CRUD.
+              quản lý hoặc quản trị viên, hãy đăng nhập để tải dữ liệu và thao tác.
             </p>
           </div>
 
@@ -93,12 +93,12 @@ export default function LoginPage() {
         <Card className="space-y-6 border-emerald-100 bg-white/95 p-6 shadow-lg">
           <div className="space-y-2">
             <p className="text-sm font-medium uppercase tracking-[0.2em] text-[var(--accent)]">
-              Tree Shop Managing System
+              GreenShop
             </p>
             <h2 className="text-2xl font-semibold text-[var(--text-h)]">Đăng nhập</h2>
             <p className="text-sm leading-6 text-[var(--text)]">
               Dùng tài khoản đã có trong dữ liệu seed của dự án. Nếu bạn đang thử khu quản lý, hãy
-              đăng nhập bằng tài khoản có role Manager hoặc System Admin.
+              đăng nhập bằng tài khoản có quyền của Manager hoặc System Admin.
             </p>
           </div>
 
@@ -118,7 +118,7 @@ export default function LoginPage() {
               onChange={handleChange}
             />
             <Input
-              label="Password"
+              label="Mật khẩu"
               name="password"
               type="password"
               autoComplete="current-password"
@@ -128,21 +128,20 @@ export default function LoginPage() {
 
             <div className="flex flex-wrap gap-3 pt-2">
               <Button type="submit" disabled={loading}>
-                {loading ? 'Signing in...' : 'Sign in'}
+                {loading ? 'Đang đăng ký' : 'Đăng ký'}
               </Button>
               <Button type="button" variant="secondary" onClick={() => navigate('/', { replace: true })}>
-                Back to home
+                Quay lại trang chủ
               </Button>
             </div>
           </Form>
 
           <div className="rounded-xl border border-[var(--border)] bg-[var(--social-bg)] p-4 text-sm text-[var(--text)]">
             <div className="font-medium text-[var(--text-h)]">
-              Current session: {canManage ? 'manager access ready' : 'not authenticated yet'}
+              Current session: {canManage ? 'Có thể truy cập với tư cách Manager' : 'Chưa được cấp quyền'}
             </div>
             <p className="mt-1 leading-6">
-              After login, the app keeps the JWT cookie so the CRUD requests can load without the
-              401 gate.
+              Sau khi đăng nhập, ứng dụng giữ lại JWT cookie để có thể load các request của CRUD mà không dính cổng 401.
             </p>
           </div>
         </Card>

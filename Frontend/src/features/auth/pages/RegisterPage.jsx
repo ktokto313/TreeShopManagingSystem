@@ -39,7 +39,7 @@ export default function RegisterPage() {
   function handleSubmit(e) {
     e.preventDefault()
     if (values.password !== confirmPassword) {
-      setConfirmError('Passwords do not match')
+      setConfirmError('Mật khẩu không trùng khớp')
       return
     }
     setConfirmError('')
@@ -53,15 +53,15 @@ export default function RegisterPage() {
             <img src={registerImg} className="object-cover w-full h-full" alt="" />
           </div>
           <div className="bg-blue-300/90 relative z-10 p-10 m-6 md:m-10 max-w-sm w-full md:w-auto">
-            <h2 className="text-2xl font-bold uppercase mb-4">Login</h2>
+            <h2 className="text-2xl font-bold uppercase mb-4">Đăng nhập</h2>
             <p className="mb-8 text-left text-pretty w-[80%] text-lg font-semibold">
-              Already have an account? Log in!
+              Đã có tài khoản? Đăng nhập.
             </p>
             <button
                 onClick={() => navigate('/login')}
                 className="px-6 py-2.5 text-xs font-bold uppercase border border-white hover:bg-white hover:text-blue-600 transition cursor-pointer"
             >
-              Login
+              Đăng nhập
             </button>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default function RegisterPage() {
         <div className="flex flex-col items-center justify-center px-16 md:px-12 lg:px-0 pt-12 pb-12 md:pt-0 md:pb-20 md:flex-1 bg-amber-200/30">
           <div className="w-full max-w-md">
             <h1 className="text-2xl font-bold tracking-wider uppercase mb-8 text-black">
-              Register
+              Đăng ký
             </h1>
 
             {error && (
@@ -81,7 +81,7 @@ export default function RegisterPage() {
             {!otpSent ? (
                 <form onSubmit={handleSubmit}>
                   <div className="mb-5">
-                    <label className="block text-sm mb-1.5 text-black">Full name *</label>
+                    <label className="block text-sm mb-1.5 text-black">Họ và Tên *</label>
                     <input
                         name="fullName"
                         value={values.fullName}
@@ -93,7 +93,7 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="mb-5">
-                    <label className="block text-sm mb-1.5 text-black">Email address *</label>
+                    <label className="block text-sm mb-1.5 text-black">Địa chỉ email *</label>
                     <input
                         type="email"
                         name="email"
@@ -106,7 +106,7 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="mb-5">
-                    <label className="block text-sm mb-1.5 text-black">Password *</label>
+                    <label className="block text-sm mb-1.5 text-black">Mật khẩu *</label>
                     <div className="relative">
                       <input
                           type={showPassword ? 'text' : 'password'}
@@ -129,7 +129,7 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="mb-6">
-                    <label className="block text-sm mb-1.5 text-black">Confirm password *</label>
+                    <label className="block text-sm mb-1.5 text-black">Nhập lại mật khẩu *</label>
                     <div className="relative">
                       <input
                           type={showConfirm ? 'text' : 'password'}
@@ -165,7 +165,7 @@ export default function RegisterPage() {
                       disabled={loading}
                       className="w-full px-8 py-3 text-xs font-bold uppercase bg-green-600 text-white hover:bg-green-500 disabled:opacity-50 transition cursor-pointer"
                   >
-                    {loading ? 'Sending OTP...' : 'Register'}
+                    {loading ? 'Đang gửi mã OTP...' : 'Đăng ký'}
                   </button>
                 </form>
             ) : (
@@ -195,7 +195,7 @@ export default function RegisterPage() {
                         disabled={loading || otp.length !== 6}
                         className="px-8 py-3 text-xs font-bold uppercase bg-green-800 text-white hover:bg-green-700 disabled:opacity-50 transition cursor-pointer"
                     >
-                      {loading ? 'Verifying...' : 'Verify OTP'}
+                      {loading ? 'Đang kiểm tra...' : 'Kiểm tra mã OTP'}
                     </button>
 
                     <button

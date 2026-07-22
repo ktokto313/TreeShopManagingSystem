@@ -49,10 +49,10 @@ export function UserDetailModal({ user, isOpen, onClose }) {
 
         {/* Fields */}
         <div className="grid grid-cols-2 gap-4 border-t border-stone-100 pt-4">
-          <Field label="User ID" value={user.id} />
-          <Field label="Phone" value={user.phone} />
-          <Field label="Created At" value={user.createdAt} />
-          <Field label="Updated At" value={user.updatedAt} />
+          <Field label="ID tài khoản" value={user.id} />
+          <Field label="Số điện thoại" value={user.phone} />
+          <Field label="Thời gian tạo" value={user.createdAt} />
+          <Field label="Thời gian cập nhật" value={user.updatedAt} />
         </div>
       </div>
     </Modal>

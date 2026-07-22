@@ -113,11 +113,11 @@ export function UserManagementContainer() {
     <div className="flex flex-col gap-6 mt-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-stone-800">User Management</h1>
+          <h1 className="text-xl font-semibold text-stone-800">Trình quản lý người dùng</h1>
           <p className="text-sm text-stone-500 mt-0.5">
             {searchResults
-              ? `${searchResults.length} result(s) found`
-              : `${users.length} total users`}
+              ? `Tìm được ${searchResults.length} kết quả`
+              : `${users.length} tài khoản`}
           </p>
         </div>
       </div>
@@ -134,7 +134,7 @@ export function UserManagementContainer() {
             className="h-10 px-4 text-sm rounded-md font-medium bg-green-500 flex gap-1 cursor-pointer items-center text-white hover:opacity-90"
           >
           <FaPlus></FaPlus>
-          Create User
+          Thêm tài khoản
         </button>
       </div>
 
@@ -142,12 +142,12 @@ export function UserManagementContainer() {
         {hasError ? (
           <div className="py-16 text-center">
             <p className="text-stone-500 text-sm">
-              Failed to load users.{" "}
+              Không thể tìm được danh sách người dùng.{" "}
               <button
                 onClick={refetch}
                 className="text-[#283C1D] underline underline-offset-2"
               >
-                Try again
+                Thử lại
               </button>
             </p>
           </div>
@@ -156,19 +156,19 @@ export function UserManagementContainer() {
             <thead>
               <tr className="bg-green-500">
                 <th className={thClass} onClick={() => handleSort("user")}>
-                  User <SortIcon active={sortKey === "user"} direction={sortDir} />
+                  Tài khoản <SortIcon active={sortKey === "user"} direction={sortDir} />
                 </th>
                 <th className={thClass} onClick={() => handleSort("role")}>
-                  Role <SortIcon active={sortKey === "role"} direction={sortDir} />
+                  Quyền <SortIcon active={sortKey === "role"} direction={sortDir} />
                 </th>
                 <th className={thClass} onClick={() => handleSort("status")}>
-                  Status <SortIcon active={sortKey === "status"} direction={sortDir} />
+                  Trạng thái <SortIcon active={sortKey === "status"} direction={sortDir} />
                 </th>
                 <th className={thClass} onClick={() => handleSort("phone")}>
-                  Phone <SortIcon active={sortKey === "phone"} direction={sortDir} />
+                  Số điện thoại <SortIcon active={sortKey === "phone"} direction={sortDir} />
                 </th>
                 <th className="px-4 py-3 text-xs font-medium text-white uppercase tracking-wide">
-                  Actions
+                Quản lý
                 </th>
               </tr>
             </thead>
@@ -213,7 +213,7 @@ export function UserManagementContainer() {
       {!hasError && !isLoading && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
           <p className="text-sm text-stone-500">
-            Showing {firstUserIndex}-{lastUserIndex} of {totalUsers} users
+            Đang hiện {firstUserIndex}-{lastUserIndex} trên {totalUsers} tài khoản
           </p>
 
           <div className="flex items-center gap-1">

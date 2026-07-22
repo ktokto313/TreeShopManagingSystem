@@ -17,11 +17,11 @@ const ROLES = ["CUSTOMER", "MANAGER", "SHIPPER", "SUPPORT_AGENT"];
 
 function validate(form) {
   const errors = {};
-  if (!form.fullName.trim()) errors.fullName = "Full name is required";
+  if (!form.fullName.trim()) errors.fullName = "Vui lòng gõ đầy đủ họ tên";
   else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(form.fullName.trim()))
-    errors.fullName = "Full name must contain letters only";
+    errors.fullName = "Họ tên vui lòng không thêm vào ký tự đặc biệt";
   if (form.phone && !/^0\d{8,10}$/.test(form.phone.replace(/\s/g, "")))
-    errors.phone = "Phone must start with 0 and be 9–11 digits";
+    errors.phone = "Số điện thoại phải bắt đầu bằng 0 và chứa từ 9-11 số";
   return errors;
 }
 
@@ -61,7 +61,7 @@ export function EditUserModal({ user, isOpen, onClose, onUpdated }) {
 
         <div>
           <Input
-            label="Full Name"
+            label="Họ và Tên"
             value={form.fullName}
             onChange={handleChange("fullName")}
             required
@@ -71,7 +71,7 @@ export function EditUserModal({ user, isOpen, onClose, onUpdated }) {
 
         <div>
           <Input
-            label="Phone"
+            label="Số điện thoại"
             value={form.phone}
             onChange={handleChange("phone")}
             placeholder="0912 345 678"
@@ -80,7 +80,7 @@ export function EditUserModal({ user, isOpen, onClose, onUpdated }) {
         </div>
 
         <Select
-          label="Role"
+          label="Quyền"
           value={form.role}
           onChange={handleChange("role")}
           options={ROLES.map((r) => ({ label: r.replace("_", " "), value: r }))}
@@ -89,27 +89,27 @@ export function EditUserModal({ user, isOpen, onClose, onUpdated }) {
         <div>
           <div className="relative">
             <Input
-              label="New Password"
+              label="Mật khẩu mới"
               type={showPassword ? "text" : "password"}
               value={form.password}
               onChange={handleChange("password")}
-              placeholder="Leave blank to keep current"
+              placeholder="Để trống để giữ mật khẩu hiện tại"
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               className="absolute right-3 top-8 text-sm text-gray-500 hover:text-gray-800"
             >
-              {showPassword ? "Hide" : "Show"}
+              {showPassword ? "Ẩn" : "Hiện"}
             </button>
           </div>
         </div>
 
-        {hasError && <p className="text-sm text-rose-600">Something went wrong. Please try again.</p>}
+        {hasError && <p className="text-sm text-rose-600">Đã có lỗi xảy ra. Vui lòng thử lại.</p>}
 
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="outline" type="button" className="bg-red-500 hover:bg-red-400 text-white" onClick={onClose}>Cancel</Button>
-          <Button type="submit" disabled={isLoading}>{isLoading ? "Saving…" : "Save Changes"}</Button>
+          <Button type="submit" disabled={isLoading}>{isLoading ? "Đang Lưu" : "Lưu"}</Button>
         </div>
       </Form>
     </Modal>

@@ -105,7 +105,7 @@ export function UserTableRow({
             size="sm"
             onClick={() => onBanToggle(user)}
             disabled={isActionLoading}
-            title={user.isBanned ? "Unban user" : "Ban user"}
+            title={user.isBanned ? "Bỏ khóa tài khoản" : "Khóa tài khoản"}
             className={
               user.isBanned ? "text-emerald-600 hover:text-emerald-700" : "text-amber-600 hover:text-amber-700"
             }
@@ -128,7 +128,7 @@ export function UserTableRow({
             size="sm"
             onClick={() => onDelete(user.id)}
             disabled={isActionLoading}
-            title="Delete user"
+            title="Xóa tài khoản"
             className="text-rose-500 hover:text-rose-700"
           >
             <svg

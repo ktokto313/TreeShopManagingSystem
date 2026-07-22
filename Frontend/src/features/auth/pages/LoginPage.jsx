@@ -45,15 +45,15 @@ export default function LoginPage() {
             <img src={loginImg} className={"object-cover w-full h-full"}></img>
           </div>
           <div className={"bg-blue-300/90 relative z-10 p-10"}>
-            <h2 className="text-2xl font-bold uppercase mb-4">Register</h2>
+            <h2 className="text-2xl font-bold uppercase mb-4">Đăng ký</h2>
             <p className="mb-8 text-left text-pretty w-[80%] text-lg font-semibold">
-              Don't have an account? Register one!
+              Chưa có tài khoản? Đăng ký ngay!
             </p>
             <button
                 onClick={() => navigate('/register')}
                 className="px-6 py-2.5 text-xs font-bold uppercase border border-white hover:bg-white hover:text-blue-600 transition cursor-pointer"
             >
-              Register an account
+              Đăng ký tài khoản
             </button>
           </div>
         </div>
@@ -63,7 +63,7 @@ export default function LoginPage() {
           <div className="w-full max-w-md">
 
             <h1 className="text-2xl font-bold uppercase tracking-widest mb-8 text-green-800">
-              Login
+              Đăng nhập
             </h1>
 
             {error && (
@@ -147,10 +147,10 @@ export default function LoginPage() {
                   className="px-8 py-3 text-xs w-full font-bold uppercase bg-green-600 text-white hover:bg-green-500 disabled:opacity-50 transition cursor-pointer"
               >
                 {blockedSeconds > 0
-                    ? `Try again in ${blockedSeconds}s`
+                    ? `Thử đăng nhâp lại sau ${blockedSeconds}s`
                     : loading
-                        ? 'Logging in...'
-                        : 'Log in'}
+                        ? 'Đang đăng nhập'
+                        : 'Đăng nhập'}
               </button>
             </form>
 
