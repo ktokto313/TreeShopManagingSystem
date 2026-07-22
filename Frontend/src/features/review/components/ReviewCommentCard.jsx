@@ -55,7 +55,10 @@ const ReviewCommentCard = ({ review = {}, className, canManage, onHideToggle, on
 							size="sm" 
 							variant={curated ? "primary" : "secondary"}
 							onClick={onCurateToggle}
-							className={curated ? "bg-green-600 hover:bg-green-700 text-white" : "border-green-300 text-green-700 hover:bg-green-50"}
+							disabled={hidden}
+							className={hidden 
+								? "bg-gray-200 text-gray-400 cursor-not-allowed border-gray-200" 
+								: (curated ? "bg-green-600 hover:bg-green-700 text-white" : "border-green-300 text-green-700 hover:bg-green-50")}
 						>
 							{curated ? 'Đã chọn tiêu biểu' : 'Chọn tiêu biểu'}
 						</Button>

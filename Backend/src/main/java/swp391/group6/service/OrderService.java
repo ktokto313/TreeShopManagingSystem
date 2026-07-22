@@ -268,7 +268,14 @@ public class OrderService {
             return false;
         }
 
-        review.setHidden(!review.isHidden());
+        boolean newHiddenState = !review.isHidden();
+        review.setHidden(newHiddenState);
+
+        // A review cannot be hidden and curated at the same time.
+        if (newHiddenState && review.isCurated()) {
+            review.setCurated(false);
+        }
+
         reviewRepository.save(review);
         return true;
     }
@@ -320,6 +327,11 @@ public class OrderService {
         Review review = reviewRepository.findById(reviewId).orElse(null);
         if (review == null) {
             return false;
+        }
+
+        // Mutual exclusivity: A review cannot be curated if it is hidden.
+        if (!review.isCurated() && review.isHidden()) {
+            throw new IllegalStateException("Cannot curate a hidden review. Please unhide it first.");
         }
 
         review.setCurated(!review.isCurated());

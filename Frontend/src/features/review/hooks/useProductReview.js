@@ -111,11 +111,19 @@ export const useProductReview = (productId, onSuccess) => {
 	};
 
 	const toggleReviewHide = async (reviewId) => {
+		// Updates optimistically so we dont have to reload everything for this small change
 		try {
 			await toggleReviewHideApi(reviewId);
-			setReviews(reviews.map(r => r.id === reviewId ? { ...r, hidden: !r.hidden } : r));
+			setReviews(reviews.map(r => {
+				if (r.id === reviewId) {
+					const newHidden = !r.hidden;
+					return { ...r, hidden: newHidden, curated: newHidden ? false : r.curated };
+				}
+				return r;
+			}));
 		} catch (err) {
 			console.error('Lỗi ẩn đánh giá:', err);
+			alert(err.response?.data?.message || err.message || 'Có lỗi xảy ra khi ẩn đánh giá.');
 		}
 	};
 
@@ -125,6 +133,7 @@ export const useProductReview = (productId, onSuccess) => {
 			setReviews(reviews.map(r => r.id === reviewId ? { ...r, curated: !r.curated } : r));
 		} catch (err) {
 			console.error('Lỗi curate đánh giá:', err);
+			alert(err.response?.data?.message || err.message || 'Có lỗi xảy ra khi chọn tiêu biểu đánh giá.');
 		}
 	};
 

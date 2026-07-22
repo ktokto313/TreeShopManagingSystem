@@ -6,6 +6,7 @@ import { useState } from 'react';
 import useFetchAllOrders from './hooks/useFetchAllOrders';
 import OrderModal from './OrderModal';
 import { Skeleton } from '../../components/ui/Skeleton';
+import { TbReload } from "react-icons/tb";
 
 export default function OrderManagement() {
   const {
@@ -44,13 +45,11 @@ export default function OrderManagement() {
             </div>
             <Button
               variant="secondary"
-              className="self-start md:self-auto flex items-center gap-2"
+              className="self-start md:self-auto flex items-center gap-1"
               onClick={fetchOrders}
               disabled={isLoading}
             >
-              <svg className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 15.57M21 21v-5h-.581m0 0a8.003 8.003 0 01-15.357-2" />
-              </svg>
+              <TbReload></TbReload>
               Làm mới
             </Button>
           </div>
