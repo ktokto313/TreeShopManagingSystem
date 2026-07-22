@@ -56,11 +56,19 @@ function createDetailParagraphs(product, categoryName) {
 function createDetailMarkdownContent(product, categoryName) {
 	const stock = Number(product?.stock ?? 0);
 	const price = formatCurrency(product?.price);
-	const careGuide = product?.careGuide || "Chưa cập nhật";
-	const sunlightLevel = product?.sunlightLevel || "Chưa cập nhật";
-	const wateringFrequency = product?.wateringFrequency || "Chưa cập nhật";
-	const difficulty = product?.difficulty || "Chưa cập nhật";
-	const fengShuiElement = product?.fengShuiElement || "Chưa cập nhật";
+	const careGuide = product?.careGuide;
+	const sunlightLevel = product?.sunlightLevel;
+	const wateringFrequency = product?.wateringFrequency;
+	const difficulty = product?.difficulty;
+	const fengShuiElement = product?.fengShuiElement;
+
+	// Only include fields that have actual data
+	const plantInfoLines = [];
+	if (careGuide?.trim()) plantInfoLines.push(`- **Hướng dẫn chăm sóc:** ${careGuide}`);
+	if (sunlightLevel?.trim()) plantInfoLines.push(`- **Ánh sáng:** ${sunlightLevel}`);
+	if (wateringFrequency?.trim()) plantInfoLines.push(`- **Tần suất tưới:** ${wateringFrequency}`);
+	if (difficulty?.trim()) plantInfoLines.push(`- **Độ khó chăm:** ${difficulty}`);
+	if (fengShuiElement?.trim()) plantInfoLines.push(`- **Phong thủy:** ${fengShuiElement}`);
 
 	const sample = [
 		`# ${product?.name || "Thông tin chi tiết của sản phẩm"}`,
@@ -69,18 +77,19 @@ function createDetailMarkdownContent(product, categoryName) {
 		"",
 		`Sản phẩm phù hợp để bố trí trong không gian sống, bàn làm việc hoặc khu vực thư giãn. Hiện tại sản phẩm đang có **${stock}** sản phẩm với mức giá **${price}**.`,
 		"",
-		"### Thông tin nhanh",
-		"",
-		`- **Hướng dẫn chăm sóc:** ${careGuide}`,
-		`- **Ánh sáng:** ${sunlightLevel}`,
-		`- **Tần suất tưới:** ${wateringFrequency}`,
-		`- **Độ khó chăm:** ${difficulty}`,
-		`- **Phong thủy:** ${fengShuiElement}`,
-		"",
-		"### Ghi chú",
-		"",
-		"Sản phẩm này được hiển thị theo nội dung markdown để hỗ trợ thêm ảnh, tiêu đề và các đoạn mô tả chi tiết.",
 	];
+
+	// Only add quick info section if there are plant details
+	if (plantInfoLines.length > 0) {
+		sample.push("### Thông tin nhanh");
+		sample.push("");
+		sample.push(...plantInfoLines);
+		sample.push("");
+	}
+
+	sample.push("### Ghi chú");
+	sample.push("");
+	sample.push("Sản phẩm này được hiển thị theo nội dung markdown để hỗ trợ thêm ảnh, tiêu đề và các đoạn mô tả chi tiết.");
 
 	return sample.join("\n");
 }
