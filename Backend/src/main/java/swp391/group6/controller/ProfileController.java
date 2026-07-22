@@ -33,6 +33,7 @@ public class ProfileController {
         this.changePasswordService = changePasswordService;
     }
 
+    // Returns basic user info (email, name, phone, status, hasPassword flag).
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProfileResponse> getProfile(HttpServletRequest request) {
@@ -44,6 +45,7 @@ public class ProfileController {
         return ResponseEntity.ok(toProfileResponse(user));
     }
 
+    // Update profile information of the currently authenticated user.
     @PutMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProfileResponse> updateProfile(@RequestBody UserDTO userDTO,
@@ -64,6 +66,7 @@ public class ProfileController {
     }
 
     // Helper
+    // Convert internal UserDTO to ProfileResponse format for API response.
     private ProfileResponse toProfileResponse(UserDTO user) {
         boolean hasPassword = user.getIsHasPassword();
 
@@ -77,6 +80,7 @@ public class ProfileController {
     }
 
     // BR-19: all user passwords must be encrypted using BCrypt
+    // Change password for authenticated user.
     @PostMapping("/change-password")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest req,

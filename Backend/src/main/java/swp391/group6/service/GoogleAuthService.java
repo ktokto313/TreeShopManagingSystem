@@ -44,6 +44,7 @@ public class GoogleAuthService {
         this.roleRepository = roleRepository;
     }
 
+    // Handle Google login using ID token (credential).
     public Object handleGoogleLogin(String credential, HttpServletResponse response) {
         GoogleIdToken.Payload payload = verifyToken(credential);
 
@@ -82,6 +83,7 @@ public class GoogleAuthService {
         return googleAuthResponse;
     }
 
+    // Complete profile for a new Google user (after first login).
     public void completeGoogleProfile(CompleteProfileRequest req, HttpServletResponse response) {
         User user = new User();
         user.setEmail(req.getEmail());
@@ -106,6 +108,7 @@ public class GoogleAuthService {
         response.addHeader("Set-Cookie", cookie.toString());
     }
 
+    // Verify Google ID token using Google's public keys and client ID.
     private GoogleIdToken.Payload verifyToken(String credential) {
         try {
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(

@@ -41,6 +41,7 @@ public class NotificationService {
 
     // BR-77: sends a notification to a specific user
     // BR-78: the created Notification shall have a read/unread status and starts as unread.
+    // Send a notification directly to a specific user.
     @Async
     public void notifyUser(Long userId, NotificationType type,
                            String subject, String content) {
@@ -50,6 +51,7 @@ public class NotificationService {
     }
 
     // BR-77: sends a notification to a specific user
+    // Send a notification to all users belonging to a specific role.
     @Async
     public void notifyRole(String roleName, NotificationType type,
                            String subject, String content) {
@@ -67,6 +69,7 @@ public class NotificationService {
     }
 
     //Template versions
+    // Send notification to a specific user using predefined template. Template provides subject and content with dynamic arguments.
     @Async
     public void notifyUserByTemplate(Long userId, NotificationType type,
                                      String templateKey, Object... args) {
@@ -74,6 +77,7 @@ public class NotificationService {
         String content = NotificationTemplate.body(templateKey, args);
         notifyUser(userId, type, subject, content);
     }
+    // Send notification to all users of a role using predefined template. Template provides subject and content with dynamic arguments.
     @Async
     public void notifyRoleByTemplate(String roleName, NotificationType type,
                                      String templateKey, Object... args) {
@@ -82,6 +86,7 @@ public class NotificationService {
         notifyRole(roleName, type, subject, content);
     }
 
+    //Construct a Notification entity with type, subject, and content.
     private Notification buildNotification(NotificationType type, String subject, String content) {
         Notification notification = new Notification();
         notification.setType(type);

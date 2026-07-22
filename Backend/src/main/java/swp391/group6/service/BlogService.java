@@ -36,7 +36,7 @@ public class BlogService {
     private final NotificationService notificationService; // added for blog notification triggers
 
     // VIEW BLOG
-
+    // Get all published blog posts, optionally filtered by tags.
     public List<BlogResponse> getPublished(Long userId, List<BlogTag> tags) {
         List<BlogPost> posts = (tags == null || tags.isEmpty())
                 ? postRepo.findByStatusOrderByCreatedAtDesc(BlogStatus.PUBLISHED)
@@ -47,19 +47,21 @@ public class BlogService {
                 .toList();
     }
 
-    // Fixed taxonomy — no DB query needed, the enum itself is the source of truth.
+    // Return all available blog tags
     public List<BlogTagOption> getAvailableTags() {
         return Arrays.stream(BlogTag.values())
                 .map(t -> new BlogTagOption(t.name(), t.getDisplayName()))
                 .toList();
     }
 
+    // Get a single published blog post by ID.
     public BlogResponse getById(long id, Long userId) {
         BlogPost post = postRepo.findById(id).orElse(null);
         if (post == null || post.getStatus() != BlogStatus.PUBLISHED) return null;
         return toResponse(post, userId);
     }
 
+    // Get all blog posts that are pending approval or have pending edits.
     public List<BlogResponse> getPending() {
         return postRepo.findPendingOrHasPendingEdit(BlogStatus.PENDING)
                 .stream()
@@ -68,7 +70,7 @@ public class BlogService {
     }
 
     // CREATE BLOG
-
+    // Create a new blog post.
     @Transactional
     public BlogResponse create(BlogRequest req, String email) {
 
@@ -124,7 +126,7 @@ public class BlogService {
     }
 
     // UPDATE BLOG
-
+    // Update an existing blog post owned by the user.
     @Transactional
     public BlogResponse update(long postId, BlogRequest req, String email) {
 
@@ -199,7 +201,7 @@ public class BlogService {
     }
 
     // DELETE BLOG
-
+    // Delete a published blog post (Manager only).
     @Transactional
     public boolean delete(long postId, String email) {
 
@@ -221,7 +223,7 @@ public class BlogService {
     }
 
     // APPROVE BLOG
-
+    // Approve a blog post or a pending edit.
     @Transactional
     public boolean approve(long postId) {
 
@@ -258,6 +260,7 @@ public class BlogService {
         return false;
     }
 
+    // Reject a blog post or pending edit.
     @Transactional
     public boolean reject(long postId) {
 
@@ -290,7 +293,7 @@ public class BlogService {
     }
 
     // UPVOTE BLOG
-
+    // Toggle vote (upvote/unvote) for a blog post.
     @Transactional
     public boolean toggleVote(long postId, String email) {
 
@@ -318,7 +321,7 @@ public class BlogService {
     }
 
     // VALIDATION
-
+    // Validate blog request data
     private void validate(BlogRequest req) {
 
         if (req.getTitle() == null || req.getTitle().isBlank())
@@ -338,7 +341,7 @@ public class BlogService {
     }
 
     // HELPERS
-
+    // Save list of image URLs for a blog post.
     private void saveImages(BlogPost post, List<String> imgs, boolean isPending) {
         if (imgs == null) return;
 
@@ -357,6 +360,7 @@ public class BlogService {
         notificationService.notifyUserByTemplate(author.getId(), type, templateKey, args);
     }
 
+    // Convert BlogPost entity to BlogResponse DTO.
     private BlogResponse toResponse(BlogPost post, Long userId) {
 
         return BlogResponse.builder()
@@ -402,6 +406,7 @@ public class BlogService {
     }
 
     // OWN BLOGS
+    // Get all blog posts created by current user
     public List<BlogResponse> getMyPosts(String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
         return postRepo.findByAuthorIdOrderByCreatedAtDesc(user.getId())

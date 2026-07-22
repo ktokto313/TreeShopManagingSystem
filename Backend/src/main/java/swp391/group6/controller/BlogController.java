@@ -42,6 +42,7 @@ public class BlogController {
     private String cookieName;
 
     // helper
+    // Extract authenticated user from request (JWT stored in cookie).
     private LoginResponse getUser(HttpServletRequest request) {
         LoginResponse user = (LoginResponse) request.getAttribute(cookieName);
         if (user == null)
@@ -49,8 +50,7 @@ public class BlogController {
         return user;
     }
 
-    // BR-32/BR-33/BR-38/BR-42: gate used to restrict Manager-only actions
-    // (approve/reject, delete, viewing pending queue).
+    // BR-32/BR-33/BR-38/BR-42: gate used to restrict Manager-only actions (approve/reject, delete, viewing pending queue).
     private void requireManager(LoginResponse user) {
         if (!"MANAGER".equals(user.getRole()))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden");
@@ -60,8 +60,7 @@ public class BlogController {
 
     // BR-26: Only blog posts with status "Published" are visible to any user.
     // BR-74/BR-75/BR-76: accepts one or multiple tags and returns results filtered
-    // dynamically by all selected tags (actual match-all-tags logic lives in
-    // service.getPublished — confirm there).
+    // dynamically by all selected tags (actual match-all-tags logic lives in service.getPublished — confirm there).
     // BR-27: vote count on returned BlogResponse must be visible regardless of
     // whether userId is null (i.e., unauthenticated) — verify in service/DTO mapping.
     @GetMapping
@@ -75,6 +74,7 @@ public class BlogController {
     // TAGS
 
     // Supports BR-74: supplies the set of tags a user can select for filtering.
+    // Return list of available blog tags for filtering/search UI.
     @GetMapping("/tags")
     public List<BlogTagOption> getAvailableTags() {
         return service.getAvailableTags();
@@ -84,6 +84,7 @@ public class BlogController {
     // callers — enforcement of that restriction should be checked inside service.getById.
     // BR-50: passes userId (nullable) through so the response can reflect the current
     // Customer's vote status when authenticated (BR-27 for vote count regardless).
+    // Get a single blog post by ID, including vote info if user logged in.
     @GetMapping("/{id}")
     public BlogResponse getById(@PathVariable long id, HttpServletRequest request) {
         LoginResponse user = (LoginResponse) request.getAttribute(cookieName);
@@ -91,7 +92,8 @@ public class BlogController {
         return service.getById(id, userId);
     }
 
-    // BR-43: Only blog posts with status "Pending" are available for Manager review —
+    // BR-43: Only blog posts with status "Pending" are available for Manager review
+    // Get all pending blog posts for manager review.
     @GetMapping("/pending")
     public List<BlogResponse> getPending(HttpServletRequest request) {
         requireManager(getUser(request));
@@ -104,6 +106,7 @@ public class BlogController {
     // BR-30: max 4 gallery image URLs.
     // BR-32: Customer posts always require Manager approval.
     // BR-33: Manager posts bypass approval and publish immediately.
+    // Create a new blog post (Customer or Manager).
     @PostMapping
     public BlogResponse create(HttpServletRequest request,
                                @RequestBody BlogRequest req) {
@@ -118,6 +121,7 @@ public class BlogController {
     // BR-36: a Manager's post retains its current status after update.
     // BR-37: updating a "Draft" post resets the 12-hour auto-deletion timer.
     // BR-45: editing/resubmitting a "Rejected" post returns it to "Pending".
+    // Update an existing blog post (only by owner).
     @PutMapping("/{id}")
     public BlogResponse update(@PathVariable long id,
                                HttpServletRequest request,
@@ -132,6 +136,7 @@ public class BlogController {
     // BR-39: only "Published" posts can be deleted.
     // BR-40: deletion is permanent.
     // BR-41: associated data are removed alongside the post.
+    // Delete a blog post (Manager only). Only Published posts can be deleted permanently.
     @DeleteMapping("/{id}")
     public boolean delete(@PathVariable long id, HttpServletRequest request) {
         LoginResponse user = getUser(request);
@@ -142,6 +147,7 @@ public class BlogController {
 
     // BR-42: Any Manager can approve any pending post regardless of author.
     // BR-44: approval requires no additional justification
+    // Approve a pending blog post (Manager only).
     @PostMapping("/{id}/approve")
     public boolean approve(@PathVariable long id, HttpServletRequest request) {
         requireManager(getUser(request));
@@ -151,6 +157,7 @@ public class BlogController {
     // BR-42: Any Manager can reject any pending post regardless of author.
     // BR-44: rejection requires no additional justification.
     // BR-45: rejected post returns to the author, who may edit and resubmit to "Pending".
+    // Reject a pending blog post (Manager only).
     @PostMapping("/{id}/reject")
     public boolean reject(@PathVariable long id, HttpServletRequest request) {
         requireManager(getUser(request));
@@ -162,6 +169,7 @@ public class BlogController {
     // BR-46: only authenticated Customers can upvote
     // BR-47: one vote per Customer per post. BR-48: toggle behavior — voting again removes the vote
     // BR-49: only published posts can be voted on. (All enforced in service.toggleVote.)
+    // Toggle vote (upvote/unvote) for a blog post by authenticated customer.
     @PostMapping("/{id}/vote")
     public boolean vote(@PathVariable long id, HttpServletRequest request) {
         LoginResponse user = getUser(request);
@@ -171,6 +179,7 @@ public class BlogController {
     // UPLOAD IMAGE
 
     // Supports BR-30: Gallery images are referenced by external URL, maximum 4 images per post
+    // Upload an image file and store it in database, returning a public URL.
     @PostMapping("/images/upload")
     public ResponseEntity<Map<String, String>> uploadImage(
             HttpServletRequest request,
@@ -200,6 +209,7 @@ public class BlogController {
     }
 
     //IMAGE
+    // Retrieve image binary data by ID and return it with correct content type.
     @GetMapping("/images/{id}")
     public ResponseEntity<byte[]> getImage(@PathVariable long id) {
         return imageRepo.findById(id)
@@ -211,6 +221,7 @@ public class BlogController {
     }
 
     //OWN BLOG
+    // Get all blog posts created by the currently authenticated user.
     @GetMapping("/my")
     public List<BlogResponse> getMyPosts(HttpServletRequest request) {
         LoginResponse user = getUser(request);

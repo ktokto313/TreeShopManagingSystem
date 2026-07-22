@@ -38,6 +38,7 @@ public class OtpService {
     }
 
     //BR-80: OTPs are saved in RAM and will auto delete on next access or after 5 minutes without new call.
+    // Generate a 6-digit OTP, store it in memory with expiry (5 minutes), and send it to user's email.
     public void generateAndSend(String email, OtpType type) {
         String otp = String.format("%06d", new Random().nextInt(999999));
 
@@ -56,6 +57,7 @@ public class OtpService {
 
     // BR-79: OTP has 2 types of Register/Reset Password. This type of OTP can't be used in other otp's workflow
     // BR-80: OTPs are saved in RAM and will auto delete on next access or after 5 minutes without new call.
+    // Verify OTP for a given email and workflow type.
     public boolean verify(String email, String otp, OtpType type) {
         AtomicBoolean verified = new AtomicBoolean(false);
 
@@ -80,11 +82,13 @@ public class OtpService {
     }
 
     // BR-80: OTPs auto delete after 5 minutes without new call
+    // Periodically clean up expired OTP entries from memory (every 60 seconds).
     @Scheduled(fixedRate = 60_000)
     public void cleanupExpiredOtps() {
         LocalDateTime now = LocalDateTime.now();
         otpStore.entrySet().removeIf(e -> now.isAfter(e.getValue().expiry()));
     }
 
+    // Internal record to store OTP data: code, expiry time, and type.
     private record OtpEntry(String otp, LocalDateTime expiry, OtpType type) {}
 }

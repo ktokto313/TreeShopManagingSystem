@@ -20,12 +20,13 @@ public class BlogCleanupScheduler {
 
     @Scheduled(fixedDelay = 30 * 60 * 1000)
     @Transactional
+    // Periodically cleans up expired blog posts (DRAFT & REJECTED) older than 12 hours.
     public void deleteExpiredDrafts() {
         Timestamp cutoff = new Timestamp(System.currentTimeMillis() - 12L * 60 * 60 * 1000);
         int deletedD = postRepo.deleteByStatusAndUpdatedAtBefore(BlogStatus.DRAFT, cutoff);
         int deletedR = postRepo.deleteByStatusAndUpdatedAtBefore(BlogStatus.REJECTED, cutoff);
         if (deletedD > 0) {
-            log.info("Auto-deleted {} expired draft(s)", deletedR);
+            log.info("Auto-deleted {} expired draft(s)", deletedD);
         }
         if(deletedR > 0){
             log.info("Auto-deleted {} expired rejected blog(s)", deletedR);

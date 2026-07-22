@@ -45,6 +45,7 @@ public class AuthService {
     // BR-01: If a user inputs incorrect login details 5 times continuously,
     // the system will temporarily lock their login action for 30s, time increases by 30s per locked time.
     // BR-19: password check uses passwordEncoder.matches against a BCrypt hash.
+    // Authenticate user with email/password.
     public LoginResponse login(LoginRequest request, String clientIp) {
         String email = request.getEmail();
 
@@ -79,6 +80,7 @@ public class AuthService {
 
     // BR-01: If a user inputs incorrect login details 5 times continuously,
     // the system will temporarily lock their login action for 30s, time increases by 30s per locked time.
+    // Check whether a client IP is currently blocked due to too many failed login attempts.
     public boolean isBlocked(String clientIp) {
         LoginAttemptInfo info = loginAttempts.get(clientIp);
         return info != null && info.blockedUntil > System.currentTimeMillis();
@@ -86,6 +88,7 @@ public class AuthService {
 
     // BR-01: If a user inputs incorrect login details 5 times continuously,
     // the system will temporarily lock their login action for 30s, time increases by 30s per locked time.
+    // Get remaining block time (in seconds) for a blocked client IP.
     public long getRemainingBlockSeconds(String clientIp) {
         LoginAttemptInfo info = loginAttempts.get(clientIp);
         if (info == null) return 0;
@@ -95,6 +98,7 @@ public class AuthService {
 
     // BR-01: If a user inputs incorrect login details 5 times continuously,
     // the system will temporarily lock their login action for 30s, time increases by 30s per locked time.
+    // Record a failed login attempt for a client IP.
     private void recordFailedAttempt(String clientIp) {
         long now = System.currentTimeMillis();
         loginAttempts.compute(clientIp, (key, info) -> {
@@ -116,6 +120,7 @@ public class AuthService {
     }
 
     // BR-19: new user's password is stored via passwordEncoder.encode (BCrypt hash).
+    // Register a new user with encrypted password and default CUSTOMER role.
     public User register(RegisterRequest request) {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -142,10 +147,12 @@ public class AuthService {
         return userRepository.save(user);
     }
 
+    // Check if an email already exists in the system.
     public boolean emailExists(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
 
+    // Determine whether an account is a Google account (no password stored).
     public boolean isGoogleAccount(String email) {
         return userRepository.findByEmail(email)
                 .map(u -> u.getPassword() == null)

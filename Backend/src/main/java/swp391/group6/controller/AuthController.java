@@ -50,6 +50,7 @@ public class AuthController {
 
     // BR-01: If a user inputs incorrect login details 5 times continuously, the system will temporarily lock their action for 30s, time increases by 30s per locked time.
     // BR-19: password comparison inside authService.login must be done against a BCrypt hash, and this endpoint must only be reachable over HTTPS (verify at the service/security-config level).
+    // Handles user login: validate credentials, apply brute-force protection (IP-based), generate JWT and return it via HTTP-only cookie if successful.
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request,
                                    HttpServletRequest httpRequest,
@@ -82,6 +83,7 @@ public class AuthController {
     }
 
     // Support helper for BR-01: resolves the identity (client IP) that failed-attempt tracking and the 15-minute lockout are keyed on.
+    // Resolve client IP address (supports X-Forwarded-For when behind proxy) to track failed login attempts and apply temporary blocking.
     private String resolveClientIp(HttpServletRequest request) {
         String forwarded = request.getHeader("X-Forwarded-For");
         if (forwarded != null && !forwarded.isBlank()) {
@@ -91,6 +93,7 @@ public class AuthController {
     }
 
     // BR-19: the new password must ultimately be persisted BCrypt-hashed
+    // Register a new user account using email/password.
     @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody RegisterRequest request) {
 
@@ -103,6 +106,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    // Send OTP for registration after checking email does not already exist.
     @PostMapping("/register/send-otp")
     public ResponseEntity<?> sendRegisterOtp(@RequestBody OtpRequest request) {
         if (authService.emailExists(request.getEmail())) {
@@ -114,6 +118,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Đã gửi OTP"));
     }
 
+    // Verify OTP for registration; must be valid before allowing account creation.
     @PostMapping("/register/verify-otp")
     public ResponseEntity<?> verifyRegisterOtp(@RequestBody OtpRequest request) {
         boolean valid = otpService.verify(
@@ -130,6 +135,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "OTP đã được xác minh"));
     }
 
+    // Handle login/signup via Google: verify credential and return authenticated user info.
     @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@RequestBody GoogleAuthRequest request,
                                          HttpServletResponse response) {
@@ -143,6 +149,7 @@ public class AuthController {
         }
     }
 
+    // Complete profile for Google users who need to fill missing required fields.
     @PostMapping("/google/complete-profile")
     public ResponseEntity<?> completeProfile(@RequestBody CompleteProfileRequest request,
                                              HttpServletResponse response) {
@@ -151,6 +158,7 @@ public class AuthController {
     }
 
     //FORGOT PASSWORD
+    // Send OTP for password reset after validating email exists and ensuring the account is not a Google account.
     @PostMapping("/forgot-password/send-otp")
     public ResponseEntity<?> sendResetOtp(@RequestBody OtpRequest request) {
         if (authService.isGoogleAccount(request.getEmail())) {
@@ -168,6 +176,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Đã gửi OTP"));
     }
 
+    // Verify OTP for password reset and mark the email as verified temporarily.
     @PostMapping("/forgot-password/verify-otp")
     public ResponseEntity<?> verifyResetOtp(@RequestBody OtpRequest request) {
 
@@ -188,6 +197,7 @@ public class AuthController {
     }
 
     // BR-19: the new password must ultimately be persisted BCrypt-hashed
+    // Reset password after OTP verification, ensuring secure update (BCrypt hashed).
     @PostMapping("/forgot-password/reset")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
 
@@ -211,8 +221,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Đặt lại mật khẩu thành công."));
     }
 
-    //LOGOUT
-
+    //LOGOUT by clearing (invalidating) the JWT cookie.
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
         ResponseCookie deadCookie = CookieUtil.invalidateCookie();

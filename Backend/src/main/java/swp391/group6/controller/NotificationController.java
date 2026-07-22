@@ -29,7 +29,8 @@ public class NotificationController {
         this.notificationRepository = notificationRepository;
     }
 
-    // BR-77: a notification is sent to (and here, retrieved for) a specific user —
+    // BR-77: a notification is sent to (and here, retrieved for) a specific user
+    // Get all notifications of the currently authenticated user, ordered by newest first.
     @GetMapping
     public ResponseEntity<List<Notification>> getMyNotifications(@AuthenticationPrincipal User currentUser) {
         List<Notification> notifications =
@@ -38,6 +39,7 @@ public class NotificationController {
     }
 
     // BR-78: each notification has a read/unread status
+    // Get total number of unread notifications for current user.
     @GetMapping("/unread-count")
     public ResponseEntity<Map<String, Long>> getUnreadCount(@AuthenticationPrincipal User currentUser) {
         long count = notificationRepository.countByRecipientUserIdAndIsReadFalse(currentUser.getId());
@@ -45,6 +47,7 @@ public class NotificationController {
     }
 
     // BR-78: each notification has a read/unread status
+    // Mark a specific notification as read if it belongs to current user.
     @PatchMapping("/{id}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
         Notification notification = notificationRepository.findById(id).orElse(null);
@@ -57,6 +60,7 @@ public class NotificationController {
     }
 
     // BR-78: each notification has a read/unread status
+    // Mark all notifications of current user as read in bulk.
     @PatchMapping("/read-all")
     public ResponseEntity<Void> markAllAsRead(@AuthenticationPrincipal User currentUser) {
         List<Notification> notifications =

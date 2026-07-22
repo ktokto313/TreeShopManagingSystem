@@ -34,6 +34,7 @@ public class ChangePasswordService {
     // and stores the new password re-hashed with BCrypt (passwordEncoder.encode) —
     // plaintext is never persisted.
     // NO_PASSWORD correctly blocks Google SSO accounts (no local password to change),
+    // Change password for a user using their email.
     public Result changePassword(String email, ChangePasswordRequest req) {
         if (req.getOldPassword() == null || req.getOldPassword().isBlank()
                 || req.getNewPassword() == null || req.getNewPassword().isBlank()) {
@@ -60,6 +61,7 @@ public class ChangePasswordService {
     // BR-19: the reset password is stored BCrypt-hashed (passwordEncoder.encode), never
     // in plaintext. Also guards against resetting a Google SSO account's (nonexistent)
     // password
+    // Reset password for "forgot password" flow.
     public boolean resetPassword(String email, String newPassword) {
 
         if (newPassword == null || newPassword.isBlank()) {
