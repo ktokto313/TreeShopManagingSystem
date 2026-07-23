@@ -51,7 +51,8 @@ public class OrderService {
 
         if (canAccessAllOrder(loginResponse)) {
             if (hasStatusFilter) {
-                return orderRepository.searchByStatusInOrderByStatusAscThenCreatedAtDesc(statuses, query);
+                return orderRepository.searchByStatusInOrderByStatusAscThenCreatedAtDesc(statuses
+                        .stream().map(Enum::toString).toList(), query);
             } else {
                 return orderRepository.searchAllOrderByStatusAscThenCreatedAtDesc(query);
             }
@@ -60,7 +61,8 @@ public class OrderService {
             if (fullUser == null) return new ArrayList<>();
             long uid = fullUser.getId();
             if (hasStatusFilter) {
-                return orderRepository.searchByStatusInAndUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(statuses, query, uid, uid);
+                return orderRepository.searchByStatusInAndUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(statuses.
+                        stream().map(Enum::toString).toList(), query, uid, uid);
             } else {
                 return orderRepository.searchByUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(query, uid, uid);
             }

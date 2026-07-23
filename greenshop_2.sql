@@ -1117,6 +1117,343 @@ SET care_guide        = 'Hợp không gian sảnh hoặc phòng khách, tưới 
     feng_shui_element = 'Mộc'
 WHERE product_id = 12;
 
+-- Add care data for products 13-98 (all other plant products)
+UPDATE product_details
+SET care_guide        = 'Để nơi sáng, tránh nắng gắt, tưới khi đất ráo.',
+    sunlight_level    = 'Ánh sáng gián tiếp',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 13;
+
+UPDATE product_details
+SET care_guide        = 'Cần ánh sáng tốt, tưới vừa phải, phù hợp góc phòng khách.',
+    sunlight_level    = 'Ánh sáng trung bình',
+    water_freq        = '7-10 ngày/lần',
+    difficulty        = 'Trung bình',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 14;
+
+UPDATE product_details
+SET care_guide        = 'Thân cao sắc nét, cần chỗ yên tĩnh, tưới đều đặn.',
+    sunlight_level    = 'Ánh sáng trung bình đến cao',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Trung bình',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 15;
+
+UPDATE product_details
+SET care_guide        = 'Lá sọc vàng rực rỡ, dễ trồng, sinh trưởng nhanh.',
+    sunlight_level    = 'Ánh sáng trung bình',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 16;
+
+UPDATE product_details
+SET care_guide        = 'Thích hợp bình thủy sinh, rễ bám trên đá, chăm sóc dễ.',
+    sunlight_level    = 'Ánh sáng thấp đến trung bình',
+    water_freq        = 'Hàng ngày kiểm tra nước',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Thủy'
+WHERE product_id = 17;
+
+UPDATE product_details
+SET care_guide        = 'Tán lá xanh mát, thanh lọc không khí tốt, chịu bóng tốt.',
+    sunlight_level    = 'Ánh sáng thấp đến trung bình',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 18;
+
+UPDATE product_details
+SET care_guide        = 'Lá như lông chim, màu đỏ tía đẹp, phù hợp bàn làm việc.',
+    sunlight_level    = 'Ánh sáng sáng vừa',
+    water_freq        = '5-7 ngày/lần',
+    difficulty        = 'Trung bình',
+    feng_shui_element = 'Hỏa'
+WHERE product_id = 19;
+
+UPDATE product_details
+SET care_guide        = 'Lá nhỏ bạc đẹp, chịu bóng tốt, tưới ít nhưng đều.',
+    sunlight_level    = 'Ánh sáng thấp đến trung bình',
+    water_freq        = '7-10 ngày/lần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Kim'
+WHERE product_id = 20;
+
+UPDATE product_details
+SET care_guide        = 'Cây lâu năm, tán rộng xanh tốt, phù hợp sân vườn lớn.',
+    sunlight_level    = 'Ánh sáng cao, nắng chiều',
+    water_freq        = '2-3 lần/tuần',
+    difficulty        = 'Trung bình',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 21;
+
+UPDATE product_details
+SET care_guide        = 'Hoa vàng đẹp mùa nở, tán rộng mát mẻ, phù hợp công viên.',
+    sunlight_level    = 'Ánh sáng cao, nắng trực tiếp',
+    water_freq        = '2-3 lần/tuần',
+    difficulty        = 'Trung bình',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 22;
+
+UPDATE product_details
+SET care_guide        = 'Tán tròn đẹp, lá xanh tươi, chịu nắng tốt, ít chăm sóc.',
+    sunlight_level    = 'Ánh sáng cao, nắng chiều',
+    water_freq        = '3-5 ngày/lần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 23;
+
+UPDATE product_details
+SET care_guide        = 'Hoa trắng thơm ngát, tán nhỏ xinh, dễ bố trí hàng rào.',
+    sunlight_level    = 'Ánh sáng cao',
+    water_freq        = '2-3 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Kim'
+WHERE product_id = 24;
+
+UPDATE product_details
+SET care_guide        = 'Leo bám tốt, hoa rực rỡ, phù hợp ban công và hàng rào.',
+    sunlight_level    = 'Ánh sáng cao, nắng trực tiếp',
+    water_freq        = '1-2 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Hỏa'
+WHERE product_id = 25;
+
+UPDATE product_details
+SET care_guide        = 'Hoa trắng tinh khôi, trang trí bàn tiệc sang trọng.',
+    sunlight_level    = 'Ánh sáng trung bình',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Trung bình',
+    feng_shui_element = 'Kim'
+WHERE product_id = 26;
+
+UPDATE product_details
+SET care_guide        = 'Lá đỏ nổi bật, tán rậm rạp, chịu cắt tỉa tốt.',
+    sunlight_level    = 'Ánh sáng cao',
+    water_freq        = '2-3 lần/tuần',
+    difficulty        = 'Trung bình',
+    feng_shui_element = 'Hỏa'
+WHERE product_id = 27;
+
+UPDATE product_details
+SET care_guide        = 'Biểu tượng tài lộc, tán lá tròn đẹp, chịu sáng vừa.',
+    sunlight_level    = 'Ánh sáng trung bình',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 28;
+
+UPDATE product_details
+SET care_guide        = 'Cây cảnh phong thủy, lá kim xanh đậm, phù hợp biệt thự.',
+    sunlight_level    = 'Ánh sáng sáng vừa',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Trung bình',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 29;
+
+UPDATE product_details
+SET care_guide        = 'Tán lá xanh vòng cung đẹp, mang ý nghĩa phong thủy tốt.',
+    sunlight_level    = 'Ánh sáng cao',
+    water_freq        = '2-3 lần/tuần',
+    difficulty        = 'Trung bình',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 30;
+
+UPDATE product_details
+SET care_guide        = 'Hoa trắng tinh khôi, dễ chăm sóc, phù hợp sân vườn.',
+    sunlight_level    = 'Ánh sáng cao',
+    water_freq        = '2-3 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Kim'
+WHERE product_id = 31;
+
+UPDATE product_details
+SET care_guide        = 'Lá đỏ rực rỡ, dễ trồng, sinh trưởng nhanh, dễ cắt tỉa.',
+    sunlight_level    = 'Ánh sáng cao',
+    water_freq        = '2-3 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Hỏa'
+WHERE product_id = 32;
+
+UPDATE product_details
+SET care_guide        = 'Lá xanh nhung, lưu hóa đẹp, chịu sáng vừa, tưới đều.',
+    sunlight_level    = 'Ánh sáng trung bình',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 33;
+
+UPDATE product_details
+SET care_guide        = 'Lá tía nhạt đẹp, dễ chăm, tưới vừa phải, chịu bóng tốt.',
+    sunlight_level    = 'Ánh sáng trung bình',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Thủy'
+WHERE product_id = 34;
+
+UPDATE product_details
+SET care_guide        = 'Mùi thơm dễ chịu, lá xanh, dễ trồng, tưới ít.',
+    sunlight_level    = 'Ánh sáng cao',
+    water_freq        = '7-10 ngày/lần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 35;
+
+UPDATE product_details
+SET care_guide        = 'Mùi hương Pháp ngoạn mục, chịu nắng tốt, tưới ít.',
+    sunlight_level    = 'Ánh sáng cao, nắng trực tiếp',
+    water_freq        = '7-10 ngày/lần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 36;
+
+UPDATE product_details
+SET care_guide        = 'Mùi thơm nhẹ nhàng, lá tím đẹp, chịu khô tốt, tưới ít.',
+    sunlight_level    = 'Ánh sáng cao',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 37;
+
+UPDATE product_details
+SET care_guide        = 'Mùi thơm thanh mát, lá bạc, dễ chăm, sinh trưởng nhanh.',
+    sunlight_level    = 'Ánh sáng cao',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Kim'
+WHERE product_id = 38;
+
+UPDATE product_details
+SET care_guide        = 'Rau thơm gia vị, dễ trồng, tưới đều, cắt bất kỳ lúc nào.',
+    sunlight_level    = 'Ánh sáng cao',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 39;
+
+UPDATE product_details
+SET care_guide        = 'Rau thơm Việt, dễ trồng, tưới đều, thu hoạch dần.',
+    sunlight_level    = 'Ánh sáng cao',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Mộc'
+WHERE product_id = 40;
+
+UPDATE product_details
+SET care_guide        = 'Lá tròn đặc sắc, rất dễ chăm, tưới khi đất ráo.',
+    sunlight_level    = 'Ánh sáng cao',
+    water_freq        = '10 ngày/lần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Mộc'
+WHERE product_id IN (41, 42, 43);
+
+UPDATE product_details
+SET care_guide        = 'Cây sen đá nhỏ xinh, rất ít nước, tưới khi đất hết nước.',
+    sunlight_level    = 'Ánh sáng cao',
+    water_freq        = '10-14 ngày/lần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Kim'
+WHERE product_id IN (44, 45, 46);
+
+UPDATE product_details
+SET care_guide        = 'Lá dài xanh bóng, tưới vừa phải, cắt tỉa gọn gàng.',
+    sunlight_level    = 'Ánh sáng trung bình',
+    water_freq        = '7-10 ngày/lần',
+    difficulty        = 'Trung bình',
+    feng_shui_element = 'Mộc'
+WHERE product_id IN (47, 48, 49, 50);
+
+UPDATE product_details
+SET care_guide        = 'Lan mini dễ chăm, tưới ít, hoa lâu tàn, ánh sáng vừa.',
+    sunlight_level    = 'Ánh sáng trung bình',
+    water_freq        = '7-10 ngày/lần',
+    difficulty        = 'Trung bình',
+    feng_shui_element = 'Kim'
+WHERE product_id IN (51, 52);
+
+UPDATE product_details
+SET care_guide        = 'Cây may mắn, bộ rễ khoẻ, tưới đều, chịu bóng tốt.',
+    sunlight_level    = 'Ánh sáng thấp đến trung bình',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Mộc'
+WHERE product_id IN (53, 54, 55);
+
+UPDATE product_details
+SET care_guide        = 'Cây cảnh tinh tế, rễ mạnh, chịu sáng vừa, tưới đều.',
+    sunlight_level    = 'Ánh sáng trung bình',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Trung bình',
+    feng_shui_element = 'Mộc'
+WHERE product_id IN (56, 57, 58, 59, 60);
+
+UPDATE product_details
+SET care_guide        = 'Sen đá bắt mắt, chịu hạn tốt, tưới khi đất hết nước.',
+    sunlight_level    = 'Ánh sáng cao',
+    water_freq        = '10-14 ngày/lần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Kim'
+WHERE product_id IN (61, 62, 63, 64, 65, 66, 67, 68);
+
+UPDATE product_details
+SET care_guide        = 'Xương rồng đặc sắc, chịu hạn cực tốt, tưới rất ít.',
+    sunlight_level    = 'Ánh sáng cao, nắng trực tiếp',
+    water_freq        = '2-3 tuần/lần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Kim'
+WHERE product_id IN (69, 70, 71, 72, 73, 74, 75);
+
+UPDATE product_details
+SET care_guide        = 'Sen đá Sedum nhỏ xinh, dễ chăm, tưới ít, chịu nắng tốt.',
+    sunlight_level    = 'Ánh sáng cao',
+    water_freq        = '10-14 ngày/lần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Kim'
+WHERE product_id IN (76, 77, 78, 79, 80);
+
+UPDATE product_details
+SET care_guide        = 'Cây phong thủy may mắn, lá tròn xanh, phù hợp để bàn.',
+    sunlight_level    = 'Ánh sáng trung bình',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Kim'
+WHERE product_id IN (81, 82, 83, 84, 85);
+
+UPDATE product_details
+SET care_guide        = 'Dây leo phong thủy, may mắn tài lộc, dễ chăm, sinh trưởng nhanh.',
+    sunlight_level    = 'Ánh sáng thấp đến trung bình',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Dễ',
+    feng_shui_element = 'Mộc'
+WHERE product_id IN (86, 87);
+
+UPDATE product_details
+SET care_guide        = 'Lan phong thủy sang trọng, tưới vừa phải, ánh sáng sáng.',
+    sunlight_level    = 'Ánh sáng sáng vừa',
+    water_freq        = '7-10 ngày/lần',
+    difficulty        = 'Trung bình',
+    feng_shui_element = 'Kim'
+WHERE product_id IN (88, 89, 90);
+
+UPDATE product_details
+SET care_guide        = 'Kim ngân phong thủy xoắn đẹp, mang tài lộc, tưới đều.',
+    sunlight_level    = 'Ánh sáng trung bình',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Trung bình',
+    feng_shui_element = 'Kim'
+WHERE product_id IN (91, 92);
+
+UPDATE product_details
+SET care_guide        = 'Cây phong thủy cao sang, tưới vừa phải, chịu bóng tốt.',
+    sunlight_level    = 'Ánh sáng thấp đến trung bình',
+    water_freq        = '1 lần/tuần',
+    difficulty        = 'Trung bình',
+    feng_shui_element = 'Mộc'
+WHERE product_id IN (93, 94, 95, 96, 97, 98);
+
 INSERT INTO blog_posts (author_id, title, content, thumbnail, is_published, status, published_at)
 VALUES (2, 'Top 10 cây trong nhà dễ chăm nhất cho người bận rộn',
         'Bạn yêu cây nhưng không có nhiều thời gian chăm sóc? Đây là danh sách 10 loại cây cực dễ chăm: Lưỡi hổ, ZZ Plant, Pothos, Trầu bà... Những loại cây này chỉ cần tưới 1-2 lần mỗi tuần, chịu bóng tốt và vẫn phát triển khỏe mạnh.',

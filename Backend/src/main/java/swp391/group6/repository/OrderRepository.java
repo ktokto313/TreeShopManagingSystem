@@ -30,39 +30,40 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByStatus(OrderStatus status);
 
-    @Query("SELECT o " +
-            "FROM Order o " +
-            "WHERE (CAST(o.id AS string) LIKE %:query% OR LOWER(o.shippingAddress) LIKE LOWER(CONCAT('%', :query, '%')))" +
-            "ORDER BY o.status asc, o.createdAt desc")
+    //TODO: those 4 methods are using native PostGreSQL query because I need the order_status cast to work to sort
+    @Query(value = "SELECT * " +
+            "FROM orders o " +
+            "WHERE (o.id::TEXT LIKE %:query% OR LOWER(o.shipping_address) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+            "ORDER BY o.status::order_status asc, o.created_at desc", nativeQuery = true)
     List<Order> searchAllOrderByStatusAscThenCreatedAtDesc(@Param("query") String query);
 
-    @Query("SELECT o " +
-            "FROM Order o " +
-            "WHERE (CAST(o.id AS string) LIKE %:query% OR LOWER(o.shippingAddress) LIKE LOWER(CONCAT('%', :query, '%'))) " +
-            "AND (o.user.id = :userId OR o.shipper.id = :shipperId)" +
-            "ORDER BY o.status asc, o.createdAt desc")
+    @Query(value = "SELECT * " +
+            "FROM orders o " +
+            "WHERE (o.id::TEXT LIKE %:query% OR LOWER(o.shipping_address) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+            "AND (o.customer_id = :userId OR o.shipper_id = :shipperId) " +
+            "ORDER BY o.status::order_status asc, o.created_at desc", nativeQuery = true)
     List<Order> searchByUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(
             @Param("query") String query,
             @Param("userId") long userId,
             @Param("shipperId") long shipperId);
 
-    @Query("SELECT o " +
-            "FROM Order o " +
+    @Query(value = "SELECT * " +
+            "FROM orders o " +
             "WHERE o.status IN :statuses " +
-            "AND (CAST(o.id AS string) LIKE %:query% OR LOWER(o.shippingAddress) LIKE LOWER(CONCAT('%', :query, '%')))" +
-            "ORDER BY o.status asc, o.createdAt desc")
+            "AND (o.id::TEXT LIKE %:query% OR LOWER(o.shipping_address) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+            "ORDER BY o.status::order_status asc, o.created_at desc", nativeQuery = true)
     List<Order> searchByStatusInOrderByStatusAscThenCreatedAtDesc(
-            @Param("statuses") List<OrderStatus> statuses,
+            @Param("statuses") List<String> statuses,
             @Param("query") String query);
 
-    @Query("SELECT o " +
-            "FROM Order o " +
+    @Query(value = "SELECT * " +
+            "FROM orders o " +
             "WHERE o.status IN :statuses " +
-            "   AND (CAST(o.id AS string) LIKE %:query% OR LOWER(o.shippingAddress) LIKE LOWER(CONCAT('%', :query, '%'))) " +
-            "   AND (o.user.id = :userId OR o.shipper.id = :shipperId)" +
-            "ORDER BY o.status asc, o.createdAt desc")
+            "   AND (o.id::TEXT LIKE %:query% OR LOWER(o.shipping_address) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+            "   AND (o.customer_id = :userId OR o.shipper_id = :shipperId) " +
+            "ORDER BY o.status::order_status asc, o.created_at desc", nativeQuery = true)
     List<Order> searchByStatusInAndUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(
-            @Param("statuses") List<OrderStatus> statuses,
+            @Param("statuses") List<String> statuses,
             @Param("query") String query,
             @Param("userId") long userId,
             @Param("shipperId") long shipperId);

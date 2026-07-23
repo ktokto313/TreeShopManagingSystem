@@ -61,13 +61,12 @@ export default function useFetchAllOrders() {
 	}, [searchQuery, selectedFilter]);
 
 	const changeSearchQuery = (newQuery) => {
-		setSearchQuery(newQuery);
-
 		if (debounceTimerRef.current) {
 			clearTimeout(debounceTimerRef.current);
 		}
 		debounceTimerRef.current = setTimeout(() => {
-			fetchOrders();
+			setSearchQuery(newQuery);
+			// fetchOrders();
 		}, DEBOUNCE_MS);
 	};
 

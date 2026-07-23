@@ -134,27 +134,33 @@ export function matchesCatalogFilters(product, filters, categoryName, options = 
     return false
   }
 
-  if (
-    !matchesAnyText(careDifficulty, [
+  if (careDifficulty) {
+    const normalizedDifficulty = normalizeSearchText(careDifficulty)
+    const candidateTexts = [
       product.difficulty,
       product.careGuide,
       product.description,
       product.content,
-    ])
-  ) {
-    return false
+    ].map(normalizeSearchText).join(' ')
+    
+    if (!candidateTexts.includes(normalizedDifficulty)) {
+      return false
+    }
   }
 
-  if (
-    !matchesAnyText(fengShuiElement, [
+  if (fengShuiElement) {
+    const normalizedFengShui = normalizeSearchText(fengShuiElement)
+    const candidateTexts = [
       product.fengShuiElement,
       categoryName,
       product.name,
       product.description,
       product.content,
-    ])
-  ) {
-    return false
+    ].map(normalizeSearchText).join(' ')
+    
+    if (!candidateTexts.includes(normalizedFengShui)) {
+      return false
+    }
   }
 
   return matchesText(product, keyword, categoryName, options.searchAliases)

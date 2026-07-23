@@ -57,7 +57,7 @@ export default function OrderManagement() {
           {/* Statistics/Metrics Ribbon */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
             <div className="p-5 rounded-xl border border-border/60 bg-bg-surface/40 backdrop-blur-sm relative overflow-hidden group hover:border-interactive/40 transition-all duration-300">
-              <span className="text-xs font-bold uppercase tracking-wider text-black/50">Tổng Đơn Hàng</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-black/50">Đơn Hàng Đang Hiển Thị</span>
               <div className="text-3xl font-black text-black mt-2">
                 {isLoading ? <Skeleton className="h-9 w-16 mt-1" /> : totalOrders}
               </div>

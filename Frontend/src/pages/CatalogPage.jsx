@@ -21,7 +21,6 @@ const SMALL_CATEGORY_LIMIT = 10
 const emptyFilters = { //criteria for filter
   keyword: '',
   categoryId: '',
-  status: '',
   minPrice: '',
   maxPrice: '',
   careDifficulty: '',
@@ -37,11 +36,7 @@ const sortOptions = [
   { value: 'price-desc', label: 'Giá giảm dần' },
 ]
 
-const statusOptions = [
-  { value: '', label: 'Tất cả tình trạng' },
-  { value: 'true', label: 'Còn hàng' },
-  { value: 'false', label: 'Hết hàng' },
-]
+
 
 function toChipText(category) {
   if (!category) {
@@ -379,13 +374,6 @@ export default function CatalogPage() {
                     value: String(category.id),
                     label: category.name,
                   }))}
-                />
-
-                <Select
-                  label="Tình trạng kho"
-                  value={filters.status}
-                  onChange={(event) => updateFilter('status', event.target.value)}
-                  options={statusOptions}
                 />
 
                 <div className="grid gap-4 sm:grid-cols-2">
