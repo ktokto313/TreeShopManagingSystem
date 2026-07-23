@@ -534,10 +534,21 @@ export default function ManagementPage() {
 			await loadCategories();
 			await loadProducts();
 		} catch (error) {
-			if (handleAuthError(error)) {
-				return;
-			}
-			setNotice(`Xóa danh mục thất bại: ${error.message}`);
+			// Map HTTP status codes to Vietnamese error messages
+			const statusCodeMessages = {
+				401: "Bạn không có quyền thực hiện thao tác này.",
+				403: "Bạn không có quyền xóa danh mục.",
+				404: "Danh mục không tồn tại.",
+				409: "Không thể xóa danh mục vì nó vẫn chứa sản phẩm. Vui lòng xóa hết sản phẩm trong danh mục trước.",
+			};
+
+			// Get message from backend response or use status code mapping or fallback to error.message
+			const errorMessage = 
+				error?.message || 
+				statusCodeMessages[error?.status] || 
+				`Lỗi ${error?.status || "không xác định"}`;
+			
+			setNotice(`Xóa danh mục thất bại: ${errorMessage}`);
 		}
 	}
 
