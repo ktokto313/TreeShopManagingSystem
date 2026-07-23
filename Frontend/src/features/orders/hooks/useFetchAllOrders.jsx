@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 
 const FILTER_TO_STATUSES = {
 	ALL: [],
@@ -10,15 +10,12 @@ const FILTER_TO_STATUSES = {
 	FAILED: ["FAILED", "RETURN_PROCESSING", "RETURN_PENDING", "RETURNING"],
 };
 
-const DEBOUNCE_MS = 400;
-
 export default function useFetchAllOrders() {
 	const [orders, setOrders] = useState([]);
 	const [selectedFilter, setSelectedFilter] = useState("ALL");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState(null);
-	const debounceTimerRef = useRef(null);
 
 	const fetchOrders = useCallback(async () => {
 		const activeFilter = selectedFilter;
@@ -61,23 +58,8 @@ export default function useFetchAllOrders() {
 	}, [searchQuery, selectedFilter]);
 
 	const changeSearchQuery = (newQuery) => {
-		if (debounceTimerRef.current) {
-			clearTimeout(debounceTimerRef.current);
-		}
-		debounceTimerRef.current = setTimeout(() => {
-			setSearchQuery(newQuery);
-			// fetchOrders();
-		}, DEBOUNCE_MS);
+		setSearchQuery(newQuery);
 	};
-
-	// Cleanup debounce timer on unmount
-	useEffect(() => {
-		return () => {
-			if (debounceTimerRef.current) {
-				clearTimeout(debounceTimerRef.current);
-			}
-		};
-	}, []);
 
 	return {
 		orders,
