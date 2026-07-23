@@ -58,7 +58,8 @@ public class AuthController {
         String clientIp = resolveClientIp(httpRequest);
 
         if (authService.isGoogleAccount(request.getEmail())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "Vui lòng đăng nhập bằng Google"));
         }
 
         if (authService.isBlocked(clientIp)) {
@@ -71,8 +72,10 @@ public class AuthController {
         }
 
         LoginResponse loginResponse = authService.login(request, clientIp);
-        if (loginResponse == null)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (loginResponse == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Email hoặc mật khẩu không chính xác"));
+        }
 
         String jwt = JWTUtil.createToken(loginResponse);
         ResponseCookie cookie = CookieUtil.makeCookieFromJWT(jwt);
@@ -95,15 +98,17 @@ public class AuthController {
     // BR-19: the new password must ultimately be persisted BCrypt-hashed
     // Register a new user account using email/password.
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
 
         User user = authService.register(request);
 
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", "Email đã được đăng ký"));
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Map.of("message", "Đăng ký thành công"));
     }
 
     // Send OTP for registration after checking email does not already exist.
@@ -111,7 +116,7 @@ public class AuthController {
     public ResponseEntity<?> sendRegisterOtp(@RequestBody OtpRequest request) {
         if (authService.emailExists(request.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("message", "Email đã tồn tại"));
+                    .body(Map.of("message", "Email đã được đăng ký"));
         }
 
         otpService.generateAndSend(request.getEmail(), OtpType.REGISTER);

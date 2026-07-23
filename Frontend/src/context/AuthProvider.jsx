@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
 				} else if (response.status === 401) {
 					setUser(null);
 				} else {
-					setError("Failed to fetch user profile");
+					setError("Không thể lấy thông tin người dùng");
 				}
 			} catch (err) {
 				setError(err.message);
@@ -52,24 +52,25 @@ export function AuthProvider({ children }) {
 		const credentials =
 			typeof emailOrCredentials === "object"
 				? emailOrCredentials
-				: { email: emailOrCredentials, password };
+				: {email: emailOrCredentials, password};
 		setIsLoading(true);
 		setError(null);
 		try {
 			const response = await fetch("/api/auth/login", {
 				method: "POST",
 				credentials: "include",
-				headers: { "Content-Type": "application/json" },
+				headers: {"Content-Type": "application/json"},
 				body: JSON.stringify(credentials),
 			});
 			if (!response.ok) {
 				let body = null;
 				body = await response.json();
-				
+
 				const message =
 					response.status === 429
-						? body?.message || "Too many failed attempts. Try again later."
-						: "Login failed. Check your credentials.";
+						? body?.message || "Bạn đã nhập sai quá nhiều lần. Vui lòng thử lại sau."
+						: body?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
+
 				const loginError = new Error(message);
 				loginError.status = response.status;
 				loginError.remainingSeconds = body?.remainingSeconds ?? null;
@@ -99,14 +100,14 @@ export function AuthProvider({ children }) {
 		const response = await fetch("/api/auth/register", {
 			method: "POST",
 			credentials: "include",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ fullName, email, password }),
+			headers: {"Content-Type": "application/json"},
+			body: JSON.stringify({fullName, email, password}),
 		});
 		if (!response.ok) {
 			const registerError = new Error(
 				response.status === 409
-					? "Email already registered"
-					: "Registration failed",
+					? "Email đã được đăng ký"
+					: "Đăng ký thất bại",
 			);
 			registerError.status = response.status;
 			setError(registerError.message);
@@ -116,7 +117,7 @@ export function AuthProvider({ children }) {
 	};
 
 	const updateUser = (updates) => {
-		setUser((current) => normalizeUser({ ...current, ...updates }));
+		setUser((current) => normalizeUser({...current, ...updates}));
 	};
 
 	const logout = async () => {
@@ -129,7 +130,7 @@ export function AuthProvider({ children }) {
 				setUser(null);
 				clearStoredAuth();
 			} else {
-				setError("Failed to logout");
+				setError("Đăng xuất thất bại");
 			}
 		} catch (err) {
 			setError(err.message);
