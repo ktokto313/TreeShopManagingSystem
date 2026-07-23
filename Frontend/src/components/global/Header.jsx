@@ -56,7 +56,7 @@ const navItemsByRole = {
     { label: 'Quản lý người dùng', to: '/admin/users' },
     { label: 'Quản lý sản phẩm', to: '/manage' },
     { label: 'Đơn hàng', to: '/orders' },
-    { label: 'Tài khoản', to: '/profile' },
+    { label: 'Thống kê', to: '/statistic' },
   ],
 };
 

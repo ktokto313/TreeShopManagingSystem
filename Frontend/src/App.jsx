@@ -180,7 +180,7 @@ function AppRoutes() {
 				path="/statistic"
 				element={
 					<ProtectedRoute
-						roles={["MANAGER"]}
+						roles={["MANAGER", "SYSTEM_ADMIN"]}
 						element={<ProfitDashboard />}
 					/>
 				}
