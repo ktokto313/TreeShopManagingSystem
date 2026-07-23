@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
 import { Select } from '../components/ui/Select'
+import { PageBar } from '../components/ui/PageBar'
 import { AuthContext } from '../context/AuthContext'
 import CatalogProductCard from '../features/catalog/components/CatalogProductCard'
 import { addCartItem } from '../features/cart/cartApi'
@@ -517,41 +518,13 @@ export default function CatalogPage() {
                 </div>
               ) : null}
 
-              {visibleProducts.length > itemsPerPage ? (
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-                  <div className="text-sm flex-1 text-green-800">
-                    Trang {effectiveCurrentPage} / {totalPages}
-                  </div>
-                  <div className="flex flex-nowrap flex-1 items-center gap-2">
-                    <Button
-                      size="sm"
-                      disabled={effectiveCurrentPage === 1}
-                      onClick={() => setCurrentPage((value) => Math.max(1, value - 1))}
-                    >
-                      Trước
-                    </Button>
-                    {pageNumbers.map((pageNumber) => (
-                      <Button
-                        key={pageNumber}
-                        variant={pageNumber === effectiveCurrentPage ? 'primary' : 'secondary'}
-                        size="sm"
-                        onClick={() => setCurrentPage(pageNumber)}
-                      >
-                        {pageNumber}
-                      </Button>
-                    ))}
-                    <Button
-
-                      size="sm"
-                      disabled={effectiveCurrentPage === totalPages}
-                      onClick={() => setCurrentPage((value) => Math.min(totalPages, value + 1))}
-                    >
-                      Sau
-                    </Button>
-                  </div>
-                  <div className='flex-1'></div>
-                </div>
-              ) : null}
+              {visibleProducts.length > itemsPerPage && (
+                <PageBar
+                  currentPage={effectiveCurrentPage}
+                  totalPages={totalPages}
+                  onPageChange={(newPage) => setCurrentPage(newPage)}
+                />
+              )}
             </div>
           </section>
         </div>

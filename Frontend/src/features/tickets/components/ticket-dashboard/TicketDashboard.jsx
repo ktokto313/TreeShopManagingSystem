@@ -3,31 +3,8 @@ import { TicketCard } from "../TicketCard";
 import { LuTicketCheck } from "react-icons/lu";
 import { Skeleton } from "../../../../components/ui/Skeleton";
 import { TicketDashboardFilterBtn } from "./TicketDashboardFilter";
-import { Button } from "../../../../components/ui/Button";
+import { PageBar } from "../../../../components/ui/PageBar";
 import { cn } from "./../../../../utils/cn";
-import { useState } from "react";
-
-function getPageNumbers(currentPage, totalPages, maxVisible = 5) {
-	if (totalPages <= maxVisible) {
-		return Array.from({ length: totalPages }, (_, index) => index + 1);
-	}
-
-	let startPage = currentPage - Math.floor(maxVisible / 2);
-	let endPage = currentPage + Math.floor(maxVisible / 2);
-
-	if (startPage < 1) {
-		startPage = 1;
-		endPage = maxVisible;
-	} else if (endPage > totalPages) {
-		endPage = totalPages;
-		startPage = totalPages - maxVisible + 1;
-	}
-
-	return Array.from(
-		{ length: endPage - startPage + 1 },
-		(_, index) => startPage + index
-	);
-}
 
 const TicketDashboard = ({ dashboardState, className }) => {
 	const {
@@ -41,10 +18,6 @@ const TicketDashboard = ({ dashboardState, className }) => {
 		ticketSearch,
 		handleFilterChange,
 	} = dashboardState;
-
-	const effectiveCurrentPage = currentPage + 1;
-	const safeTotalPages = Math.max(1, totalPages || 1);
-	const pageNumbers = getPageNumbers(effectiveCurrentPage, safeTotalPages);
 
 	return (
 		<div className={cn(className, styles.dashboard, "bg-white flex flex-col h-full")}>
@@ -125,38 +98,12 @@ const TicketDashboard = ({ dashboardState, className }) => {
 			</div>
 
 			{fetchedTickets.length > 0 && (
-				<div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 pt-4 px-5 pb-5 mt-auto">
-					<div className="text-sm flex-1 text-green-800">
-						Trang {effectiveCurrentPage} / {safeTotalPages}
-					</div>
-					<div className="flex flex-nowrap flex-1 items-center justify-center gap-2">
-						<Button
-							size="sm"
-							disabled={effectiveCurrentPage === 1}
-							onClick={() => setCurrentPage((value) => Math.max(0, value - 1))}
-						>
-							Trước
-						</Button>
-						{pageNumbers.map((pageNumber) => (
-							<Button
-								key={pageNumber}
-								variant={pageNumber === effectiveCurrentPage ? 'primary' : 'secondary'}
-								size="sm"
-								onClick={() => setCurrentPage(pageNumber - 1)}
-							>
-								{pageNumber}
-							</Button>
-						))}
-						<Button
-							size="sm"
-							disabled={effectiveCurrentPage === safeTotalPages}
-							onClick={() => setCurrentPage((value) => Math.min(safeTotalPages - 1, value + 1))}
-						>
-							Sau
-						</Button>
-					</div>
-					<div className='flex-1'></div>
-				</div>
+				<PageBar
+					currentPage={currentPage + 1}
+					totalPages={totalPages}
+					onPageChange={(newPage) => setCurrentPage(newPage - 1)}
+					className="px-5 pb-5"
+				/>
 			)}
 		</div>
 	);

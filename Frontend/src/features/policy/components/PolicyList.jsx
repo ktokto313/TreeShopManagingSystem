@@ -1,5 +1,6 @@
 import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/Button";
+import { PageBar } from "../../../components/ui/PageBar";
 import { IoSearchSharp } from "react-icons/io5";
 import { IoShieldCheckmark } from "react-icons/io5";
 import PolicyCard from "./PolicyCard";
@@ -17,28 +18,6 @@ const policyStates = [
 	{ label: "Lưu trữ", value: "ARCHIVED" },
 ];
 
-const getPageNumbers = (currentPage, totalPages, maxVisible = 5) => {
-	if (totalPages <= maxVisible) {
-		return Array.from({ length: totalPages }, (_, index) => index + 1);
-	}
-
-	let startPage = currentPage - Math.floor(maxVisible / 2);
-	let endPage = currentPage + Math.floor(maxVisible / 2);
-
-	if (startPage < 1) {
-		startPage = 1;
-		endPage = maxVisible;
-	} else if (endPage > totalPages) {
-		endPage = totalPages;
-		startPage = totalPages - maxVisible + 1;
-	}
-
-	return Array.from(
-		{ length: endPage - startPage + 1 },
-		(_, index) => startPage + index,
-	);
-};
-
 const PolicyList = ({ state }) => {
 	const {
 		policies,
@@ -51,8 +30,6 @@ const PolicyList = ({ state }) => {
 		loadPage,
 	} = state;
 	const { canManage } = useContext(AuthContext);
-
-	const pageNumbers = getPageNumbers(currentPage, totalPages);
 
 	return (
 		<>
@@ -140,40 +117,14 @@ const PolicyList = ({ state }) => {
 				)}
 			</div>
 
-			{totalPages > 1 ? (
-				<div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 mt-6 pt-4">
-					<div className="text-sm flex-1 text-green-800 font-medium">
-						Trang {currentPage} / {totalPages}
-					</div>
-					<div className="flex flex-nowrap flex-1 items-center justify-center gap-2">
-						<Button
-							className="px-3 py-1 text-xs"
-							disabled={currentPage === 1}
-							onClick={() => loadPage(currentPage - 1)}
-						>
-							Trước
-						</Button>
-						{pageNumbers.map((pageNumber) => (
-							<Button
-								key={pageNumber}
-								variant={pageNumber === currentPage ? "primary" : "secondary"}
-								className="px-3 py-1 text-xs"
-								onClick={() => loadPage(pageNumber)}
-							>
-								{pageNumber}
-							</Button>
-						))}
-						<Button
-							className="px-3 py-1 text-xs"
-							disabled={currentPage === totalPages}
-							onClick={() => loadPage(currentPage + 1)}
-						>
-							Sau
-						</Button>
-					</div>
-					<div className="flex-1"></div>
-				</div>
-			) : null}
+			{policies && policies.length > 0 && (
+				<PageBar
+					currentPage={currentPage}
+					totalPages={totalPages}
+					onPageChange={(newPage) => loadPage(newPage)}
+					className="mt-6"
+				/>
+			)}
 		</>
 	);
 };

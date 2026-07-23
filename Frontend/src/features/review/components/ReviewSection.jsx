@@ -1,11 +1,10 @@
 import { useEffect } from "react";
-import { Button } from "../../../components/ui/Button";
+import { PageBar } from "../../../components/ui/PageBar";
 import { Select } from "../../../components/ui/Select";
 import { Skeleton } from "../../../components/ui/Skeleton";
 import { cn } from "../../../utils/cn";
 import { getRatingsOptions } from "../data/reviewsData";
 import { useProductReview } from "../hooks/useProductReview";
-import { getPageNumbers } from "../data/reviewsData";
 import ReviewCommentCard from "./ReviewCommentCard";
 import ReviewCommentSection from "./ReviewCommentSection";
 import ReviewForm from "./ReviewForm";
@@ -32,8 +31,6 @@ const ReviewSection = ({
 	useEffect(() => {
 		loadReviews(1);
 	}, [productId, loadReviews, ratingFilter]);
-
-	const pageNumbers = getPageNumbers(currentPage, totalPages);
 
 	return (
 		<div className={cn(className)}>
@@ -80,40 +77,14 @@ const ReviewSection = ({
 					)}
 				</div>
 
-				{reviews.length > 0 ? (
-					<div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 mt-6 pt-4">
-						<div className="text-sm flex-1 text-green-800 font-medium">
-							Trang {currentPage} / {totalPages}
-						</div>
-						<div className="flex flex-nowrap flex-1 items-center justify-center gap-2">
-							<Button
-								className="px-3 py-1 text-xs"
-								disabled={currentPage === 1}
-								onClick={() => loadReviews(currentPage - 1)}
-							>
-								Trước
-							</Button>
-							{pageNumbers.map((pageNumber) => (
-								<Button
-									key={pageNumber}
-									variant={pageNumber === currentPage ? "primary" : "secondary"}
-									className="px-3 py-1 text-xs"
-									onClick={() => loadReviews(pageNumber)}
-								>
-									{pageNumber}
-								</Button>
-							))}
-							<Button
-								className="px-3 py-1 text-xs"
-								disabled={currentPage === totalPages}
-								onClick={() => loadReviews(currentPage + 1)}
-							>
-								Sau
-							</Button>
-						</div>
-						<div className="flex-1"></div>
-					</div>
-				) : null}
+				{reviews.length > 0 && (
+					<PageBar
+						currentPage={currentPage}
+						totalPages={totalPages}
+						onPageChange={(newPage) => loadReviews(newPage)}
+						className="mt-6"
+					/>
+				)}
 			</ReviewCommentSection>
 		</div>
 	);
