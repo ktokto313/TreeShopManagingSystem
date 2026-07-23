@@ -29,8 +29,14 @@ public class ProductImageStorageService {
     private final Path imageDirectory;
 
     public ProductImageStorageService(
-            @Value("${treeshop.product-images.directory:uploads/product-images}") String imageDirectory) {
-        this.imageDirectory = Path.of(imageDirectory).toAbsolutePath().normalize();
+            @Value("${treeshop.product-images.directory:}") String configuredDirectory) {
+        // If no config is provided, use Frontend folder (relative path works in both Docker and local)
+        if (configuredDirectory == null || configuredDirectory.isBlank()) {
+            this.imageDirectory = Path.of("Frontend", "src", "features", "products", "images")
+                    .toAbsolutePath().normalize();
+        } else {
+            this.imageDirectory = Path.of(configuredDirectory).toAbsolutePath().normalize();
+        }
     }
 
     public Path getImageDirectory() {
