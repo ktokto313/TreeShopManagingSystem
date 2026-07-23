@@ -85,16 +85,6 @@ function matchesText(product, keyword, categoryName, searchAliases = []) {
   return searchableText.includes(searchValue) || compactSearchableText.includes(compactSearchValue)
 }
 
-function matchesAnyText(keyword, candidates = []) {
-  const searchValue = normalizeSearchText(keyword)
-
-  if (!searchValue) {
-    return true
-  }
-
-  return candidates.some((candidate) => normalizeSearchText(candidate).includes(searchValue))
-}
-
 //check filter data
 export function matchesCatalogFilters(product, filters, categoryName, options = {}) {
   const keyword = filters.keyword
