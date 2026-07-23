@@ -86,9 +86,11 @@ public class TicketService {
         return new ArrayList<>(ticketRepository.findTicketsByCreator(userId));
     }
 
-    public Page<Ticket> getAuthorizedTicketsByEmail(String email, String statusStr, String priorityStr, Pageable pageable) {
+    public Page<Ticket> getAuthorizedTicketsByEmail(String email, String search, String statusStr, String priorityStr, Pageable pageable) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found for email: " + email));
+
+        String searchKeyword = (search != null && !search.isBlank()) ? search.trim() : null;
 
         // Safely convert strings to Enums, leaving them as null if the frontend didn't send them
         TicketState state = (statusStr != null && !statusStr.isBlank())
@@ -98,11 +100,13 @@ public class TicketService {
                 ? Priority.valueOf(priorityStr.toUpperCase()) : null;
 
         // Pass everything to the repository
-        Page<Ticket> ticketsResult = null;
-        if (user.getRole().getId() == 1) { // Id of customer
-            ticketsResult = ticketRepository.findTicketsByCreatorWithFilters(user.getId(), state, priority, pageable);
-        } else if (user.getRole().getId() == 4) { // Id of support agent
-            ticketsResult = ticketRepository.findAllWithFiltersAndIsAssigned(user.getId(), state, priority, pageable);
+        Page<Ticket> ticketsResult;
+        String roleName = (user.getRole() != null && user.getRole().getName() != null) ? user.getRole().getName() : "";
+
+        if ("CUSTOMER".equalsIgnoreCase(roleName)) {
+            ticketsResult = ticketRepository.findTicketsByCreatorWithFilters(user.getId(), searchKeyword, state, priority, pageable);
+        } else {
+            ticketsResult = ticketRepository.findAllWithFiltersAndIsAssigned(user.getId(), searchKeyword, state, priority, pageable);
         }
 
         return ticketsResult;

@@ -22,6 +22,7 @@ export const useTicketDashboard = () => {
 	} = useFetchAllTickets();
 
 	const {
+		ticketSearch,
 		ticketState,
 		ticketPriority,
 		ticketSort,
@@ -42,7 +43,7 @@ export const useTicketDashboard = () => {
 	} = useCreateTicket();
 
 	useEffect(() => {
-		executeFetchAllTickets(ticketState, ticketPriority, ticketSort, currentPage);
+		executeFetchAllTickets(ticketSearch, ticketState, ticketPriority, ticketSort, currentPage);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [currentPage]);
 
@@ -62,6 +63,7 @@ export const useTicketDashboard = () => {
 		executeFetchAllTickets,
 
 		// Filter & Sort
+		ticketSearch,
 		ticketState,
 		ticketPriority,
 		ticketSort,

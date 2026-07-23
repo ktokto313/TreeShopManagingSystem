@@ -59,6 +59,7 @@ public class TicketController {
     @GetMapping("/")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<Ticket>> getAuthorizedTickets(
+            @RequestParam(required = false) String search,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String priority,
             @RequestParam(defaultValue = "0") int page,
@@ -69,7 +70,7 @@ public class TicketController {
         LoginResponse currentUser = JWTUtil.getUser(request);
         String email = currentUser.getEmail();
         Pageable pageable = PageRequest.of(page, size, sort != null ? sort : Sort.unsorted());
-        Page<Ticket> tickets = ticketService.getAuthorizedTicketsByEmail(email, status, priority, pageable);
+        Page<Ticket> tickets = ticketService.getAuthorizedTicketsByEmail(email, search, status, priority, pageable);
         return ResponseEntity.ok(tickets);
     }
 

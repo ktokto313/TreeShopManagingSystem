@@ -80,7 +80,7 @@ const ReviewSection = ({
 					)}
 				</div>
 
-				{totalPages > 1 ? (
+				{reviews.length > 0 ? (
 					<div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 mt-6 pt-4">
 						<div className="text-sm flex-1 text-green-800 font-medium">
 							Trang {currentPage} / {totalPages}

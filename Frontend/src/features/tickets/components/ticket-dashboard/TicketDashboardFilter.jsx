@@ -18,6 +18,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 		getFilterValue,
 		handleFilterChange,
 		executeFetchAllTickets,
+		ticketSearch,
 		ticketState,
 		ticketPriority,
 		ticketSort,
@@ -75,7 +76,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 				<Button
 					className="hover:bg-green-400 w-full"
 					onClick={() => {
-						executeFetchAllTickets(ticketState, ticketPriority, ticketSort, dashboardState.currentPage);
+						executeFetchAllTickets(ticketSearch, ticketState, ticketPriority, ticketSort, dashboardState.currentPage);
 					}}
 				>
 					<div
@@ -115,7 +116,7 @@ export const TicketDashboardFilterBoard = ({ dashboardState, classNames }) => {
 								const isSuccess = await handleCreateTicketSubmit(e);
 
 								if (isSuccess) {
-									executeFetchAllTickets(ticketState, ticketPriority, ticketSort, dashboardState.currentPage);
+									executeFetchAllTickets(ticketSearch, ticketState, ticketPriority, ticketSort, dashboardState.currentPage);
 									close();
 								}
 							}}
@@ -199,6 +200,7 @@ export const TicketDashboardFilterBtn = ({ dashboardState, modalButtonClasses, r
 		getFilterValue,
 		handleFilterChange,
 		executeFetchAllTickets,
+		ticketSearch,
 		ticketState,
 		ticketPriority,
 		ticketSort,
@@ -245,6 +247,7 @@ export const TicketDashboardFilterBtn = ({ dashboardState, modalButtonClasses, r
 							<Button
 								onClick={() => {
 									executeFetchAllTickets(
+										ticketSearch,
 										ticketState,
 										ticketPriority,
 										ticketSort,
@@ -263,7 +266,7 @@ export const TicketDashboardFilterBtn = ({ dashboardState, modalButtonClasses, r
 			<Button
 				className={cn("hover:bg-green-600! w-full", reloadButtonClasses)}
 				onClick={() => {
-					executeFetchAllTickets(ticketState, ticketPriority, ticketSort, dashboardState.currentPage);
+					executeFetchAllTickets(ticketSearch, ticketState, ticketPriority, ticketSort, dashboardState.currentPage);
 				}}
 			>
 				<div className={cn("flex flex-row items-center justify-center gap-2", reloadButtonContentClasses)}>

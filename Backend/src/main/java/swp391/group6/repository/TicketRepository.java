@@ -30,27 +30,32 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findTicketsByCreator(@Param("userId") long userId);
 
     @Query("SELECT t FROM Ticket t WHERE (t.ticketCreator.id = :userId) " +
+            "AND (:search IS NULL OR :search = '' OR LOWER(t.title) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(t.detail) LIKE LOWER(CONCAT('%', :search, '%'))) " +
             "AND (:state IS NULL OR t.ticketState = :state) " +
             "AND (:priority IS NULL OR t.priority = :priority)")
-
     Page<Ticket> findTicketsByCreatorWithFilters(
             @Param("userId") long userId,
+            @Param("search") String search,
             @Param("state") TicketState state,
             @Param("priority") Priority priority,
             Pageable pageable);
 
-    @Query("SELECT t FROM Ticket t WHERE (:state IS NULL OR t.ticketState = :state) " +
+    @Query("SELECT t FROM Ticket t WHERE (:search IS NULL OR :search = '' OR LOWER(t.title) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(t.detail) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+            "AND (:state IS NULL OR t.ticketState = :state) " +
             "AND (:priority IS NULL OR t.priority = :priority)")
     Page<Ticket> findAllWithFilters(
+            @Param("search") String search,
             @Param("state") TicketState state,
             @Param("priority") Priority priority,
             Pageable pageable);
 
-    @Query("SELECT t FROM Ticket t WHERE (:state IS NULL OR t.ticketState = :state) " +
-            "AND (:priority IS NULL OR t.priority = :priority)" +
-            "AND (t.assignee.id IS NULL OR t.assignee.id = :userId)")
+    @Query("SELECT t FROM Ticket t WHERE (:search IS NULL OR :search = '' OR LOWER(t.title) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(t.detail) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+            "AND (:state IS NULL OR t.ticketState = :state) " +
+            "AND (:priority IS NULL OR t.priority = :priority) " +
+            "AND (t.assignee IS NULL OR t.assignee.id = :userId)")
     Page<Ticket> findAllWithFiltersAndIsAssigned(
             @Param("userId") long userId,
+            @Param("search") String search,
             @Param("state") TicketState state,
             @Param("priority") Priority priority,
             Pageable pageable);

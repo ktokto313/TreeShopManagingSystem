@@ -36,9 +36,10 @@ export const createComment = async (ticketId, detail) => {
 	return response.json();
 };
 
-export const fetchAllTickets = async (status, priority, sort, page = 0, size = 8) => {
+export const fetchAllTickets = async (search, status, priority, sort, page = 0, size = 8) => {
 	const params = new URLSearchParams();
 
+	if (search) params.append("search", search);
 	if (status) params.append("status", status);
 	if (priority) params.append("priority", priority);
 	if (sort) params.append("sort", sort);

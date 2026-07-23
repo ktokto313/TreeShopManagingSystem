@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 const useFilterAndSortTickets = (executeFetchAllTickets, setCurrentPage) => {
+	const [ticketSearch, setTicketSearch] = useState("");
 	const [ticketState, setTicketState] = useState("");
 	const [ticketPriority, setTicketPriority] = useState("");
 	const [ticketSort, setTicketSort] = useState("");
@@ -8,6 +9,7 @@ const useFilterAndSortTickets = (executeFetchAllTickets, setCurrentPage) => {
 	const [isSelectAutoFilterSort, setIsSelectAutoFilterSort] = useState(true);
 
 	const handleFilterChange = (ticketParam, value) => {
+		if (ticketParam === "search") setTicketSearch(value);
 		if (ticketParam === "status") setTicketState(value);
 		if (ticketParam === "priority") setTicketPriority(value);
 		if (ticketParam === "sort") setTicketSort(value);
@@ -18,6 +20,7 @@ const useFilterAndSortTickets = (executeFetchAllTickets, setCurrentPage) => {
 
 		if(isSelectAutoFilterSort){
 			executeFetchAllTickets(
+				ticketParam === "search" ? value : ticketSearch,
 				ticketParam === "status" ? value : ticketState,
 				ticketParam === "priority" ? value : ticketPriority,
 				ticketParam === "sort" ? value : ticketSort,
@@ -27,6 +30,7 @@ const useFilterAndSortTickets = (executeFetchAllTickets, setCurrentPage) => {
 	};
 
 	const getFilterValue = (ticketParam) => {
+		if (ticketParam === "search") return ticketSearch;
 		if (ticketParam === "status") return ticketState;
 		if (ticketParam === "priority") return ticketPriority;
 		if (ticketParam === "sort") return ticketSort;
@@ -34,6 +38,7 @@ const useFilterAndSortTickets = (executeFetchAllTickets, setCurrentPage) => {
 	};
 
 	return {
+		ticketSearch,
 		ticketState,
 		ticketPriority,
 		ticketSort,

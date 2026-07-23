@@ -10,20 +10,25 @@ const useFetchAllTickets = (initialTickets = []) => {
 	const [fetchAllTicketsError, setFetchAllTicketsError] = useState(null);
 
 	const executeFetchAllTickets = useCallback(
-		async (ticketFilter, ticketPiority, ticketSort, page = 0) => {
+		async (search, ticketFilter, ticketPiority, ticketSort, page = 0) => {
 			setIsFetchAllTicketsLoading(true);
 			setFetchAllTicketsError(null);
 
 			try {
 				const data = await fetchAllTickets(
+					search,
 					ticketFilter,
 					ticketPiority,
 					ticketSort,
 					page
 				);
-				setFetchedTickets(data.content || []);
-				setTotalPages(data.totalPages || 1);
-				setTotalElements(data.totalElements || 0);
+				const content = data.content || (Array.isArray(data) ? data : []);
+				const totalPagesCount = data.totalPages ?? data.page?.totalPages ?? 1;
+				const totalElementsCount = data.totalElements ?? data.page?.totalElements ?? content.length;
+
+				setFetchedTickets(content);
+				setTotalPages(totalPagesCount);
+				setTotalElements(totalElementsCount);
 			} catch {
 				const errorMessage = "Đã xảy ra lỗi khi tải dữ liệu."; // Hardcoded message
 
