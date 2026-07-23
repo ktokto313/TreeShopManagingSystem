@@ -49,7 +49,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query(value = "SELECT * " +
             "FROM orders o " +
-            "WHERE o.status IN :statuses " +
+            "WHERE o.status::TEXT IN :statuses " +
             "AND (o.id::TEXT LIKE %:query% OR LOWER(o.shipping_address) LIKE LOWER(CONCAT('%', :query, '%'))) " +
             "ORDER BY o.status::order_status asc, o.created_at desc", nativeQuery = true)
     List<Order> searchByStatusInOrderByStatusAscThenCreatedAtDesc(
@@ -58,7 +58,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query(value = "SELECT * " +
             "FROM orders o " +
-            "WHERE o.status IN :statuses " +
+            "WHERE o.status::TEXT IN :statuses " +
             "   AND (o.id::TEXT LIKE %:query% OR LOWER(o.shipping_address) LIKE LOWER(CONCAT('%', :query, '%'))) " +
             "   AND (o.customer_id = :userId OR o.shipper_id = :shipperId) " +
             "ORDER BY o.status::order_status asc, o.created_at desc", nativeQuery = true)

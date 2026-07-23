@@ -103,8 +103,8 @@ export default function OrderManagement() {
             <div className="flex flex-wrap gap-1.5">
               {[
                 { id: 'ALL', label: 'Tất cả' },
-                { id: 'PENDING', label: 'Chờ xử lý' },
-                { id: 'PROCESSING', label: 'Chờ lấy hàng' },
+                { id: 'PROCESSING', label: 'Chờ xử lý' },
+                { id: 'PENDING', label: 'Chờ lấy hàng' },
                 { id: 'DELIVERING', label: 'Đang giao' },
                 { id: 'TORECEIVE', label: 'Chờ nhận'},
                 { id: 'COMPLETED', label: 'Hoàn thành' },
