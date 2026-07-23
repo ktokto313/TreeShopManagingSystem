@@ -536,10 +536,9 @@ export default function ManagementPage() {
 		} catch (error) {
 			// Map HTTP status codes to Vietnamese error messages
 			const statusCodeMessages = {
+				400: "Không thể xóa danh mục vì nó vẫn chứa sản phẩm. Vui lòng xóa hết sản phẩm trong danh mục trước.",
 				401: "Bạn không có quyền thực hiện thao tác này.",
 				403: "Bạn không có quyền xóa danh mục.",
-				404: "Danh mục không tồn tại.",
-				409: "Không thể xóa danh mục vì nó vẫn chứa sản phẩm. Vui lòng xóa hết sản phẩm trong danh mục trước.",
 			};
 
 			// Get message from backend response or use status code mapping or fallback to error.message

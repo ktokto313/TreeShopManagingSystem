@@ -64,17 +64,12 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
-        // Check if category exists
-        if (!categoryService.categoryExists(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Danh mục không tồn tại");
+        boolean result = categoryService.deleteCategory(id);
+        if (!result) {
+            return ResponseEntity.badRequest().build();
         }
-        
-        // Check if category has products
-        if (!categoryService.deleteCategory(id)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Không thể xóa danh mục vì nó vẫn chứa sản phẩm. Vui lòng xóa hết sản phẩm trong danh mục trước.");
-        }
-        
         return ResponseEntity.noContent().build();
     }
 }
