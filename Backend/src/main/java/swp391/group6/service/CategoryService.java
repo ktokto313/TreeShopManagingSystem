@@ -44,6 +44,13 @@ public class CategoryService {
     }
 
     /**
+     * Checks if a category exists by ID.
+     */
+    public boolean categoryExists(Long id) {
+        return categoryRepository.existsById(id);
+    }
+
+    /**
      * Returns the created category, or empty if the name already exists.
      */
     public Optional<CategoryResponse> createCategory(CategoryRequest request) {

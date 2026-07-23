@@ -48,6 +48,14 @@ public class ProductController {
         this.productImageStorageService = productImageStorageService;
     }
 
+    /**
+     * Lists all products with optional filtering by keyword, category, or status.
+     * 
+     * @param keyword optional search keyword (matches name, SKU, description, content, care info)
+     * @param categoryId optional category ID filter
+     * @param status optional status filter (true for active, false for inactive)
+     * @return list of ProductResponse objects matching the criteria
+     */
     @GetMapping
     public ResponseEntity<List<ProductResponse>> listProducts(
             @RequestParam(required = false) String keyword,
@@ -57,6 +65,12 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
+    /**
+     * Retrieves a single product by ID with full details (description, care guide, images, etc.).
+     * 
+     * @param id the product ID
+     * @return ProductResponse if found, 404 Not Found otherwise
+     */
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getProduct(@PathVariable Long id) {
         return productService.getProduct(id)
@@ -64,12 +78,25 @@ public class ProductController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Retrieves featured products for the homepage.
+     * Typically returns newly added and recommended products for promotional display.
+     * 
+     * @return HomepageFeaturedResponse containing featured product lists
+     */
     @GetMapping("/homepage-featured")
     public ResponseEntity<HomepageFeaturedResponse> getHomepageFeaturedProducts() {
         HomepageFeaturedResponse response = productService.getHomepageFeaturedProducts();
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Creates a new product with the provided details and optional plant-specific fields.
+     * Requires SYSTEM_ADMIN or MANAGER role.
+     * 
+     * @param request ProductRequest containing name, price, stock, category, and optional care details
+     * @return 201 Created with ProductResponse if successful, 400 Bad Request if validation fails
+     */
     @PostMapping
     @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
     public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest request) {
@@ -78,6 +105,16 @@ public class ProductController {
                 .orElse(ResponseEntity.badRequest().build());
     }
 
+    /**
+     * Uploads product images and stores them in the filesystem.
+     * Requires SYSTEM_ADMIN or MANAGER role.
+     * 
+     * Supported formats: JPEG, PNG, WebP (validated by ProductImageStorageService).
+     * Maximum file size enforced by Spring multipart configuration.
+     * 
+     * @param files list of image files to upload
+     * @return 201 Created with list of stored filenames if successful, 400 Bad Request if upload fails
+     */
     @PostMapping("/images")
     @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
     public ResponseEntity<List<String>> uploadProductImages(@RequestParam("files") List<MultipartFile> files) {
@@ -92,6 +129,16 @@ public class ProductController {
         }
     }
 
+    /**
+     * Updates an existing product with new details and optional plant-specific fields.
+     * Requires SYSTEM_ADMIN or MANAGER role.
+     * 
+     * Note: Existing images are preserved unless explicitly replaced in the request.
+     * 
+     * @param id the product ID to update
+     * @param request ProductRequest with updated fields
+     * @return 200 OK with updated ProductResponse if successful, 404 Not Found if product doesn't exist
+     */
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
     public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id, @RequestBody ProductRequest request) {
@@ -100,6 +147,14 @@ public class ProductController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Soft-deletes a product by deactivating it (sets status to false).
+     * The product record remains in the database for historical tracking but won't appear in public listings.
+     * Requires SYSTEM_ADMIN or MANAGER role.
+     * 
+     * @param id the product ID to deactivate
+     * @return 204 No Content if successful, 404 Not Found if product doesn't exist
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {

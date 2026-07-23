@@ -1,6 +1,19 @@
 // Created by minhlthe200133
+
 import { getProductAvailability } from '../../products/utils/productAvailability'
 
+/**
+ * Parses product images from various input formats (array, string, JSON, nested object).
+ * Converts all image references to strings and filters out empty/falsy values.
+ * 
+ * Handles formats:
+ * - Array of images: [img1, img2, ...] → returns array of strings
+ * - JSON string: '["img1", "img2"]' or '{"images": ["img1", "img2"]}' → parsed and returned
+ * - Plain string: 'img.jpg' → returns single-element array
+ * 
+ * @param {any} value - The image data to parse (can be null, array, string, JSON)
+ * @returns {string[]} Array of image strings, empty if parsing fails or value is empty
+ */
 export function parseCatalogImages(value) {
   if (!value) {
     return []
@@ -28,6 +41,15 @@ export function parseCatalogImages(value) {
   return []
 }
 
+/**
+ * Formats a numeric value as Vietnamese Dong currency (VND).
+ * Returns formatted string with thousand separators or '-' if value is not a valid number.
+ * 
+ * Example: 1500000 → "1.500.000 ₫"
+ * 
+ * @param {number|string} value - The numeric value to format
+ * @returns {string} Formatted currency string or '-' if NaN
+ */
 export function formatCurrency(value) {
   const numberValue = Number(value)
 
@@ -42,7 +64,19 @@ export function formatCurrency(value) {
   }).format(numberValue)
 }
 
-function normalizeSearchText(value) { //dieu chinh de co tim duoc nhung san pham chua unicode
+/**
+ * Normalizes text for search matching: removes diacritical marks (Vietnamese accents),
+ * converts to lowercase, removes special characters, and collapses whitespace.
+ * 
+ * This enables case-insensitive, accent-insensitive searching. For example:
+ * "Cây Hoa Hồng" → "cay hoa hong" (matches search for "cay" or "hoa")
+ * "Đồng Tiền" → "dong tien" (matches search for "dong" even though character is "đ")
+ * 
+ * @param {string} value - The text to normalize (null/undefined treated as empty string)
+ * @returns {string} Normalized lowercase text with accents removed
+ */
+function normalizeSearchText(value) {
+  // Remove Vietnamese diacritical marks to match search even with accent variations
   return String(value ?? '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -54,11 +88,31 @@ function normalizeSearchText(value) { //dieu chinh de co tim duoc nhung san pham
     .replace(/\s+/g, ' ')
 }
 
+/**
+ * Compacts normalized search text by removing all spaces.
+ * Used to match multi-word terms regardless of spacing.
+ * Example: "cay hoa hong" → "cayhoahong"
+ * 
+ * @param {string} value - The text to normalize and compact
+ * @returns {string} Compact normalized text (no spaces)
+ */
 function compactSearchText(value) {
   return normalizeSearchText(value).replace(/\s+/g, '')
 }
 
-//check filter keyword search
+/**
+ * Checks if a product matches a keyword search across multiple fields.
+ * Uses both normalized (space-aware) and compact (space-agnostic) matching to catch variations.
+ * 
+ * Search fields: name, SKU, description, content, care guide, difficulty, feng shui element, category, search aliases.
+ * Handles accent-insensitive matching for Vietnamese product names/descriptions.
+ * 
+ * @param {object} product - The product object to search
+ * @param {string} keyword - The search term (can be empty/null to match all)
+ * @param {string} categoryName - The product's category name
+ * @param {string[]} searchAliases - Additional keywords to include in search (default: [])
+ * @returns {boolean} True if product matches keyword or keyword is empty
+ */
 function matchesText(product, keyword, categoryName, searchAliases = []) {
   const searchValue = normalizeSearchText(keyword)
 
@@ -82,10 +136,38 @@ function matchesText(product, keyword, categoryName, searchAliases = []) {
     .join(' ')
   const compactSearchableText = compactSearchText(searchableText)
 
+  // Try both normalized (space-aware) and compact (space-agnostic) matching
   return searchableText.includes(searchValue) || compactSearchableText.includes(compactSearchValue)
 }
 
-//check filter data
+/**
+ * Matches a product against all active catalog filters (keyword, category, price, difficulty, feng shui).
+ * All filter conditions are AND'ed (product must pass ALL filters to be included).
+ * 
+ * Filters applied:
+ * - Category: exact match (or "other" pseudo-category for uncategorized products)
+ * - Stock status: active only if status=true, out-of-stock only if status=false
+ * - Price range: minPrice ≤ product.price ≤ maxPrice (nulls are treated as no limit)
+ * - Care difficulty: accent-insensitive substring match in difficulty, care guide, description, content
+ * - Feng shui element: accent-insensitive substring match in element, category, name, description, content
+ * - Keyword search: matches across multiple product fields using matchesText()
+ * 
+ * @param {object} product - The product to filter
+ * @param {object} filters - Filter criteria object
+ *   - filters.keyword: string search term
+ *   - filters.categoryId: string category ID
+ *   - filters.status: string "true" or "false"
+ *   - filters.minPrice: number minimum price (or empty string for no limit)
+ *   - filters.maxPrice: number maximum price (or empty string for no limit)
+ *   - filters.careDifficulty: string difficulty level to filter by
+ *   - filters.fengShuiElement: string feng shui element to filter by
+ * @param {string} categoryName - The product's category name
+ * @param {object} options - Additional filter options
+ *   - options.otherCategoryId: ID for "other" uncategorized category (default: 'other')
+ *   - options.smallCategoryIds: Set of category IDs to group into "other" (default: empty Set)
+ *   - options.searchAliases: additional search keywords to include (default: [])
+ * @returns {boolean} True if product matches all active filters, false if any filter excludes it
+ */
 export function matchesCatalogFilters(product, filters, categoryName, options = {}) {
   const keyword = filters.keyword
   const selectedCategoryId = String(filters.categoryId ?? '')
@@ -99,14 +181,17 @@ export function matchesCatalogFilters(product, filters, categoryName, options = 
   const smallCategoryIds = options.smallCategoryIds ?? new Set()
   const productCategoryId = String(product.categoryId ?? '')
 
+  // Category filter: if "other" is selected, only include products not in smallCategoryIds
   if (selectedCategoryId === otherCategoryId && !smallCategoryIds.has(productCategoryId)) {
     return false
   }
 
+  // Category filter: if specific category selected, must match exactly
   if (selectedCategoryId && selectedCategoryId !== otherCategoryId && productCategoryId !== selectedCategoryId) {
     return false
   }
 
+  // Status filter: true = must be purchasable, false = must be out-of-stock
   if (selectedStatus === 'true' && !availability.canPurchase) {
     return false
   }
@@ -115,6 +200,7 @@ export function matchesCatalogFilters(product, filters, categoryName, options = 
     return false
   }
 
+  // Price range filter: product price must be within [minPrice, maxPrice]
   const priceValue = Number(product.price ?? 0)
   if (minPrice !== null && !Number.isNaN(minPrice) && priceValue < minPrice) {
     return false
@@ -124,6 +210,7 @@ export function matchesCatalogFilters(product, filters, categoryName, options = 
     return false
   }
 
+  // Care difficulty filter: accent-insensitive substring match
   if (careDifficulty) {
     const normalizedDifficulty = normalizeSearchText(careDifficulty)
     const candidateTexts = [
@@ -138,6 +225,7 @@ export function matchesCatalogFilters(product, filters, categoryName, options = 
     }
   }
 
+  // Feng shui element filter: accent-insensitive substring match
   if (fengShuiElement) {
     const normalizedFengShui = normalizeSearchText(fengShuiElement)
     const candidateTexts = [
@@ -153,11 +241,27 @@ export function matchesCatalogFilters(product, filters, categoryName, options = 
     }
   }
 
+  // Keyword search filter: must match keyword across multiple fields
   return matchesText(product, keyword, categoryName, options.searchAliases)
 }
 
-//sort products
-export function sortCatalogProducts(products, sortKey) { //sap xap theo vai thu tu nhat dinh
+/**
+ * Sorts products by the specified sort key.
+ * Creates a copy of the input array before sorting (non-destructive).
+ * 
+ * Sort options:
+ * - 'popular': by stock × 2 + image_count × 3 (descending), then by ID
+ * - 'rating': by image count (descending), then by ID
+ * - 'latest' or 'recommended': by ID (descending, newest first)
+ * - 'price-asc': by price (ascending, cheapest first)
+ * - 'price-desc': by price (descending, most expensive first)
+ * - default/unknown: by ID (descending)
+ * 
+ * @param {object[]} products - Array of products to sort
+ * @param {string} sortKey - The sort criterion to apply
+ * @returns {object[]} New sorted array (original array not modified)
+ */
+export function sortCatalogProducts(products, sortKey) {
   const sortedProducts = [...products]
 
   switch (sortKey) {
