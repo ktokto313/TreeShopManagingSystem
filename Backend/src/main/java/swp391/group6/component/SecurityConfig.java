@@ -48,7 +48,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/reviews/product/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/reviews/curated").permitAll()
                         .requestMatchers("/api/statistic/**").hasAnyRole("SYSTEM_ADMIN", "MANAGER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("SYSTEM_ADMIN")
                         .anyRequest().authenticated()
                     )
                 .exceptionHandling(ex -> ex
