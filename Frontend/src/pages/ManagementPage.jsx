@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Container } from "../components/global/Container";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
-import { IoReload } from "react-icons/io5";
 import { FaPlus } from "react-icons/fa6";
 import { Modal } from "../components/ui/Modal";
 import {
@@ -586,16 +585,7 @@ export default function ManagementPage() {
 						<p className="max-w-3xl text-sm text-green-800"></p>
 					</div>
 
-					<div className="flex flex-wrap items-center gap-3">
-						<Button variant="secondary" className="hover:bg-gray-300 flex items-center gap-1" onClick={() => void loadCategories()}>
-							<IoReload></IoReload>
-							Tải lại danh mục
-						</Button>
-						<Button variant="secondary" className="hover:bg-gray-300 flex items-center gap-1" onClick={() => void loadProducts()}>
-							<IoReload></IoReload>
-							Tải lại sản phẩm
-						</Button>
-					</div>
+
 				</div>
 
 				{notice ? (
@@ -662,10 +652,6 @@ export default function ManagementPage() {
 									<FaPlus></FaPlus>
 									Thêm sản phẩm
 									</Button>
-								<Button variant="secondary" className="hover:bg-gray-300 flex items-center gap-1" onClick={() => void loadProducts()}>
-									<IoReload></IoReload>
-									Tải lại sản phẩm
-								</Button>
 							</div>
 
 							<form

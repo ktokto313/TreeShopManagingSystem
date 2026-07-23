@@ -60,38 +60,65 @@ public class ProductService {
         this.orderRepository = orderRepository;
     }
 
+    /**
+     * Lists all products filtered by keyword, category, and status.
+     * 
+     * @param keyword optional search keyword (matches product name or SKU, case-insensitive)
+     * @param categoryId optional category ID to filter by
+     * @param status optional status filter (true for active, false for inactive)
+     * @return list of filtered products as ProductResponse objects
+     */
     public List<ProductResponse> listProducts(String keyword, Long categoryId, Boolean status) {
         return productRepository.findAll(Sort.by(Sort.Direction.ASC, "id")).stream()
+                // Filter by keyword (matches name or SKU)
                 .filter(product -> keyword == null
                         || keyword.isEmpty()
                         || containsIgnoreCase(product.getName(), keyword)
                         || containsIgnoreCase(product.getSku(), keyword))
+                // Filter by category if specified
                 .filter(product -> categoryId == null || categoryId.equals(product.getCategory().getId()))
+                // Filter by status if specified
                 .filter(product -> status == null || status.equals(product.isStatus()))
                 .map(this::toResponse)
                 .toList();
     }
 
+    /**
+     * Retrieves a single product by ID.
+     * 
+     * @param id the product ID
+     * @return Optional containing the ProductResponse if found, empty if not
+     */
     public Optional<ProductResponse> getProduct(Long id) {
         return productRepository.findById(id).map(this::toResponse);
     }
 
+    /**
+     * Fetches featured products for the homepage.
+     * Strategy: First tries to get best-selling products from the current month.
+     * If insufficient (< 4), falls back to all-time best sellers.
+     * 
+     * @return HomepageFeaturedResponse containing up to 4 products with title
+     */
     public HomepageFeaturedResponse getHomepageFeaturedProducts() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startOfMonth = now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime endOfMonth = now.withDayOfMonth(now.getMonth().length(now.toLocalDate().isLeapYear()))
                 .withHour(23).withMinute(59).withSecond(59).withNano(999999999);
 
+        // Try to fetch this month's best sellers
         List<BestSellingProductDTO> topProducts = orderRepository.findBestSellingProducts(startOfMonth, endOfMonth, OrderStatus.RECEIVED);
         
         String title = "Sản Phẩm Bán Chạy Nhất Tháng Này";
         
+        // If not enough products this month, use all-time best sellers
         if (topProducts.size() < 4) {
             LocalDateTime startOfAllTime = LocalDateTime.of(2000, 1, 1, 0, 0);
             topProducts = orderRepository.findBestSellingProducts(startOfAllTime, endOfMonth, OrderStatus.RECEIVED);
             title = "Sản Phẩm Bán Chạy Nhất Mọi Thời Đại";
         }
         
+        // Convert DTOs to responses and limit to 4 products
         List<ProductResponse> products = topProducts.stream()
                 .limit(4)
                 .map(dto -> getProduct(dto.getProductId()).orElse(null))
@@ -167,7 +194,18 @@ public class ProductService {
         return true;
     }
 
+    /**
+     * Applies request data to a product entity, handling both basic and optional detail fields.
+     * Creates a ProductDetail record if optional fields are provided, otherwise leaves it null.
+     * 
+     * @param product the product entity to update
+     * @param request the ProductRequest DTO with new data
+     * @param name sanitized product name (non-null)
+     * @param sku sanitized product SKU (non-null)
+     * @param price validated product price (non-null, > 0)
+     */
     private void applyRequest(Product product, ProductRequest request, String name, String sku, BigDecimal price) {
+        // Set basic product fields
         Category category = new Category();
         category.setId(request.getCategoryId());
         product.setCategory(category);
@@ -177,6 +215,7 @@ public class ProductService {
         product.setStatus(request.getStatus() == null || request.getStatus());
         product.setSku(sku);
 
+        // Extract optional detail fields
         String description = trimToNull(request.getDescription());
         String content = trimToNull(request.getContent());
         String careGuide = trimToNull(request.getCareGuide());
@@ -185,6 +224,8 @@ public class ProductService {
         String difficulty = trimToNull(request.getDifficulty());
         String fengShuiElement = trimToNull(request.getFengShuiElement());
         String images = trimToNull(request.getImages());
+        
+        // Check if we have any detail fields to store
         boolean hasDetail = description != null
                 || content != null
                 || careGuide != null
@@ -195,11 +236,14 @@ public class ProductService {
                 || images != null;
 
         ProductDetail detail = product.getProductDetail();
+        
+        // Create ProductDetail only if we have optional fields to store
         if (detail == null && hasDetail) {
             detail = new ProductDetail();
             detail.setProduct(product);
         }
 
+        // Update or clear the detail record
         if (detail != null) {
             detail.setProduct(product);
             detail.setDescription(description);
@@ -212,10 +256,18 @@ public class ProductService {
             detail.setImages(images);
             product.setProductDetail(detail);
         } else {
+            // No detail fields provided, clear any existing detail
             product.setProductDetail(null);
         }
     }
 
+    /**
+     * Converts a Product entity to a ProductResponse DTO.
+     * Includes all basic product fields and optional detail fields if present.
+     * 
+     * @param product the Product entity to convert
+     * @return ProductResponse DTO with all product data
+     */
     private ProductResponse toResponse(Product product) {
         ProductResponse response = new ProductResponse();
         response.setId(product.getId());
@@ -225,6 +277,8 @@ public class ProductService {
         response.setStock(product.getStock());
         response.setStatus(product.isStatus());
         response.setSku(product.getSku());
+        
+        // Include optional detail fields if present
         ProductDetail detail = resolveProductDetail(product);
         if (detail != null) {
             response.setDescription(detail.getDescription());
@@ -239,6 +293,13 @@ public class ProductService {
         return response;
     }
 
+    /**
+     * Resolves the ProductDetail for a given product.
+     * Checks if detail is eagerly loaded, otherwise queries the repository.
+     * 
+     * @param product the Product entity
+     * @return ProductDetail if it exists, null otherwise
+     */
     private ProductDetail resolveProductDetail(Product product) {
         if (product.getProductDetail() != null) {
             return product.getProductDetail();
@@ -246,6 +307,13 @@ public class ProductService {
         return productDetailRepository.findByProduct_Id(product.getId()).orElse(null);
     }
 
+    /**
+     * Trims whitespace from a string and returns null if empty.
+     * Useful for normalizing optional user input.
+     * 
+     * @param value the string to trim
+     * @return trimmed string, or null if empty/whitespace-only
+     */
     private String trimToNull(String value) {
         if (value == null) {
             return null;
@@ -254,10 +322,28 @@ public class ProductService {
         return trimmed.isEmpty() ? null : trimmed;
     }
 
+    /**
+     * Checks if a string contains a keyword using case-insensitive comparison.
+     * 
+     * @param value the string to search in
+     * @param keyword the keyword to search for
+     * @return true if value contains keyword (case-insensitive), false otherwise
+     */
     private boolean containsIgnoreCase(String value, String keyword) {
         return value != null && keyword != null && value.toLowerCase().contains(keyword.toLowerCase());
     }
 
+    /**
+     * Validates the entire ProductRequest against business rules and constraints.
+     * Checks: category exists, name/SKU non-empty and within length limits,
+     * price is positive, stock is non-negative, optional fields within length limits.
+     * 
+     * @param request the ProductRequest DTO to validate
+     * @param name sanitized product name (result of trimToNull)
+     * @param sku sanitized product SKU (result of trimToNull)
+     * @param price the product price
+     * @return true if all validations pass, false otherwise
+     */
     private boolean isValidProductRequest(ProductRequest request, String name, String sku, BigDecimal price) {
         String description = trimToNull(request.getDescription());
         String content = trimToNull(request.getContent());
@@ -268,6 +354,7 @@ public class ProductService {
         String fengShuiElement = trimToNull(request.getFengShuiElement());
         Integer stock = request.getStock();
 
+        // Validate all required and optional fields
         return request.getCategoryId() != null
                 && name != null
                 && name.length() <= MAX_NAME_LENGTH

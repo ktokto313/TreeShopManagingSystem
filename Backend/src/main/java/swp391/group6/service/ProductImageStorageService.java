@@ -43,11 +43,21 @@ public class ProductImageStorageService {
         return imageDirectory;
     }
 
+    /**
+     * Stores multiple image files to disk.
+     * Validates file count and creates the image directory if it doesn't exist.
+     * 
+     * @param files list of MultipartFile objects to store (max 5 files)
+     * @return list of stored file names (sanitized and unique)
+     * @throws IOException if file storage fails or directory cannot be created
+     * @throws IllegalArgumentException if file count exceeds MAX_IMAGE_FILES or list is null
+     */
     public List<String> storeAll(List<MultipartFile> files) throws IOException {
         if (files == null || files.size() > MAX_IMAGE_FILES) {
             throw new IllegalArgumentException("Invalid image file count");
         }
 
+        // Ensure image directory exists
         Files.createDirectories(imageDirectory);
 
         List<String> storedFileNames = new ArrayList<>();
@@ -60,11 +70,22 @@ public class ProductImageStorageService {
         return storedFileNames;
     }
 
+    /**
+     * Stores a single image file to disk.
+     * Sanitizes filename, ensures uniqueness, and validates security.
+     * 
+     * @param file the MultipartFile to store
+     * @return the stored file name (sanitized and unique)
+     * @throws IOException if file storage fails or security check fails
+     */
     private String store(MultipartFile file) throws IOException {
         validateImage(file);
 
+        // Sanitize and ensure unique filename
         String fileName = ensureUniqueFileName(sanitizeFileName(file.getOriginalFilename()));
         Path destination = imageDirectory.resolve(fileName).normalize();
+        
+        // Security check: ensure the resolved path is within the intended directory
         if (!destination.startsWith(imageDirectory)) {
             throw new IOException("Invalid image path");
         }
@@ -76,32 +97,64 @@ public class ProductImageStorageService {
         return fileName;
     }
 
+    /**
+     * Validates that the uploaded file is a valid image.
+     * Checks content type and file size.
+     * 
+     * @param file the MultipartFile to validate
+     * @throws IllegalArgumentException if file is not an image or exceeds size limit
+     */
     private void validateImage(MultipartFile file) {
         String contentType = file.getContentType();
+        
+        // Check content type is image/*
         if (contentType != null && !contentType.toLowerCase(Locale.ROOT).startsWith("image/")) {
             throw new IllegalArgumentException("Only image files can be uploaded");
         }
+        
+        // Check file size doesn't exceed limit
         if (file.getSize() > MAX_IMAGE_FILE_SIZE) {
             throw new IllegalArgumentException("Image file is too large");
         }
     }
 
+    /**
+     * Sanitizes the filename to prevent security issues.
+     * Removes special characters and replaces with hyphens.
+     * Returns a safe default if the sanitized name is empty.
+     * 
+     * @param originalName the original filename from the uploaded file
+     * @return a sanitized filename safe for file storage
+     */
     private String sanitizeFileName(String originalName) {
         String fileName = originalName == null ? "" : Path.of(originalName).getFileName().toString();
+        
+        // Replace special characters with hyphens
         String sanitized = fileName.replaceAll("[^A-Za-z0-9._-]", "-");
+        // Collapse multiple consecutive hyphens into one
         sanitized = sanitized.replaceAll("-+", "-");
 
+        // Use default name if result is empty or invalid
         if (sanitized.isBlank() || sanitized.equals(".") || sanitized.equals("..")) {
             return "product-image";
         }
         return sanitized;
     }
 
+    /**
+     * Ensures the filename is unique by appending a counter if the file already exists.
+     * Preserves the file extension when appending numbers.
+     * 
+     * @param fileName the base filename to ensure uniqueness for
+     * @return a unique filename that doesn't conflict with existing files
+     * @throws IOException if file system access fails
+     */
     private String ensureUniqueFileName(String fileName) throws IOException {
         String baseName = fileName;
         String extension = "";
         int dotIndex = fileName.lastIndexOf('.');
 
+        // Split filename and extension
         if (dotIndex > 0) {
             baseName = fileName.substring(0, dotIndex);
             extension = fileName.substring(dotIndex);
@@ -109,6 +162,8 @@ public class ProductImageStorageService {
 
         String candidate = fileName;
         int counter = 1;
+        
+        // Keep incrementing counter until we find a unique name
         while (Files.exists(imageDirectory.resolve(candidate))) {
             candidate = "%s-%d%s".formatted(baseName, counter, extension);
             counter++;
