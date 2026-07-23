@@ -541,10 +541,10 @@ export default function ManagementPage() {
 				403: "Bạn không có quyền xóa danh mục.",
 			};
 
-			// Get message from backend response or use status code mapping or fallback to error.message
+			// Use status code message first (frontend priority), then fallback to error.message
 			const errorMessage = 
-				error?.message || 
 				statusCodeMessages[error?.status] || 
+				error?.message || 
 				`Lỗi ${error?.status || "không xác định"}`;
 			
 			setNotice(`Xóa danh mục thất bại: ${errorMessage}`);
