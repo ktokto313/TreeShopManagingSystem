@@ -7,6 +7,7 @@ import useFetchAllOrders from './hooks/useFetchAllOrders';
 import OrderModal from './OrderModal';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { TbReload } from "react-icons/tb";
+import { PageBar } from '../../components/ui/PageBar';
 
 export default function OrderManagement() {
   const {
@@ -17,6 +18,10 @@ export default function OrderManagement() {
     setSelectedFilter,
     searchQuery,
     setSearchQuery,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    totalElements,
     fetchOrders,
   } = useFetchAllOrders();
 
@@ -24,10 +29,10 @@ export default function OrderManagement() {
 
   useEffect(() => {
     fetchOrders();
-  }, [fetchOrders]);
+  }, [fetchOrders, currentPage]);
 
   // Compute metrics
-  const totalOrders = orders.length;
+  const totalOrders = totalElements;
 
   return (
     <div className="min-h-screen flex flex-col bg-bg-base font-main">
@@ -215,6 +220,16 @@ export default function OrderManagement() {
                 />
               ))}
             </div>
+          )}
+
+          {/* Pagination */}
+          {!isLoading && !error && totalPages > 1 && (
+            <PageBar
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              className="mt-8"
+            />
           )}
         </Container>
       </main>

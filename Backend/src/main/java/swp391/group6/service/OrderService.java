@@ -45,26 +45,26 @@ public class OrderService {
     }
 
     @PreAuthorize("isAuthenticated()")
-    public List<Order> getOrders(LoginResponse loginResponse, List<OrderStatus> statuses, String query) {
+    public Page<Order> getOrders(LoginResponse loginResponse, List<OrderStatus> statuses, String query, Pageable pageable) {
         if (query == null) query = "";
         boolean hasStatusFilter = statuses != null && !statuses.isEmpty();
 
         if (canAccessAllOrder(loginResponse)) {
             if (hasStatusFilter) {
                 return orderRepository.searchByStatusInOrderByStatusAscThenCreatedAtDesc(statuses
-                        .stream().map(Enum::toString).toList(), query);
+                        .stream().map(Enum::toString).toList(), query, pageable);
             } else {
-                return orderRepository.searchAllOrderByStatusAscThenCreatedAtDesc(query);
+                return orderRepository.searchAllOrderByStatusAscThenCreatedAtDesc(query, pageable);
             }
         } else {
             User fullUser = userRepository.findByEmail(loginResponse.getEmail()).orElse(null);
-            if (fullUser == null) return new ArrayList<>();
+            if (fullUser == null) return Page.empty(pageable);
             long uid = fullUser.getId();
             if (hasStatusFilter) {
                 return orderRepository.searchByStatusInAndUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(statuses.
-                        stream().map(Enum::toString).toList(), query, uid, uid);
+                        stream().map(Enum::toString).toList(), query, uid, uid, pageable);
             } else {
-                return orderRepository.searchByUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(query, uid, uid);
+                return orderRepository.searchByUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(query, uid, uid, pageable);
             }
         }
     }

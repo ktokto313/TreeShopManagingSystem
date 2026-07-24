@@ -41,15 +41,14 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderListDTO>> getOrders(
+    public ResponseEntity<Page<OrderListDTO>> getOrders(
             HttpServletRequest request,
             @RequestParam(name = "statusList", required = false) List<OrderStatus> statusList,
-            @RequestParam(name = "query", required = false) String query) {
+            @RequestParam(name = "query", required = false) String query,
+            @PageableDefault(size = 10) Pageable pageable) {
         LoginResponse loggedInUser = JWTUtil.getUser(request);
-        List<OrderListDTO> orderList = orderService.getOrders(loggedInUser, statusList, query)
-                .stream()
-                .map(OrderListDTO::new)
-                .toList();
+        Page<OrderListDTO> orderList = orderService.getOrders(loggedInUser, statusList, query, pageable)
+                .map(OrderListDTO::new);
         return ResponseEntity.ok(orderList);
     }
 

@@ -8,6 +8,8 @@
  */
 package swp391.group6.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -34,39 +36,47 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query(value = "SELECT * " +
             "FROM orders o " +
             "WHERE (o.id::TEXT LIKE %:query% OR LOWER(o.shipping_address) LIKE LOWER(CONCAT('%', :query, '%'))) " +
-            "ORDER BY o.status::order_status asc, o.created_at desc", nativeQuery = true)
-    List<Order> searchAllOrderByStatusAscThenCreatedAtDesc(@Param("query") String query);
+            "ORDER BY o.status::order_status asc, o.created_at desc", 
+           countQuery = "SELECT count(*) FROM orders o WHERE (o.id::TEXT LIKE %:query% OR LOWER(o.shipping_address) LIKE LOWER(CONCAT('%', :query, '%')))",
+           nativeQuery = true)
+    Page<Order> searchAllOrderByStatusAscThenCreatedAtDesc(@Param("query") String query, Pageable pageable);
 
     @Query(value = "SELECT * " +
             "FROM orders o " +
             "WHERE (o.id::TEXT LIKE %:query% OR LOWER(o.shipping_address) LIKE LOWER(CONCAT('%', :query, '%'))) " +
             "AND (o.customer_id = :userId OR o.shipper_id = :shipperId) " +
-            "ORDER BY o.status::order_status asc, o.created_at desc", nativeQuery = true)
-    List<Order> searchByUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(
+            "ORDER BY o.status::order_status asc, o.created_at desc", 
+           countQuery = "SELECT count(*) FROM orders o WHERE (o.id::TEXT LIKE %:query% OR LOWER(o.shipping_address) LIKE LOWER(CONCAT('%', :query, '%'))) AND (o.customer_id = :userId OR o.shipper_id = :shipperId)",
+           nativeQuery = true)
+    Page<Order> searchByUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(
             @Param("query") String query,
             @Param("userId") long userId,
-            @Param("shipperId") long shipperId);
+            @Param("shipperId") long shipperId, Pageable pageable);
 
     @Query(value = "SELECT * " +
             "FROM orders o " +
             "WHERE o.status::TEXT IN :statuses " +
             "AND (o.id::TEXT LIKE %:query% OR LOWER(o.shipping_address) LIKE LOWER(CONCAT('%', :query, '%'))) " +
-            "ORDER BY o.status::order_status asc, o.created_at desc", nativeQuery = true)
-    List<Order> searchByStatusInOrderByStatusAscThenCreatedAtDesc(
+            "ORDER BY o.status::order_status asc, o.created_at desc", 
+           countQuery = "SELECT count(*) FROM orders o WHERE o.status::TEXT IN :statuses AND (o.id::TEXT LIKE %:query% OR LOWER(o.shipping_address) LIKE LOWER(CONCAT('%', :query, '%')))",
+           nativeQuery = true)
+    Page<Order> searchByStatusInOrderByStatusAscThenCreatedAtDesc(
             @Param("statuses") List<String> statuses,
-            @Param("query") String query);
+            @Param("query") String query, Pageable pageable);
 
     @Query(value = "SELECT * " +
             "FROM orders o " +
             "WHERE o.status::TEXT IN :statuses " +
             "   AND (o.id::TEXT LIKE %:query% OR LOWER(o.shipping_address) LIKE LOWER(CONCAT('%', :query, '%'))) " +
             "   AND (o.customer_id = :userId OR o.shipper_id = :shipperId) " +
-            "ORDER BY o.status::order_status asc, o.created_at desc", nativeQuery = true)
-    List<Order> searchByStatusInAndUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(
+            "ORDER BY o.status::order_status asc, o.created_at desc", 
+           countQuery = "SELECT count(*) FROM orders o WHERE o.status::TEXT IN :statuses AND (o.id::TEXT LIKE %:query% OR LOWER(o.shipping_address) LIKE LOWER(CONCAT('%', :query, '%'))) AND (o.customer_id = :userId OR o.shipper_id = :shipperId)",
+           nativeQuery = true)
+    Page<Order> searchByStatusInAndUserIdOrShipperIdOrderByStatusAscThenCreatedAtDesc(
             @Param("statuses") List<String> statuses,
             @Param("query") String query,
             @Param("userId") long userId,
-            @Param("shipperId") long shipperId);
+            @Param("shipperId") long shipperId, Pageable pageable);
 
     @Query("SELECT p.id AS productId, p.name AS productName, CAST(SUM(od.quantity) AS int) AS totalSold " +
            "FROM Order o JOIN o.orderDetailList od JOIN od.product p " +
