@@ -58,8 +58,8 @@ export default function useFetchAllOrders() {
 
 			const data = await response.json();
 			setOrders(data.content || []);
-			setTotalPages(data.totalPages || 1);
-			setTotalElements(data.totalElements || 0);
+			setTotalPages(data.page.totalPages || 1);
+			setTotalElements(data.page.totalElements || 0);
 		} catch (err) {
 			setError(err.message);
 		} finally {
