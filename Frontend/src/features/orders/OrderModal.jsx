@@ -223,6 +223,23 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
               </Button>
             )}
 
+            {selectedOrder.status === "PROCESSING" && user?.role === "MANAGER" && (
+              <Button
+                variant="primary"
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 border-none"
+                disabled={isChangingStatus}
+                onClick={async () => {
+                  const success = await changeOrderStatus(selectedOrder.id, "FAILED");
+                  if (success) {
+                    fetchOrderDetail(selectedOrderId);
+                    onOrderChange?.();
+                  }
+                }}
+              >
+                Hủy đơn hàng
+              </Button>
+            )}
+
             {selectedOrder.status === "RETURNING" && user?.role === "MANAGER" && (
               <Button
                 variant="primary"
@@ -254,20 +271,36 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
 
             {/* SHIPPER Actions */}
             {selectedOrder.status === "DELIVERING" && user?.role === "SHIPPER" && (
-              <Button
-                variant="primary"
-                className="px-4 py-2"
-                disabled={isChangingStatus}
-                onClick={async () => {
-                  const success = await changeOrderStatus(selectedOrder.id, "ARRIVED");
-                  if (success) {
-                    fetchOrderDetail(selectedOrderId);
-                    onOrderChange?.();
-                  }
-                }}
-              >
-                Xác nhận đã giao
-              </Button>
+              <>
+                <Button
+                  variant="primary"
+                  className="px-4 py-2"
+                  disabled={isChangingStatus}
+                  onClick={async () => {
+                    const success = await changeOrderStatus(selectedOrder.id, "ARRIVED");
+                    if (success) {
+                      fetchOrderDetail(selectedOrderId);
+                      onOrderChange?.();
+                    }
+                  }}
+                >
+                  Xác nhận đã giao
+                </Button>
+                <Button
+                  variant="primary"
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 border-none"
+                  disabled={isChangingStatus}
+                  onClick={async () => {
+                    const success = await changeOrderStatus(selectedOrder.id, "RETURNING");
+                    if (success) {
+                      fetchOrderDetail(selectedOrderId);
+                      onOrderChange?.();
+                    }
+                  }}
+                >
+                  Hủy giao hàng
+                </Button>
+              </>
             )}
 
             {selectedOrder.status === "RETURN_PENDING" && user?.role === "SHIPPER" && (

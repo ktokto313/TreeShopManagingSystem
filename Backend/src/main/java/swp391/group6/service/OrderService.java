@@ -220,13 +220,15 @@ public class OrderService {
         }
 
         return switch (from) {
-            case PROCESSING -> to == OrderStatus.PENDING && "MANAGER".equals(roleName);
+            case PROCESSING ->
+                    (to == OrderStatus.PENDING || to == OrderStatus.FAILED) && "MANAGER".equals(roleName);
             case PENDING -> to == OrderStatus.DELIVERING && "MANAGER".equals(roleName);
             case DELIVERING ->
                     (to == OrderStatus.ARRIVED || to == OrderStatus.RETURNING) && "SHIPPER".equals(roleName);
             case ARRIVED ->
                     (to == OrderStatus.RECEIVED || to == OrderStatus.RETURN_PROCESSING) && "CUSTOMER".equals(roleName);
-            case RETURN_PROCESSING -> to == OrderStatus.RETURN_PENDING && "MANAGER".equals(roleName);
+            case RETURN_PROCESSING ->
+                    (to == OrderStatus.RETURN_PENDING) && "MANAGER".equals(roleName);
             case RETURN_PENDING -> to == OrderStatus.RETURNING && "SHIPPER".equals(roleName);
             case RETURNING -> to == OrderStatus.FAILED && "MANAGER".equals(roleName);
             default -> false;
