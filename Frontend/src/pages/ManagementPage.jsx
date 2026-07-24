@@ -551,22 +551,30 @@ export default function ManagementPage() {
 		}
 	}
 
-	async function deactivateSelectedProduct(product) {
+	async function toggleProductStatus(product) {
 		setNotice("");
 
 		try {
-			await deactivateProduct(product.id);
+			if (product.status) {
+				// Product is active, deactivate it
+				await deactivateProduct(product.id);
+				setNotice("Đã ẩn sản phẩm.");
+			} else {
+				// Product is inactive, activate it by updating with status = true
+				await updateProduct(product.id, { ...product, status: true });
+				setNotice("Đã kích hoạt sản phẩm.");
+			}
 			if (String(productForm.id) === String(product.id)) {
 				resetProductForm();
 				closeProductModal();
 			}
-			setNotice("Đã ẩn sản phẩm.");
 			await loadProducts();
 		} catch (error) {
 			if (handleAuthError(error)) {
 				return;
 			}
-			setNotice(`Ẩn sản phẩm thất bại: ${error.message}`);
+			const action = product.status ? "ẩn" : "kích hoạt";
+			setNotice(`${action} sản phẩm thất bại: ${error.message}`);
 		}
 	}
 
@@ -756,7 +764,7 @@ export default function ManagementPage() {
 							<ProductTable
 								products={filteredProductsWithCategoryName}
 								onEdit={openEditProductModal}
-								onDeactivate={deactivateSelectedProduct}
+								onDeactivate={toggleProductStatus}
 							/>
 						</div>
 					</div>
@@ -794,22 +802,6 @@ export default function ManagementPage() {
 						onChange={updateCategoryFormField}
 						onSubmit={saveCategory}
 					/>
-
-					<div className="flex flex-wrap">
-						<Button variant="secondary" className={"grow bg-red-500 hover:bg-red-400 text-white"} onClick={resetProductForm}>
-							Xóa
-						</Button>
-						<Button
-							variant="secondary"
-							className={"grow border-gray-400 text-black border hover:bg-gray-300/40"}
-							onClick={() => {
-								resetCategoryForm();
-								closeCategoryModal();
-							}}
-						>
-							Đóng
-						</Button>
-					</div>
 				</div>
 			</Modal>
 
@@ -851,7 +843,7 @@ export default function ManagementPage() {
 						onChange={updateProductFormField}
 						onSubmit={saveProduct}
 					>
-						<Button type="button" variant="secondary" className="w-full bg-red-500 hover:bg-red-400 text-white" onClick={resetProductForm}>
+						<Button type="button" variant="secondary" className="w-full bg-red-500 hover:bg-red-400 text-white py-3 font-semibold" onClick={resetProductForm}>
 							Xóa
 						</Button>
 					</ProductForm>

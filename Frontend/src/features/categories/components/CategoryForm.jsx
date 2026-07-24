@@ -20,7 +20,7 @@ export default function CategoryForm({
 	}
 
 	return (
-		<Form onSubmit={onSubmit}>
+		<Form onSubmit={onSubmit} className="gap-4">
 			<Input
 				label="Tên danh mục"
 				name="name"
@@ -38,9 +38,11 @@ export default function CategoryForm({
 				error={errors.description}
 				onChange={handleInputChange}
 			/>
-			<Button type="submit" disabled={isSubmitting}>
-				{isSubmitting ? "Đang lưu..." : "Lưu danh mục"}
-			</Button>
+			<div className="pt-4 pb-2">
+				<Button type="submit" disabled={isSubmitting} className="w-full py-3 text-base font-semibold">
+					{isSubmitting ? "Đang lưu..." : "Lưu danh mục"}
+				</Button>
+			</div>
 		</Form>
 	);
 }

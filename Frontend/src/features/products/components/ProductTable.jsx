@@ -80,8 +80,11 @@ export default function ProductTable({ products = [], onEdit, onDeactivate }) {
 										<Button className="bg-blue-500 hover:bg-blue-400" onClick={() => onEdit?.(product)}>
 											Sửa
 										</Button>
-										<Button className="bg-red-500 hover:bg-red-400" onClick={() => onDeactivate?.(product)}>
-											Ngừng bán
+										<Button 
+											className={product.status ? "bg-red-500 hover:bg-red-400" : "bg-green-600 hover:bg-green-500"}
+											onClick={() => onDeactivate?.(product)}
+										>
+											{product.status ? "Ngừng bán" : "Kích hoạt"}
 										</Button>
 									</div>
 								</td>
