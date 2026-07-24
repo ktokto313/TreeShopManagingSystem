@@ -7,6 +7,7 @@
 package swp391.group6.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class ProductRequest {
     private Long categoryId;
@@ -22,7 +23,7 @@ public class ProductRequest {
     private String wateringFrequency;
     private String difficulty;
     private String fengShuiElement;
-    private String images;
+    private List<String> images;
 
     public Long getCategoryId() {
         return categoryId;
@@ -128,11 +129,11 @@ public class ProductRequest {
         this.fengShuiElement = fengShuiElement;
     }
 
-    public String getImages() {
+    public List<String> getImages() {
         return images;
     }
 
-    public void setImages(String images) {
+    public void setImages(List<String> images) {
         this.images = images;
     }
 }

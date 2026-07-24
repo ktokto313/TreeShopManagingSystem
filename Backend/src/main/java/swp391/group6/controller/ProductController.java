@@ -125,6 +125,7 @@ public class ProductController {
             }
             return ResponseEntity.status(HttpStatus.CREATED).body(storedFileNames);
         } catch (IllegalArgumentException | IOException exception) {
+            log.error("Image upload failed: {}", exception.getMessage(), exception);
             return ResponseEntity.badRequest().build();
         }
     }

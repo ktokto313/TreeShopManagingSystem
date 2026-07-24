@@ -52,6 +52,7 @@ function loadJsonp(path) {
 async function requestJsonWithFetch(path, options) {
   const { body, headers, method = 'GET' } = options
   const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
+
   const response = await fetch(path, {
     method,
     credentials: 'include',

@@ -223,7 +223,22 @@ public class ProductService {
         String wateringFrequency = trimToNull(request.getWateringFrequency());
         String difficulty = trimToNull(request.getDifficulty());
         String fengShuiElement = trimToNull(request.getFengShuiElement());
-        String images = trimToNull(request.getImages());
+        
+        // Convert images list to JSON string for storage
+        String images = null;
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
+            // Manually construct JSON array string to avoid dependency issues
+            StringBuilder sb = new StringBuilder("[");
+            for (int i = 0; i < request.getImages().size(); i++) {
+                if (i > 0) sb.append(",");
+                String img = request.getImages().get(i);
+                // Escape quotes in filename
+                String escaped = img.replace("\\", "\\\\").replace("\"", "\\\"");
+                sb.append("\"").append(escaped).append("\"");
+            }
+            sb.append("]");
+            images = sb.toString();
+        }
         
         // Check if we have any detail fields to store
         boolean hasDetail = description != null

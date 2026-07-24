@@ -15,7 +15,7 @@ import CategoryForm from "../features/categories/components/CategoryForm";
 import CategoryTable from "../features/categories/components/CategoryTable";
 import ProductForm from "../features/products/components/ProductForm";
 import ProductTable from "../features/products/components/ProductTable";
-import ReviewSection from "../features/review/components/ReviewSection";
+
 import {
 	createProduct,
 	deactivateProduct,
@@ -26,7 +26,6 @@ import {
 import { sortCategories } from "../utils/categorySort";
 import { AuthContext } from "../context/AuthContext";
 import { cn } from "../utils/cn";
-import { FaCheck } from "react-icons/fa";
 import { IoMdRemoveCircleOutline } from "react-icons/io";
 
 /**
@@ -256,10 +255,6 @@ function toProductApiFilters(filters) {
 		categoryId: filters.categoryId,
 		status: filters.status,
 	};
-}
-
-function isOutOfStockProduct(product) {
-	return Number(product?.stock ?? 0) <= 0 || product?.status === false;
 }
 
 export default function ManagementPage() {
@@ -536,10 +531,19 @@ export default function ManagementPage() {
 				return;
 			}
 
-			const uploadedImages = productForm.imageFiles?.length
-				? await uploadProductImages(productForm.imageFiles)
-				: productForm.images;
+			let uploadedImages = productForm.images;
+			if (productForm.imageFiles?.length) {
+				try {
+					uploadedImages = await uploadProductImages(productForm.imageFiles);
+					console.log('Uploaded images:', uploadedImages);
+				} catch (uploadError) {
+					console.error('Image upload failed:', uploadError);
+					setNotice(`Tải ảnh thất bại: ${uploadError.message}`);
+					return;
+				}
+			}
 			const imageNames = Array.isArray(uploadedImages) ? uploadedImages : [];
+			console.log('Final image names to send:', imageNames);
 			const payload = {
 				categoryId:
 					productForm.categoryId === "" ? null : Number(productForm.categoryId),
@@ -555,8 +559,9 @@ export default function ManagementPage() {
 				wateringFrequency: productForm.wateringFrequency.trim(),
 				difficulty: productForm.difficulty.trim(),
 				fengShuiElement: productForm.fengShuiElement.trim(),
-				images: imageNames.length ? JSON.stringify(imageNames) : null,
+				images: imageNames.length ? imageNames : null,
 			};
+			console.log('Sending product payload:', payload);
 
 			if (productForm.id) {
 				await updateProduct(productForm.id, payload);
@@ -873,10 +878,6 @@ export default function ManagementPage() {
 							Xóa
 						</Button>
 					</ProductForm>
-
-					{productForm.id && (
-						<ReviewSection productId={productForm.id} canManage={true} />
-					)}
 				</div>
 			</Modal>
 		</main>
