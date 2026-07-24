@@ -29,6 +29,44 @@ import { cn } from "../utils/cn";
 import { FaCheck } from "react-icons/fa";
 import { IoMdRemoveCircleOutline } from "react-icons/io";
 
+/**
+ * Normalizes text for search matching: removes diacritical marks (Vietnamese accents),
+ * converts to lowercase, removes special characters, and collapses whitespace.
+ */
+function normalizeSearchText(value) {
+	return String(value ?? "")
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.replace(/đ/g, "d")
+		.replace(/Đ/g, "D")
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, " ")
+		.trim()
+		.replace(/\s+/g, " ");
+}
+
+/**
+ * Checks if product matches keyword search across multiple fields.
+ */
+function matchesProductKeyword(product, keyword, categoryName) {
+	const searchValue = normalizeSearchText(keyword);
+
+	if (!searchValue) {
+		return true;
+	}
+
+	const searchableText = [
+		product.name,
+		product.sku,
+		product.description,
+		categoryName,
+	]
+		.map(normalizeSearchText)
+		.join(" ");
+
+	return searchableText.includes(searchValue);
+}
+
 const emptyCategoryForm = { id: "", name: "", description: "" };
 const emptyProductForm = {
 	id: "",
@@ -267,12 +305,31 @@ export default function ManagementPage() {
 	}, [products, categoryLookup]);
 
 	const filteredProductsWithCategoryName = useMemo(() => {
-		if (filters.stockState !== "out-of-stock") {
-			return productsWithCategoryName;
-		}
+		return productsWithCategoryName.filter((product) => {
+			// Filter by keyword
+			if (!matchesProductKeyword(product, filters.keyword, product.categoryName)) {
+				return false;
+			}
 
-		return productsWithCategoryName.filter(isOutOfStockProduct);
-	}, [filters.stockState, productsWithCategoryName]);
+			// Filter by category
+			if (
+				filters.categoryId &&
+				String(product.categoryId) !== String(filters.categoryId)
+			) {
+				return false;
+			}
+
+			// Filter by status
+			if (filters.status) {
+				const targetStatus = filters.status === "true";
+				if (Boolean(product.status) !== targetStatus) {
+					return false;
+				}
+			}
+
+			return true;
+		});
+	}, [filters, productsWithCategoryName]);
 
 	async function loadInitialData() {
 		setNotice("");
@@ -578,15 +635,15 @@ export default function ManagementPage() {
 		}
 	}
 
-	async function applyFilters(event) {
-		event.preventDefault();
-		await loadProducts(filters);
+	function updateFilter(name, value) {
+		setFilters((current) => ({
+			...current,
+			[name]: value,
+		}));
 	}
 
 	function clearFilters() {
-		const nextFilters = emptyFilters;
-		setFilters(nextFilters);
-		void loadProducts(nextFilters);
+		setFilters(emptyFilters);
 	}
 
 	return (
@@ -659,10 +716,6 @@ export default function ManagementPage() {
 										Bộ lọc sản phẩm
 									</h2>
 								</div>
-								<span className="text-base bg-emerald-200 text-emerald-600 px-3 border-emerald-300 py-1 border-2 rounded-2xl">
-									{filteredProductsWithCategoryName.length} / {products.length}{" "}
-									hàng
-								</span>
 							</div>
 
 							<div className="flex flex-wrap gap-2">
@@ -673,16 +726,12 @@ export default function ManagementPage() {
 							</div>
 
 							<form
-								onSubmit={applyFilters}
 								className="space-y-3 rounded-xl border border-[var(--border)] bg-[var(--social-bg)] p-4"
 							>
 								<input
 									value={filters.keyword}
 									onChange={(event) =>
-										setFilters((current) => ({
-											...current,
-											keyword: event.target.value,
-										}))
+										updateFilter("keyword", event.target.value)
 									}
 									placeholder="Tìm theo từ khóa"
 									className="h-10 w-full rounded-md border border-[var(--border)] bg-white px-3 text-sm text-[var(--text-h)] outline-none"
@@ -690,10 +739,7 @@ export default function ManagementPage() {
 								<select
 									value={filters.categoryId}
 									onChange={(event) =>
-										setFilters((current) => ({
-											...current,
-											categoryId: event.target.value,
-										}))
+										updateFilter("categoryId", event.target.value)
 									}
 									className="h-10 w-full rounded-md border border-[var(--border)] bg-white px-3 text-sm text-[var(--text-h)] outline-none"
 								>
@@ -707,10 +753,7 @@ export default function ManagementPage() {
 								<select
 									value={filters.status}
 									onChange={(event) =>
-										setFilters((current) => ({
-											...current,
-											status: event.target.value,
-										}))
+										updateFilter("status", event.target.value)
 									}
 									className="h-10 w-full rounded-md border border-green-500 bg-white px-3 text-sm text-green-800 outline-none"
 								>
@@ -718,28 +761,11 @@ export default function ManagementPage() {
 									<option value="true">Đang hoạt động</option>
 									<option value="false">Đã ẩn</option>
 								</select>
-								<select
-									value={filters.stockState}
-									onChange={(event) =>
-										setFilters((current) => ({
-											...current,
-											stockState: event.target.value,
-										}))
-									}
-									className="h-10 w-full rounded-md border border-green-500 bg-white px-3 text-sm text-green-800 outline-none"
-								>
-									<option value="">Tất cả tồn kho</option>
-									<option value="out-of-stock">Hết hàng / đã ẩn</option>
-								</select>
 								<div className="flex gap-2">
-									<Button className="flex gap-1 hover:bg-green-400" type="submit">
-										<FaCheck className="text-sm"/>
-										Áp dụng
-										</Button>
 									<Button
 										type="button"
 										variant="secondary"
-										className="hover:bg-gray-300 flex gap-1 items-center"
+										className="hover:bg-gray-300 flex gap-1 items-center flex-1"
 										onClick={clearFilters}
 									>
 										<IoMdRemoveCircleOutline className="-mb-0.5"></IoMdRemoveCircleOutline>
