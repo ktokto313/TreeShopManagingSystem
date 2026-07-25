@@ -1,11 +1,3 @@
-/*
- * Author: Hung Dao
- * Created Date: 2026-07-16
- * Name: NotificationTemplate.java
- * Description:
- * Last Change Author: Hung Dao
- * Last Change Date: 2026-07-16
- */
 package swp391.group6.model;
 
 import java.util.HashMap;
@@ -18,14 +10,14 @@ public class NotificationTemplate {
 
     static {
 
-        //ORDER
+        // ================= ORDER =================
         register("ORDER_PLACED_CUSTOMER",
-                 "Đặt hàng thành công",
-                 "Đơn hàng #%s của bạn đã được tạo thành công.");
+                "Đặt hàng thành công",
+                "Đơn hàng #%s của bạn đã được tạo thành công.");
 
         register("NEW_ORDER_MANAGER",
-                 "Đơn hàng mới",
-                 "Có đơn hàng mới #%s cần được xử lý.");
+                "Đơn hàng mới",
+                "Có đơn hàng mới #%s cần được xử lý.");
 
         register("ORDER_STATUS_UPDATE_CUSTOMER",
                 "Cập nhật trạng thái đơn hàng",
@@ -51,7 +43,7 @@ public class NotificationTemplate {
                 "Vấn đề khi giao hàng",
                 "Đơn hàng #%s đã gặp vấn đề trong lúc vận chuyển.");
 
-        //BLOG
+        // ================= BLOG =================
         register("BLOG_PENDING_APPROVAL_MANAGER",
                 "Bài viết chờ duyệt",
                 "\"%s\" bởi %s đang đợi duyệt.");
@@ -80,7 +72,7 @@ public class NotificationTemplate {
                 "Bài viết đã bị xóa",
                 "\"%s\" đã được xóa bởi quản lý.");
 
-        //TICKET
+        // ================= TICKET =================
         register("NEW_SUPPORT_REQUEST_AGENT",
                 "Yêu cầu hỗ trợ",
                 "Phiếu yêu cầu hỗ trợ \"%s\" tạo bởi %s.");
@@ -101,6 +93,32 @@ public class NotificationTemplate {
         register("WISHLIST_PRODUCT_BACK_IN_STOCK",
                 "Sản phẩm yêu thích đã có hàng",
                 "Sản phẩm \"%s\" trong danh sách yêu thích của bạn đã có hàng trở lại.");
+
+        // ================= RETURN (NEW) =================
+
+        register("RETURN_REQUEST_CREATED_MANAGER",
+                "Yêu cầu trả hàng mới",
+                "Có yêu cầu trả hàng #%s từ khách hàng.");
+
+        register("RETURN_REQUEST_APPROVED_CUSTOMER",
+                "Yêu cầu trả hàng được duyệt",
+                "Yêu cầu #%s đã được duyệt. Vui lòng gửi hàng về.");
+
+        register("RETURN_REQUEST_REJECTED_CUSTOMER",
+                "Yêu cầu bị từ chối",
+                "Yêu cầu #%s bị từ chối. Lý do: %s");
+
+        register("RETURN_MORE_INFO_CUSTOMER",
+                "Cần bổ sung thông tin",
+                "Yêu cầu #%s cần thêm thông tin. Vui lòng cập nhật.");
+
+        register("RETURN_REFUND_CUSTOMER",
+                "Hoàn tiền",
+                "Yêu cầu #%s đã được hoàn tiền.");
+
+        register("RETURN_ADDITIONAL_PAYMENT_CUSTOMER",
+                "Cần thanh toán thêm",
+                "Yêu cầu #%s cần thanh toán thêm %s.");
     }
 
     private static void register(String key, String subject, String bodyTemplate) {
@@ -111,7 +129,7 @@ public class NotificationTemplate {
     public static String subject(String key) {
         String subject = SUBJECTS.get(key);
         if (subject == null) {
-            throw new IllegalArgumentException("Không xác định: " + key);
+            throw new IllegalArgumentException("Không xác định template: " + key);
         }
         return subject;
     }
@@ -119,7 +137,7 @@ public class NotificationTemplate {
     public static String body(String key, Object... args) {
         String template = BODIES.get(key);
         if (template == null) {
-            throw new IllegalArgumentException("Không xác định: " + key);
+            throw new IllegalArgumentException("Không xác định template: " + key);
         }
         return String.format(template, args);
     }

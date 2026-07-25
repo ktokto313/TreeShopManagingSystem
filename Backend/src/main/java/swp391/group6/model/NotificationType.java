@@ -1,16 +1,8 @@
-/*
- * Author: Hung Dao
- * Created Date: 2026-07-16
- * Name: NotificationType.java
- * Description:
- * Last Change Author: Hung Dao
- * Last Change Date: 2026-07-16
- */
 package swp391.group6.model;
 
 public enum NotificationType {
 
-    //CUSTOMER
+    // CUSTOMER
     ORDER_CONFIRMATION,
     ORDER_STATUS_UPDATE,
     DELIVERY_COMPLETED,
@@ -18,17 +10,23 @@ public enum NotificationType {
     BLOG_STATUS_UPDATE,
     SUPPORT_TICKET_UPDATE,
     WISHLIST_PRODUCT_BACK_IN_STOCK,
+    RETURN_REQUEST_APPROVED,
+    RETURN_REQUEST_REJECTED,
+    RETURN_MORE_INFO_REQUIRED,
+    RETURN_REFUND_PROCESSED,
+    RETURN_ADDITIONAL_PAYMENT_REQUIRED,
 
-    //MANAGER
+    // MANAGER
     NEW_ORDER_ALERT,
     BLOG_PENDING_APPROVAL,
+    RETURN_REQUEST_CREATED,
 
-    //SHIPPER
+    // SHIPPER
     DELIVERY_ASSIGNMENT,
 
-    //SUPPORT
+    // SUPPORT
     NEW_SUPPORT_REQUEST,
 
-    //SYSTEM
+    // SYSTEM
     DELIVERY_EXCEPTION
 }
