@@ -12,8 +12,6 @@ public class TicketRequest {
     private String title;
     private String detail;
     private String priority;
-    private long creatorId;
-
     public String getTitle() {
         return title;
     }
@@ -37,12 +35,4 @@ public class TicketRequest {
     public void setPriority(String priority) {
         this.priority = priority;
     }
-
-    public long getCreatorId() {
-        return creatorId;
-    }
-
-    public void setCreatorId(long creatorId) {
-        this.creatorId = creatorId;
-    }
-}
+}
