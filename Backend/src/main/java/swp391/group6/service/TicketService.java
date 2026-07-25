@@ -81,10 +81,6 @@ public class TicketService {
         return ticket;
     }
 
-    // UC 12 & 16: Customer/Agent views tickets
-    public List<Ticket> getAuthorizedTickets(long userId) {
-        return new ArrayList<>(ticketRepository.findTicketsByCreator(userId));
-    }
 
     public Page<Ticket> getAuthorizedTicketsByEmail(String email, String search, String statusStr, String priorityStr, Pageable pageable) {
         User user = userRepository.findByEmail(email)

@@ -18,9 +18,9 @@ import swp391.group6.model.Review;
 import java.util.List;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    List<Review> findByOrderDetail_Product_Id(Long id);
+
     Page<Review> findByOrderDetail_Product_Id(Long id, Pageable pageable);
-    Page<Review> findByOrderDetail_Product_IdAndRating(Long id, Short rating, Pageable pageable);
+
     
     Page<Review> findByOrderDetail_Product_IdAndIsHiddenFalse(Long id, Pageable pageable);
     Page<Review> findByOrderDetail_Product_IdAndRatingAndIsHiddenFalse(Long id, Short rating, Pageable pageable);

@@ -22,12 +22,8 @@ import swp391.group6.model.Ticket;
 import swp391.group6.model.TicketState;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
-    List<Ticket> findByTicketCreator(long id);
-    List<Ticket> findByTicketStateNot(TicketState state);
-    List<Ticket> findByTicketState(TicketState state);
 
-    @Query("SELECT t FROM Ticket t WHERE t.ticketCreator.id = :userId")
-    List<Ticket> findTicketsByCreator(@Param("userId") long userId);
+    List<Ticket> findByTicketState(TicketState state);
 
     @Query("SELECT t FROM Ticket t WHERE (t.ticketCreator.id = :userId) " +
             "AND (:search IS NULL OR :search = '' OR LOWER(t.title) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(t.detail) LIKE LOWER(CONCAT('%', :search, '%'))) " +

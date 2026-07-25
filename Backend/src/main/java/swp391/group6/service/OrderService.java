@@ -244,9 +244,6 @@ public class OrderService {
         return reviewRepository.existsByOrderDetail_Order_IdAndOrderDetail_Product_Id(orderId, productId);
     }
 
-    public List<Review> getProductReviews(Long productId) {
-        return reviewRepository.findByOrderDetail_Product_Id(productId);
-    }
 
     public Page<Review> getProductReviews(Long productId, Short rating, Pageable pageable) {
         if (rating != null) {
