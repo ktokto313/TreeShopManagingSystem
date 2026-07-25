@@ -691,7 +691,26 @@ export default function ManagementPage() {
 				setNotice("Đã ẩn sản phẩm.");
 			} else {
 				// Product is inactive, activate it by updating with status = true
-				await updateProduct(product.id, { ...product, status: true });
+				// Only send required ProductRequest fields to avoid deserialization issues
+				// Parse images from API response (comes as JSON string) to array
+				const imageNames = parseImageList(product.images);
+				const payload = {
+					categoryId: product.categoryId,
+					name: product.name,
+					price: product.price,
+					stock: product.stock,
+					status: true,
+					sku: product.sku,
+					description: product.description,
+					content: product.content,
+					careGuide: product.careGuide,
+					sunlightLevel: product.sunlightLevel,
+					wateringFrequency: product.wateringFrequency,
+					difficulty: product.difficulty,
+					fengShuiElement: product.fengShuiElement,
+					images: imageNames.length ? imageNames : null,
+				};
+				await updateProduct(product.id, payload);
 				setNotice("Đã kích hoạt sản phẩm.");
 			}
 			if (String(productForm.id) === String(product.id)) {
