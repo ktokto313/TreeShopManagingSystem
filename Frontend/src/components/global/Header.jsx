@@ -29,6 +29,7 @@ const navItemsByRole = {
     { label: 'Đơn hàng', to: '/orders' },
     { label: 'Khiếu nại', to: '/tickets/' },
     { label: 'Blog', to: '/blogs' },
+    { label: 'Đổi trả', to: '/return-requests'},
   ],
   MANAGER: [
     { label: 'Trang chủ', to: '/' },
@@ -38,6 +39,7 @@ const navItemsByRole = {
     { label: 'Thống kê', to: '/statistic' },
     { label: 'Tài khoản', to: '/profile' },
     { label: 'Blog', to: '/blogs' },
+    { label: 'Yêu cầu đổi trả', to: '/return-requests/manage'},
   ],
   SUPPORT_AGENT: [
     { label: 'Trang chủ', to: '/' },

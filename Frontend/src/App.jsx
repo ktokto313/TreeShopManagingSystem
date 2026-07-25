@@ -31,7 +31,9 @@ import ProfitDashboard from "./features/statistic/ProfitDashboard";
 import PolicyPage from "./pages/PolicyPage";
 import PolicyDetailsPage from "./pages/PolicyDetailsPage";
 import CreatePolicyPage from "./pages/CreatePolicyPage";
-
+import CustomerReturnRequestPage from "./features/return&exchange/pages/CustomerReturnRequestPage";
+import ManagerReturnRequestPage from "./features/return&exchange/pages/ManagerReturnRequestPage";
+import ManagerReturnReportPage from "./features/return&exchange/pages/ManagerReturnReportPage";
 function ProtectedRoute({ element, roles = [] }) {
 	const { user, isLoading } = useContext(AuthContext);
 	if (isLoading) return <LoadingScreen></LoadingScreen>;
@@ -182,6 +184,34 @@ function AppRoutes() {
 					<ProtectedRoute
 						roles={["MANAGER", "SYSTEM_ADMIN"]}
 						element={<ProfitDashboard />}
+					/>
+				}
+			/>
+			{/* Return and Exchange */}
+			<Route
+				path="/return-requests"
+				element={
+					<ProtectedRoute
+						roles={["CUSTOMER"]}
+						element={<CustomerReturnRequestPage />}
+					/>
+				}
+			/>
+			<Route
+				path="/return-requests/manage"
+				element={
+					<ProtectedRoute
+						roles={["MANAGER"]}
+						element={<ManagerReturnRequestPage />}
+					/>
+				}
+			/>
+			<Route
+				path="/return-requests/report"
+				element={
+					<ProtectedRoute
+						roles={["MANAGER"]}
+						element={<ManagerReturnReportPage />}
 					/>
 				}
 			/>
