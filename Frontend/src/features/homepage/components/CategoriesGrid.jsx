@@ -10,9 +10,9 @@ const categories = [
         to: '/catalog/category/3', // Cây để bàn
     },
     {
-        title: 'Cây Lọc Không Khí',
+        title: 'Cây Trong Nhà',
         desc: 'Mang lại bầu không khí trong lành',
-        image: 'https://images.unsplash.com/photo-1545241047-6083a36a1c1c?auto=format&fit=crop&q=80&w=800',
+        image: 'https://spacet-release.s3.ap-southeast-1.amazonaws.com/img/blog/2023-10-10/cay-lan-chi-phu-hop-cho-phong-khach-phong-tam-ban-cong-cua-so-65250612f0bcd816ecc993c0.webp',
         to: '/catalog/category/1', // Cây trong nhà
     },
     {
