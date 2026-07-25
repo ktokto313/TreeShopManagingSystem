@@ -120,19 +120,26 @@ public class ProductImageStorageService {
 
     /**
      * Sanitizes the filename to prevent security issues.
-     * Removes special characters and replaces with hyphens.
+     * Removes special characters and spaces, converts to lowercase for consistency.
      * Returns a safe default if the sanitized name is empty.
      * 
      * @param originalName the original filename from the uploaded file
-     * @return a sanitized filename safe for file storage
+     * @return a sanitized filename safe for file storage (lowercase, no spaces/special chars)
      */
     private String sanitizeFileName(String originalName) {
         String fileName = originalName == null ? "" : Path.of(originalName).getFileName().toString();
         
-        // Replace special characters with hyphens
-        String sanitized = fileName.replaceAll("[^A-Za-z0-9._-]", "-");
+        // Convert to lowercase for consistency
+        fileName = fileName.toLowerCase(Locale.ROOT);
+        
+        // Replace spaces and special characters with hyphens
+        String sanitized = fileName.replaceAll("[^a-z0-9._-]", "-");
+        
         // Collapse multiple consecutive hyphens into one
         sanitized = sanitized.replaceAll("-+", "-");
+        
+        // Remove leading/trailing hyphens
+        sanitized = sanitized.replaceAll("^-+|-+$", "");
 
         // Use default name if result is empty or invalid
         if (sanitized.isBlank() || sanitized.equals(".") || sanitized.equals("..")) {
