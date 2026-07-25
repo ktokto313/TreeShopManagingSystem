@@ -102,8 +102,8 @@ export const useProductReview = (productId, onSuccess) => {
 			return false;
 		}
 
-		if (!rating || !comment) {
-			setReviewValidationError("Vui lòng chọn số sao và nhập bình luận để gửi đánh giá.");
+		if (!rating) {
+			setReviewValidationError("Vui lòng chọn số sao để gửi đánh giá.");
 			return false;
 		}
 

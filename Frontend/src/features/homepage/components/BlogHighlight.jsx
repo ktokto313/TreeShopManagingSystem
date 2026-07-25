@@ -7,7 +7,7 @@ export default function BlogHighlight() {
     const { blogs, loading, error } = useBlogs();
     const { ref, isVisible } = useScrollReveal({ threshold: 0.1 });
 
-    const recentBlogs = blogs?.slice(0, 3) || [];
+    const recentBlogs = blogs?.slice(0, 4) || [];
 
     return (
         <section className="py-16 bg-green-200/30 overflow-hidden" ref={ref}>
@@ -36,7 +36,7 @@ export default function BlogHighlight() {
                             </Link>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                             {recentBlogs.map((blog, idx) => (
                                 <Link 
                                     key={blog.id || idx} 
