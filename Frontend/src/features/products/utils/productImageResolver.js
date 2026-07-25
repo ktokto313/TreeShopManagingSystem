@@ -22,7 +22,7 @@ function normalizeSource(source) {
 
 function toUploadedImageUrl(source) {
   const fileName = source.split('/').pop()
-  return fileName ? `/product-images/${encodeURIComponent(fileName)}` : ''
+  return fileName ? `/api/products/images/${encodeURIComponent(fileName)}` : ''
 }
 
 export function resolveProductImageSource(source) {

@@ -10,7 +10,10 @@ package swp391.group6.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,6 +36,7 @@ import swp391.group6.service.ProductImageStorageService;
 import swp391.group6.service.ProductService;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 
@@ -163,6 +167,66 @@ public class ProductController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Serves product image files from disk.
+     * Maps requests from /api/products/images/{filename} to stored image files.
+     * 
+     * @param filename the name of the image file to serve
+     * @return the image file with appropriate content type, or 404 if not found
+     */
+    @GetMapping("/images/{filename}")
+    public ResponseEntity<Resource> serveImage(@PathVariable String filename) {
+        try {
+            // Prevent directory traversal attacks
+            if (filename.contains("..") || filename.contains("/")) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            java.nio.file.Path imagePath = productImageStorageService.getImageDirectory().resolve(filename).normalize();
+            
+            // Verify the resolved path is within the intended directory
+            if (!imagePath.startsWith(productImageStorageService.getImageDirectory())) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            if (!java.nio.file.Files.exists(imagePath)) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Resource resource = new FileSystemResource(imagePath);
+            
+            // Determine media type based on file extension
+            MediaType mediaType = determineMediaType(filename);
+            
+            return ResponseEntity.ok()
+                    .contentType(mediaType)
+                    .body(resource);
+        } catch (Exception e) {
+            log.error("Error serving image: {}", filename, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Determines the appropriate media type based on file extension.
+     * 
+     * @param filename the image filename
+     * @return the MediaType for the file
+     */
+    private MediaType determineMediaType(String filename) {
+        String lowerFilename = filename.toLowerCase();
+        if (lowerFilename.endsWith(".png")) {
+            return MediaType.IMAGE_PNG;
+        } else if (lowerFilename.endsWith(".jpg") || lowerFilename.endsWith(".jpeg")) {
+            return MediaType.IMAGE_JPEG;
+        } else if (lowerFilename.endsWith(".gif")) {
+            return MediaType.IMAGE_GIF;
+        } else if (lowerFilename.endsWith(".webp")) {
+            return new MediaType("image", "webp");
+        }
+        return MediaType.IMAGE_PNG; // Default to PNG
     }
 
 }
