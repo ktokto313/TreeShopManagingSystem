@@ -47,8 +47,8 @@ public class TicketService {
 
     // UC 16: Customer creates a ticket
     public Ticket createTicket(TicketRequest request, String userEmail) {
-        if (request.getDetail() == null || request.getDetail().isBlank()) {
-            return null;
+        if (request.getDetail() == null || request.getDetail().isBlank() || request.getDetail().length() < 20) {
+            throw new RuntimeException("Ticket detail must contain a minimum of 20 characters.");
         }
 
         User creator = userRepository.findByEmail(userEmail)
