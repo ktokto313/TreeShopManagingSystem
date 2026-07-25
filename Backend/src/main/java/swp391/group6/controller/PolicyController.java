@@ -52,15 +52,11 @@ public class PolicyController {
     @GetMapping("/{id}")
     public ResponseEntity<Policy> getPolicyById(@PathVariable Long id, HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);
-        boolean isAdmin = currentUser != null && 
+        boolean isManagerOrAdmin = currentUser != null && 
                           ("MANAGER".equals(currentUser.getRole()) || "SYSTEM_ADMIN".equals(currentUser.getRole()));
 
-        Policy policy = policyService.getPolicyById(id);
+        Policy policy = policyService.getPolicyById(id, isManagerOrAdmin);
         
-        if (!isAdmin && policy.getStatus() != PolicyStatus.PUBLISHED) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
         return ResponseEntity.ok(policy);
     }
 

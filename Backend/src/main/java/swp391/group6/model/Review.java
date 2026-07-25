@@ -49,6 +49,9 @@ public class Review {
     @Column(name = "is_hidden", nullable = false)
     private boolean isHidden = false;
 
+    @Column(name = "product_id", insertable = false, updatable = false)
+    private Long productId;
+
     public long getId() {
         return id;
     }

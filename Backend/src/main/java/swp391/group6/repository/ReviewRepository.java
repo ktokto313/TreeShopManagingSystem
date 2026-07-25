@@ -19,11 +19,11 @@ import java.util.List;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-    Page<Review> findByOrderDetail_Product_Id(Long id, Pageable pageable);
+    Page<Review> findByProductId(Long id, Pageable pageable);
 
     
-    Page<Review> findByOrderDetail_Product_IdAndIsHiddenFalse(Long id, Pageable pageable);
-    Page<Review> findByOrderDetail_Product_IdAndRatingAndIsHiddenFalse(Long id, Short rating, Pageable pageable);
+    Page<Review> findByProductIdAndIsHiddenFalse(Long id, Pageable pageable);
+    Page<Review> findByProductIdAndRatingAndIsHiddenFalse(Long id, Short rating, Pageable pageable);
     
     boolean existsByOrderDetail_Order_IdAndOrderDetail_Product_Id(Long orderId, Long productId);
     List<Review> findByIsCuratedTrue();

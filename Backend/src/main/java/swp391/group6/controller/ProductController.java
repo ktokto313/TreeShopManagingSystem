@@ -88,9 +88,9 @@ public class ProductController {
      * 
      * @return HomepageFeaturedResponse containing featured product lists
      */
-    @GetMapping("/homepage-featured")
-    public ResponseEntity<HomepageFeaturedResponse> getHomepageFeaturedProducts() {
-        HomepageFeaturedResponse response = productService.getHomepageFeaturedProducts();
+    @GetMapping("/best-sellers")
+    public ResponseEntity<HomepageFeaturedResponse> getBestSellers() {
+        HomepageFeaturedResponse response = productService.getBestSellers();
         return ResponseEntity.ok(response);
     }
 

@@ -37,9 +37,13 @@ public class PolicyService {
         }
     }
 
-    public Policy getPolicyById(Long id) {
-        return policyRepository.findById(id)
+    public Policy getPolicyById(Long id, boolean canViewHidden) {
+        Policy policy = policyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Policy not found"));
+        if (!canViewHidden && policy.getStatus() != PolicyStatus.PUBLISHED) {
+            throw new RuntimeException("Policy is not available");
+        }
+        return policy;
     }
 
     public Policy createPolicy(Policy policy) {
@@ -58,7 +62,7 @@ public class PolicyService {
     }
 
     public Policy updatePolicy(Long id, Policy policyDetails) {
-        Policy policy = getPolicyById(id);
+        Policy policy = getPolicyById(id, true);
 
         if (policyDetails.getTitle() != null) {
             if (policyDetails.getTitle().trim().isEmpty()) {

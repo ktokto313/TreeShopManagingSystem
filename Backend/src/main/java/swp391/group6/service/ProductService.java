@@ -100,7 +100,7 @@ public class ProductService {
      * 
      * @return HomepageFeaturedResponse containing up to 4 products with title
      */
-    public HomepageFeaturedResponse getHomepageFeaturedProducts() {
+    public HomepageFeaturedResponse getBestSellers() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startOfMonth = now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime endOfMonth = now.withDayOfMonth(now.getMonth().length(now.toLocalDate().isLeapYear()))

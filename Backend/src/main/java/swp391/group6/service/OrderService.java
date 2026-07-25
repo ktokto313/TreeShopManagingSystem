@@ -247,15 +247,15 @@ public class OrderService {
 
     public Page<Review> getProductReviews(Long productId, Short rating, Pageable pageable) {
         if (rating != null) {
-            return reviewRepository.findByOrderDetail_Product_IdAndRatingAndIsHiddenFalse(productId, rating, pageable);
+            return reviewRepository.findByProductIdAndRatingAndIsHiddenFalse(productId, rating, pageable);
         }
 
-        return reviewRepository.findByOrderDetail_Product_IdAndIsHiddenFalse(productId, pageable);
+        return reviewRepository.findByProductIdAndIsHiddenFalse(productId, pageable);
     }
     
     @PreAuthorize("hasAnyRole('MANAGER')")
     public Page<Review> getAllProductReviewsForManager(Long productId, Pageable pageable) {
-        return reviewRepository.findByOrderDetail_Product_Id(productId, pageable);
+        return reviewRepository.findByProductId(productId, pageable);
     }
     
     @PreAuthorize("hasAnyRole('MANAGER')")
