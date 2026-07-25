@@ -267,6 +267,8 @@ export default function ManagementPage() {
 	const [productForm, setProductForm] = useState(emptyProductForm);
 	const [categoryErrors, setCategoryErrors] = useState({});
 	const [productErrors, setProductErrors] = useState({});
+	const [categoryNameCheckTimeout, setCategoryNameCheckTimeout] = useState(null);
+	const [productSkuCheckTimeout, setProductSkuCheckTimeout] = useState(null);
 	const [filters, setFilters] = useState(emptyFilters);
 	const [activeTab, setActiveTab] = useState("categories");
 	const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -398,6 +400,36 @@ export default function ManagementPage() {
 		setProductErrors({});
 	}
 
+	// Async validation for duplicate category name
+	function checkCategoryNameExists(name, excludeId = null) {
+		return categories.some((cat) => {
+			// Case-insensitive comparison
+			if (cat.name.toLowerCase() !== name.toLowerCase()) {
+				return false;
+			}
+			// If editing, exclude the current category from check
+			if (excludeId && cat.id === excludeId) {
+				return false;
+			}
+			return true;
+		});
+	}
+
+	// Async validation for duplicate product SKU
+	function checkProductSkuExists(sku, excludeId = null) {
+		return products.some((prod) => {
+			// Case-insensitive comparison
+			if (prod.sku.toLowerCase() !== sku.toLowerCase()) {
+				return false;
+			}
+			// If editing, exclude the current product from check
+			if (excludeId && prod.id === excludeId) {
+				return false;
+			}
+			return true;
+		});
+	}
+
 	function updateCategoryFormField(name, value) {
 		setCategoryForm((current) => ({
 			...current,
@@ -408,6 +440,24 @@ export default function ManagementPage() {
 			delete remainingErrors[name];
 			return remainingErrors;
 		});
+
+		// Debounced duplicate name check when updating name field
+		if (name === "name" && value.trim()) {
+			if (categoryNameCheckTimeout) {
+				clearTimeout(categoryNameCheckTimeout);
+			}
+
+			const timeout = setTimeout(() => {
+				if (checkCategoryNameExists(value.trim(), categoryForm.id)) {
+					setCategoryErrors((current) => ({
+						...current,
+						name: "Danh mục này đã tồn tại.",
+					}));
+				}
+			}, 300); // 300ms debounce
+
+			setCategoryNameCheckTimeout(timeout);
+		}
 	}
 
 	function updateProductFormField(name, value) {
@@ -423,6 +473,24 @@ export default function ManagementPage() {
 			}
 			return nextErrors;
 		});
+
+		// Debounced duplicate SKU check when updating SKU field
+		if (name === "sku" && value.trim()) {
+			if (productSkuCheckTimeout) {
+				clearTimeout(productSkuCheckTimeout);
+			}
+
+			const timeout = setTimeout(() => {
+				if (checkProductSkuExists(value.trim(), productForm.id)) {
+					setProductErrors((current) => ({
+						...current,
+						sku: "Mã SKU này đã tồn tại.",
+					}));
+				}
+			}, 300); // 300ms debounce
+
+			setProductSkuCheckTimeout(timeout);
+		}
 	}
 
 	function openCreateCategoryModal() {
