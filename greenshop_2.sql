@@ -2396,3 +2396,52 @@ BEGIN
     END LOOP;
 END $$;
 
+-- Un-curate all reviews in the database
+UPDATE reviews SET is_curated = FALSE;
+
+-- Populate tickets so that khach1 has a lot of tickets sent
+INSERT INTO tickets (creator_id, assignee_id, title, detail, state, priority, time_created)
+VALUES 
+((SELECT id FROM users WHERE email = 'khach1@gmail.com'), 4, 'Hỏi về thời gian giao hàng đơn 9999', 'Tại sao đơn hàng 9999 của tôi vẫn chưa chuyển sang trạng thái Delivering?', 'PROCESSING', 'HIGH', NOW() - INTERVAL '3 hours'),
+((SELECT id FROM users WHERE email = 'khach1@gmail.com'), 4, 'Yêu cầu hủy đơn hàng', 'Tôi muốn hủy đơn hàng vừa đặt nhầm.', 'RESOLVED', 'MEDIUM', NOW() - INTERVAL '1 day'),
+((SELECT id FROM users WHERE email = 'khach1@gmail.com'), NULL, 'Cây bị héo úa sau 2 ngày', 'Cây kim tiền tôi mua được 2 ngày thì lá bắt đầu vàng úa.', 'CREATED', 'CRITICAL', NOW() - INTERVAL '2 days'),
+((SELECT id FROM users WHERE email = 'khach1@gmail.com'), 4, 'Lỗi thanh toán qua VNPay', 'Giao dịch báo thành công nhưng đơn hàng vẫn hiển thị Chưa thanh toán.', 'DONE', 'HIGH', NOW() - INTERVAL '4 days'),
+((SELECT id FROM users WHERE email = 'khach1@gmail.com'), NULL, 'Tư vấn chọn chậu cây ngoài trời', 'Tôi muốn mua chậu trồng cây ngoài ban công hướng Tây.', 'CREATED', 'LOW', NOW() - INTERVAL '5 days'),
+((SELECT id FROM users WHERE email = 'khach1@gmail.com'), 4, 'Hỏi về chính sách tích điểm', 'Tôi mua đơn hàng 1 triệu nhưng chưa thấy điểm tích lũy thay đổi.', 'DONE', 'LOW', NOW() - INTERVAL '6 days'),
+((SELECT id FROM users WHERE email = 'khach1@gmail.com'), NULL, 'Cây không đúng kích thước', 'Chậu lưỡi hổ mini thực tế bé hơn nhiều so với mô tả.', 'CREATED', 'MEDIUM', NOW() - INTERVAL '7 days'),
+((SELECT id FROM users WHERE email = 'khach1@gmail.com'), 4, 'Yêu cầu xuất hóa đơn VAT', 'Công ty tôi cần xuất hóa đơn cho đơn hàng mua cây văn phòng.', 'RESOLVED', 'MEDIUM', NOW() - INTERVAL '8 days'),
+((SELECT id FROM users WHERE email = 'khach1@gmail.com'), 4, 'Cây bị gãy cành khi nhận', 'Shipper giao hàng làm gãy cành Monstera.', 'DONE', 'HIGH', NOW() - INTERVAL '10 days'),
+((SELECT id FROM users WHERE email = 'khach1@gmail.com'), 4, 'Chất lượng đất trồng không tốt', 'Đất trồng cây có xơ dừa bị mốc.', 'DONE', 'LOW', NOW() - INTERVAL '12 days'),
+((SELECT id FROM users WHERE email = 'khach1@gmail.com'), NULL, 'Không áp dụng được mã giảm giá', 'Mã GREENSHOOT20 báo không hợp lệ dù tôi mua đơn đầu tiên.', 'CREATED', 'MEDIUM', NOW() - INTERVAL '13 days'),
+((SELECT id FROM users WHERE email = 'khach1@gmail.com'), 4, 'Hỏi về dịch vụ chăm sóc cây tại nhà', 'Vườn nhà tôi có nhiều cây bị sâu bệnh, shop có dịch vụ phun thuốc không?', 'PROCESSING', 'MEDIUM', NOW() - INTERVAL '14 days'),
+((SELECT id FROM users WHERE email = 'khach1@gmail.com'), 4, 'Yêu cầu hoàn tiền', 'Đơn hàng đổi trả đã hoàn thành 5 ngày nhưng chưa nhận được tiền hoàn.', 'PROCESSING', 'HIGH', NOW() - INTERVAL '15 days'),
+((SELECT id FROM users WHERE email = 'khach1@gmail.com'), 4, 'Tư vấn trồng cây phong thủy cho tuổi Thìn', 'Tôi sinh năm 1988 muốn tìm cây đặt bàn làm việc.', 'DONE', 'LOW', NOW() - INTERVAL '16 days'),
+((SELECT id FROM users WHERE email = 'khach1@gmail.com'), NULL, 'Giao thiếu chậu sứ đi kèm', 'Đơn hàng chỉ có cây và bầu đất, không thấy chậu sứ đâu.', 'CREATED', 'HIGH', NOW() - INTERVAL '18 days');
+
+-- Make sure one of khach1's order has a lot of products inside, named order id 9999
+INSERT INTO orders (id, customer_id, shipper_id, shipping_address, shipping_fee, discount, status, created_at, delivery_date)
+VALUES (9999, (SELECT id FROM users WHERE email = 'khach1@gmail.com'), 3, '123 Nguyễn Trãi, Quận Thanh Xuân, Hà Nội', 30000, 0, 'RECEIVED', NOW() - INTERVAL '10 days', NOW() - INTERVAL '9 days');
+
+-- Update orders primary key sequence
+SELECT setval('orders_id_seq', (SELECT MAX(id) FROM orders));
+
+-- Populate order details for order 9999 with 15 products
+INSERT INTO order_detail (order_id, product_id, quantity, price_paid)
+VALUES 
+(9999, 1, 1, 85000),   -- Trầu bà xanh
+(9999, 2, 2, 95000),   -- Lưỡi hổ nhỏ
+(9999, 3, 1, 120000),  -- Kim tiền
+(9999, 5, 1, 75000),   -- Dây leo pothos
+(9999, 6, 1, 250000),  -- Monstera nhỏ
+(9999, 10, 2, 120000), -- Lan ý
+(9999, 12, 1, 45000),  -- Xương rồng tai thỏ
+(9999, 14, 1, 180000), -- Hồng môn đỏ
+(9999, 25, 2, 85000),  -- Hoa giấy
+(9999, 36, 1, 85000),  -- Hương thảo
+(9999, 41, 3, 35000),  -- Sen đá thạch ngọc
+(9999, 47, 1, 180000), -- Kim ngân bàn
+(9999, 62, 2, 55000),  -- Sen đá kim cương
+(9999, 75, 1, 180000), -- Xương rồng gỗ nhỏ
+(9999, 99, 4, 35000);  -- Chậu sứ trắng 15cm
+
+
