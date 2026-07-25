@@ -82,7 +82,7 @@ public class ReviewController {
     }
 
     @PutMapping("/{reviewId}/curate")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<Void> toggleReviewCurated(
             @PathVariable Long reviewId) {
         if (orderService.toggleReviewCurated(reviewId)) {
@@ -92,7 +92,7 @@ public class ReviewController {
     }
 
     @PutMapping("/{reviewId}/hide")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<Void> toggleReviewHidden(
             @PathVariable Long reviewId) {
         if (orderService.toggleReviewHidden(reviewId)) {
