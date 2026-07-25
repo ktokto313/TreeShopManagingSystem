@@ -96,6 +96,11 @@ public class NotificationTemplate {
         register("TICKET_REOPENED_AGENT",
                 "Phiếu yêu cầu được mở lại",
                 "Khách hàng yêu cầu xem xét thêm cho phiếu yêu cầu hỗ trợ \"%s\".");
+
+        //WISHLIST
+        register("WISHLIST_PRODUCT_BACK_IN_STOCK",
+                "Sản phẩm yêu thích đã có hàng",
+                "Sản phẩm \"%s\" trong danh sách yêu thích của bạn đã có hàng trở lại.");
     }
 
     private static void register(String key, String subject, String bodyTemplate) {

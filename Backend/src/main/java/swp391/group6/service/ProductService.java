@@ -41,16 +41,19 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductDetailRepository productDetailRepository;
     private final ReviewRepository reviewRepository;
-    private final UserRepository userRepository; // 1. Add this!
+    private final UserRepository userRepository;
     private final OrderRepository orderRepository;
+    private final NotificationService notificationService;
+    private final WishlistItemRepository wishlistItemRepository;
 
-    // 2. Add UserRepository to your constructor
     public ProductService(ProductRepository productRepository,
                           CategoryRepository categoryRepository,
                           ProductDetailRepository productDetailRepository,
                           ReviewRepository reviewRepository,
                           UserRepository userRepository,
-                          OrderRepository orderRepository
+                          OrderRepository orderRepository,
+                          NotificationService notificationService,
+                          WishlistItemRepository wishlistItemRepository
     ) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
@@ -58,6 +61,8 @@ public class ProductService {
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.orderRepository = orderRepository;
+        this.notificationService = notificationService;
+        this.wishlistItemRepository = wishlistItemRepository;
     }
 
     /**
@@ -175,9 +180,18 @@ public class ProductService {
         }
 
         Product product = existing.get();
+        int oldStock = product.getStock();
+        
         applyRequest(product, request, name, sku, price);
         product.setId(id);
-        return Optional.of(toResponse(productRepository.save(product)));
+        Product savedProduct = productRepository.save(product);
+        
+        // Notify customers if product is back in stock (0 -> >0)
+        if (oldStock == 0 && savedProduct.getStock() > 0) {
+            notifyWishlistCustomersProductBackInStock(savedProduct);
+        }
+        
+        return Optional.of(toResponse(savedProduct));
     }
 
     /**
@@ -387,6 +401,33 @@ public class ProductService {
                 && (wateringFrequency == null || wateringFrequency.length() <= MAX_SHORT_TEXT_LENGTH)
                 && (difficulty == null || difficulty.length() <= MAX_SHORT_TEXT_LENGTH)
                 && (fengShuiElement == null || fengShuiElement.length() <= MAX_SHORT_TEXT_LENGTH);
+    }
+
+    /**
+     * Notifies all customers with this product in their wishlist when it comes back in stock.
+     * Sends notification only when stock transitions from 0 to >0.
+     * 
+     * @param product the product that is now back in stock
+     */
+    private void notifyWishlistCustomersProductBackInStock(Product product) {
+        try {
+            List<WishlistItem> wishlistItems = wishlistItemRepository.findByProduct_Id(product.getId());
+            
+            for (WishlistItem item : wishlistItems) {
+                User customer = item.getCustomer();
+                if (customer != null && customer.getEmail() != null) {
+                    notificationService.notifyUserByTemplate(
+                        customer.getId(),
+                        NotificationType.WISHLIST_PRODUCT_BACK_IN_STOCK,
+                        "WISHLIST_PRODUCT_BACK_IN_STOCK",
+                        product.getName()
+                    );
+                }
+            }
+        } catch (Exception e) {
+            // Log error but don't fail the product update if notification fails
+            System.err.println("Failed to send wishlist notifications for product " + product.getId() + ": " + e.getMessage());
+        }
     }
 
 }
