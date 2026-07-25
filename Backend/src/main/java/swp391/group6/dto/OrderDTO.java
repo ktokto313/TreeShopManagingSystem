@@ -11,8 +11,10 @@ public class OrderDTO {
 
     private long id;
     private String customerName;
+    private String customerPhone;
     private Long shipperId;
     private String shipperName;
+    private String shipperPhone;
     private String shippingAddress;
     private BigDecimal shippingFee;
     private BigDecimal discount;
@@ -25,8 +27,10 @@ public class OrderDTO {
     public OrderDTO(Order order) {
         this.id = order.getId();
         this.customerName = order.getUser() != null ? order.getUser().getFullName() : null;
+        this.customerPhone = order.getUser() != null ? order.getUser().getPhone() : null;
         this.shipperId = order.getShipper() != null ? order.getShipper().getId() : null;
         this.shipperName = order.getShipper() != null ? order.getShipper().getFullName() : null;
+        this.shipperPhone = order.getShipper() != null ? order.getShipper().getPhone() : null;
         this.shippingAddress = order.getShippingAddress();
         this.shippingFee = order.getShippingFee();
         this.discount = order.getDiscount();
@@ -40,16 +44,29 @@ public class OrderDTO {
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
 
+    public String getCustomerPhone() {
+        return customerPhone;
+    }
+    public void setCustomerPhone(String customerPhoneNumber) {
+        this.customerPhone = customerPhoneNumber;
+    }
+
     public Long getShipperId() {
         return shipperId;
     }
-
     public void setShipperId(long shipperId) {
         this.shipperId = shipperId;
     }
 
     public String getShipperName() { return shipperName; }
     public void setShipperName(String shipperName) { this.shipperName = shipperName; }
+
+    public String getShipperPhone() {
+        return shipperPhone;
+    }
+    public void setShipperPhone(String shipperPhone) {
+        this.shipperPhone = shipperPhone;
+    }
 
     public String getShippingAddress() { return shippingAddress; }
     public void setShippingAddress(String shippingAddress) { this.shippingAddress = shippingAddress; }

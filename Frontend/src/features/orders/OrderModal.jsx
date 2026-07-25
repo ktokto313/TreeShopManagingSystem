@@ -151,13 +151,34 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
             </div>
           </div>
 
-          {/* Shipping Address */}
+          {/* Receiver Information */}
+          <h4 className="text-xs font-bold text-black/60 uppercase tracking-wider">Thông tin khách hàng</h4>
           <div className="p-3 rounded-lg bg-bg-base border border-border/55">
-            <h4 className="text-xs font-bold text-black/60 uppercase tracking-wider mb-1.5">Địa chỉ giao hàng</h4>
+            <p className="text-xs text-black/80 leading-relaxed">
+              {selectedOrder.customerName || 'Không có tên khách hàng.'}
+            </p>
+            <p className="text-xs text-black/80 leading-relaxed">
+              {selectedOrder.customerPhone || 'Không có số điện thoại khách hàng.'}
+            </p>
             <p className="text-xs text-black/80 leading-relaxed">
               {selectedOrder.shippingAddress || 'Không có địa chỉ giao hàng.'}
             </p>
           </div>
+          
+          {/* Shipper Information */}
+          {!!selectedOrder.shipperId && (
+          <>
+            <h4 className="text-xs font-bold text-black/60 uppercase tracking-wider">Thông tin shipper</h4>
+            <div className="p-3 rounded-lg bg-bg-base border border-border/55">
+              <p className="text-xs text-black/80 leading-relaxed">
+                {selectedOrder.shipperName || 'Không có tên shipper.'}
+              </p>
+              <p className="text-xs text-black/80 leading-relaxed">
+                {selectedOrder.shipperPhone || 'Không có số điện thoại shipper.'}
+              </p>
+            </div>
+          </>
+          )}
 
           {/* Pricing Summary */}
           <div className="space-y-1.5 border-t border-border/60 pt-3 text-sm text-black/75">
