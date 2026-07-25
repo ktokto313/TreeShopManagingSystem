@@ -17,7 +17,10 @@ import org.springframework.web.bind.annotation.*;
 import swp391.group6.model.Policy;
 import swp391.group6.model.PolicyStatus;
 import swp391.group6.service.PolicyService;
-
+import jakarta.servlet.http.HttpServletRequest;
+import swp391.group6.dto.LoginResponse;
+import swp391.group6.util.JWTUtil;
+import org.springframework.http.HttpStatus;
 @RestController
 @RequestMapping("/api/policy")
 public class PolicyController {
@@ -31,14 +34,34 @@ public class PolicyController {
     public ResponseEntity<Page<Policy>> getAllPolicy(
             @RequestParam(name = "title", required = false) String title,
             @RequestParam(name = "status", required = false) PolicyStatus status,
-            @PageableDefault(size = 6, sort = "createdAt") Pageable pageable) {
+            @PageableDefault(size = 6, sort = "createdAt") Pageable pageable,
+            HttpServletRequest request) {
+            
+        LoginResponse currentUser = JWTUtil.getUser(request);
+        boolean isAdmin = currentUser != null && 
+                          ("MANAGER".equals(currentUser.getRole()) || "SYSTEM_ADMIN".equals(currentUser.getRole()));
+
+        if (!isAdmin) {
+            status = PolicyStatus.PUBLISHED;
+        }
+
         Page<Policy> policies = policyService.getAllPolicy(title, status, pageable);
         return ResponseEntity.ok(policies);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Policy> getPolicyById(@PathVariable Long id) {
-        return ResponseEntity.ok(policyService.getPolicyById(id));
+    public ResponseEntity<Policy> getPolicyById(@PathVariable Long id, HttpServletRequest request) {
+        LoginResponse currentUser = JWTUtil.getUser(request);
+        boolean isAdmin = currentUser != null && 
+                          ("MANAGER".equals(currentUser.getRole()) || "SYSTEM_ADMIN".equals(currentUser.getRole()));
+
+        Policy policy = policyService.getPolicyById(id);
+        
+        if (!isAdmin && policy.getStatus() != PolicyStatus.PUBLISHED) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        return ResponseEntity.ok(policy);
     }
 
     @PostMapping
