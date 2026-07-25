@@ -2,9 +2,6 @@ import { useState } from 'react';
 import { Container } from '../../../components/global/Container';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { FiChevronDown } from 'react-icons/fi';
-import { Form } from '../../../components/ui/Form'
-import { Input } from '../../../components/ui/Input';
-import { Button } from '../../../components/ui/Button';
 
 const faqs = [
     {
@@ -24,13 +21,6 @@ const faqs = [
 export default function NewsletterFAQ() {
     const { ref, isVisible } = useScrollReveal({ threshold: 0.1 });
     const [openIdx, setOpenIdx] = useState(null);
-    const [subscribed, setSubscribed] = useState(false);
-
-    const handleSubscribe = (e) => {
-        e.preventDefault();
-        setSubscribed(true);
-        setTimeout(() => setSubscribed(false), 5000);
-    };
 
     return (
         <section className="py-20" ref={ref}>
@@ -72,38 +62,20 @@ export default function NewsletterFAQ() {
                         </div>
                     </div>
 
-                    {/* Newsletter Section */}
+                    {/* Green Mission Section */}
                     <div 
-                        className={`bg-green-800 rounded-3xl p-8 sm:p-12 text-center flex flex-col justify-center transition-all duration-700 transform ${
+                        className={`bg-green-800 rounded-3xl p-8 sm:p-12 text-left flex flex-col justify-center transition-all duration-700 transform ${
                             isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'
                         }`}
                         style={{ backgroundImage: 'linear-gradient(to bottom right, #283c1d, #3f6537)' }}
                     >
-                        <h2 className="text-3xl font-bold text-white mb-4">Đăng Ký Bản Tin Xanh</h2>
-                        <p className="text-green-100 mb-8 max-w-sm mx-auto">
-                            Nhận ngay cẩm nang chăm sóc cây và mã giảm giá độc quyền 10% cho đơn hàng đầu tiên.
+                        <h2 className="text-3xl font-bold text-white mb-6">Sứ Mệnh Của Greenshop</h2>
+                        <p className="text-green-100 mb-6 leading-relaxed">
+                            Tại Greenshop, chúng tôi tin rằng mỗi mầm xanh được mang vào không gian sống không chỉ làm đẹp ngôi nhà, mà còn mang lại sự bình yên, thanh lọc tâm hồn và kết nối con người gần hơn với thiên nhiên.
                         </p>
-                        
-                        {subscribed ? (
-                            <div className="bg-green-500 text-white py-3 px-6 rounded-full font-medium animate-pulse">
-                                Đăng ký thành công! Vui lòng kiểm tra email.
-                            </div>
-                        ) : (
-                            <Form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto w-full">
-                                <Input 
-                                    type="email" 
-                                    placeholder="Địa chỉ email của bạn" 
-                                    required
-                                    
-                                />
-                                <Button 
-                                    type="submit" 
-                                    className="px-6 py-3 bg-yellow-400 text-base text-yellow-950 font-bold rounded-full hover:bg-yellow-300 transition whitespace-nowrap"
-                                >
-                                    Tham Gia
-                                </Button>
-                            </Form>
-                        )}
+                        <p className="text-green-200 text-sm italic border-l-4 border-yellow-400 pl-4 py-2">
+                            "Mỗi chậu cây là một câu chuyện tình yêu với thiên nhiên, mang năng lượng tích cực và sự tươi mát đến từng góc nhỏ trong ngôi nhà của bạn."
+                        </p>
                     </div>
 
                 </div>
