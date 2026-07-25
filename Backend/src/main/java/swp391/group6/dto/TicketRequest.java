@@ -11,7 +11,6 @@ package swp391.group6.dto;
 public class TicketRequest {
     private String title;
     private String detail;
-    private String ticketType;
     private String priority;
     private long creatorId;
 
@@ -29,14 +28,6 @@ public class TicketRequest {
 
     public void setDetail(String detail) {
         this.detail = detail;
-    }
-
-    public String getTicketType() {
-        return ticketType;
-    }
-
-    public void setTicketType(String ticketType) {
-        this.ticketType = ticketType;
     }
 
     public String getPriority() {

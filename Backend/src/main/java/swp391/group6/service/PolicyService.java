@@ -82,9 +82,4 @@ public class PolicyService {
         }
         return policyRepository.save(policy);
     }
-
-    public void deletePolicy(Long id) {
-        Policy policy = getPolicyById(id);
-        policyRepository.delete(policy);
-    }
 }

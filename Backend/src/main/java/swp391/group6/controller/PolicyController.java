@@ -53,10 +53,4 @@ public class PolicyController {
         return ResponseEntity.ok(policyService.updatePolicy(id, policyDetails));
     }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('MANAGER', 'SYSTEM_ADMIN')")
-    public ResponseEntity<Void> deletePolicy(@PathVariable Long id) {
-        policyService.deletePolicy(id);
-        return ResponseEntity.noContent().build();
-    }
 }
