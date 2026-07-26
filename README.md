@@ -18,19 +18,52 @@ The project uses one primary files for configurations and environment variables:
 
 ### 1. `.env`
 This file configures the Spring Boot application and JWT properties:
-```env
-POSTGRES_USER: sa
-POSTGRES_DB: app
-POSTGRES_PASSWORD: example
-PGADMIN_DEFAULT_EMAIL: a@a.a
-PGADMIN_DEFAULT_PASSWORD: example
 
-SERVER_ADDRESS: 0.0.0.0
-SERVER_PORT: 8081
-JWT_COOKIE_NAME: Auth
-JWT_LIFETIME: 86400
-JWT_ISSUER: LKT
-JWT_SECRET: a-string-for-testing
+
+Note that empty value should be filled for the corresponding module to work correctly
+```env
+POSTGRES_USER=sa
+POSTGRES_PASSWORD=example
+POSTGRES_DB=app
+
+SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/app
+SERVER_PORT=8080
+
+PGADMIN_DEFAULT_EMAIL=admin@admin.com
+PGADMIN_DEFAULT_PASSWORD=admin
+
+JWT_SECRET=a-string-for-testing
+JWT_ISSUER=a
+JWT_LIFETIME=86400
+JWT_COOKIE_NAME=hihi
+JWT_COOKIE_SECURE=false
+
+#Google Client Id taken from google cloud console
+GOOGLE_CLIENT-ID=
+
+#Gmail OTP
+SPRING_MAIL_HOST=smtp.gmail.com
+SPRING_MAIL_PORT=587
+#Gmail address
+SPRING_MAIL_USERNAME=
+SPRING_MAIL_PASSWORD=
+SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=true
+SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
+
+#VietQR configuration
+CHECKOUT_BANK_ID=MB
+CHECKOUT_BANK_ACCOUNT_NO=
+CHECKOUT_BANK_ACCOUNT_NAME=
+CHECKOUT_TRANSFER_PREFIX=TS
+CHECKOUT_QR_TEMPLATE=compact2
+
+# Viettel Post configuration
+VIETTELPOST_USERNAME=
+VIETTELPOST_PASSWORD=
+VIETTELPOST_BASE_URL=https://partner.viettelpost.vn
+VIETTELPOST_ENABLED=true
+VIETTELPOST_SENDER_PROVINCE_ID=1
+VIETTELPOST_SENDER_DISTRICT_ID=2
 ```
 
 ## Getting Started
