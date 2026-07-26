@@ -131,7 +131,7 @@ export const usePolicy = (id = null) => {
 		} else {
 			getAllPolicies(searchTitle, filterStatus, 1);
 		}
-	}, [id]);
+	}, [id, getAllPolicies, searchTitle, filterStatus]);
 
 	return {
 		policies,

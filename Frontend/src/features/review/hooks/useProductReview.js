@@ -118,7 +118,7 @@ export const useProductReview = (productId, onSuccess) => {
 		}
 	};
 
-	const handleReviewValidation = ({ rating, comment, user }) => {
+	const handleReviewValidation = ({ rating, user }) => {
 		if (!user) {
 			setReviewValidationError("Bạn cần đăng nhập để được đánh giá sản phẩm.");
 			return false;

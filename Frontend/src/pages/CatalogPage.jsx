@@ -62,30 +62,7 @@ function toChipText(category) {
  * - 100 total pages, current=50 → [48, 49, 50, 51, 52]
  * - 3 total pages, current=2 → [1, 2, 3]
  * - 10 total pages, current=1 → [1, 2, 3, 4, 5]
- * 
- * @param {number} currentPage - The currently selected page (1-indexed)
- * @param {number} totalPages - Total number of pages available
- * @param {number} maxVisible - Maximum number of page buttons to show (default: 5)
- * @returns {number[]} Array of page numbers to display
- */
-function getPageNumbers(currentPage, totalPages, maxVisible = 5) {
-  if (totalPages <= maxVisible) {
-    return Array.from({ length: totalPages }, (_, index) => index + 1)
-  }
 
-  let startPage = currentPage - Math.floor(maxVisible / 2)
-  let endPage = currentPage + Math.floor(maxVisible / 2)
-
-  if (startPage < 1) {
-    startPage = 1
-    endPage = maxVisible
-  } else if (endPage > totalPages) {
-    endPage = totalPages
-    startPage = totalPages - maxVisible + 1
-  }
-
-  return Array.from({ length: endPage - startPage + 1 }, (_, index) => startPage + index)
-}
 
 /**
  * CatalogPage - Main product discovery and browsing interface.
@@ -325,7 +302,6 @@ export default function CatalogPage() {
     ]
   }, [baseCategoryCounts, productsWithCategoryName.length, smallCategoryIds])
 
-  const pageNumbers = getPageNumbers(effectiveCurrentPage, totalPages)
   const selectedCategory = filters.categoryId === OTHER_CATEGORY_ID
     ? { id: OTHER_CATEGORY_ID, name: 'Khác' }
     : categories.find(
