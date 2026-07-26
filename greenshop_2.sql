@@ -19,7 +19,7 @@ DROP TABLE IF EXISTS wishlist_items CASCADE;
 DROP TABLE IF EXISTS policies CASCADE;
 DROP TYPE IF EXISTS order_status CASCADE;
 DROP TABLE IF EXISTS return_request_item CASCADE;
-DROP TYPE IF EXISTS return_request CASCADE;
+DROP TABLE IF EXISTS return_request CASCADE;
 
 -- ===============================
 -- RETURN REQUEST
