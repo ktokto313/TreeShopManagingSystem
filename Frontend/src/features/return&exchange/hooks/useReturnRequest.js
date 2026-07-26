@@ -3,7 +3,7 @@ import {
     createReturnRequest,
     getOrderItems,
     getAvailableProducts,
-    getManagerRequests,
+    getPendingRequests,
     getRequestDetail,
     requestMoreInfo,
     updateRequestInfo,
@@ -14,12 +14,10 @@ import {
     getApprovedReturnRequests
 } from "../api/returnRequestApi";
 
-
 export function useReturnRequest() {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-
 
     const execute = async (callback) => {
         try {
@@ -29,16 +27,13 @@ export function useReturnRequest() {
             return await callback();
 
         } catch (err) {
-            setError(
-                err.message || "Có lỗi xảy ra"
-            );
+            setError(err.message || "Có lỗi xảy ra");
             throw err;
 
         } finally {
             setLoading(false);
         }
     };
-
 
     return {
 
@@ -47,10 +42,7 @@ export function useReturnRequest() {
 
         createRequest: (customerId, data) =>
             execute(() =>
-                createReturnRequest(
-                    customerId,
-                    data
-                )
+                createReturnRequest(customerId, data)
             ),
 
         fetchOrderItems: (orderId) =>
@@ -80,27 +72,17 @@ export function useReturnRequest() {
 
         updateInfo: (id, data) =>
             execute(() =>
-                updateRequestInfo(
-                    id,
-                    data
-                )
+                updateRequestInfo(id, data)
             ),
 
         approveRequest: (id) =>
             execute(() =>
-                decideRequest(
-                    id,
-                    "APPROVE"
-                )
+                decideRequest(id, "APPROVE")
             ),
 
         rejectRequest: (id, reason) =>
             execute(() =>
-                decideRequest(
-                    id,
-                    "DECLINE",
-                    reason
-                )
+                decideRequest(id, "DECLINE", reason)
             ),
 
         markItemReturning: (id) =>
