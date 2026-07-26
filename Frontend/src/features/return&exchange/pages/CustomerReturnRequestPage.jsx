@@ -12,6 +12,7 @@ import {
 import CreateReturnRequestModal from "../components/CreateReturnRequestModal";
 import PaymentModal from "../components/PaymentModal";
 import RefundInfoModal from "../components/RefundInfoModal";
+import EditRequestInfoModal from "../components/EditRequestInfoModal";
 
 export default function CustomerReturnRequestPage() {
 
@@ -22,6 +23,7 @@ export default function CustomerReturnRequestPage() {
     const [showCreate, setShowCreate] = useState(false);
     const [showPayment, setShowPayment] = useState(null);
     const [showRefund, setShowRefund] = useState(null);
+    const [showEdit, setShowEdit] = useState(null);
     const [cancelingId, setCancelingId] = useState(null);
 
     async function loadRequests() {
@@ -215,6 +217,16 @@ export default function CustomerReturnRequestPage() {
                                         {getStatusLabel(request.status)}
                                     </span>
 
+                                    {/* Chỉnh sửa */}
+                                    {request.status === "PENDING" && (
+                                        <Button
+                                            className="bg-teal-500 hover:bg-teal-600 text-white"
+                                            onClick={() => setShowEdit(request)}
+                                        >
+                                            Chỉnh sửa
+                                        </Button>
+                                    )}
+
                                     {/* Hủy yêu cầu */}
                                     {request.status === "PENDING" && (
                                         <Button
@@ -303,6 +315,18 @@ export default function CustomerReturnRequestPage() {
                     onClose={() => setShowRefund(null)}
                     onSuccess={() => {
                         setShowRefund(null);
+                        loadRequests();
+                    }}
+                />
+            )}
+
+            {/* EDIT MODAL */}
+            {showEdit && (
+                <EditRequestInfoModal
+                    request={showEdit}
+                    onClose={() => setShowEdit(null)}
+                    onSuccess={() => {
+                        setShowEdit(null);
                         loadRequests();
                     }}
                 />

@@ -9,14 +9,20 @@
 package swp391.group6.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import swp391.group6.dto.*;
 import swp391.group6.model.*;
 import swp391.group6.service.ReturnRequestService;
-
+import swp391.group6.model.BlogImage;
+import swp391.group6.repository.BlogImageRepository;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/return-requests")
@@ -24,6 +30,9 @@ public class ReturnRequestController {
 
     @Autowired
     private ReturnRequestService returnRequestService;
+
+    @Autowired
+    private BlogImageRepository imageRepo;
 
     // Step: Customer submits a new return/exchange request.
     @PostMapping
@@ -261,5 +270,30 @@ public class ReturnRequestController {
         return ResponseEntity.ok(
                 returnRequestService.getManagerRequests()
         );
+    }
+
+    @PostMapping("/images/upload")
+    public ResponseEntity<Map<String, String>> uploadEvidenceImage(
+            @RequestParam("file") MultipartFile file) throws IOException {
+
+        if (file.isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File trống");
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/"))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Chỉ chấp nhận file ảnh");
+
+        BlogImage img = new BlogImage();
+        img.setImageData(file.getBytes());
+        img.setFileName(file.getOriginalFilename());
+        img.setContentType(contentType);
+        img.setImageUrl("");
+
+        BlogImage saved = imageRepo.save(img);
+        String url = "/api/blogs/images/" + saved.getId();
+        saved.setImageUrl(url);
+        imageRepo.save(saved);
+
+        return ResponseEntity.ok(Map.of("url", url));
     }
 }

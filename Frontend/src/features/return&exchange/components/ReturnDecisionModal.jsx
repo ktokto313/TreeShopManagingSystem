@@ -4,11 +4,22 @@ export default function ReturnDecisionModal({
                                                 request,
                                                 onApprove,
                                                 onReject,
+                                                onRequestMoreInfo,
                                                 onClose
                                             }) {
     const [reason, setReason] = useState("");
+    const [requestingInfo, setRequestingInfo] = useState(false);
 
     const isPending = request?.status === "PENDING";
+
+    async function handleRequestMoreInfo() {
+        try {
+            setRequestingInfo(true);
+            await onRequestMoreInfo();
+        } finally {
+            setRequestingInfo(false);
+        }
+    }
 
     return (
         <div
@@ -51,6 +62,9 @@ export default function ReturnDecisionModal({
                     {request?.expectedFee != null && (
                         <p>Phí ước tính: {request.expectedFee}</p>
                     )}
+                    {request?.managerNote && (
+                        <p>Ghi chú: {request.managerNote}</p>
+                    )}
                 </div>
 
                 {request?.evidences?.length > 0 && (
@@ -90,7 +104,23 @@ export default function ReturnDecisionModal({
                     </p>
                 )}
 
-                <div className="flex justify-end gap-3 pt-2">
+                <div className="flex justify-end gap-3 pt-2 flex-wrap">
+                    {isPending && onRequestMoreInfo && (
+                        <button
+                            type="button"
+                            onClick={handleRequestMoreInfo}
+                            disabled={requestingInfo}
+                            className="
+                                px-4 py-2 rounded-lg
+                                border border-blue-300
+                                text-blue-500 hover:bg-blue-50
+                                disabled:opacity-50
+                            "
+                        >
+                            {requestingInfo ? "Đang gửi..." : "Yêu cầu thêm thông tin"}
+                        </button>
+                    )}
+
                     <button
                         type="button"
                         onClick={() => onReject(reason)}

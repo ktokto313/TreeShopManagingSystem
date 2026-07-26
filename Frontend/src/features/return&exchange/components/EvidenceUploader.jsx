@@ -42,7 +42,7 @@ const EvidenceUploader = forwardRef(function EvidenceUploader(
                 const formData = new FormData();
                 formData.append("file", file);
 
-                const res = await fetch("/api/blogs/images/upload", {
+                const res = await fetch("/api/return-requests/images/upload", {
                     method: "POST",
                     credentials: "include",
                     body: formData

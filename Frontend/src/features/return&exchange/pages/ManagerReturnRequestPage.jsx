@@ -5,7 +5,8 @@ import {
     decideRequest,
     confirmReturn,
     completePayment,
-    completeByManager
+    completeByManager,
+    requestMoreInfo
 } from "../api/returnRequestApi";
 
 import ReturnRequestCard from "../components/ReturnRequestCard";
@@ -55,6 +56,18 @@ export default function ManagerReturnRequestPage() {
         await decideRequest(selected.id, "DECLINE", reason);
         closeDetail();
         load();
+    }
+
+    async function handleRequestMoreInfo() {
+        try {
+            await requestMoreInfo(selected.id);
+            alert("Đã gửi yêu cầu bổ sung thông tin đến khách hàng");
+            closeDetail();
+            load();
+        } catch (error) {
+            console.error(error);
+            alert("Không thể gửi yêu cầu bổ sung thông tin");
+        }
     }
 
     async function handleConfirmReceived(request) {
@@ -126,6 +139,7 @@ export default function ManagerReturnRequestPage() {
                     request={selected}
                     onApprove={approve}
                     onReject={reject}
+                    onRequestMoreInfo={handleRequestMoreInfo}
                     onClose={closeDetail}
                 />
             )}
