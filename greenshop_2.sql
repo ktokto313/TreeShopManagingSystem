@@ -21,6 +21,115 @@ DROP TYPE IF EXISTS order_status CASCADE;
 DROP TABLE IF EXISTS return_request_item CASCADE;
 DROP TABLE IF EXISTS return_request CASCADE;
 
+CREATE TABLE role
+(
+    id   BIGSERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+        CHECK (name IN ('CUSTOMER', 'MANAGER', 'SHIPPER', 'SUPPORT_AGENT', 'SYSTEM_ADMIN'))
+);
+
+-- ============================================================
+
+CREATE TABLE users
+(
+    id         BIGSERIAL PRIMARY KEY,
+    role_id    BIGINT       NOT NULL DEFAULT 1 REFERENCES role (id),
+    email      VARCHAR(150) NOT NULL UNIQUE,
+    password   VARCHAR(255),
+    full_name  VARCHAR(150) NOT NULL,
+    phone      VARCHAR(20),
+    status     BOOLEAN      NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_users_email ON users (email);
+CREATE INDEX idx_users_role_id ON users (role_id);
+
+-- ============================================================
+
+CREATE TABLE categories
+(
+    id          BIGSERIAL PRIMARY KEY,
+    name        VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    parent_id   BIGINT       REFERENCES categories (id) ON DELETE SET NULL
+);
+
+-- ============================================================
+
+CREATE TABLE products
+(
+    id          BIGSERIAL PRIMARY KEY,
+    category_id BIGINT         REFERENCES categories (id) ON DELETE SET NULL,
+    name        VARCHAR(200)   NOT NULL,
+    price       DECIMAL(15, 2) NOT NULL CHECK (price >= 0),
+    stock       INT            NOT NULL DEFAULT 0 CHECK (stock >= 0),
+    sku         VARCHAR(50)    NOT NULL UNIQUE,
+    status      BOOLEAN        NOT NULL DEFAULT TRUE
+);
+
+CREATE INDEX idx_products_category ON products (category_id);
+CREATE INDEX idx_products_sku ON products (sku);
+
+-- ============================================================
+
+CREATE TABLE product_details
+(
+    id                BIGSERIAL PRIMARY KEY,
+    product_id        BIGINT NOT NULL UNIQUE REFERENCES products (id) ON DELETE CASCADE,
+    description       TEXT,
+    content           TEXT,
+    care_guide        TEXT,
+    sunlight_level    VARCHAR(50),
+    water_freq        VARCHAR(50),
+    difficulty        VARCHAR(50),
+    feng_shui_element VARCHAR(50),
+    images            JSON
+);
+
+ALTER TABLE product_details
+    ADD COLUMN IF NOT EXISTS care_guide TEXT;
+ALTER TABLE product_details
+    ADD COLUMN IF NOT EXISTS sunlight_level TEXT;
+ALTER TABLE product_details
+    ADD COLUMN IF NOT EXISTS water_freq TEXT;
+ALTER TABLE product_details
+    ADD COLUMN IF NOT EXISTS difficulty TEXT;
+ALTER TABLE product_details
+    ADD COLUMN IF NOT EXISTS feng_shui_element TEXT;
+
+-- ============================================================
+
+CREATE TYPE order_status as ENUM ('PROCESSING', 'PENDING', 'DELIVERING', 'ARRIVED', 'RETURN_PROCESSING', 'RETURN_PENDING', 'RETURNING', 'RECEIVED', 'FAILED');
+
+CREATE TABLE orders
+(
+   id               BIGSERIAL PRIMARY KEY,
+   customer_id      BIGINT NOT NULL REFERENCES users(id),
+   shipper_id       BIGINT REFERENCES users(id),
+   shipping_address TEXT,
+   shipping_fee     DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+   discount         DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+   status           order_status NOT NULL DEFAULT 'PROCESSING',
+   created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   delivery_date    TIMESTAMP
+);
+
+CREATE INDEX idx_orders_customer_id ON orders (customer_id);
+CREATE INDEX idx_orders_status ON orders (status);
+CREATE INDEX idx_orders_created_at ON orders (created_at DESC);
+
+-- ============================================================
+
+CREATE TABLE order_detail
+(
+    order_id   BIGINT         NOT NULL REFERENCES orders (id) ON DELETE CASCADE,
+    product_id BIGINT         NOT NULL REFERENCES products (id) ON DELETE RESTRICT,
+    quantity   INT            NOT NULL CHECK (quantity > 0),
+    price_paid DECIMAL(15, 2) NOT NULL,
+    PRIMARY KEY (order_id, product_id)
+);
+
 -- ===============================
 -- RETURN REQUEST
 -- ===============================
@@ -153,114 +262,6 @@ CREATE TABLE return_exchange_product (
 
 );
 
-CREATE TABLE role
-(
-    id   BIGSERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE
-        CHECK (name IN ('CUSTOMER', 'MANAGER', 'SHIPPER', 'SUPPORT_AGENT', 'SYSTEM_ADMIN'))
-);
-
--- ============================================================
-
-CREATE TABLE users
-(
-    id         BIGSERIAL PRIMARY KEY,
-    role_id    BIGINT       NOT NULL DEFAULT 1 REFERENCES role (id),
-    email      VARCHAR(150) NOT NULL UNIQUE,
-    password   VARCHAR(255),
-    full_name  VARCHAR(150) NOT NULL,
-    phone      VARCHAR(20),
-    status     BOOLEAN      NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_users_email ON users (email);
-CREATE INDEX idx_users_role_id ON users (role_id);
-
--- ============================================================
-
-CREATE TABLE categories
-(
-    id          BIGSERIAL PRIMARY KEY,
-    name        VARCHAR(100) NOT NULL UNIQUE,
-    description TEXT,
-    parent_id   BIGINT       REFERENCES categories (id) ON DELETE SET NULL
-);
-
--- ============================================================
-
-CREATE TABLE products
-(
-    id          BIGSERIAL PRIMARY KEY,
-    category_id BIGINT         REFERENCES categories (id) ON DELETE SET NULL,
-    name        VARCHAR(200)   NOT NULL,
-    price       DECIMAL(15, 2) NOT NULL CHECK (price >= 0),
-    stock       INT            NOT NULL DEFAULT 0 CHECK (stock >= 0),
-    sku         VARCHAR(50)    NOT NULL UNIQUE,
-    status      BOOLEAN        NOT NULL DEFAULT TRUE
-);
-
-CREATE INDEX idx_products_category ON products (category_id);
-CREATE INDEX idx_products_sku ON products (sku);
-
--- ============================================================
-
-CREATE TABLE product_details
-(
-    id                BIGSERIAL PRIMARY KEY,
-    product_id        BIGINT NOT NULL UNIQUE REFERENCES products (id) ON DELETE CASCADE,
-    description       TEXT,
-    content           TEXT,
-    care_guide        TEXT,
-    sunlight_level    VARCHAR(50),
-    water_freq        VARCHAR(50),
-    difficulty        VARCHAR(50),
-    feng_shui_element VARCHAR(50),
-    images            JSON
-);
-
-ALTER TABLE product_details
-    ADD COLUMN IF NOT EXISTS care_guide TEXT;
-ALTER TABLE product_details
-    ADD COLUMN IF NOT EXISTS sunlight_level TEXT;
-ALTER TABLE product_details
-    ADD COLUMN IF NOT EXISTS water_freq TEXT;
-ALTER TABLE product_details
-    ADD COLUMN IF NOT EXISTS difficulty TEXT;
-ALTER TABLE product_details
-    ADD COLUMN IF NOT EXISTS feng_shui_element TEXT;
-
--- ============================================================
-
-CREATE TYPE order_status as ENUM ('PROCESSING', 'PENDING', 'DELIVERING', 'ARRIVED', 'RETURN_PROCESSING', 'RETURN_PENDING', 'RETURNING', 'RECEIVED', 'FAILED');
-
-CREATE TABLE orders
-(
-   id               BIGSERIAL PRIMARY KEY,
-   customer_id      BIGINT NOT NULL REFERENCES users(id),
-   shipper_id       BIGINT REFERENCES users(id),
-   shipping_address TEXT,
-   shipping_fee     DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-   discount         DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-   status           order_status NOT NULL DEFAULT 'PROCESSING',
-   created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-   delivery_date    TIMESTAMP
-);
-
-CREATE INDEX idx_orders_customer_id ON orders (customer_id);
-CREATE INDEX idx_orders_status ON orders (status);
-CREATE INDEX idx_orders_created_at ON orders (created_at DESC);
-
--- ============================================================
-
-CREATE TABLE order_detail
-(
-    order_id   BIGINT         NOT NULL REFERENCES orders (id) ON DELETE CASCADE,
-    product_id BIGINT         NOT NULL REFERENCES products (id) ON DELETE RESTRICT,
-    quantity   INT            NOT NULL CHECK (quantity > 0),
-    price_paid DECIMAL(15, 2) NOT NULL,
-    PRIMARY KEY (order_id, product_id)
-);
 
 -- ============================================================
 
@@ -2338,134 +2339,6 @@ COLUMN post_id DROP
 NOT NULL;
 TRUNCATE TABLE policies RESTART IDENTITY;
 
--- ===============================
--- RETURN REQUEST
--- ===============================
-
-CREATE TABLE return_request (
- id UUID PRIMARY KEY,
-
- order_id BIGINT NOT NULL,
- customer_id BIGINT NOT NULL,
-
- reason VARCHAR(50) NOT NULL,
- return_type VARCHAR(50) NOT NULL,
- status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
-
- expected_fee NUMERIC(12,2),
- price_difference NUMERIC(12,2),
- refund_amount NUMERIC(12,2),
- additional_payment NUMERIC(12,2),
-
- financial_processed BOOLEAN NOT NULL DEFAULT FALSE,
-
- bank_name VARCHAR(255),
- bank_account VARCHAR(255),
- account_number VARCHAR(255),
- account_holder VARCHAR(255),
-
- manager_note VARCHAR(1000),
-
- created_at TIMESTAMP NOT NULL,
- updated_at TIMESTAMP NOT NULL,
- completed_at TIMESTAMP,
-
-
- CONSTRAINT fk_return_request_order
-     FOREIGN KEY(order_id)
-         REFERENCES orders(id),
-
-
- CONSTRAINT fk_return_request_customer
-     FOREIGN KEY(customer_id)
-         REFERENCES users(id)
-);
-
-
-
--- ===============================
--- RETURN REQUEST ITEM
--- ===============================
-
-CREATE TABLE return_request_item (
-
-      id UUID PRIMARY KEY,
-
-      return_request_id UUID NOT NULL,
-
-      order_id BIGINT NOT NULL,
-      product_id BIGINT NOT NULL,
-
-      quantity INTEGER NOT NULL,
-
-
-      CONSTRAINT fk_return_item_request
-          FOREIGN KEY(return_request_id)
-              REFERENCES return_request(id)
-              ON DELETE CASCADE,
-
-
-      CONSTRAINT fk_return_item_order_detail
-          FOREIGN KEY(order_id, product_id)
-              REFERENCES order_detail(order_id, product_id)
-);
-
-
-
--- ===============================
--- RETURN EVIDENCE
--- ===============================
-
-CREATE TABLE return_evidence (
-
-  id BIGSERIAL PRIMARY KEY,
-
-  return_request_id UUID NOT NULL,
-
-  image_url TEXT NOT NULL,
-
-  image_data BYTEA,
-
-  file_name VARCHAR(255),
-
-  content_type VARCHAR(100),
-
-  description TEXT,
-
-
-  CONSTRAINT fk_return_evidence_request
-      FOREIGN KEY(return_request_id)
-          REFERENCES return_request(id)
-          ON DELETE CASCADE
-);
-
-
-
--- ===============================
--- RETURN EXCHANGE PRODUCT
--- ===============================
-
-CREATE TABLE return_exchange_product (
-
-          id BIGSERIAL PRIMARY KEY,
-
-          return_request_id UUID NOT NULL UNIQUE,
-
-          product_id BIGINT NOT NULL,
-
-          quantity INTEGER NOT NULL DEFAULT 1,
-
-
-          CONSTRAINT fk_exchange_request
-              FOREIGN KEY(return_request_id)
-                  REFERENCES return_request(id)
-                  ON DELETE CASCADE,
-
-
-          CONSTRAINT fk_exchange_product
-              FOREIGN KEY(product_id)
-                  REFERENCES products(id)
-);
 
 INSERT INTO policies (title, description, status)
 VALUES ('Chính sách Đổi trả & Hoàn tiền', '## 1. Điều kiện đổi trả
