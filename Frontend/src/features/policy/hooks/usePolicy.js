@@ -16,13 +16,6 @@ export const usePolicy = (id = null) => {
 
 	const [updateLoading, setUpdateLoading] = useState(false);
 
-	const handleSearch = (e) => {
-		e.preventDefault();
-		const search = new FormData(e.target).get("search");
-		setSearchTitle(search || "");
-		setCurrentPage(1);
-	};
-
 	const getAllPolicies = useCallback(async (title, status, page = 1) => {
 		setLoading(true);
 		try {
@@ -30,25 +23,51 @@ export const usePolicy = (id = null) => {
 			const result = await fetchAllPolicies(title, status, backendPage, 6);
 			if (result && Array.isArray(result.content)) {
 				setPolicies(result.content);
-				setTotalPages(result.totalPages || 1);
-				setTotalElements(result.totalElements || 0);
-				setCurrentPage((result.number ?? 0) + 1);
+				const pages = result.totalPages ?? result.page?.totalPages ?? 1;
+				const elements = result.totalElements ?? result.page?.totalElements ?? 0;
+				const pageNum = result.number ?? result.page?.number ?? backendPage;
+				setTotalPages(Math.max(1, pages));
+				setTotalElements(elements);
+				setCurrentPage(pageNum + 1);
 			} else if (Array.isArray(result)) {
 				setPolicies(result);
 				setTotalPages(1);
+				setTotalElements(result.length);
 				setCurrentPage(1);
 			} else {
 				setPolicies([]);
+				setTotalPages(1);
+				setTotalElements(0);
+				setCurrentPage(1);
 			}
 		} catch (error) {
 			console.error("Failed to fetch policies:", error);
 			setPolicies([]);
+			setTotalPages(1);
+			setTotalElements(0);
+			setCurrentPage(1);
 		} finally {
 			setLoading(false);
 		}
 	}, []);
 
+	const handleSearch = (e) => {
+		e.preventDefault();
+		const search = new FormData(e.target).get("search");
+		const newSearch = search || "";
+		setSearchTitle(newSearch);
+		setCurrentPage(1);
+		getAllPolicies(newSearch, filterStatus, 1);
+	};
+
+	const handleFilterStatusChange = useCallback((newStatus) => {
+		setFilterStatus(newStatus);
+		setCurrentPage(1);
+		getAllPolicies(searchTitle, newStatus, 1);
+	}, [getAllPolicies, searchTitle]);
+
 	const loadPage = useCallback((page) => {
+		setCurrentPage(page);
 		getAllPolicies(searchTitle, filterStatus, page);
 	}, [getAllPolicies, searchTitle, filterStatus]);
 
@@ -112,7 +131,7 @@ export const usePolicy = (id = null) => {
 		} else {
 			getAllPolicies(searchTitle, filterStatus, 1);
 		}
-	}, [id, getAllPolicies, searchTitle, filterStatus]);
+	}, [id]);
 
 	return {
 		policies,
@@ -120,7 +139,7 @@ export const usePolicy = (id = null) => {
 		searchTitle,
 		setSearchTitle,
 		filterStatus,
-		setFilterStatus,
+		setFilterStatus: handleFilterStatusChange,
 		currentPage,
 		totalPages,
 		totalElements,

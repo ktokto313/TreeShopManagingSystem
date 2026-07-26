@@ -30,28 +30,50 @@ export const useProductReview = (productId, onSuccess) => {
 	const { user, canManage } = useContext(AuthContext);
 
 	const loadReviews = useCallback(
-	async (page = 1) => {
-		try {
-			setIsReviewsLoading(true);
-			const backendPage = Math.max(0, page - 1);
+		async (page = 1) => {
+			try {
+				setIsReviewsLoading(true);
+				const backendPage = Math.max(0, page - 1);
 
-			let cleanRating = null;
-			if (ratingFilter !== undefined && ratingFilter !== null && ratingFilter !== "" && ratingFilter !== "null") {
-				cleanRating = Number(ratingFilter);
+				let cleanRating = null;
+				if (ratingFilter !== undefined && ratingFilter !== null && ratingFilter !== "" && ratingFilter !== "null") {
+					cleanRating = Number(ratingFilter);
+				}
+
+				const result = await getProductReviews(productId, backendPage, REVIEWS_PER_PAGE, cleanRating, canManage);
+
+				if (result && Array.isArray(result.content)) {
+					const pages = result.totalPages ?? result.page?.totalPages ?? 1;
+					const elements = result.totalElements ?? result.page?.totalElements ?? 0;
+					const pageNum = result.number ?? result.page?.number ?? backendPage;
+
+					setReviews(result.content);
+					setTotalPages(Math.max(1, pages));
+					setTotalElements(elements);
+					setCurrentPage(pageNum + 1);
+				} else if (Array.isArray(result)) {
+					setReviews(result);
+					setTotalPages(1);
+					setTotalElements(result.length);
+					setCurrentPage(1);
+				} else {
+					setReviews([]);
+					setTotalPages(1);
+					setTotalElements(0);
+					setCurrentPage(1);
+				}
+			} catch (error) {
+				console.error("Lỗi tải đánh giá:", error);
+				setReviews([]);
+				setTotalPages(1);
+				setTotalElements(0);
+				setCurrentPage(1);
+			} finally {
+				setIsReviewsLoading(false);
 			}
-
-			const result = await getProductReviews(productId, backendPage, REVIEWS_PER_PAGE, cleanRating, canManage);
-
-			setReviews(result.content || []);
-			setTotalPages(result.totalPages || 1);
-			setTotalElements(result.totalElements || 0);
-			setCurrentPage((result.number ?? 0) + 1);
-		} catch (error) {
-			console.error("Lỗi tải đánh giá:", error);
-		} finally {
-			setIsReviewsLoading(false);
-		}
-	}, [productId, setIsReviewsLoading, ratingFilter, canManage]);
+		},
+		[productId, setIsReviewsLoading, ratingFilter, canManage],
+	);
 
 	const handleStarOnClick = (starValue) => {
 		setStarValue(starValue);
