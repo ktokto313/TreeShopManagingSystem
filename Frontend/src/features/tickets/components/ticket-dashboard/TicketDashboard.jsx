@@ -36,7 +36,7 @@ const TicketDashboard = ({ dashboardState, className }) => {
 				>
 					<LuTicketCheck className="text-3xl" />
 					<h1 className={cn("text-sm md:text-lg lg:text-xl font-semibold")}>
-						Các Ticket Khiếu Nại
+						Các Phiếu Hỗ Trợ
 					</h1>
 				</div>
 
@@ -53,7 +53,7 @@ const TicketDashboard = ({ dashboardState, className }) => {
 			<div className="px-5 mb-5">
 				<input
 					type="text"
-					placeholder="Tìm kiếm ticket theo tên..."
+					placeholder="Tìm kiếm phiếu hỗ trợ theo tên..."
 					value={ticketSearch}
 					onChange={(e) => handleFilterChange("search", e.target.value)}
 					className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 transition-colors"
@@ -74,8 +74,8 @@ const TicketDashboard = ({ dashboardState, className }) => {
 				) : fetchedTickets.length === 0 && !fetchAllTicketsError ? (
 					/* Else if: Not loading, but the array is empty */
 					<div className="col-span-full flex flex-col items-center justify-center py-5 text-gray-500">
-						<h2 className="text-xl font-semibold mb-2">Chưa có ticket nào!</h2>
-						<p>Thử thay đổi bộ lọc hoặc tạo ticket mới.</p>
+						<h2 className="text-xl font-semibold mb-2">Chưa có phiếu hỗ trợ nào!</h2>
+						<p>Thử thay đổi bộ lọc hoặc tạo phiếu hỗ trợ mới.</p>
 					</div>
 				) : fetchAllTicketsError ? (
 					/* Else if: Not loading, but fetch error */
@@ -91,7 +91,7 @@ const TicketDashboard = ({ dashboardState, className }) => {
 							onClick={() => navigate(`/tickets/${t.id}`)}
 							className="cursor-pointer transition-transform hover:scale-[1.02]"
 						>
-							<TicketCard ticket={t}/>
+							<TicketCard ticket={t} />
 						</div>
 					))
 				)}

@@ -27,7 +27,7 @@ const navItemsByRole = {
     { label: 'Yêu thích', to: '/wishlist' },
     { label: 'Tài khoản', to: '/profile' },
     { label: 'Đơn hàng', to: '/orders' },
-    { label: 'Khiếu nại', to: '/tickets/' },
+    { label: 'Hỗ trợ', to: '/tickets/' },
     { label: 'Blog', to: '/blogs' },
     { label: 'Đổi trả', to: '/return-requests'},
   ],
@@ -43,7 +43,7 @@ const navItemsByRole = {
   ],
   SUPPORT_AGENT: [
     { label: 'Trang chủ', to: '/' },
-    { label: 'Khiếu nại', to: '/tickets/' },
+    { label: 'Hỗ trợ', to: '/tickets/' },
     { label: 'Đơn hàng', to: '/orders' },
     { label: 'Tài khoản', to: '/profile' },
   ],

@@ -12,7 +12,7 @@ export function Footer() {
                             Mang không gian xanh đến ngôi nhà của bạn. Chúng tôi cung cấp các loại cây cảnh chất lượng cao cùng dịch vụ chăm sóc tận tâm.
                         </p>
                     </div>
-                    
+
                     <div>
                         <h4 className="font-semibold text-white mb-4">Về Chúng Tôi</h4>
                         <ul className="space-y-2 text-sm text-green-200">
@@ -25,7 +25,7 @@ export function Footer() {
                         <h4 className="font-semibold text-white mb-4">Hỗ Trợ Khách Hàng</h4>
                         <ul className="space-y-2 text-sm text-green-200">
                             <li><Link to="/policy" className="hover:text-white transition-colors">Chính sách & Quy định</Link></li>
-                            <li><Link to="/tickets" className="hover:text-white transition-colors">Gửi khiếu nại / Hỗ trợ</Link></li>
+                            <li><Link to="/tickets" className="hover:text-white transition-colors">Hỗ trợ</Link></li>
                         </ul>
                     </div>
 
@@ -38,7 +38,7 @@ export function Footer() {
                         </ul>
                     </div>
                 </div>
-                
+
                 <div className="mt-12 pt-8 border-t border-green-800 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-green-300">
                     <p>&copy; {new Date().getFullYear()} Greenshop. All rights reserved.</p>
                 </div>

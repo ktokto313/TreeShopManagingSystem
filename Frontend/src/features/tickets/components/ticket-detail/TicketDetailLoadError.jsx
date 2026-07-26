@@ -15,9 +15,9 @@ const TicketDetailLoadError = ({ detailState }) => {
 				style={{ boxShadow: "15px 15px 0 5px" }}
 			>
 				{isFetchDetailLoadingError ? (
-					<span>Không tìm thấy Ticket!</span>
+					<span>Không tìm thấy Phiếu Hỗ Trợ!</span>
 				) : (
-					<span>Lỗi Khi Tải Ticket</span>
+					<span>Lỗi Khi Tải Phiếu Hỗ Trợ</span>
 				)}
 			</h1>
 			<div

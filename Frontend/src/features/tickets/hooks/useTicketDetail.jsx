@@ -138,7 +138,7 @@ export const useTicketDetail = (ticketId) => {
 		if (!isAgent && !isCreator) {
 			dispatch({
 				type: "STATUS_UPDATE_ERROR",
-				payload: "Bạn không phải là chủ Ticket hay Agent",
+				payload: "Bạn không phải là người tạo Phiếu Hỗ Trợ hay Agent",
 			});
 			return false;
 		}
@@ -147,7 +147,7 @@ export const useTicketDetail = (ticketId) => {
 		if (targetState === "CREATED") {
 			dispatch({
 				type: "STATUS_UPDATE_ERROR",
-				payload: "Ticket không thể trở lại trạng thái đã khởi tạo",
+				payload: "Phiếu hỗ trợ không thể trở lại trạng thái đã khởi tạo",
 			});
 			return false;
 		}
@@ -155,7 +155,7 @@ export const useTicketDetail = (ticketId) => {
 		if (currentTicketState === "DONE") {
 			dispatch({
 				type: "STATUS_UPDATE_ERROR",
-				payload: "Ticket đã hoàn thành, không thể chỉnh sửa",
+				payload: "Phiếu hỗ trợ đã hoàn thành, không thể chỉnh sửa",
 			});
 			return false;
 		}
@@ -186,7 +186,7 @@ export const useTicketDetail = (ticketId) => {
 				dispatch({
 					type: "STATUS_UPDATE_ERROR",
 					payload:
-						"Agent không thể sửa đổi Ticket đang chờ khách hàng xác nhận",
+						"Agent không thể sửa đổi phiếu hỗ trợ đang chờ khách hàng xác nhận",
 				});
 				return false;
 			}
@@ -198,7 +198,7 @@ export const useTicketDetail = (ticketId) => {
 				dispatch({
 					type: "STATUS_UPDATE_ERROR",
 					payload:
-						"Khách hàng chỉ có thể cập nhật trạng thái khi Ticket ở trạng thái đã xử lí",
+						"Khách hàng chỉ có thể cập nhật trạng thái khi phiếu hỗ trợ ở trạng thái đã xử lí",
 				});
 				return false;
 			}

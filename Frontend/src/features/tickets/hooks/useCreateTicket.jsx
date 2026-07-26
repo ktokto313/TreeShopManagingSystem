@@ -11,7 +11,7 @@ const useCreateTicket = () => {
     const executeCreateTicket = async (data) => {
         if (isCreateTicketLoading) {
             setTicketCreateWarning(
-                "Có một Ticket đang được khởi tạo. Xin vui lòng đợi.",
+                "Có một phiếu hỗ trợ đang được tạo. Xin vui lòng đợi.",
             );
             return false; 
         }

@@ -44,11 +44,11 @@ export const CreateTicketButton = ({
 				>
 					<FaPlus></FaPlus>
 					<p className={cn(buttonContentClasses ?? styles.createTicketBtnContent, "text-nowrap")}>
-						Tạo Ticket
+						Tạo Phiếu Hỗ Trợ
 					</p>
 				</div>
 			}
-			modalTitle="Tạo Ticket"
+			modalTitle="Tạo Phiếu Hỗ Trợ"
 			isLoading={isCreateTicketLoading}
 			buttonClasses={cn(
 				"w-full cursor-pointer hover:bg-green-400",
@@ -75,7 +75,7 @@ export const CreateTicketButton = ({
 					{isCreateTicketSuccess && (
 						<span className="flex items-center gap-2 py-2 px-4 rounded-xl bg-bg-success text-white">
 							<FaCheck className="text-xl" />
-							<p>Ticket đã được khởi tạo xong!</p>
+							<p>Phiếu hỗ trợ đã được tạo thành công!</p>
 						</span>
 					)}
 
@@ -89,7 +89,7 @@ export const CreateTicketButton = ({
 					{ticketCreateError && (
 						<span className="flex items-center gap-2 py-2 px-4 rounded-xl bg-red-500 text-white">
 							<MdBlock className="text-xl" />
-							<p>Lỗi khi khởi tạo Ticket, vui lòng thử lại sau.</p>
+							<p>Lỗi khi tạo phiếu hỗ trợ, vui lòng thử lại sau.</p>
 						</span>
 					)}
 
@@ -236,7 +236,7 @@ export const TicketDashboardFilterBtn = ({ dashboardState, modalButtonClasses, r
 	return (
 		<>
 			<ModalButton
-				modalTitle={"Lọc Ticket"}
+				modalTitle={"Lọc Phiếu Hỗ Trợ"}
 				buttonClasses={cn(
 					"flex cursor-pointer hover:bg-green-400",
 					styles.ticketSelectToggle,
