@@ -11,10 +11,10 @@ export function useHomepageProducts() {
         setLoading(true);
         setError(null);
         try {
-            const data = await requestJson('/api/products/homepage-featured');
+            const data = await requestJson('/api/products/best-sellers');
             if (data) {
                 setProducts(data.products || []);
-                setTitle(data.title || 'Sản Phẩm Bán Chạy');
+                setTitle(data.title || 'Sản Phẩm Bán Chạy Mọi Thời Đại');
             }
         } catch (err) {
             console.error('Failed to load homepage products', err);
