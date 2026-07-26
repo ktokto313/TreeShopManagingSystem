@@ -1,6 +1,8 @@
 export default function ReturnRequestCard({
                                               request,
                                               onView,
+                                              onEdit,
+                                              onCancel,
                                               onReturn,
                                               onConfirmReceived,
                                               onProcessPayment,
@@ -46,6 +48,26 @@ export default function ReturnRequestCard({
                 </button>
 
                 {/* ================= CUSTOMER ================= */}
+
+                {/* Edit request*/}
+                {request.status === "PENDING" && onEdit && (
+                    <button
+                        onClick={() => onEdit(request)}
+                        className="px-4 py-2 rounded-lg bg-teal-500 text-white"
+                    >
+                        Chỉnh sửa
+                    </button>
+                )}
+
+                {/* PENDING to Cancel request*/}
+                {request.status === "PENDING" && onCancel && (
+                    <button
+                        onClick={() => onCancel(request)}
+                        className="px-4 py-2 rounded-lg bg-gray-500 text-white"
+                    >
+                        Hủy yêu cầu
+                    </button>
+                )}
 
                 {/* APPROVED → Trả hàng */}
                 {request.status === "APPROVED" && onReturn && (

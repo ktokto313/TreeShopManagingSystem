@@ -8,6 +8,8 @@ export default function ReturnDecisionModal({
                                             }) {
     const [reason, setReason] = useState("");
 
+    const isPending = request?.status === "PENDING";
+
     return (
         <div
             className="
@@ -82,6 +84,12 @@ export default function ReturnDecisionModal({
                     />
                 </div>
 
+                {!isPending && (
+                    <p className="text-xs text-stone-400">
+                        Yêu cầu này không còn ở trạng thái chờ duyệt — chỉ có thể từ chối.
+                    </p>
+                )}
+
                 <div className="flex justify-end gap-3 pt-2">
                     <button
                         type="button"
@@ -94,17 +102,19 @@ export default function ReturnDecisionModal({
                     >
                         Từ chối
                     </button>
-                    <button
-                        type="button"
-                        onClick={onApprove}
-                        className="
-                            px-4 py-2 rounded-lg
-                            bg-green-500 text-white
-                            hover:bg-green-600
-                        "
-                    >
-                        Duyệt
-                    </button>
+                    {isPending && (
+                        <button
+                            type="button"
+                            onClick={onApprove}
+                            className="
+                                px-4 py-2 rounded-lg
+                                bg-green-500 text-white
+                                hover:bg-green-600
+                            "
+                        >
+                            Duyệt
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

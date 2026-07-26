@@ -4,7 +4,7 @@
  * Name: ReturnRequestController.java
  * Description:
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-07-25
+ * Last Change Date: 2026-07-26
  */
 package swp391.group6.controller;
 
@@ -97,6 +97,16 @@ public class ReturnRequestController {
         }
 
         return ResponseEntity.ok(updated);
+    }
+
+    // Step: Customer cancels their own pending request (reuses reject flow).
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<ReturnRequest> cancelRequest(
+            @PathVariable String id) {
+
+        return ResponseEntity.ok(
+                returnRequestService.cancelRequest(id)
+        );
     }
 
     // Step: Customer confirms returning item.

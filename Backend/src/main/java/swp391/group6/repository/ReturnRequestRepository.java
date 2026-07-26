@@ -31,6 +31,7 @@ public interface ReturnRequestRepository
 
     long countByStatus(ReturnStatus status);
 
+    boolean existsByOrder_IdAndStatusNotIn(Long orderId, List<ReturnStatus> statuses);
 
     @Query("""
         SELECT COALESCE(SUM(r.refundAmount), 0)

@@ -172,3 +172,12 @@ export function getManagerRequests() {
         `${BASE_URL}/manager`
     );
 }
+
+export function cancelRequest(id) {
+    return requestJson(
+        `${BASE_URL}/${id}/cancel`,
+        {
+            method: "POST"
+        }
+    );
+}

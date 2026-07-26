@@ -5,7 +5,8 @@ import { AuthContext } from "../../../context/AuthContext";
 
 import {
     getMyReturnRequests,
-    markReturning
+    markReturning,
+    cancelRequest
 } from "../api/returnRequestApi";
 
 import CreateReturnRequestModal from "../components/CreateReturnRequestModal";
@@ -21,6 +22,7 @@ export default function CustomerReturnRequestPage() {
     const [showCreate, setShowCreate] = useState(false);
     const [showPayment, setShowPayment] = useState(null);
     const [showRefund, setShowRefund] = useState(null);
+    const [cancelingId, setCancelingId] = useState(null);
 
     async function loadRequests() {
 
@@ -69,6 +71,36 @@ export default function CustomerReturnRequestPage() {
             console.error("RETURN ITEM ERROR:", error);
 
             alert("Không thể xác nhận trả hàng");
+
+        }
+
+    }
+
+    async function handleCancelRequest(id) {
+
+        if (!window.confirm("Bạn có chắc muốn hủy yêu cầu này?")) {
+            return;
+        }
+
+        try {
+
+            setCancelingId(id);
+
+            await cancelRequest(id);
+
+            alert("Đã hủy yêu cầu");
+
+            await loadRequests();
+
+        } catch (error) {
+
+            console.error("CANCEL REQUEST ERROR:", error);
+
+            alert("Không thể hủy yêu cầu");
+
+        } finally {
+
+            setCancelingId(null);
 
         }
 
@@ -182,6 +214,17 @@ export default function CustomerReturnRequestPage() {
                                     <span className="px-3 py-1 rounded-full text-sm bg-green-100 text-green-700">
                                         {getStatusLabel(request.status)}
                                     </span>
+
+                                    {/* Hủy yêu cầu */}
+                                    {request.status === "PENDING" && (
+                                        <Button
+                                            className="bg-gray-500 hover:bg-gray-600 text-white"
+                                            disabled={cancelingId === request.id}
+                                            onClick={() => handleCancelRequest(request.id)}
+                                        >
+                                            {cancelingId === request.id ? "Đang hủy..." : "Hủy yêu cầu"}
+                                        </Button>
+                                    )}
 
                                     {/* Trả hàng */}
                                     {request.status === "APPROVED" && (

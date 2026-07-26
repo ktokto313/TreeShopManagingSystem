@@ -11,7 +11,8 @@ import {
     markReturning,
     confirmReturn,
     completePayment,
-    getApprovedReturnRequests
+    getApprovedReturnRequests,
+    cancelRequest
 } from "../api/returnRequestApi";
 
 export function useReturnRequest() {
@@ -103,6 +104,11 @@ export function useReturnRequest() {
         fetchApprovedRequests: (customerId) =>
             execute(() =>
                 getApprovedReturnRequests(customerId)
+            ),
+
+        cancelPendingRequest: (id) =>
+            execute(() =>
+                cancelRequest(id)
             ),
     };
 }

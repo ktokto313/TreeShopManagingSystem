@@ -1,3 +1,11 @@
+/*
+ * Author: HungDLM
+ * Created Date: 2026-07-25
+ * Name: ReturnRequestService.java
+ * Description:
+ * Last Change Author: Hung Dao
+ * Last Change Date: 2026-07-26
+ */
 package swp391.group6.service;
 
 import org.springframework.stereotype.Service;
@@ -22,6 +30,11 @@ public class ReturnRequestService {
             new BigDecimal("0.85");
 
     private static final int MIN_DAMAGED_EVIDENCE_COUNT = 2;
+
+    private static final List<ReturnStatus> TERMINAL_STATUSES = List.of(
+            ReturnStatus.REJECTED,
+            ReturnStatus.COMPLETED
+    );
 
     private final OrderRepository orderRepository;
     private final ReturnRequestOrderRepository returnOrderRepository;
@@ -89,6 +102,19 @@ public class ReturnRequestService {
 
             throw new IllegalArgumentException(
                     "Order does not belong to customer"
+            );
+        }
+
+        // an order can only have 1 active (non-terminal) return/exchange
+        boolean hasActiveRequest =
+                returnRequestRepository.existsByOrder_IdAndStatusNotIn(
+                        order.getId(),
+                        TERMINAL_STATUSES
+                );
+
+        if (hasActiveRequest) {
+            throw new IllegalStateException(
+                    "This order already has an active return/exchange request"
             );
         }
 
@@ -266,8 +292,13 @@ public class ReturnRequestService {
 
 
     public ReturnRequest approveRequest(String id) {
-        ReturnRequest request =
-                getRequestDetail(id);
+        ReturnRequest request = getRequestDetail(id);
+
+        if (request.getStatus() != ReturnStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Only pending requests can be approved"
+            );
+        }
 
         request.setStatus(
                 ReturnStatus.APPROVED
@@ -305,6 +336,20 @@ public class ReturnRequestService {
                 reason
         );
         return request;
+    }
+
+    // Step: Customer cancels their own pending request.
+    public ReturnRequest cancelRequest(String id) {
+
+        ReturnRequest request = getRequestDetail(id);
+
+        if (request.getStatus() != ReturnStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Only pending requests can be cancelled"
+            );
+        }
+
+        return rejectRequest(id, "Cancelled by customer");
     }
 
     public ReturnRequest requestMoreInfo(String id) {
