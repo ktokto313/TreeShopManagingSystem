@@ -18,6 +18,140 @@ DROP TABLE IF EXISTS role CASCADE;
 DROP TABLE IF EXISTS wishlist_items CASCADE;
 DROP TABLE IF EXISTS policies CASCADE;
 DROP TYPE IF EXISTS order_status;
+DROP TABLE IF EXISTS return_request_item;
+DROP TYPE IF EXISTS return_request;
+
+-- ===============================
+-- RETURN REQUEST
+-- ===============================
+
+CREATE TABLE return_request (
+
+    id VARCHAR(36) PRIMARY KEY,
+
+    order_id BIGINT NOT NULL,
+    customer_id BIGINT NOT NULL,
+
+    reason VARCHAR(50) NOT NULL,
+    return_type VARCHAR(50) NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
+
+    expected_fee NUMERIC(12,2),
+    price_difference NUMERIC(12,2),
+    refund_amount NUMERIC(12,2),
+    additional_payment NUMERIC(12,2),
+
+    financial_processed BOOLEAN NOT NULL DEFAULT FALSE,
+
+    bank_name VARCHAR(255),
+    bank_account VARCHAR(255),
+    account_number VARCHAR(255),
+    account_holder VARCHAR(255),
+
+    manager_note VARCHAR(1000),
+
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    completed_at TIMESTAMP,
+
+
+    CONSTRAINT fk_return_request_order
+        FOREIGN KEY(order_id)
+        REFERENCES orders(id),
+
+
+    CONSTRAINT fk_return_request_customer
+        FOREIGN KEY(customer_id)
+        REFERENCES users(id)
+
+);
+
+-- ===============================
+-- RETURN REQUEST ITEM
+-- ===============================
+
+CREATE TABLE return_request_item (
+
+    id VARCHAR(36) PRIMARY KEY,
+
+    return_request_id VARCHAR(36) NOT NULL,
+
+    order_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+
+    quantity INTEGER NOT NULL,
+
+
+    CONSTRAINT fk_return_item_request
+        FOREIGN KEY(return_request_id)
+        REFERENCES return_request(id)
+        ON DELETE CASCADE,
+
+
+    CONSTRAINT fk_return_item_order_detail
+        FOREIGN KEY(order_id, product_id)
+        REFERENCES order_detail(order_id, product_id)
+
+);
+
+
+
+-- ===============================
+-- RETURN EVIDENCE
+-- ===============================
+
+CREATE TABLE return_evidence (
+
+    id BIGSERIAL PRIMARY KEY,
+
+    return_request_id VARCHAR(36) NOT NULL,
+
+    image_url TEXT NOT NULL,
+
+    image_data BYTEA,
+
+    file_name VARCHAR(255),
+
+    content_type VARCHAR(255),
+
+    description TEXT,
+
+
+    CONSTRAINT fk_return_evidence_request
+        FOREIGN KEY(return_request_id)
+        REFERENCES return_request(id)
+        ON DELETE CASCADE
+
+);
+
+
+
+-- ===============================
+-- RETURN EXCHANGE PRODUCT
+-- ===============================
+
+CREATE TABLE return_exchange_product (
+
+    id BIGSERIAL PRIMARY KEY,
+
+    return_request_id VARCHAR(36) NOT NULL UNIQUE,
+
+    product_id BIGINT NOT NULL,
+
+    quantity INTEGER NOT NULL DEFAULT 1,
+
+
+    CONSTRAINT fk_exchange_request
+        FOREIGN KEY(return_request_id)
+        REFERENCES return_request(id)
+        ON DELETE CASCADE,
+
+
+    CONSTRAINT fk_exchange_product
+        FOREIGN KEY(product_id)
+        REFERENCES products(id)
+
+);
 
 CREATE TABLE role
 (
