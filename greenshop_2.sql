@@ -17,9 +17,9 @@ DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS role CASCADE;
 DROP TABLE IF EXISTS wishlist_items CASCADE;
 DROP TABLE IF EXISTS policies CASCADE;
-DROP TYPE IF EXISTS order_status;
-DROP TABLE IF EXISTS return_request_item;
-DROP TYPE IF EXISTS return_request;
+DROP TYPE IF EXISTS order_status CASCADE;
+DROP TABLE IF EXISTS return_request_item CASCADE;
+DROP TYPE IF EXISTS return_request CASCADE;
 
 -- ===============================
 -- RETURN REQUEST
