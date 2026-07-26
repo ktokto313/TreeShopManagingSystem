@@ -70,6 +70,18 @@ public class ProductController {
     }
 
     /**
+     * Retrieves featured products for the homepage.
+     * Typically returns newly added and recommended products for promotional display.
+     * 
+     * @return HomepageFeaturedResponse containing featured product lists
+     */
+    @GetMapping("/best-sellers")
+    public ResponseEntity<HomepageFeaturedResponse> getBestSellers() {
+        HomepageFeaturedResponse response = productService.getBestSellers();
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Retrieves a single product by ID with full details (description, care guide, images, etc.).
      * 
      * @param id the product ID
@@ -80,18 +92,6 @@ public class ProductController {
         return productService.getProduct(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
-    }
-
-    /**
-     * Retrieves featured products for the homepage.
-     * Typically returns newly added and recommended products for promotional display.
-     * 
-     * @return HomepageFeaturedResponse containing featured product lists
-     */
-    @GetMapping("/best-sellers")
-    public ResponseEntity<HomepageFeaturedResponse> getBestSellers() {
-        HomepageFeaturedResponse response = productService.getBestSellers();
-        return ResponseEntity.ok(response);
     }
 
     /**
