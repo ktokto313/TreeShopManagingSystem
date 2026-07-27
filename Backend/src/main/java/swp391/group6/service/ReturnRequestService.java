@@ -435,18 +435,6 @@ public class ReturnRequestService {
         return request;
     }
 
-    // Shared helper: loads the request and overwrites its status with no other side effects.
-    private ReturnRequest updateStatus(
-            String id,
-            ReturnStatus status
-    ) {
-        ReturnRequest request =
-                getRequestDetail(id);
-
-        request.setStatus(status);
-        return request;
-    }
-
     // Recalculates and stores the price difference (exchange product price vs. returned item
     // value) for an EXCHANGE request; throws if the request isn't an exchange.
     public BigDecimal calculatePriceDifference(String id) {
@@ -498,16 +486,23 @@ public class ReturnRequestService {
                         diff
                 );
 
-            } else if (diff != null && diff.compareTo(BigDecimal.ZERO) < 0) {
+            } else {
 
-                request.setRefundAmount(diff.abs());
+                if (diff != null && diff.compareTo(BigDecimal.ZERO) < 0) {
 
-                notificationService.notifyUserByTemplate(
-                        request.getCustomer().getId(),
-                        NotificationType.RETURN_REFUND_PROCESSED,
-                        "RETURN_REFUND_CUSTOMER",
-                        request.getId()
-                );
+                    request.setRefundAmount(diff.abs());
+
+                    notificationService.notifyUserByTemplate(
+                            request.getCustomer().getId(),
+                            NotificationType.RETURN_REFUND_PROCESSED,
+                            "RETURN_REFUND_CUSTOMER",
+                            request.getId()
+                    );
+                }
+
+                // No additional payment owed — ship the exchange product right away.
+                request.setFinancialProcessed(true);
+                createExchangeOrder(request);
             }
 
             request.setStatus(ReturnStatus.PROCESSING);
@@ -531,9 +526,6 @@ public class ReturnRequestService {
     }
 
     // Step: Customer confirms they have paid the additional amount for an exchange.
-    // BR: only valid when status is PROCESSING, type EXCHANGE, and additionalPayment
-    // was set by the manager; marks financialProcessed and creates the order that
-    // ships the exchanged product, per swimlane "Create new order with status Processing".
     public ReturnRequest confirmAdditionalPayment(String id) {
 
         ReturnRequest request = getRequestDetail(id);
@@ -692,6 +684,13 @@ public class ReturnRequestService {
         r.setAccountNumber(dto.getAccountNumber());
         r.setAccountHolder(dto.getAccountHolder());
 
+        r.setManagerNote(String.format(
+                "Refund bank info: %s - %s - %s",
+                dto.getBankName(),
+                dto.getAccountNumber(),
+                dto.getAccountHolder()
+        ));
+
         return returnRequestRepository.save(r);
     }
 
@@ -708,7 +707,9 @@ public class ReturnRequestService {
             );
         }
 
-        if (r.getReturnType() == ReturnType.RETURN
+        boolean refundOwed = r.getRefundAmount() != null;
+
+        if (refundOwed
                 && (r.getBankName() == null
                 || r.getAccountNumber() == null
                 || r.getAccountHolder() == null)) {
