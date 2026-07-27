@@ -24,6 +24,7 @@ public class ProductResponse {
     private String difficulty;
     private String fengShuiElement;
     private String images;
+    private String categoryName;
 
     public Long getId() {
         return id;
@@ -143,5 +144,13 @@ public class ProductResponse {
 
     public void setImages(String images) {
         this.images = images;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 }

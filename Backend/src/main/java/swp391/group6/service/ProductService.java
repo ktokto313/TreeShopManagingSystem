@@ -307,6 +307,7 @@ public class ProductService {
         ProductResponse response = new ProductResponse();
         response.setId(product.getId());
         response.setCategoryId(product.getCategory().getId());
+        response.setCategoryName(product.getCategory().getName());
         response.setName(product.getName());
         response.setPrice(product.getPrice());
         response.setStock(product.getStock());

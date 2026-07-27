@@ -148,7 +148,7 @@ export default function FeaturedProducts() {
                                     <CatalogProductCard 
                                         product={product} 
                                         onOpen={handleOpen} 
-                                        categoryName={product.category?.name}
+                                        categoryName={product.categoryName}
                                         onAdd={handleAddToCart}
                                         onWishlist={handleWishlistAction}
                                         isAdding={addingProductId === productId}
