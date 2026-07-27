@@ -229,11 +229,6 @@ public class ReturnRequestController {
 
         var data =
                 returnRequestService.getCustomerRequests(customerId);
-
-        System.out.println(
-                "CUSTOMER RETURN SIZE = " + data.size()
-        );
-
         return ResponseEntity.ok(data);
     }
 

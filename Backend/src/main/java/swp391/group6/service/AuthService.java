@@ -75,7 +75,7 @@ public class AuthService {
         loginAttempts.remove(clientIp);
 
         String role = user.getRole() != null ? user.getRole().getName() : "CUSTOMER";
-        return new LoginResponse(user.getEmail(), user.getFullName(), role);
+        return new LoginResponse(user.getId(), user.getEmail(), user.getFullName(), role);
     }
 
     // BR-01: If a user inputs incorrect login details 5 times continuously,

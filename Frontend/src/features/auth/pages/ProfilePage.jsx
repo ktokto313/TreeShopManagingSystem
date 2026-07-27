@@ -30,7 +30,7 @@ export default function ProfilePage() {
 
   function handleChangePassword() {
     if (!profile.hasPassword) {
-      alert('Tài khoản Google không có mật khẩu. Vui lòng sử dụng đăng nhập Google.')
+      alert('Tài khoản Google không có mật khẩu. Vui lòng sử dụng đăng nhập.')
       return
     }
     navigate('/change-password')

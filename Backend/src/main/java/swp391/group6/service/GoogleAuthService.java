@@ -48,8 +48,8 @@ public class GoogleAuthService {
     public Object handleGoogleLogin(String credential, HttpServletResponse response) {
         GoogleIdToken.Payload payload = verifyToken(credential);
 
-        String email  = payload.getEmail();
-        String name   = (String) payload.get("name");
+        String email = payload.getEmail();
+        String name = (String) payload.get("name");
 
         Optional<User> existing = userRepository.findByEmail(email);
 
@@ -60,6 +60,7 @@ public class GoogleAuthService {
             }
 
             LoginResponse loginResponse = new LoginResponse(
+                    user.getId(),
                     user.getEmail(),
                     user.getFullName(),
                     user.getRole() != null ? user.getRole().getName() : "CUSTOMER"
@@ -76,7 +77,7 @@ public class GoogleAuthService {
         }
 
         // New user — ask frontend to collect name + phone
-        GoogleAuthResponse googleAuthResponse = new GoogleAuthResponse(true,email,name);
+        GoogleAuthResponse googleAuthResponse = new GoogleAuthResponse(true, email, name);
         googleAuthResponse.setNewUser(true);
         googleAuthResponse.setEmail(email);
         googleAuthResponse.setFullName(name);
@@ -99,9 +100,10 @@ public class GoogleAuthService {
         userRepository.save(user);
 
         LoginResponse loginResponse = new LoginResponse(
+                user.getId(),
                 user.getEmail(),
                 user.getFullName(),
-                "CUSTOMER"
+                user.getRole() != null ? user.getRole().getName() : "CUSTOMER"
         );
         String jwt = JWTUtil.createToken(loginResponse);
         ResponseCookie cookie = CookieUtil.makeCookieFromJWT(jwt);
