@@ -32,7 +32,7 @@ function attachCategoryName(product, categoryMap) {
 }
 
 function collectPurchaseSignals(orders, products) {
-	const productBySku = new Map(products.map((product) => [normalizeText(product.sku), product]));
+	const productById = new Map(products.map((product) => [String(product.id), product]));
 
 	const purchasedProductIds = new Set();
 	const purchasedCategories = new Map();
@@ -48,12 +48,12 @@ function collectPurchaseSignals(orders, products) {
 	for (const order of sortedOrders) {
 		const details = Array.isArray(order?.orderDetailList) ? order.orderDetailList : [];
 		for (const detail of details) {
-			const sku = normalizeText(detail?.sku);
-			if (!sku) {
+			const productId = String(detail?.productId);
+			if (!productId || productId === 'null' || productId === 'undefined') {
 				continue;
 			}
 
-			const matchedProduct = productBySku.get(sku);
+			const matchedProduct = productById.get(productId);
 			if (!matchedProduct) {
 				continue;
 			}
