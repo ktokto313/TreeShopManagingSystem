@@ -282,7 +282,8 @@ export default function RecommendationSection() {
 				if (isAuthenticated) {
 					try {
 						const orderData = await requestJson("/api/orders");
-						orders = Array.isArray(orderData) ? orderData : [];
+						// /api/orders returns Page<OrderListDTO>, extract content array
+						orders = Array.isArray(orderData?.content) ? orderData.content : [];
 					} catch (error) {
 						if (error?.status !== 401) {
 							throw error;
