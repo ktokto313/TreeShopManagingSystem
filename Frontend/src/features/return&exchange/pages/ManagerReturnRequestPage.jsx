@@ -55,9 +55,19 @@ export default function ManagerReturnRequestPage() {
     }
 
     async function reject(reason) {
-        await decideRequest(selected.id, "DECLINE", reason);
-        closeDetail();
-        load();
+        if (!reason || !reason.trim()) {
+            alert("Vui lòng nhập lý do từ chối");
+            return;
+        }
+
+        try {
+            await decideRequest(selected.id, "DECLINE", reason.trim());
+            closeDetail();
+            load();
+        } catch (error) {
+            console.error(error);
+            alert("Không thể từ chối yêu cầu");
+        }
     }
 
     async function handleRequestMoreInfo() {
