@@ -104,9 +104,18 @@ public class ProductController {
     @PostMapping
     @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
     public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest request) {
-        return productService.createProduct(request)
-                .map(product -> ResponseEntity.status(HttpStatus.CREATED).body(product))
-                .orElse(ResponseEntity.badRequest().build());
+        Optional<ProductResponse> result = productService.createProduct(request);
+        
+        if (result.isEmpty()) {
+            // Service returned empty - need to determine why and provide specific error
+            // For now, generic validation error
+            throw new org.springframework.web.server.ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Tên sản phẩm hoặc SKU đã tồn tại"
+            );
+        }
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body(result.get());
     }
 
     /**
@@ -147,9 +156,24 @@ public class ProductController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
     public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id, @RequestBody ProductRequest request) {
-        return productService.updateProduct(id, request)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Optional<ProductResponse> result = productService.updateProduct(id, request);
+        
+        if (result.isEmpty()) {
+            // Service returned empty - could be not found or validation failed
+            // Return 404 if product doesn't exist, or 409 if duplicate name/sku
+            if (!productService.getProduct(id).isPresent()) {
+                throw new org.springframework.web.server.ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Sản phẩm không tồn tại"
+                );
+            }
+            throw new org.springframework.web.server.ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Tên sản phẩm hoặc SKU đã tồn tại"
+            );
+        }
+        
+        return ResponseEntity.ok(result.get());
     }
 
     /**

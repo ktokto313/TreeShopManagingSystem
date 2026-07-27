@@ -150,6 +150,9 @@ public class ProductService {
         if (productRepository.existsBySkuIgnoreCase(sku)) {
             return Optional.empty();
         }
+        if (productRepository.existsByNameIgnoreCase(name)) {
+            return Optional.empty();
+        }
 
         Product product = new Product();
         applyRequest(product, request, name, sku, price);
@@ -176,6 +179,9 @@ public class ProductService {
             return Optional.empty();
         }
         if (productRepository.existsBySkuIgnoreCaseAndIdNot(sku, id)) {
+            return Optional.empty();
+        }
+        if (productRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {
             return Optional.empty();
         }
 

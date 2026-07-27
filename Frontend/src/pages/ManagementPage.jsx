@@ -149,7 +149,7 @@ function validateProductImages(files = []) {
 	return "";
 }
 
-function validateProductForm(values) {
+function validateProductForm(values, existingProducts = [], editingProductId = null) {
 	const errors = {};
 	const name = String(values.name ?? "").trim();
 	const sku = String(values.sku ?? "").trim();
@@ -166,6 +166,14 @@ function validateProductForm(values) {
 		errors.name = "Vui lòng nhập tên sản phẩm.";
 	} else if (name.length > 200) {
 		errors.name = "Tên sản phẩm tối đa 200 ký tự.";
+	} else {
+		// Check for duplicate name (case-insensitive)
+		const duplicateByName = existingProducts.find(
+			(p) => p.name.toLowerCase() === name.toLowerCase() && p.id !== editingProductId
+		);
+		if (duplicateByName) {
+			errors.name = "Tên sản phẩm này đã tồn tại.";
+		}
 	}
 
 	if (!sku) {
@@ -593,7 +601,7 @@ export default function ManagementPage() {
 		setNotice("");
 
 		try {
-			const validationErrors = validateProductForm(productForm);
+			const validationErrors = validateProductForm(productForm, products, productForm.id);
 			setProductErrors(validationErrors);
 			if (hasErrors(validationErrors)) {
 				return;
