@@ -15,7 +15,6 @@ import swp391.group6.dto.BlogRequest;
 import swp391.group6.dto.BlogResponse;
 import swp391.group6.dto.BlogTagOption;
 import swp391.group6.model.*;
-import swp391.group6.model.NotificationType;
 import swp391.group6.repository.*;
 
 import java.util.Arrays;
