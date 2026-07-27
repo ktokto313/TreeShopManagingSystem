@@ -9,15 +9,18 @@ import { PageBar } from '../components/ui/PageBar'
 import { AuthContext } from '../context/AuthContext'
 import CatalogProductCard from '../features/catalog/components/CatalogProductCard'
 import { addCartItem } from '../features/cart/cartApi'
-import { loadPublicJson } from '../features/catalog/utils/catalogApi'
 import { matchesCatalogFilters, sortCatalogProducts } from '../features/catalog/utils/catalogUtils'
-import { addWishlistProduct, getWishlistProducts } from '../features/wishlist/wishlistApi'
+import { addWishlistProduct } from '../features/wishlist/wishlistApi'
 import { sortCategories } from '../utils/categorySort'
 import { cn } from '../utils/cn'
+import { useCategories } from '../features/categories/hooks/useCategories'
+import { useProducts } from '../features/products/hooks/useProducts'
+import { getWishlistProducts } from '../features/wishlist/wishlistApi'
 import bg from "../assets/images/catalog-bg.jpg"
 
 const OTHER_CATEGORY_ID = 'other'
 const SMALL_CATEGORY_LIMIT = 10
+const itemsPerPage = 12
 
 const emptyFilters = { //criteria for filter
   keyword: '',
@@ -97,20 +100,22 @@ function toChipText(category) {
 export default function CatalogPage() {
   const navigate = useNavigate()
   const { categoryId: routeCategoryId } = useParams()
-  const { logout, isAuthenticated, canManage } = useContext(AuthContext);
-  const [categories, setCategories] = useState([])
-  const [products, setProducts] = useState([])
-  const [filters, setFilters] = useState(() => ({ //load filter data
+  const { logout, isAuthenticated, canManage } = useContext(AuthContext)
+  
+  // Use custom hooks for data fetching
+  const { categories, isLoading: categoriesLoading, error: categoriesError, loadCategories } = useCategories()
+  const { products, isLoading: productsLoading, error: productsError, loadProducts } = useProducts()
+  
+  // Local state for UI
+  const [filters, setFilters] = useState(() => ({
     ...emptyFilters,
     categoryId: routeCategoryId ?? '',
   }))
-
   const [showFilters, setShowFilters] = useState(true)
   const [notice, setNotice] = useState('')
   const [addingProductId, setAddingProductId] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [wishlistIds, setWishlistIds] = useState(new Set())
-  const itemsPerPage = 12
 
   useEffect(() => {
     if (routeCategoryId !== undefined) {
@@ -143,54 +148,6 @@ export default function CatalogPage() {
   }
 
   /**
-   * Loads all catalog data (categories and products) from API.
-   * Categories are sorted using project's standard sort order.
-   * Only loads active products (status=true).
-   * Sets error notice if loading fails.
-   */
-  async function loadCatalogData() {
-    setNotice('')
-
-    try {
-      const [categoryData, productData] = await Promise.all([
-        loadPublicJson('/api/categories'),
-        loadPublicJson('/api/products?status=true'),
-      ])
-      setCategories(Array.isArray(categoryData) ? sortCategories(categoryData) : [])
-      setProducts(Array.isArray(productData) ? productData : [])
-    } catch (error) {
-      if (handleAuthError(error)) {
-        return
-      }
-      setNotice(error.message)
-    }
-  }
-
-  /**
-   * Loads the authenticated user's wishlist.
-   * Populates wishlistIds Set for O(1) lookup when rendering product cards.
-   * If not authenticated, clears wishlist IDs.
-   */
-  async function loadWishlistData() {
-    if (!isAuthenticated) {
-      setWishlistIds(new Set())
-      return
-    }
-
-    try {
-      const wishlistProducts = await getWishlistProducts()
-      setWishlistIds(
-        new Set((Array.isArray(wishlistProducts) ? wishlistProducts : []).map((product) => product.id)),
-      )
-    } catch (error) {
-      if (handleAuthError(error)) {
-        return
-      }
-      setWishlistIds(new Set())
-    }
-  }
-
-  /**
    * Updates a single filter value and resets pagination to page 1.
    * This triggers useMemo to recalculate visibleProducts.
    * 
@@ -216,14 +173,47 @@ export default function CatalogPage() {
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadCatalogData()
+    // Load categories and products on mount
+    void loadCategories()
+    void loadProducts({ status: true })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadWishlistData()
+    // Show error if categories failed to load
+    if (categoriesError) {
+      setNotice(categoriesError.message || 'Không thể tải danh mục.')
+    }
+  }, [categoriesError])
+
+  useEffect(() => {
+    // Show error if products failed to load
+    if (productsError) {
+      setNotice(productsError.message || 'Không thể tải sản phẩm.')
+    }
+  }, [productsError])
+
+  useEffect(() => {
+    // Load wishlist when authentication state changes
+    if (!isAuthenticated) {
+      setWishlistIds(new Set())
+      return
+    }
+
+    const loadWishlist = async () => {
+      try {
+        const wishlistProducts = await getWishlistProducts()
+        setWishlistIds(
+          new Set((Array.isArray(wishlistProducts) ? wishlistProducts : []).map((product) => product.id)),
+        )
+      } catch (error) {
+        if (!handleAuthError(error)) {
+          setWishlistIds(new Set())
+        }
+      }
+    }
+
+    void loadWishlist()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated])
 
@@ -238,9 +228,13 @@ export default function CatalogPage() {
     setCurrentPage(1)
   }, [routeCategoryId])
 
+  const sortedCategories = useMemo(() => {
+    return sortCategories(categories)
+  }, [categories])
+
   const categoryLookup = useMemo(
-    () => new Map(categories.map((category) => [String(category.id), category.name])),
-    [categories],
+    () => new Map(sortedCategories.map((category) => [String(category.id), category.name])),
+    [sortedCategories],
   )
 
   const productsWithCategoryName = useMemo(() => {
@@ -251,13 +245,13 @@ export default function CatalogPage() {
   }, [products, categoryLookup])
 
   const baseCategoryCounts = useMemo(() => {
-    return categories.map((category) => ({
+    return sortedCategories.map((category) => ({
       ...category,
       count: productsWithCategoryName.filter(
         (product) => String(product.categoryId) === String(category.id),
       ).length,
     }))
-  }, [categories, productsWithCategoryName])
+  }, [sortedCategories, productsWithCategoryName])
 
   const smallCategoryIds = useMemo(() => {
     return new Set(
@@ -304,7 +298,7 @@ export default function CatalogPage() {
 
   const selectedCategory = filters.categoryId === OTHER_CATEGORY_ID
     ? { id: OTHER_CATEGORY_ID, name: 'Khác' }
-    : categories.find(
+    : sortedCategories.find(
       (category) => String(category.id) === String(filters.categoryId),
     )
 
@@ -449,6 +443,12 @@ export default function CatalogPage() {
             {notice}
           </div>
         ) : null}
+
+        {(categoriesLoading || productsLoading) && (
+          <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+            Đang tải dữ liệu...
+          </div>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
           {showFilters ? (
