@@ -5,9 +5,10 @@ import ShipperSelect from "./ShipperSelect";
 import ORDER_STATUS_MAP from "./data/orderStatusMap";
 import useUpdateShipper from "./hooks/useUpdateShipper";
 import useFetchOrderDetail from "./hooks/useFetchOrderDetail";
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import useChangeOrderStatus from "./hooks/useChangeOrderStatus";
+import useUpdateOrderAddress from "./hooks/useUpdateOrderAddress";
 import ReviewModal from "../review/components/ReviewModal";
 
 function buildVietQrUrl(orderId, amount) {
@@ -41,6 +42,9 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
 
   const { user } = useContext(AuthContext);
   const { changeOrderStatus, isLoading: isChangingStatus } = useChangeOrderStatus();
+  const { updateAddress, isLoading: isUpdatingAddress } = useUpdateOrderAddress();
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [editingAddressValue, setEditingAddressValue] = useState('');
 
   useEffect(() => {
     fetchOrderDetail(selectedOrderId);
@@ -160,9 +164,58 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
             <p className="text-xs text-black/80 leading-relaxed">
               {selectedOrder.customerPhone || 'Không có số điện thoại khách hàng.'}
             </p>
-            <p className="text-xs text-black/80 leading-relaxed">
-              {selectedOrder.shippingAddress || 'Không có địa chỉ giao hàng.'}
-            </p>
+            <div className="text-xs text-black/80 leading-relaxed flex flex-wrap items-center justify-between gap-2 mt-1">
+              {isEditingAddress ? (
+                <div className="flex-1 flex gap-2 w-full">
+                  <input 
+                    type="text" 
+                    className="flex-1 border border-border/50 rounded px-2 py-1.5 text-xs outline-none focus:border-interactive transition-colors" 
+                    value={editingAddressValue}
+                    onChange={(e) => setEditingAddressValue(e.target.value)}
+                    disabled={isUpdatingAddress}
+                  />
+                  <Button 
+                    variant="primary" 
+                    className="px-3 py-1.5 text-xs whitespace-nowrap"
+                    disabled={isUpdatingAddress}
+                    onClick={async () => {
+                      const success = await updateAddress(selectedOrder.id, editingAddressValue);
+                      if (success) {
+                        setIsEditingAddress(false);
+                        fetchOrderDetail(selectedOrderId);
+                        onOrderChange?.();
+                      }
+                    }}
+                  >
+                    Lưu
+                  </Button>
+                  <Button 
+                    variant="secondary" 
+                    className="px-3 py-1.5 text-xs whitespace-nowrap"
+                    disabled={isUpdatingAddress}
+                    onClick={() => setIsEditingAddress(false)}
+                  >
+                    Hủy
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <span className="flex-1">{selectedOrder.shippingAddress || 'Không có địa chỉ giao hàng.'}</span>
+                  {selectedOrder.status === 'PROCESSING' && user?.role === 'CUSTOMER' && (
+                    <Button 
+                      variant="secondary" 
+                      className="text-[10px] px-3 py-1 h-auto min-h-0"
+                      onClick={() => {
+                        setEditingAddressValue(selectedOrder.shippingAddress || '');
+                        setIsEditingAddress(true);
+                      }}
+                    >
+                      Sửa
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
           </div>
           
           {/* Shipper Information */}

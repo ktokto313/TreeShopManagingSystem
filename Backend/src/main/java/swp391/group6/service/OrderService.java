@@ -25,6 +25,7 @@ import swp391.group6.repository.UserRepository;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -84,17 +85,21 @@ public class OrderService {
         return order.orElse(null);
     }
 
-    @PreAuthorize("hasAnyRole('MANAGER')")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'MANAGER')")
     public boolean changeOrder(LoginResponse loginResponse, long id, OrderDTO order) {
         User user = userRepository.findByEmail(loginResponse.getEmail()).orElse(null);
-        if (user == null || !user.getRole().getName().equals("MANAGER")) {
-            return false;
-        }
         Order existingOrder = orderRepository.findById(id).orElse(null);
         if (existingOrder == null) {
             return false;
         }
-        if (order.getShipperId() > 0) {
+        if (order.getShippingAddress() != null && !order.getShippingAddress().trim().isEmpty() &&
+                loginResponse.getRole().equals("CUSTOMER")) {
+            if (existingOrder.getUser().getId() == user.getId() && existingOrder.getStatus() == OrderStatus.PROCESSING) {
+                existingOrder.setShippingAddress(order.getShippingAddress());
+                orderRepository.save(existingOrder);
+                return true;
+            }
+        } else if (order.getShipperId() != null || order.getShipperId() > 0 && loginResponse.getRole().equals("MANAGER")) {
             User newShipper = userRepository.findById(order.getShipperId()).orElse(null);
             if (newShipper != null) {
                 existingOrder.setShipper(newShipper);

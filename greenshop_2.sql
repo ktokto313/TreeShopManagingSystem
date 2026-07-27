@@ -20,6 +20,9 @@ DROP TABLE IF EXISTS policies CASCADE;
 DROP TYPE IF EXISTS order_status CASCADE;
 DROP TABLE IF EXISTS return_request_item CASCADE;
 DROP TABLE IF EXISTS return_request CASCADE;
+DROP TABLE IF EXISTS return_evidence CASCADE;
+DROP TABLE IF EXISTS return_exchange_product CASCADE;
+
 
 CREATE TABLE role
 (
