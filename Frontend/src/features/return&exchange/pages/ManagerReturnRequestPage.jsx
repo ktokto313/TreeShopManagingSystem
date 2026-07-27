@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     getManagerRequests,
     getRequestDetail,
@@ -13,6 +14,7 @@ import ReturnRequestCard from "../components/ReturnRequestCard";
 import ReturnDecisionModal from "../components/ReturnDecisionModal";
 
 export default function ManagerReturnRequestPage() {
+    const navigate = useNavigate();
 
     const [requests, setRequests] = useState([]);
     const [selected, setSelected] = useState(null);
@@ -109,9 +111,18 @@ export default function ManagerReturnRequestPage() {
         <main className="bg-gradient-to-br from-green-50 to-white min-h-screen">
             <div className="max-w-5xl mx-auto py-10">
 
-                <h1 className="text-3xl font-bold text-green-800">
-                    Quản lý yêu cầu đổi trả
-                </h1>
+                <div className="flex justify-between items-center">
+                    <h1 className="text-3xl font-bold text-green-800">
+                        Quản lý yêu cầu đổi trả
+                    </h1>
+
+                    <button
+                        onClick={() => navigate('/return-requests/report')}
+                        className="px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 cursor-pointer text-sm font-medium transition"
+                    >
+                        Xem báo cáo
+                    </button>
+                </div>
 
                 {loadingDetail && (
                     <p className="text-sm text-stone-500 mt-2">
