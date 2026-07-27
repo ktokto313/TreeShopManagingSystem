@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useResetPassword } from "../hooks/useResetPassword";
 
@@ -20,7 +21,17 @@ export default function ResetPasswordPage() {
         handleResetPassword,
     } = useResetPassword();
 
+    const [confirmPassword, setConfirmPassword] = useState("");
+
     const isValidEmail = (email) => /^\S+@\S+\.\S+$/.test(email);
+    const isPasswordMismatch =
+        confirmPassword.length > 0 && newPassword !== confirmPassword;
+    const canSubmit =
+        step >= 3 &&
+        !loading &&
+        newPassword.length > 0 &&
+        confirmPassword.length > 0 &&
+        newPassword === confirmPassword;
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-green-100">
@@ -103,9 +114,25 @@ export default function ResetPasswordPage() {
                     className="w-full border p-2 mb-4 rounded focus:outline-none focus:ring-2 focus:ring-green-400 disabled:bg-gray-100"
                 />
 
+                {/* CONFIRM PASSWORD */}
+                <input
+                    type="password"
+                    placeholder="Xác nhận mật khẩu mới"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    disabled={step < 3 || loading}
+                    className="w-full border p-2 mb-1 rounded focus:outline-none focus:ring-2 focus:ring-green-400 disabled:bg-gray-100"
+                />
+                {isPasswordMismatch && (
+                    <p className="text-xs text-red-500 mb-3">
+                        Mật khẩu xác nhận không khớp
+                    </p>
+                )}
+                {!isPasswordMismatch && <div className="mb-4" />}
+
                 <button
                     onClick={() => handleResetPassword(navigate)}
-                    disabled={step < 3 || loading}
+                    disabled={!canSubmit}
                     className="w-full bg-green-600 text-white py-2 rounded
                                hover:bg-green-500 transition
                                disabled:opacity-50 disabled:cursor-not-allowed"

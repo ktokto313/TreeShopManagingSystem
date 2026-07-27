@@ -4,6 +4,8 @@ import {Card} from '../../../components/ui/Card'
 import {Input} from '../../../components/ui/Input'
 import { useProfile } from '../hooks/useProfile'
 
+const PHONE_REGEX = /^(0[3|5|7|8|9])+([0-9]{8})$/
+
 export default function ProfilePage() {
   const navigate = useNavigate()
 
@@ -22,12 +24,21 @@ export default function ProfilePage() {
   if (loading) return <div className="p-6 text-center text-gray-500">Loading...</div>
   if (!profile) return <div className="p-6 text-center text-red-500">Không thể tải thông tin người dùng</div>
 
+  const isPhoneValid = PHONE_REGEX.test(formData.phone)
+  const isPhoneInvalid = isEditing && formData.phone.length > 0 && !isPhoneValid
+  const canSave = isEditing && !submitting && isPhoneValid
+
   function handleChangePassword() {
     if (!profile.hasPassword) {
       alert('Tài khoản Google không có mật khẩu. Vui lòng sử dụng đăng nhập Google.')
       return
     }
     navigate('/change-password')
+  }
+
+  function handleSaveClick() {
+    if (!isPhoneValid) return
+    handleSave()
   }
 
   return (
@@ -60,8 +71,8 @@ export default function ProfilePage() {
                         Hủy
                       </button>
                       <button
-                          onClick={handleSave}
-                          disabled={submitting}
+                          onClick={handleSaveClick}
+                          disabled={!canSave}
                           className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 cursor-pointer text-sm font-medium transition disabled:opacity-50"
                       >
                         {submitting ? 'Đang lưu...' : 'Lưu'}
@@ -85,6 +96,11 @@ export default function ProfilePage() {
                   onChange={(e) => handleInputChange(e, 'phone')}
                   disabled={!isEditing || submitting}
               />
+              {isPhoneInvalid && (
+                  <p className="text-xs text-red-500 -mt-3">
+                    Số điện thoại không hợp lệ (VD: 0912345678)
+                  </p>
+              )}
               <Input
                   label="Trạng thái"
                   value={profile.status ? 'Hoạt động' : 'Bị khóa'}

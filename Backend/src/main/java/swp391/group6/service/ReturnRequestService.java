@@ -4,7 +4,7 @@
  * Name: ReturnRequestService.java
  * Description:
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-07-26
+ * Last Change Date: 2026-07-27
  */
 package swp391.group6.service;
 
@@ -57,7 +57,7 @@ public class ReturnRequestService {
         this.notificationService = notificationService;
     }
 
-    // Customer gets orders that can be returned/exchanged
+    // Returns all orders belonging to the customer that are eligible to start a return/exchange request.
     public List<Order> getAvailableOrders(String customerId) {
 
         return returnOrderRepository.findAvailableOrders(
@@ -65,7 +65,7 @@ public class ReturnRequestService {
         );
     }
 
-    // Customer selects order -> get products
+    // Returns the line items of a given order so the customer can pick which products to return.
     public List<OrderDetail> getOrderItems(String orderId) {
 
         Order order = orderRepository.findById(
@@ -77,7 +77,7 @@ public class ReturnRequestService {
         return order.getOrderDetailList();
     }
 
-    // Products available for exchange
+    // Returns all active (in-stock) products the customer can choose as an exchange target.
     public List<Product> getAvailableProducts() {
 
         return productRepository.findAll()
@@ -86,7 +86,10 @@ public class ReturnRequestService {
                 .toList();
     }
 
-    // Customer creates return/exchange request
+    // Creates a new return/exchange request: validates order ownership, blocks duplicate
+    // active requests on the same order (BR), enforces the min-2-images rule for DAMAGED (BR-?),
+    // builds items/evidence/exchange-product sub-entities, computes the expected fee, saves the
+    // request, and notifies the Manager role.
     public ReturnRequest submitRequest(
             String customerId,
             ReturnRequestDTO dto
@@ -231,6 +234,9 @@ public class ReturnRequestService {
         return saved;
     }
 
+    // Computes the expected fee at request-creation time: returned items' value at 85% of price,
+    // negated for a pure RETURN (refund owed to customer), or exchange-product price minus that
+    // value for an EXCHANGE (positive = customer owes more, negative = customer is owed a refund).
     private BigDecimal calculateExpectedFee(
             List<ReturnRequestItem> items,
             Product exchangeProduct
@@ -275,12 +281,14 @@ public class ReturnRequestService {
                         RoundingMode.HALF_UP
                 );
     }
+
+    // Returns all requests currently awaiting Manager review.
     public List<ReturnRequest> getPendingRequests() {
         return returnRequestRepository
                 .findByStatus(ReturnStatus.PENDING);
     }
 
-
+    // Fetches a single return/exchange request by id, or throws if not found.
     public ReturnRequest getRequestDetail(String id) {
         return returnRequestRepository.findById(id)
                 .orElseThrow(
@@ -290,7 +298,7 @@ public class ReturnRequestService {
                 );
     }
 
-
+    // Manager approves a PENDING request, moving it to APPROVED and notifying the customer.
     public ReturnRequest approveRequest(String id) {
         ReturnRequest request = getRequestDetail(id);
 
@@ -314,7 +322,8 @@ public class ReturnRequestService {
         return request;
     }
 
-
+    // Manager (or the cancel flow) rejects a request with a reason, moving it to REJECTED,
+    // recording the reason as the manager note, and notifying the customer.
     public ReturnRequest rejectRequest(
             String id,
             String reason
@@ -338,7 +347,8 @@ public class ReturnRequestService {
         return request;
     }
 
-    // Step: Customer cancels their own pending request.
+    // Customer cancels their own request while it's still PENDING (reuses the reject flow with
+    // a fixed "Cancelled by customer" note).
     public ReturnRequest cancelRequest(String id) {
 
         ReturnRequest request = getRequestDetail(id);
@@ -352,6 +362,7 @@ public class ReturnRequestService {
         return rejectRequest(id, "Cancelled by customer");
     }
 
+    // Manager asks the customer for more evidence/info; just notifies the customer, no status change.
     public ReturnRequest requestMoreInfo(String id) {
         ReturnRequest request =
                 getRequestDetail(id);
@@ -365,6 +376,8 @@ public class ReturnRequestService {
         return request;
     }
 
+    // Customer submits additional info/evidence in response to a Manager's request; updates the
+    // manager note and appends any new evidence images.
     public ReturnRequest updateRequestInfo(
             String id,
             ReturnRequestUpdateDTO dto
@@ -394,21 +407,35 @@ public class ReturnRequestService {
         return request;
     }
 
-
+    // Customer confirms they've shipped the item back on an approved request, moving it to RETURNING.
     public ReturnRequest markReturning(String id) {
-        return updateStatus(
-                id,
-                ReturnStatus.RETURNING
-        );
+        ReturnRequest request = getRequestDetail(id);
+
+        if (request.getStatus() != ReturnStatus.APPROVED) {
+            throw new IllegalStateException(
+                    "Only approved requests can be marked as returning"
+            );
+        }
+
+        request.setStatus(ReturnStatus.RETURNING);
+        return request;
     }
 
+    // Manager confirms the returned/exchanged item has arrived, moving the request to RECEIVED.
     public ReturnRequest confirmReturn(String id) {
-        return updateStatus(
-                id,
-                ReturnStatus.RECEIVED
-        );
+        ReturnRequest request = getRequestDetail(id);
+
+        if (request.getStatus() != ReturnStatus.RETURNING) {
+            throw new IllegalStateException(
+                    "Only returning requests can be marked as received"
+            );
+        }
+
+        request.setStatus(ReturnStatus.RECEIVED);
+        return request;
     }
 
+    // Shared helper: loads the request and overwrites its status with no other side effects.
     private ReturnRequest updateStatus(
             String id,
             ReturnStatus status
@@ -420,6 +447,8 @@ public class ReturnRequestService {
         return request;
     }
 
+    // Recalculates and stores the price difference (exchange product price vs. returned item
+    // value) for an EXCHANGE request; throws if the request isn't an exchange.
     public BigDecimal calculatePriceDifference(String id) {
         ReturnRequest request =
                 getRequestDetail(id);
@@ -445,8 +474,6 @@ public class ReturnRequestService {
     }
 
     // Step: Manager processes payment/refund after receiving the item.
-    // BR: only valid from RECEIVED; computes additionalPayment (EXCHANGE)
-    // or refundAmount (RETURN) and moves the request to PROCESSING.
     public void completePayment(String id) {
 
         ReturnRequest request = getRequestDetail(id);
@@ -471,6 +498,16 @@ public class ReturnRequestService {
                         diff
                 );
 
+            } else if (diff != null && diff.compareTo(BigDecimal.ZERO) < 0) {
+
+                request.setRefundAmount(diff.abs());
+
+                notificationService.notifyUserByTemplate(
+                        request.getCustomer().getId(),
+                        NotificationType.RETURN_REFUND_PROCESSED,
+                        "RETURN_REFUND_CUSTOMER",
+                        request.getId()
+                );
             }
 
             request.setStatus(ReturnStatus.PROCESSING);
@@ -559,6 +596,7 @@ public class ReturnRequestService {
         orderRepository.save(newOrder);
     }
 
+    // Returns all return/exchange requests ever submitted by this customer (any status).
     public List<ReturnRequest> getCustomerRequests(
             String customerId
     ) {
@@ -569,6 +607,8 @@ public class ReturnRequestService {
                 );
     }
 
+    // Builds the Manager's return/exchange report: total request count, completed count,
+    // total refunded, total additional payments collected, and their net revenue impact.
     public ReturnReportDTO getReturnReport() {
 
 
@@ -621,6 +661,8 @@ public class ReturnRequestService {
         );
     }
 
+    // Returns this customer's requests that have been approved (used to filter which orders
+    // are eligible to move to the "Return" action).
     public List<ReturnRequest> getApprovedRequests(String customerId) {
 
         return returnRequestRepository
@@ -630,23 +672,30 @@ public class ReturnRequestService {
                 );
     }
 
+    // Returns every return/exchange request in the system, regardless of status.
     public List<ReturnRequest> getAllRequests(){
         return returnRequestRepository.findAll();
     }
 
+    // Customer submits refund bank details (bank name, account number, account holder) for a
     public ReturnRequest submitRefundInfo(String id, RefundInfoDTO dto){
 
         ReturnRequest r = getRequestDetail(id);
+
+        if (r.getStatus() != ReturnStatus.PROCESSING) {
+            throw new IllegalStateException(
+                    "Refund info can only be submitted while the request is processing"
+            );
+        }
 
         r.setBankName(dto.getBankName());
         r.setAccountNumber(dto.getAccountNumber());
         r.setAccountHolder(dto.getAccountHolder());
 
-        r.setStatus(ReturnStatus.PROCESSING);
-
         return returnRequestRepository.save(r);
     }
 
+    // Manager marks a request as fully done, recording the completion time.
     public void completeByManager(String id){
 
         ReturnRequest r = getRequestDetail(id);
@@ -659,11 +708,21 @@ public class ReturnRequestService {
             );
         }
 
+        if (r.getReturnType() == ReturnType.RETURN
+                && (r.getBankName() == null
+                || r.getAccountNumber() == null
+                || r.getAccountHolder() == null)) {
+            throw new IllegalStateException(
+                    "Refund bank info must be submitted before completing"
+            );
+        }
+
         r.setStatus(ReturnStatus.COMPLETED);
         r.setCompletedAt(LocalDateTime.now());
         returnRequestRepository.save(r);
     }
 
+    // Returns all requests still requiring Manager attention (any non-terminal, non-cancelled status).
     public List<ReturnRequest> getManagerRequests(){
 
         return returnRequestRepository.findByStatusIn(

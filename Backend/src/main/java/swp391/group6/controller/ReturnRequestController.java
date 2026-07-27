@@ -4,7 +4,7 @@
  * Name: ReturnRequestController.java
  * Description:
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-07-26
+ * Last Change Date: 2026-07-27
  */
 package swp391.group6.controller;
 
@@ -33,6 +33,22 @@ public class ReturnRequestController {
 
     @Autowired
     private BlogImageRepository imageRepo;
+
+    // Business-rule preconditions not met (wrong status, missing confirmation, etc.) -> 409
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalState(IllegalStateException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("message", ex.getMessage()));
+    }
+
+    // Bad input (not found, missing required fields, invalid data) -> 400
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("message", ex.getMessage()));
+    }
 
     // Step: Customer submits a new return/exchange request.
     @PostMapping

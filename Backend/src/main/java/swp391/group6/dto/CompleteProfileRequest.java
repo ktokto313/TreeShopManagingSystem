@@ -4,7 +4,7 @@
  * Name: CompleteProfileRequest.java
  * Description:
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-07-16
+ * Last Change Date: 2026-07-27
  */
 package swp391.group6.dto;
 
@@ -15,8 +15,8 @@ public class CompleteProfileRequest {
     private String email;
     private String fullName;
 
-    @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "^(0[3|5|7|8|9])+([0-9]{8})$", message = "Invalid Vietnamese phone number")
+    @NotBlank(message = "Yêu cầu số điện thoại")
+    @Pattern(regexp = "^(0[3|5|7|8|9])+([0-9]{8})$", message = "Số điện thoại không hợp lệ")
     private String phoneNumber;
 
     public String getEmail() { return email; }
