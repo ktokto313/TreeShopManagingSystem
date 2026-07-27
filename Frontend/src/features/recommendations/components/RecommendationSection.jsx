@@ -220,14 +220,9 @@ function RecommendationCard({ product }) {
 				fallbackLabel="Chưa có ảnh"
 			/>
 			<div className="space-y-3 p-4">
-				<div className="flex items-start justify-between gap-3">
-					<div className="space-y-1">
-						<h3 className="font-semibold text-green-950 group-hover:text-green-700">{product.name}</h3>
-						<p className="text-sm text-green-700">{product.categoryName || "Sản phẩm phù hợp"}</p>
-					</div>
-					<span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-						{Math.round(product.matchScore ?? 0)} điểm
-					</span>
+				<div className="space-y-1">
+					<h3 className="font-semibold text-green-950 group-hover:text-green-700">{product.name}</h3>
+					<p className="text-sm text-green-700">{product.categoryName || "Sản phẩm phù hợp"}</p>
 				</div>
 
 				<div className="flex items-center justify-between gap-3">

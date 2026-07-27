@@ -256,7 +256,7 @@ export default function CatalogPage() {
   const smallCategoryIds = useMemo(() => {
     return new Set(
       baseCategoryCounts
-        .filter((category) => category.count > 0 && category.count <= SMALL_CATEGORY_LIMIT)
+        .filter((category) => category.count >= 0 && category.count <= SMALL_CATEGORY_LIMIT)
         .map((category) => String(category.id)),
     )
   }, [baseCategoryCounts])
