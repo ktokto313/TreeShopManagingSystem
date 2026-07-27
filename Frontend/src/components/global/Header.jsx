@@ -44,7 +44,6 @@ const navItemsByRole = {
   SUPPORT_AGENT: [
     { label: 'Trang chủ', to: '/' },
     { label: 'Hỗ trợ', to: '/tickets/' },
-    { label: 'Đơn hàng', to: '/orders' },
     { label: 'Tài khoản', to: '/profile' },
   ],
   SHIPPER: [
