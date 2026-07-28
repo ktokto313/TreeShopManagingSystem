@@ -16,9 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import swp391.group6.dto.*;
 import swp391.group6.model.*;
-import swp391.group6.service.ReturnRequestService;
-import swp391.group6.model.BlogImage;
 import swp391.group6.repository.BlogImageRepository;
+import swp391.group6.service.ReturnRequestService;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
@@ -32,45 +32,88 @@ public class ReturnRequestController {
     private ReturnRequestService returnRequestService;
 
     @Autowired
-    private BlogImageRepository imageRepo;
+    private BlogImageRepository blogImageRepository;
 
-    // Business-rule preconditions not met (wrong status, missing confirmation, etc.) -> 409
+
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalState(IllegalStateException ex) {
+    public ResponseEntity<Map<String, String>> handleIllegalState(
+            IllegalStateException ex) {
+
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(Map.of("message", ex.getMessage()));
     }
 
-    // Bad input (not found, missing required fields, invalid data) -> 400
+
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
+    public ResponseEntity<Map<String, String>> handleIllegalArgument(
+            IllegalArgumentException ex) {
+
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("message", ex.getMessage()));
     }
 
-    // Step: Customer submits a new return/exchange request.
+
+    // Customer gets orders that can be returned/exchanged
+    @GetMapping("/orders")
+    public ResponseEntity<List<Order>> getAvailableOrders(
+            @RequestParam String customerId) {
+
+        return ResponseEntity.ok(
+                returnRequestService.getAvailableOrders(customerId)
+        );
+    }
+
+
+    // Customer selects an order and gets its items
+    @GetMapping("/orders/{orderId}/items")
+    public ResponseEntity<List<OrderDetail>> getOrderItems(
+            @PathVariable String orderId) {
+
+        return ResponseEntity.ok(
+                returnRequestService.getOrderItems(orderId)
+        );
+    }
+
+
+    // Customer selects exchange product
+    @GetMapping("/products")
+    public ResponseEntity<List<Product>> getAvailableProducts() {
+
+        return ResponseEntity.ok(
+                returnRequestService.getAvailableProducts()
+        );
+    }
+
+
+    // Customer submits a new return/exchange request
     @PostMapping
     public ResponseEntity<ReturnRequest> createReturnRequest(
             @RequestParam String customerId,
             @RequestBody ReturnRequestDTO request) {
 
-        ReturnRequest created =
-                returnRequestService.submitRequest(customerId, request);
-
-        return ResponseEntity.ok(created);
+        return ResponseEntity.ok(
+                returnRequestService.submitRequest(
+                        customerId,
+                        request
+                )
+        );
     }
 
-    // Step: Manager opens the list of pending requests.
+
+    // Manager opens pending requests
     @GetMapping("/pending")
-    public ResponseEntity<List<ReturnRequest>> getPendingRequests(){
-        var data = returnRequestService.getPendingRequests();
-        return ResponseEntity.ok(data);
+    public ResponseEntity<List<ReturnRequest>> getPendingRequests() {
+
+        return ResponseEntity.ok(
+                returnRequestService.getPendingRequests()
+        );
     }
 
-    // Step: Manager (or Customer) views a request's detail.
-    @GetMapping("/{id}")
+
+    // Get request detail
+    @GetMapping("/detail/{id}")
     public ResponseEntity<ReturnRequest> getRequestDetail(
             @PathVariable String id) {
 
@@ -79,7 +122,8 @@ public class ReturnRequestController {
         );
     }
 
-    // Step: Manager requests more info from Customer.
+
+    // Manager requests more information
     @PostMapping("/{id}/request-more-info")
     public ResponseEntity<Void> requestMoreInfo(
             @PathVariable String id) {
@@ -89,7 +133,8 @@ public class ReturnRequestController {
         return ResponseEntity.ok().build();
     }
 
-    // Step: Customer provides additional information.
+
+    // Customer submits additional information
     @PutMapping("/{id}/info")
     public ResponseEntity<ReturnRequest> updateRequestInfo(
             @PathVariable String id,
@@ -100,11 +145,18 @@ public class ReturnRequestController {
         );
     }
 
-    // Step: Manager makes final decision.
+
+    // Manager approve/reject decision
     @PostMapping("/{id}/decision")
     public ResponseEntity<ReturnRequest> decideRequest(
             @PathVariable String id,
             @RequestBody FinalDecisionDTO decision) {
+
+        if (decision.getDecision() == null) {
+            throw new IllegalArgumentException(
+                    "Quyết định là bắt buộc"
+            );
+        }
 
         ReturnRequest updated;
 
@@ -124,7 +176,8 @@ public class ReturnRequestController {
         return ResponseEntity.ok(updated);
     }
 
-    // Step: Customer cancels their own pending request (reuses reject flow).
+
+    // Customer cancels pending request
     @PostMapping("/{id}/cancel")
     public ResponseEntity<ReturnRequest> cancelRequest(
             @PathVariable String id) {
@@ -134,7 +187,8 @@ public class ReturnRequestController {
         );
     }
 
-    // Step: Customer confirms returning item.
+
+    // Customer confirms returning item
     @PostMapping("/{id}/return")
     public ResponseEntity<ReturnRequest> markReturning(
             @PathVariable String id) {
@@ -144,7 +198,8 @@ public class ReturnRequestController {
         );
     }
 
-    // Step: Manager confirms received item.
+
+    // Manager confirms returned item
     @PostMapping("/{id}/confirm-return")
     public ResponseEntity<ReturnRequest> confirmReturn(
             @PathVariable String id) {
@@ -161,7 +216,8 @@ public class ReturnRequestController {
         return ResponseEntity.ok(updated);
     }
 
-    // Step: Manager processes payment/refund after receiving item (RECEIVED -> PROCESSING).
+
+    // Manager processes refund/payment
     @PostMapping("/{id}/complete-payment")
     public ResponseEntity<ReturnRequest> completePayment(
             @PathVariable String id) {
@@ -173,7 +229,8 @@ public class ReturnRequestController {
         );
     }
 
-    // Step: Customer confirms they have paid the additional amount for an exchange.
+
+    // Customer confirms additional payment
     @PostMapping("/{id}/confirm-payment")
     public ResponseEntity<ReturnRequest> confirmAdditionalPayment(
             @PathVariable String id) {
@@ -183,36 +240,8 @@ public class ReturnRequestController {
         );
     }
 
-    // Customer gets orders that can be returned/exchanged
-    @GetMapping("/orders")
-    public ResponseEntity<List<Order>> getAvailableOrders(
-            @RequestParam String customerId) {
 
-        return ResponseEntity.ok(
-                returnRequestService.getAvailableOrders(customerId)
-        );
-    }
-
-    // Customer selects an order and gets its items
-    @GetMapping("/orders/{orderId}/items")
-    public ResponseEntity<List<OrderDetail>> getOrderItems(
-            @PathVariable String orderId) {
-
-        return ResponseEntity.ok(
-                returnRequestService.getOrderItems(orderId)
-        );
-    }
-
-    // Customer selects exchange product
-    @GetMapping("/products")
-    public ResponseEntity<List<Product>> getAvailableProducts() {
-
-        return ResponseEntity.ok(
-                returnRequestService.getAvailableProducts()
-        );
-    }
-
-    // Calculate additional payment/refund difference for exchange
+    // Calculate exchange price difference
     @GetMapping("/{id}/price-difference")
     public ResponseEntity<BigDecimal> calculatePriceDifference(
             @PathVariable String id) {
@@ -222,89 +251,126 @@ public class ReturnRequestController {
         );
     }
 
+
+    // Customer request history
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<ReturnRequest>> getCustomerRequests(
-            @PathVariable String customerId
-    ){
+            @PathVariable String customerId) {
 
-        var data =
-                returnRequestService.getCustomerRequests(customerId);
-        return ResponseEntity.ok(data);
+        return ResponseEntity.ok(
+                returnRequestService.getCustomerRequests(customerId)
+        );
     }
 
+
+    // Manager report
     @GetMapping("/manager/report")
-    public ReturnReportDTO getReturnReport(){
+    public ReturnReportDTO getReturnReport() {
 
-        return returnRequestService
-                .getReturnReport();
-
+        return returnRequestService.getReturnReport();
     }
 
+
+    // Approved requests for customer
     @GetMapping("/customer/{customerId}/approved")
     public ResponseEntity<List<ReturnRequest>> getApprovedRequests(
-            @PathVariable String customerId
-    ) {
+            @PathVariable String customerId) {
 
         return ResponseEntity.ok(
                 returnRequestService.getApprovedRequests(customerId)
         );
     }
 
+    // All requests
     @GetMapping
-    public ResponseEntity<List<ReturnRequest>> getAllRequests(){
+    public ResponseEntity<List<ReturnRequest>> getAllRequests() {
+
         return ResponseEntity.ok(
                 returnRequestService.getAllRequests()
         );
     }
 
+
+    // Submit refund bank information
     @PutMapping("/{id}/refund-info")
     public ResponseEntity<ReturnRequest> submitRefundInfo(
             @PathVariable String id,
-            @RequestBody RefundInfoDTO dto
-    ){
+            @RequestBody RefundInfoDTO dto) {
+
         return ResponseEntity.ok(
                 returnRequestService.submitRefundInfo(id, dto)
         );
     }
 
+
+    // Manager completes request
     @PostMapping("/{id}/complete-by-manager")
     public ResponseEntity<Void> completeByManager(
-            @PathVariable String id
-    ){
+            @PathVariable String id) {
+
         returnRequestService.completeByManager(id);
+
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/manager")
-    public ResponseEntity<List<ReturnRequest>> getManagerRequests(){
+
+    // Manager active requests
+    @GetMapping("/manager/active")
+    public ResponseEntity<List<ReturnRequest>> getManagerRequests() {
 
         return ResponseEntity.ok(
                 returnRequestService.getManagerRequests()
         );
     }
 
+    // Upload evidence image
     @PostMapping("/images/upload")
     public ResponseEntity<Map<String, String>> uploadEvidenceImage(
-            @RequestParam("file") MultipartFile file) throws IOException {
+            @RequestParam("file") MultipartFile file)
+            throws IOException {
 
-        if (file.isEmpty())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File trống");
+        if (file.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "File trống"
+            );
+        }
 
         String contentType = file.getContentType();
-        if (contentType == null || !contentType.startsWith("image/"))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Chỉ chấp nhận file ảnh");
+
+        if (contentType == null
+                || !contentType.startsWith("image/")) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Chỉ chấp nhận file ảnh"
+            );
+        }
+
 
         BlogImage img = new BlogImage();
+
         img.setImageData(file.getBytes());
         img.setFileName(file.getOriginalFilename());
         img.setContentType(contentType);
         img.setImageUrl("");
 
-        BlogImage saved = imageRepo.save(img);
-        String url = "/api/blogs/images/" + saved.getId();
-        saved.setImageUrl(url);
-        imageRepo.save(saved);
 
-        return ResponseEntity.ok(Map.of("url", url));
+        BlogImage saved =
+                blogImageRepository.save(img);
+
+
+        String url =
+                "/api/blogs/images/" + saved.getId();
+
+
+        saved.setImageUrl(url);
+
+        blogImageRepository.save(saved);
+
+
+        return ResponseEntity.ok(
+                Map.of("url", url)
+        );
     }
 }

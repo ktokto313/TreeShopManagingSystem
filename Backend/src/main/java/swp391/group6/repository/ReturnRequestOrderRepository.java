@@ -21,11 +21,12 @@ public interface ReturnRequestOrderRepository
 
 
     @Query(value = """
-    SELECT *
-    FROM orders o
-    WHERE o.customer_id = :customerId
-    AND o.status::text = 'RECEIVED'
-    """,
+SELECT *
+FROM orders o
+WHERE o.customer_id = :customerId
+AND o.status::text = 'RECEIVED'
+AND o.delivery_date >= NOW() - INTERVAL '7 days'
+""",
             nativeQuery = true)
     List<Order> findAvailableOrders(
             @Param("customerId") Long customerId

@@ -2,46 +2,193 @@ import { useEffect, useState } from "react";
 import { getAvailableProducts } from "../api/returnRequestApi";
 
 export default function ExchangeProductSelector({
-                                                    product,
-                                                    setProduct
+                                                    products,
+                                                    setProducts
                                                 }) {
-    const [products, setProducts] = useState([]);
+
+    const [availableProducts, setAvailableProducts] = useState([]);
+
 
     useEffect(() => {
         getAvailableProducts()
-            .then(setProducts)
-            .catch(() => setProducts([]));
+            .then(setAvailableProducts)
+            .catch(() =>
+                setAvailableProducts([])
+            );
+
     }, []);
 
+    function addProduct() {
+
+        setProducts([
+            ...products,
+            {
+                productId: "",
+                quantity: 1
+            }
+        ]);
+
+    }
+
+    function removeProduct(index) {
+
+        setProducts(
+            products.filter(
+                (_, i) => i !== index
+            )
+        );
+
+    }
+
+    function updateProduct(
+        index,
+        field,
+        value
+    ) {
+
+        setProducts(
+            products.map(
+                (item, i) => {
+
+                    if (i !== index) {
+                        return item;
+                    }
+
+                    return {
+                        ...item,
+                        [field]:
+                            field === "quantity"
+                                ? Number(value)
+                                : value
+                    };
+
+                }
+            )
+        );
+
+    }
+
     return (
-        <div className="space-y-2">
-            <label className="text-sm font-medium text-stone-700">
+
+        <div className="
+            space-y-4
+        ">
+
+            <label className="
+                text-sm font-medium text-stone-700
+            ">
                 Chọn sản phẩm đổi
             </label>
 
-            <select
-                value={product || ""}
-                onChange={(e) => setProduct(e.target.value)}
-                className="
-                    w-full rounded-lg border border-stone-300
-                    px-3 py-2 text-sm
-                    focus:outline-none focus:ring-2
-                    focus:ring-green-500
-                "
-            >
-                <option value="">
-                    Chọn sản phẩm
-                </option>
+            {
+                products.map(
+                    (item, index) => (
 
-                {products.map((p) => (
-                    <option
-                        key={p.id}
-                        value={p.id}
-                    >
-                        {p.name}
-                    </option>
-                ))}
-            </select>
+                        <div
+                            key={index}
+                            className="
+                                flex items-center
+                                gap-3
+                                border rounded-lg
+                                p-3
+                            "
+                        >
+
+
+                            <select
+
+                                value={item.productId}
+
+                                onChange={(e) =>
+                                    updateProduct(
+                                        index,
+                                        "productId",
+                                        e.target.value
+                                    )
+                                }
+
+                                className="
+                                    flex-1
+                                    border rounded-lg
+                                    px-3 py-2
+                                "
+                            >
+                                <option value="">
+                                    Chọn sản phẩm
+                                </option>
+
+
+                                {
+                                    availableProducts.map(
+                                        product => (
+
+                                            <option
+                                                key={product.id}
+                                                value={product.id}
+                                            >
+                                                {
+                                                    product.name
+                                                }
+                                            </option>
+
+                                        )
+                                    )
+                                }
+
+                            </select>
+                            <input
+                                type="number"
+                                min="1"
+                                value={item.quantity}
+                                onChange={(e) =>
+                                    updateProduct(
+                                        index,
+                                        "quantity",
+                                        e.target.value
+                                    )
+                                }
+                                className="
+                                    w-20
+                                    border rounded-lg
+                                    px-2 py-2
+                                "
+                            />
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    removeProduct(index)
+                                }
+                                className="
+                                    text-red-500
+                                    hover:text-red-700
+                                "
+                            >
+                                Xóa
+                            </button>
+
+                        </div>
+
+                    )
+                )
+            }
+            <div className="pt-2">
+
+                <button
+                    type="button"
+                    onClick={addProduct}
+                    className="
+            px-4 py-2
+            rounded-lg
+            bg-green-500
+            text-white
+            hover:bg-green-600
+            transition
+        "
+                >
+                    + Thêm sản phẩm đổi
+                </button>
+
+            </div>
         </div>
     );
 }

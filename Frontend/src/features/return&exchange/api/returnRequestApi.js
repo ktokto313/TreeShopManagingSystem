@@ -44,7 +44,7 @@ export function getPendingRequests() {
 
 export function getRequestDetail(id) {
     return requestJson(
-        `${BASE_URL}/${id}`
+        `${BASE_URL}/detail/${id}`
     );
 }
 
@@ -169,7 +169,7 @@ export function getReturnReport() {
 
 export function getManagerRequests() {
     return requestJson(
-        `${BASE_URL}/manager`
+        `${BASE_URL}/manager/active`
     );
 }
 
@@ -179,5 +179,30 @@ export function cancelRequest(id) {
         {
             method: "POST"
         }
+    );
+}
+
+export function uploadEvidenceImage(file) {
+
+    const formData = new FormData();
+
+    formData.append(
+        "file",
+        file
+    );
+
+    return requestJson(
+        `${BASE_URL}/images/upload`,
+        {
+            method: "POST",
+            body: formData
+        }
+    );
+}
+
+export function getAllReturnRequests() {
+
+    return requestJson(
+        `${BASE_URL}`
     );
 }

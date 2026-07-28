@@ -2,7 +2,7 @@
  * Author: HungDLM
  * Created Date: 2026-07-25
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-07-25
+ * Last Change Date: 2026-07-28
  */
 package swp391.group6.dto;
 
@@ -14,14 +14,20 @@ import java.util.List;
 public class ReturnRequestDTO {
 
     private String orderId;
-    private List<OrderDetailQuantityDTO> items;
-    private ReturnReason reason;
-    private List<String> evidenceImageUrls;
-    private ReturnType returnType;
-    private String exchangeProductId;
 
-    public ReturnRequestDTO() {
-    }
+    private List<OrderDetailQuantityDTO> items;
+
+    private ReturnReason reason;
+
+    private List<String> evidenceImageUrls;
+
+    private ReturnType returnType;
+
+    private List<ExchangeProductDTO> exchangeProducts;
+
+
+    public ReturnRequestDTO() {}
+
 
     public String getOrderId() {
         return orderId;
@@ -31,6 +37,7 @@ public class ReturnRequestDTO {
         this.orderId = orderId;
     }
 
+
     public List<OrderDetailQuantityDTO> getItems() {
         return items;
     }
@@ -38,6 +45,7 @@ public class ReturnRequestDTO {
     public void setItems(List<OrderDetailQuantityDTO> items) {
         this.items = items;
     }
+
 
     public ReturnReason getReason() {
         return reason;
@@ -47,6 +55,7 @@ public class ReturnRequestDTO {
         this.reason = reason;
     }
 
+
     public List<String> getEvidenceImageUrls() {
         return evidenceImageUrls;
     }
@@ -54,6 +63,7 @@ public class ReturnRequestDTO {
     public void setEvidenceImageUrls(List<String> evidenceImageUrls) {
         this.evidenceImageUrls = evidenceImageUrls;
     }
+
 
     public ReturnType getReturnType() {
         return returnType;
@@ -63,25 +73,57 @@ public class ReturnRequestDTO {
         this.returnType = returnType;
     }
 
-    public String getExchangeProductId() {
-        return exchangeProductId;
+
+    public List<ExchangeProductDTO> getExchangeProducts() {
+        return exchangeProducts;
     }
 
-    public void setExchangeProductId(String exchangeProductId) {
-        this.exchangeProductId = exchangeProductId;
+    public void setExchangeProducts(List<ExchangeProductDTO> exchangeProducts) {
+        this.exchangeProducts = exchangeProducts;
     }
+
 
     public static class OrderDetailQuantityDTO {
-        private String orderDetailId;
+
+        private String productId;
+
         private Integer quantity;
 
-        public String getOrderDetailId() {
-            return orderDetailId;
+
+        public String getProductId() {
+            return productId;
         }
 
-        public void setOrderDetailId(String orderDetailId) {
-            this.orderDetailId = orderDetailId;
+        public void setProductId(String productId) {
+            this.productId = productId;
         }
+
+
+        public Integer getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(Integer quantity) {
+            this.quantity = quantity;
+        }
+    }
+
+
+    public static class ExchangeProductDTO {
+
+        private String productId;
+
+        private Integer quantity;
+
+
+        public String getProductId() {
+            return productId;
+        }
+
+        public void setProductId(String productId) {
+            this.productId = productId;
+        }
+
 
         public Integer getQuantity() {
             return quantity;

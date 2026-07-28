@@ -103,12 +103,12 @@ public class ReturnRequest {
     )
     private List<ReturnEvidence> evidences = new ArrayList<>();
 
-    @OneToOne(
+    @OneToMany(
             mappedBy = "returnRequest",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private ReturnExchangeProduct exchangeProduct;
+    private List<ReturnExchangeProduct> exchangeProducts = new ArrayList<>();
 
     @PrePersist
     protected void onCreate(){
