@@ -2583,4 +2583,27 @@ VALUES
 (9999, 75, 1, 180000), -- Xương rồng gỗ nhỏ
 (9999, 99, 4, 35000);  -- Chậu sứ trắng 15cm
 
+-- Insert order 1002 to test multiple reviews for the same product across different orders
+INSERT INTO orders (id, customer_id, shipper_id, shipping_address, shipping_fee, discount, status, created_at, delivery_date)
+VALUES (1002, (SELECT id FROM users WHERE email = 'khach1@gmail.com'), 3, '123 Nguyễn Trãi, Quận Thanh Xuân, Hà Nội', 30000, 0, 'RECEIVED', NOW() - INTERVAL '5 days', NOW() - INTERVAL '4 days');
+
+-- Populate order details for order 1002 with the same products as 9999
+INSERT INTO order_detail (order_id, product_id, quantity, price_paid)
+VALUES 
+(1002, 1, 1, 85000),   -- Trầu bà xanh
+(1002, 2, 2, 95000),   -- Lưỡi hổ nhỏ
+(1002, 3, 1, 120000),  -- Kim tiền
+(1002, 5, 1, 75000),   -- Dây leo pothos
+(1002, 6, 1, 250000),  -- Monstera nhỏ
+(1002, 10, 2, 120000), -- Lan ý
+(1002, 12, 1, 45000),  -- Xương rồng tai thỏ
+(1002, 14, 1, 180000), -- Hồng môn đỏ
+(1002, 25, 2, 85000),  -- Hoa giấy
+(1002, 36, 1, 85000),  -- Hương thảo
+(1002, 41, 3, 35000),  -- Sen đá thạch ngọc
+(1002, 47, 1, 180000), -- Kim ngân bàn
+(1002, 62, 2, 55000),  -- Sen đá kim cương
+(1002, 75, 1, 180000), -- Xương rồng gỗ nhỏ
+(1002, 99, 4, 35000);  -- Chậu sứ trắng 15cm
+
 
