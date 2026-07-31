@@ -632,7 +632,9 @@ VALUES (5, 'admin@greenshop.vn', '$2a$10$zUuzRUvsOH8nimZ/6lsPjulnRHrSvOzYJBTTi4o
        (1, 'khach5@gmail.com', '$2a$10$cIjhGxmnba.JgJcr7qi9a.Q25KOvM0O2tucA3l7gpQueqNbyQN6gG', 'Bùi Quang Huy',
         '0912345605', TRUE),
        (1, 'khach6@gmail.com', '$2a$10$lLkYkek4Cc39DHC4WVnWJuKWVJS1nOSmHVdxYYfobuEjxVcbM57f2', 'Lý Thị Mai',
-        '0912345606', TRUE);
+        '0912345606', TRUE),
+       (3, 'shipper2@greenshop.vn', '$2a$10$RMK6dUAy1vJZEMsV3KtUUul.S9Avu307TcVcgxSG0IdkE2xQDrFwS', 'Lê Khánh Toàn',
+        '0826603118', TRUE);
 
 -- ============================================================
 --  CATEGORIES — 6 danh mục

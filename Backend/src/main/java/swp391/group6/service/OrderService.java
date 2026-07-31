@@ -151,12 +151,11 @@ public class OrderService {
 
         if (!isTransitionAllowed(currentStatus, targetStatus, roleName)) {
             throw new InvalidStateTransitionException(
-                    "Cannot transition order from " + currentStatus + " to " + targetStatus
-                            + " with role " + roleName);
-        } else if (targetStatus != OrderStatus.RETURN_PROCESSING && !user.getRole().getName().equals("MANAGER") && order.getShipper() == null) {
+                    "Không thể chuyển trạng thái đơn hàng từ " + currentStatus + " sang " + targetStatus
+                            + " với quyền truy cập " + roleName);
+        } else if ((targetStatus != OrderStatus.RETURN_PROCESSING || targetStatus == OrderStatus.FAILED) && order.getShipper() == null) {
             throw new InvalidStateTransitionException(
-                    "Cannot transition order from " + currentStatus + " to " + targetStatus
-                            + " without shipper");
+                    "Không thể chuyển trạng thái đơn hàng từ mà không có shipper");
         }
 
         if (targetStatus == OrderStatus.ARRIVED) {

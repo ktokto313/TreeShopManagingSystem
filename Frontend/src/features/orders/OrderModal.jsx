@@ -41,12 +41,14 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
   } = useUpdateShipper();
 
   const { user } = useContext(AuthContext);
-  const { changeOrderStatus, isLoading: isChangingStatus } = useChangeOrderStatus();
+  const { changeOrderStatus, isLoading: isChangingStatus, error: changeOrderError } = useChangeOrderStatus();
   const { updateAddress, isLoading: isUpdatingAddress } = useUpdateOrderAddress();
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [editingAddressValue, setEditingAddressValue] = useState('');
+  const [selectedShipperId, setSelectedShipperId] = useState(null);
 
   useEffect(() => {
+    setSelectedShipperId(null);
     fetchOrderDetail(selectedOrderId);
   }, [selectedOrderId, fetchOrderDetail]);
 
@@ -95,27 +97,6 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
             </div>
           </div>
 
-          {/* Shipper Assignment */}
-          {(selectedOrder.status === "PROCESSING" || selectedOrder.status === "RETURN_PROCESSING")
-           && user?.role === "MANAGER" && (
-            <div className="p-3 rounded-lg bg-bg-base border border-border/55">
-              <ShipperSelect
-                value={selectedOrder.shipperId ?? ''}
-                selectedShipperName={selectedOrder.shipperName}
-                onChange={async (shipperId) => {
-                  const didUpdate = await updateShipper(selectedOrder.id, shipperId);
-                  if (didUpdate) {
-                    fetchOrderDetail(selectedOrderId);
-                    onOrderChange?.();
-                  }
-                }}
-                disabled={isUpdatingShipper}
-              />
-              {updateError && (
-                <p className="text-red-500 text-xs mt-1">{updateError}</p>
-              )}
-            </div>
-          )}
 
           {/* Items Section */}
           <div>
@@ -254,7 +235,8 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
           </div>
 
           {/* Payment QR */}
-          {selectedOrder.status === 'PROCESSING' && (
+          {selectedOrder.status === 'PROCESSING' && 
+            user?.role === "CUSTOMER" && (
             <div className="rounded-lg bg-bg-base border border-border/55 p-3">
               <h4 className="text-xs font-bold text-black/60 uppercase tracking-wider mb-2">
                 Mã QR Thanh Toán
@@ -273,6 +255,26 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
             </div>
           )}
 
+          {/* Shipper Assignment */}
+          {["PROCESSING", "RETURN_PROCESSING", "PENDING", "RETURN_PENDING"].includes(selectedOrder.status)
+           && user?.role === "MANAGER" && (
+            <div className="p-3 rounded-lg bg-bg-base border border-border/55">
+              <ShipperSelect
+                value={selectedShipperId !== null ? selectedShipperId : (selectedOrder.shipperId ?? '')}
+                selectedShipperName={selectedOrder.shipperName}
+                onChange={(shipperId) => {
+                  setSelectedShipperId(shipperId);
+                }}
+                disabled={isUpdatingShipper}
+              />
+              
+            </div>
+          )}
+          
+          {(updateError || changeOrderError) && (
+                <p className="text-red-500 text-xs mt-1">{updateError ?? changeOrderError}</p>
+              )}
+
           {/* Close / Actions */}
           <div className="flex justify-end gap-3 mt-2">
             <Button variant="secondary" className="px-4 py-2 bg-red-500 hover:bg-red-400 text-white" onClick={onClose}>
@@ -280,6 +282,27 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
             </Button>
 
             {/* MANAGER Actions */}
+            {["PROCESSING", "RETURN_PROCESSING", "PENDING", "RETURN_PENDING"].includes(selectedOrder.status) 
+             && user?.role === "MANAGER" 
+             && selectedShipperId !== null 
+             && selectedShipperId !== (selectedOrder.shipperId ?? '') && (
+              <Button
+                variant="primary"
+                className="px-4 py-2 bg-interactive"
+                disabled={isUpdatingShipper}
+                onClick={async () => {
+                  const didUpdate = await updateShipper(selectedOrder.id, selectedShipperId);
+                  if (didUpdate) {
+                    fetchOrderDetail(selectedOrderId);
+                    onOrderChange?.();
+                    setSelectedShipperId(null);
+                  }
+                }}
+              >
+                Cập nhật Shipper
+              </Button>
+            )}
+
             {selectedOrder.status === "PENDING" && user?.role === "MANAGER" && (
               <Button
                 variant="primary"

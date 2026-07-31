@@ -16,12 +16,14 @@ export default function ShipperSelect({ value, onChange, disabled = false }) {
     }, [fetchShippers]);
 
     const options = [
-        { value: '', label: isLoading ? 'Đang tải danh sách shipper...' : 'Chưa phân công' },
         ...shippers.map((shipper) => ({
             value: shipper.id,
             label: shipper.fullName || shipper.username || `Shipper #${shipper.id}`,
         })),
     ];
+
+    if (value === '')
+        options.push({ value: '', label: isLoading ? 'Đang tải danh sách shipper...' : 'Chưa phân công'});
 
     return (
         <Select

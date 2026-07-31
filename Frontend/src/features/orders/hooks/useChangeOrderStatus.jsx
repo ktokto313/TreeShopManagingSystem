@@ -22,8 +22,10 @@ export default function useChangeOrderStatus() {
             });
 
             if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    throw new Error("UNAUTHORIZED");
+                if (response.status === 401) {
+                    throw new Error("Không thể thực hiện");
+                } else if (response.status === 403) {
+                    throw new Error(`${await response.text()}`)
                 }
                 throw new Error(`Failed to update status (Status: ${response.status})`);
             }
