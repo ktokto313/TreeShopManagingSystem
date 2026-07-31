@@ -14,12 +14,13 @@ COPY src src
 RUN --mount=type=cache,target=/home/gradle/.gradle ./gradlew bootJar --no-daemon
 
 # Stage 2: Runtime stage
-FROM eclipse-temurin:17-jdk-jammy 
+# FROM eclipse-temurin:17-jdk-jammy 
+FROM eclipse-temurin:17-jre-ubi10-minimal
 WORKDIR /app
 # Copy only the compiled JAR from the build stage
 COPY --from=build /app/build/libs/*.jar app.jar
 # Isolate running task from root perm
-RUN adduser spring && adduser spring spring
+RUN groupadd -r spring && useradd -r -g spring spring
 USER spring:spring
 # Expose the application port
 EXPOSE 8080
