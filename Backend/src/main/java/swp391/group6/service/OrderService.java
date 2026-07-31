@@ -153,7 +153,7 @@ public class OrderService {
             throw new InvalidStateTransitionException(
                     "Cannot transition order from " + currentStatus + " to " + targetStatus
                             + " with role " + roleName);
-        } else if (targetStatus != OrderStatus.RETURN_PROCESSING && order.getShipper() == null) {
+        } else if (targetStatus != OrderStatus.RETURN_PROCESSING && !user.getRole().getName().equals("MANAGER") && order.getShipper() == null) {
             throw new InvalidStateTransitionException(
                     "Cannot transition order from " + currentStatus + " to " + targetStatus
                             + " without shipper");
