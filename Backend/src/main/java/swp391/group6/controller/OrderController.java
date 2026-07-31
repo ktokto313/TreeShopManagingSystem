@@ -91,10 +91,14 @@ public class OrderController {
     }
 
     @PutMapping("{id}/status")
-    public ResponseEntity<Void> changeOrderStatus(HttpServletRequest request, @PathVariable long id, @RequestParam(name = "status") OrderStatus orderStatus) {
+    public ResponseEntity<String> changeOrderStatus(HttpServletRequest request, @PathVariable long id, @RequestParam(name = "status") OrderStatus orderStatus) {
         LoginResponse loginResponse = JWTUtil.getUser(request);
-        if (!orderService.changeOrderStatus(id, orderStatus, loginResponse)) {
-            return ResponseEntity.badRequest().build();
+        try {
+            if (!orderService.changeOrderStatus(id, orderStatus, loginResponse)) {
+                return ResponseEntity.badRequest().build();
+            }
+        } catch (InvalidStateTransitionException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
         }
 
         return ResponseEntity.ok().build();
