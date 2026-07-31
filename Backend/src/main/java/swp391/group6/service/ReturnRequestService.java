@@ -107,7 +107,7 @@ public class ReturnRequestService {
 
         if (hasActiveRequest) {
             throw new IllegalStateException(
-                    "Đơn này đã có yêu cầu hiện hành"
+                    "Đơn hàng này đã có yêu cầu đổi trả đang xử lý"
             );
         }
 
@@ -132,8 +132,8 @@ public class ReturnRequestService {
                 dto
         );
 
-        if (dto.getReturnType()
-                == ReturnType.EXCHANGE) {
+
+        if (dto.getReturnType() == ReturnType.EXCHANGE) {
 
             buildExchangeProducts(
                     request,
@@ -141,10 +141,12 @@ public class ReturnRequestService {
             );
         }
 
+
         buildEvidence(
                 request,
                 dto
         );
+
 
         request.setExpectedFee(
                 calculateExpectedFee(
@@ -153,8 +155,10 @@ public class ReturnRequestService {
                 )
         );
 
+
         ReturnRequest saved =
                 returnRequestRepository.save(request);
+
 
         notificationService.notifyRoleByTemplate(
                 "MANAGER",
@@ -254,7 +258,6 @@ public class ReturnRequestService {
                     "Chỉ có thể trả hàng trong vòng 7 ngày kể từ khi nhận hàng"
             );
         }
-
         return order;
     }
 
@@ -289,8 +292,10 @@ public class ReturnRequestService {
             Order order,
             ReturnRequestDTO dto
     ) {
+
         for (ReturnRequestDTO.OrderDetailQuantityDTO itemDto
                 : dto.getItems()) {
+
 
             OrderDetail detail =
                     order.getOrderDetailList()
@@ -302,8 +307,7 @@ public class ReturnRequestService {
                                             )
                                             .equals(
                                                     String.valueOf(
-                                                            itemDto
-                                                                    .getProductId()
+                                                            itemDto.getProductId()
                                                     )
                                             )
                             )
@@ -315,20 +319,72 @@ public class ReturnRequestService {
                                             )
                             );
 
-            if (itemDto.getQuantity() <= 0
-                    ||
-                    itemDto.getQuantity()
-                            > detail.getQuantity()) {
 
-                throw new IllegalArgumentException(
-                        "Số lượng trả hàng không hợp lệ"
+            Long productId =
+                    detail.getId()
+                            .getProductId();
+
+            boolean activeRequest =
+                    returnRequestRepository
+                            .existsActiveReturnForProduct(
+                                    order.getId(),
+                                    productId,
+                                    TERMINAL_STATUSES
+                            );
+
+
+            if (activeRequest) {
+
+                throw new IllegalStateException(
+                        "Sản phẩm này đang có yêu cầu đổi trả chưa hoàn thành"
                 );
             }
 
+            Integer completedQuantity =
+                    returnRequestRepository
+                            .sumCompletedReturnQuantity(
+                                    order.getId(),
+                                    productId
+                            );
+
+
+            if (completedQuantity == null) {
+                completedQuantity = 0;
+            }
+
+
+            int availableQuantity =
+                    detail.getQuantity()
+                            - completedQuantity;
+
+
+            if (itemDto.getQuantity() <= 0
+                    ||
+                    itemDto.getQuantity()
+                            > availableQuantity) {
+
+
+                throw new IllegalArgumentException(
+                        "Số lượng sản phẩm trả vượt quá số lượng còn lại"
+                );
+            }
+
+
+
             ReturnRequestItem item =
                     new ReturnRequestItem();
-            item.setReturnRequest(request);
-            item.setOrderDetail(detail);
+
+
+            item.setReturnRequest(
+                    request
+            );
+
+
+            item.setOrderDetail(
+                    detail
+            );
+
+
             item.setQuantity(
                     itemDto.getQuantity()
             );
@@ -344,6 +400,8 @@ public class ReturnRequestService {
             ReturnRequest request,
             ReturnRequestDTO dto
     ) {
+
+
         int returnQuantity =
                 request.getItems()
                         .stream()
@@ -351,6 +409,7 @@ public class ReturnRequestService {
                                 ReturnRequestItem::getQuantity
                         )
                         .sum();
+
 
         int exchangeQuantity =
                 dto.getExchangeProducts()
@@ -360,6 +419,7 @@ public class ReturnRequestService {
                         )
                         .sum();
 
+
         if (returnQuantity != exchangeQuantity) {
 
             throw new IllegalArgumentException(
@@ -367,27 +427,52 @@ public class ReturnRequestService {
             );
         }
 
+
+
         for (ReturnRequestDTO.ExchangeProductDTO item
                 : dto.getExchangeProducts()) {
 
+
+            if (item.getQuantity() <= 0) {
+
+                throw new IllegalArgumentException(
+                        "Số lượng sản phẩm đổi không hợp lệ"
+                );
+            }
+
+
             Product product =
                     productRepository.findById(
-                                    Long.parseLong(
-                                            item.getProductId()
-                                    )
+                                    Long.parseLong(item.getProductId())
                             )
                             .orElseThrow(
-                                    () ->
-                                            new IllegalArgumentException(
-                                                    "Không tìm thấy sản phẩm đổi"
-                                            )
+                                    () -> new IllegalArgumentException(
+                                            "Không tìm thấy sản phẩm đổi"
+                                    )
                             );
+
+
+            if (!product.isStatus()) {
+                throw new IllegalArgumentException(
+                        "Sản phẩm đổi hiện không khả dụng"
+                );
+            }
+
 
             ReturnExchangeProduct exchange =
                     new ReturnExchangeProduct();
 
-            exchange.setReturnRequest(request);
-            exchange.setProduct(product);
+
+            exchange.setReturnRequest(
+                    request
+            );
+
+
+            exchange.setProduct(
+                    product
+            );
+
+
             exchange.setQuantity(
                     item.getQuantity()
             );
@@ -529,18 +614,21 @@ public class ReturnRequestService {
     }
 
     // Manager approves pending request.
-    public ReturnRequest approveRequest(
-            String id
-    ) {
+    public ReturnRequest approveRequest(String id) {
 
         ReturnRequest request =
                 getRequestDetail(id);
 
 
         if (request.getStatus()
-                != ReturnStatus.PENDING) {
+                != ReturnStatus.PENDING
+                &&
+                request.getStatus()
+                        != ReturnStatus.WAITING_CUSTOMER_INFO) {
+
+
             throw new IllegalStateException(
-                    "Chỉ yêu cầu đang chờ xử lý mới có thể được duyệt"
+                    "Yêu cầu không thể được duyệt"
             );
         }
 
@@ -559,12 +647,21 @@ public class ReturnRequestService {
     }
 
     // Manager rejects request.
-    public ReturnRequest rejectRequest(
-            String id,
-            String reason
-    ) {
+    public ReturnRequest rejectRequest(String id, String reason) {
         ReturnRequest request =
                 getRequestDetail(id);
+
+        if (request.getStatus()
+                != ReturnStatus.PENDING
+                &&
+                request.getStatus()
+                        != ReturnStatus.WAITING_CUSTOMER_INFO) {
+
+
+            throw new IllegalStateException(
+                    "Yêu cầu không thể bị từ chối"
+            );
+        }
 
         request.setStatus(
                 ReturnStatus.REJECTED
@@ -585,9 +682,7 @@ public class ReturnRequestService {
     }
 
     // Customer cancels pending request.
-    public ReturnRequest cancelRequest(
-            String id
-    ) {
+    public ReturnRequest cancelRequest(String id) {
 
         ReturnRequest request =
                 getRequestDetail(id);
@@ -600,26 +695,38 @@ public class ReturnRequestService {
             );
         }
 
-        return rejectRequest(
-                id,
+        request.setStatus(
+                ReturnStatus.REJECTED
+        );
+        request.setManagerNote(
                 "Người dùng hủy yêu cầu"
         );
+        return request;
     }
 
     // Manager requests more information from customer.
-    public ReturnRequest requestMoreInfo(
-            String id
-    ) {
+    public ReturnRequest requestMoreInfo(String id) {
 
         ReturnRequest request =
                 getRequestDetail(id);
 
+        if (request.getStatus()
+                != ReturnStatus.PENDING) {
+
+            throw new IllegalStateException(
+                    "Chỉ yêu cầu đang chờ xử lý mới có thể yêu cầu bổ sung thông tin"
+            );
+        }
+        request.setStatus(
+                ReturnStatus.WAITING_CUSTOMER_INFO
+        );
         notificationService.notifyUserByTemplate(
                 request.getCustomer().getId(),
                 NotificationType.RETURN_MORE_INFO_REQUIRED,
                 "RETURN_MORE_INFO_CUSTOMER",
                 request.getId()
         );
+
 
         return request;
     }
@@ -629,12 +736,24 @@ public class ReturnRequestService {
             String id,
             ReturnRequestUpdateDTO dto
     ) {
+
         ReturnRequest request =
                 getRequestDetail(id);
+
+
+        if (request.getStatus()
+                != ReturnStatus.WAITING_CUSTOMER_INFO) {
+
+            throw new IllegalStateException(
+                    "Chỉ có thể bổ sung thông tin khi hệ thống yêu cầu"
+            );
+        }
+
 
         request.setManagerNote(
                 dto.getNote()
         );
+
 
         if (dto.getAdditionalImageUrls()
                 != null) {
@@ -655,36 +774,51 @@ public class ReturnRequestService {
 
                         request.getEvidences()
                                 .add(evidence);
-
                     });
         }
+        request.setStatus(
+                ReturnStatus.PENDING
+        );
+
+        notificationService.notifyRoleByTemplate(
+                "MANAGER",
+                NotificationType.RETURN_CUSTOMER_INFO_UPDATED,
+                "RETURN_CUSTOMER_INFO_UPDATED_MANAGER",
+                request.getId()
+        );
+
         return request;
     }
 
     //RETURN SHIPPING FLOW
     // Customer confirms item has been shipped back.
-    public ReturnRequest markReturning(
-            String id
-    ) {
+    public ReturnRequest markReturning(String id) {
+
         ReturnRequest request =
                 getRequestDetail(id);
 
         if (request.getStatus()
                 != ReturnStatus.APPROVED) {
             throw new IllegalStateException(
-                    "Chỉ yêu cầu đã được duyệt mới có thể chuyển sang trạng thái đang hoàn trả"
+                    "Chỉ yêu cầu đã duyệt mới được gửi trả"
             );
         }
         request.setStatus(
                 ReturnStatus.RETURNING
         );
+        notificationService.notifyRoleByTemplate(
+                "MANAGER",
+                NotificationType.RETURN_ITEM_RETURNING,
+                "RETURN_ITEM_RETURNING_MANAGER",
+                request.getId()
+        );
+
         return request;
     }
 
     // Manager confirms returned item arrived.
-    public ReturnRequest confirmReturn(
-            String id
-    ) {
+    public ReturnRequest confirmReturn(String id) {
+
         ReturnRequest request =
                 getRequestDetail(id);
 
@@ -692,13 +826,20 @@ public class ReturnRequestService {
                 != ReturnStatus.RETURNING) {
 
             throw new IllegalStateException(
-                    "Chỉ yêu cầu đang hoàn trả mới có thể xác nhận đã nhận hàng"
+                    "Yêu cầu chưa ở trạng thái đang hoàn trả"
             );
         }
+
         request.setStatus(
                 ReturnStatus.RECEIVED
         );
 
+        notificationService.notifyUserByTemplate(
+                request.getCustomer().getId(),
+                NotificationType.RETURN_ITEM_RECEIVED,
+                "RETURN_RECEIVED_CUSTOMER",
+                request.getId()
+        );
         return request;
     }
 
@@ -730,36 +871,30 @@ public class ReturnRequestService {
     }
 
     //PAYMENT
-    public void completePayment(
-            String id
-    ) {
+    public void completePayment(String id) {
 
-        ReturnRequest request =
-                getRequestDetail(id);
+        ReturnRequest request = getRequestDetail(id);
 
-        if (request.getStatus()
-                != ReturnStatus.RECEIVED) {
-
+        if (request.getStatus() != ReturnStatus.RECEIVED) {
             throw new IllegalStateException(
-                    "Yêu cầu phải ở trạng thái đã nhận hàng trước khi xử lý thanh toán"
+                    "Yêu cầu phải ở trạng thái đã nhận hàng trước khi xử lý tài chính"
             );
         }
 
-        if (request.getReturnType()
-                == ReturnType.EXCHANGE) {
+        // ===== EXCHANGE =====
+        if (request.getReturnType() == ReturnType.EXCHANGE) {
 
-            BigDecimal diff =
-                    request.getPriceDifference();
+            if (request.getPriceDifference() == null) {
+                calculatePriceDifference(id);
+            }
 
-            if (diff != null
-                    &&
-                    diff.compareTo(
-                            BigDecimal.ZERO
-                    ) > 0) {
+            BigDecimal diff = request.getPriceDifference();
 
-                request.setAdditionalPayment(
-                        diff
-                );
+            // Khách phải trả thêm tiền
+            if (diff.compareTo(BigDecimal.ZERO) > 0) {
+
+                request.setAdditionalPayment(diff);
+                request.setStatus(ReturnStatus.WAITING_PAYMENT);
 
                 notificationService.notifyUserByTemplate(
                         request.getCustomer().getId(),
@@ -769,96 +904,79 @@ public class ReturnRequestService {
                         diff
                 );
 
-            } else {
-
-                if (diff != null
-                        &&
-                        diff.compareTo(
-                                BigDecimal.ZERO
-                        ) < 0) {
-
-                    request.setRefundAmount(
-                            diff.abs()
-                    );
-
-                    notificationService.notifyUserByTemplate(
-                            request.getCustomer().getId(),
-                            NotificationType.RETURN_REFUND_PROCESSED,
-                            "RETURN_REFUND_CUSTOMER",
-                            request.getId()
-                    );
-                }
-                request.setFinancialProcessed(
-                        true
-                );
-                createExchangeOrder(
-                        request
-                );
+                return;
             }
-            request.setStatus(
-                    ReturnStatus.PROCESSING
-            );
-        } else {
-            BigDecimal refund =
-                    request.getExpectedFee()
-                            .abs();
 
-            request.setRefundAmount(
-                    refund
-            );
+            // Shop phải refund
+            if (diff.compareTo(BigDecimal.ZERO) < 0) {
 
-            request.setStatus(
-                    ReturnStatus.PROCESSING
-            );
+                request.setRefundAmount(diff.abs());
+                request.setStatus(ReturnStatus.WAITING_BANK_INFO);
 
-            notificationService.notifyUserByTemplate(
-                    request.getCustomer().getId(),
-                    NotificationType.RETURN_REFUND_PROCESSED,
-                    "RETURN_REFUND_CUSTOMER",
-                    request.getId()
-            );
+                notificationService.notifyUserByTemplate(
+                        request.getCustomer().getId(),
+                        NotificationType.RETURN_BANK_INFO_REQUIRED,
+                        "RETURN_BANK_INFO_CUSTOMER",
+                        request.getId()
+                );
+
+                return;
+            }
+
+            // Không chênh lệch
+            request.setFinancialProcessed(true);
+            createExchangeOrder(request);
+            request.setStatus(ReturnStatus.PROCESSING);
+            return;
         }
+
+        // ===== RETURN =====
+        BigDecimal refund =
+                request.getExpectedFee()
+                        .abs();
+
+
+        request.setRefundAmount(
+                refund
+        );
+
+
+        request.setFinancialProcessed(
+                false
+        );
+
+
+        request.setStatus(
+                ReturnStatus.WAITING_BANK_INFO
+        );
+
+
+        notificationService.notifyUserByTemplate(
+                request.getCustomer().getId(),
+                NotificationType.RETURN_BANK_INFO_REQUIRED,
+                "RETURN_BANK_INFO_CUSTOMER",
+                request.getId()
+        );
     }
 
     // Customer confirms additional payment for exchange.
-    public ReturnRequest confirmAdditionalPayment(
-            String id
-    ) {
+    public ReturnRequest confirmAdditionalPayment(String id) {
 
-        ReturnRequest request =
-                getRequestDetail(id);
+        ReturnRequest request = getRequestDetail(id);
 
-
-        if (request.getStatus()
-                != ReturnStatus.PROCESSING) {
-
+        if (request.getStatus() != ReturnStatus.WAITING_PAYMENT) {
             throw new IllegalStateException(
-                    "Yêu cầu phải đang xử lý để xác nhận thanh toán"
+                    "Yêu cầu không ở trạng thái chờ thanh toán"
             );
         }
 
-        if (request.getReturnType()
-                != ReturnType.EXCHANGE
-                ||
-                request.getAdditionalPayment()
-                        == null) {
+        request.setFinancialProcessed(true);
 
-            throw new IllegalStateException(
-                    "Không có khoản thanh toán bổ sung cần xác nhận"
-            );
-        }
+        createExchangeOrder(request);
 
-        request.setFinancialProcessed(
-                true
-        );
+        request.setStatus(ReturnStatus.PROCESSING);
 
-        createExchangeOrder(
-                request
-        );
-
-        return returnRequestRepository.save(
-                request
-        );
+        return request;
     }
 
     // Creates exchange order from all exchange products.
@@ -866,8 +984,7 @@ public class ReturnRequestService {
             ReturnRequest request
     ) {
 
-        Order newOrder =
-                new Order();
+        Order newOrder = new Order();
 
         newOrder.setUser(
                 request.getCustomer()
@@ -951,10 +1068,16 @@ public class ReturnRequestService {
     ) {
 
         return returnRequestRepository
-                .findByCustomer_IdAndStatus(
-                        Long.parseLong(customerId),
-                        ReturnStatus.APPROVED
-                );
+                .findByCustomer_Id(
+                        Long.parseLong(customerId)
+                )
+                .stream()
+                .filter(r ->
+                        r.getStatus() != ReturnStatus.REJECTED
+                                &&
+                                r.getStatus() != ReturnStatus.COMPLETED
+                )
+                .toList();
     }
     //MANAGER REPORT
 
@@ -1008,12 +1131,8 @@ public class ReturnRequestService {
         return returnRequestRepository.findAll();
     }
 
-
-
     //REFUND INFORMATION
-
-
-    public ReturnRequest submitRefundInfo(
+    public ReturnRequest submitBankInfo(
             String id,
             RefundInfoDTO dto
     ) {
@@ -1021,78 +1140,80 @@ public class ReturnRequestService {
         ReturnRequest request =
                 getRequestDetail(id);
 
+
         if (request.getStatus()
-                != ReturnStatus.PROCESSING) {
+                != ReturnStatus.WAITING_BANK_INFO) {
+
 
             throw new IllegalStateException(
-                    "Thông tin hoàn tiền chỉ được gửi khi yêu cầu đang xử lý"
+                    "Yêu cầu không ở trạng thái chờ thông tin ngân hàng"
             );
         }
+
 
         request.setBankName(
                 dto.getBankName()
         );
 
+
         request.setAccountNumber(
                 dto.getAccountNumber()
         );
+
 
         request.setAccountHolder(
                 dto.getAccountHolder()
         );
 
-        request.setManagerNote(
-                String.format(
-                        "Thông tin ngân hàng hoàn tiền: %s - %s - %s",
-                        dto.getBankName(),
-                        dto.getAccountNumber(),
-                        dto.getAccountHolder()
-                )
+
+        request.setStatus(
+                ReturnStatus.PROCESSING
         );
 
-        return returnRequestRepository.save(
-                request
+
+        notificationService.notifyRoleByTemplate(
+                "MANAGER",
+                NotificationType.RETURN_BANK_INFO_SUBMITTED,
+                "RETURN_BANK_INFO_SUBMITTED_MANAGER",
+                request.getId()
         );
+
+        return request;
     }
+
     // Manager completes request.
-    public void completeByManager(
-            String id
-    ) {
+    public void completeByManager(String id) {
+
         ReturnRequest request =
                 getRequestDetail(id);
 
-        if (request.getReturnType()
-                == ReturnType.EXCHANGE
-                &&
-                request.getAdditionalPayment()
-                        != null
-                &&
-                !request.isFinancialProcessed()) {
+
+        if (request.getStatus()
+                != ReturnStatus.PROCESSING) {
+
+
             throw new IllegalStateException(
-                    "Khách hàng phải xác nhận thanh toán bổ sung trước khi hoàn tất yêu cầu"
+                    "Chỉ có thể hoàn tất khi đang xử lý"
             );
         }
 
-        boolean refundOwed =
-                request.getRefundAmount()
-                        != null;
+        if (request.getRefundAmount() == null) {
 
-        if (refundOwed
-                &&
-                (
-                        request.getBankName()
-                                == null
-                                ||
-                                request.getAccountNumber()
-                                        == null
-                                ||
-                                request.getAccountHolder()
-                                        == null
-                )) {
-            throw new IllegalStateException(
-                    "Khách hàng phải cung cấp thông tin ngân hàng hoàn tiền trước khi hoàn tất yêu cầu"
+            request.setRefundAmount(
+                    BigDecimal.ZERO
             );
         }
+
+        if (request.getAdditionalPayment() == null) {
+
+            request.setAdditionalPayment(
+                    BigDecimal.ZERO
+            );
+        }
+
+        request.setFinancialProcessed(
+                true
+        );
 
         request.setStatus(
                 ReturnStatus.COMPLETED
@@ -1103,9 +1224,11 @@ public class ReturnRequestService {
                 LocalDateTime.now()
         );
 
-
-        returnRequestRepository.save(
-                request
+        notificationService.notifyUserByTemplate(
+                request.getCustomer().getId(),
+                NotificationType.RETURN_COMPLETED,
+                "RETURN_COMPLETED_CUSTOMER",
+                request.getId()
         );
     }
 }

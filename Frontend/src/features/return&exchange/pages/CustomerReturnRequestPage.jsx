@@ -26,6 +26,7 @@ export default function CustomerReturnRequestPage() {
     const [showEdit, setShowEdit] = useState(null);
     const [cancelingId, setCancelingId] = useState(null);
 
+
     async function loadRequests() {
 
         if (!user?.id) {
@@ -125,14 +126,12 @@ export default function CustomerReturnRequestPage() {
                 "Không thể hủy yêu cầu"
             );
 
-
         } finally {
 
             setCancelingId(null);
 
         }
     }
-
 
 
     function getStatusLabel(status) {
@@ -155,7 +154,13 @@ export default function CustomerReturnRequestPage() {
                 "Shop đã nhận hàng",
 
             PROCESSING:
-                "Đang xử lý hoàn tiền/đổi hàng",
+                "Đang xử lý",
+
+            WAITING_PAYMENT:
+                "Chờ thanh toán thêm",
+
+            WAITING_BANK_INFO:
+                "Chờ nhập thông tin ngân hàng",
 
             COMPLETED:
                 "Hoàn thành",
@@ -163,6 +168,7 @@ export default function CustomerReturnRequestPage() {
             FAILED:
                 "Thất bại"
         };
+
         return map[status] ?? status;
     }
 
@@ -248,110 +254,107 @@ export default function CustomerReturnRequestPage() {
                     !loading &&
                     requests.length === 0 && (
 
-                        <div className="
+                    <div className="
                         text-center py-16
                         border-2 border-dashed
                         border-stone-200
                         rounded-2xl
                         text-stone-400
                     ">
-                            Bạn chưa có yêu cầu đổi trả nào.
-                        </div>
-                    )}
+                        Bạn chưa có yêu cầu đổi trả nào.
+                    </div>
+                )}
 
                 {!authLoading &&
                     !loading &&
                     requests.length > 0 && (
 
-                        <div className="
+                    <div className="
                         grid gap-5
                     ">
 
-                            {requests.map(request => (
-                                <div
-                                    key={request.id}
-                                    className="
+                        {requests.map(request => (
+                            <div
+                                key={request.id}
+                                className="
                                     bg-white rounded-2xl
                                     border border-stone-100
                                     p-5 shadow-sm
                                     flex justify-between
                                     items-center
                                 "
-                                >
+                            >
 
-                                    <div className="
+                                <div className="
                                     space-y-2
                                 ">
-                                        <h3 className="
+                                    <h3 className="
                                         font-semibold
                                         text-green-800
                                     ">
-                                            Yêu cầu #{request.id}
-                                        </h3>
+                                        Yêu cầu #{request.id}
+                                    </h3>
 
-                                        <p className="
+                                    <p className="
                                         text-sm text-stone-600
                                     ">
-                                            Đơn hàng:
-                                            {" "}
-                                            #{request.order?.id}
-                                        </p>
+                                        Đơn hàng:
+                                        {" "}
+                                        #{request.order?.id}
+                                    </p>
 
-                                        <p className="
+                                    <p className="
                                         text-sm text-stone-600
                                     ">
-                                            Loại:
-                                            {" "}
-                                            {
-                                                request.returnType === "RETURN"
-                                                    ? "Hoàn trả"
-                                                    : "Đổi sản phẩm"
-                                            }
-                                        </p>
-                                        <p className="
-                                        text-sm text-stone-600
-                                    ">
-                                            Lý do:
-                                            {" "}
-                                            {request.reason}
-                                        </p>
+                                        Loại:
+                                        {" "}
                                         {
-                                            Number(request.refundAmount) > 0 && (
+                                            request.returnType === "RETURN"
+                                                ? "Hoàn trả"
+                                                : "Đổi sản phẩm"
+                                        }
+                                    </p>
 
-                                                <p className="
+                                    <p className="
+                                        text-sm text-stone-600
+                                    ">
+                                        Lý do:
+                                        {" "}
+                                        {request.reason}
+                                    </p>
+
+                                    {
+                                        Number(request.refundAmount) > 0 && (
+
+                                            <p className="
                                                 text-sm text-stone-600
                                             ">
-                                                    Hoàn tiền:
-                                                    {" "}
-                                                    {request.refundAmount}
-                                                </p>
+                                                Hoàn tiền:
+                                                {" "}
+                                                {request.refundAmount}
+                                            </p>
 
-                                            )
-                                        }
-                                        {
-                                            Number(request.additionalPayment) > 0 && (
+                                        )
+                                    }
+                                    {
+                                        Number(request.additionalPayment) > 0 && (
 
-                                                <p className="
+                                            <p className="
                                                 text-sm text-stone-600
                                             ">
-                                                    Cần thanh toán thêm:
-                                                    {" "}
-                                                    {request.additionalPayment}
-                                                </p>
+                                                Cần thanh toán thêm:
+                                                {" "}
+                                                {request.additionalPayment}
+                                            </p>
 
-                                            )
-                                        }
+                                        )
+                                    }
 
-                                    </div>
-
-
-
-                                    <div className="
+                                </div>
+                                <div className="
                                     flex flex-col
                                     items-end gap-3
                                 ">
-
-
                                     <span className="
                                         px-3 py-1 rounded-full
                                         text-sm
@@ -364,15 +367,15 @@ export default function CustomerReturnRequestPage() {
                                             )
                                         }
                                     </span>
-                                        {
-                                            request.status === "PENDING" && (
-
+                                    {
+                                        request.status === "PENDING" && (
+                                            <>
                                                 <Button
                                                     className="
-                                                    bg-teal-500
-                                                    hover:bg-teal-600
-                                                    text-white
-                                                "
+                                                        bg-teal-500
+                                                        hover:bg-teal-600
+                                                        text-white
+                                                    "
                                                     onClick={() =>
                                                         setShowEdit(request)
                                                     }
@@ -380,17 +383,13 @@ export default function CustomerReturnRequestPage() {
                                                     Chỉnh sửa
                                                 </Button>
 
-                                            )
-                                        }
-                                        {
-                                            request.status === "PENDING" && (
 
                                                 <Button
                                                     className="
-                                                    bg-gray-500
-                                                    hover:bg-gray-600
-                                                    text-white
-                                                "
+                                                        bg-gray-500
+                                                        hover:bg-gray-600
+                                                        text-white
+                                                    "
                                                     disabled={
                                                         cancelingId === request.id
                                                     }
@@ -407,86 +406,80 @@ export default function CustomerReturnRequestPage() {
                                                     }
                                                 </Button>
 
-                                            )
-                                        }
-                                        {
-                                            request.status === "APPROVED" && (
+                                            </>
+                                        )
+                                    }
 
-                                                <Button
-                                                    className="
+                                    {
+                                        request.status === "APPROVED" && (
+
+                                            <Button
+                                                className="
                                                     bg-blue-500
                                                     hover:bg-blue-600
                                                     text-white
                                                 "
-                                                    onClick={() =>
-                                                        handleReturnItem(
-                                                            request.id
-                                                        )
-                                                    }
-                                                >
-                                                    Trả hàng
-                                                </Button>
+                                                onClick={() =>
+                                                    handleReturnItem(
+                                                        request.id
+                                                    )
+                                                }
+                                            >
+                                                Trả hàng
+                                            </Button>
 
-                                            )
-                                        }
-                                        {
-                                            request.status === "PROCESSING"
-                                            &&
-                                            Number(
-                                                request.additionalPayment
-                                            ) > 0
-                                            && (
+                                        )
+                                    }
+                                    {
+                                        request.status === "WAITING_PAYMENT"
+                                        &&
+                                        Number(request.additionalPayment) > 0
+                                        && (
 
-                                                <Button
-                                                    className="
+                                            <Button
+                                                className="
                                                     bg-red-500
                                                     hover:bg-red-600
                                                     text-white
                                                 "
-                                                    onClick={() =>
-                                                        setShowPayment(
-                                                            request
-                                                        )
-                                                    }
-                                                >
-                                                    Thanh toán thêm
-                                                </Button>
+                                                onClick={() =>
+                                                    setShowPayment(request)
+                                                }
+                                            >
+                                                Thanh toán thêm
+                                            </Button>
 
-                                            )
-                                        }
-                                        {
-                                            request.status === "PROCESSING"
-                                            &&
-                                            Number(
-                                                request.refundAmount
-                                            ) > 0
-                                            &&
-                                            !request.accountNumber
-                                            && (
+                                        )
+                                    }
+                                    {
+                                        request.status === "WAITING_BANK_INFO"
+                                        &&
+                                        Number(request.refundAmount) > 0
+                                        &&
+                                        !request.accountNumber
+                                        && (
 
-                                                <Button
-                                                    className="
+                                            <Button
+                                                className="
                                                     bg-yellow-500
                                                     hover:bg-yellow-600
                                                     text-white
                                                 "
-                                                    onClick={() =>
-                                                        setShowRefund(
-                                                            request
-                                                        )
-                                                    }
-                                                >
-                                                    Nhập thông tin nhận tiền
-                                                </Button>
-                                            )
-                                        }
-                                    </div>
-
+                                                onClick={() =>
+                                                    setShowRefund(request)
+                                                }
+                                            >
+                                                Nhập thông tin nhận tiền
+                                            </Button>
+                                        )
+                                    }
                                 </div>
 
-                            ))}
-                        </div>
-                    )}
+                            </div>
+
+                        ))}
+                    </div>
+                )}
 
             </Container>
 
@@ -502,7 +495,6 @@ export default function CustomerReturnRequestPage() {
                             loadRequests();
                         }}
                     />
-
                 )
             }
 
@@ -518,7 +510,6 @@ export default function CustomerReturnRequestPage() {
                             loadRequests();
                         }}
                     />
-
                 )
             }
 
@@ -534,7 +525,6 @@ export default function CustomerReturnRequestPage() {
                             loadRequests();
                         }}
                     />
-
                 )
             }
             {

@@ -206,8 +206,6 @@ CREATE TABLE return_request_item (
 
 );
 
-
-
 -- ===============================
 -- RETURN EVIDENCE
 -- ===============================
@@ -236,32 +234,25 @@ CREATE TABLE return_evidence (
 
 );
 
-
-
 -- ===============================
 -- RETURN EXCHANGE PRODUCT
 -- ===============================
 
 CREATE TABLE return_exchange_product (
 
-    id BIGSERIAL PRIMARY KEY,
+id BIGSERIAL PRIMARY KEY,
+return_request_id VARCHAR(36) NOT NULL,
+product_id BIGINT NOT NULL,
+quantity INTEGER NOT NULL DEFAULT 1,
 
-    return_request_id VARCHAR(36) NOT NULL UNIQUE,
+CONSTRAINT fk_exchange_request
+FOREIGN KEY(return_request_id)
+REFERENCES return_request(id)
+ON DELETE CASCADE,
 
-    product_id BIGINT NOT NULL,
-
-    quantity INTEGER NOT NULL DEFAULT 1,
-
-
-    CONSTRAINT fk_exchange_request
-        FOREIGN KEY(return_request_id)
-        REFERENCES return_request(id)
-        ON DELETE CASCADE,
-
-
-    CONSTRAINT fk_exchange_product
-        FOREIGN KEY(product_id)
-        REFERENCES products(id)
+CONSTRAINT fk_exchange_product
+FOREIGN KEY(product_id)
+REFERENCES products(id)
 
 );
 

@@ -4,12 +4,17 @@ import { updateRequestInfo } from "../api/returnRequestApi";
 
 export default function EditRequestInfoModal({ request, onClose, onSuccess }) {
 
-    const [note, setNote] = useState(request?.managerNote ?? "");
+    const [reason, setReason] = useState(request?.reason ?? "OTHER");
+    const [note, setNote] = useState(request?.customerNote ?? "");
     const [evidenceImages, setEvidenceImages] = useState([]);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
 
     const evidenceUploaderRef = useRef(null);
+
+    const isEditable =
+        request?.status === "PENDING" ||
+        request?.status === "PROCESSING";
 
     function handleClose() {
         evidenceUploaderRef.current?.revokeAll();
@@ -18,15 +23,20 @@ export default function EditRequestInfoModal({ request, onClose, onSuccess }) {
 
     async function handleSubmit() {
 
-        setError("");
-        setSubmitting(true);
+        if (!isEditable) {
+            setError("Không thể chỉnh sửa ở trạng thái hiện tại");
+            return;
+        }
 
         try {
+            setSubmitting(true);
+            setError("");
 
             const additionalImageUrls =
                 await evidenceUploaderRef.current.uploadPending();
 
             await updateRequestInfo(request.id, {
+                reason,
                 note,
                 additionalImageUrls
             });
@@ -35,98 +45,60 @@ export default function EditRequestInfoModal({ request, onClose, onSuccess }) {
             onSuccess?.();
 
         } catch (err) {
-            setError(
-                err?.message ||
-                "Không thể cập nhật thông tin, vui lòng thử lại."
-            );
+            setError(err?.message || "Lỗi cập nhật");
         } finally {
             setSubmitting(false);
         }
     }
 
     return (
-        <div
-            className="
-                fixed inset-0 z-50
-                flex items-center justify-center
-                bg-black/40 p-4
-            "
-        >
-            <div
-                className="
-                    w-full max-w-lg
-                    max-h-[90vh] overflow-y-auto
-                    bg-white rounded-2xl shadow-lg
-                    p-6 space-y-4
-                "
-            >
-                <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-green-800">
-                        Chỉnh sửa yêu cầu #{request?.id}
-                    </h2>
-                    <button
-                        type="button"
-                        onClick={handleClose}
-                        className="text-stone-400 hover:text-stone-600"
-                    >
-                        ✕
-                    </button>
-                </div>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-xl w-[500px] space-y-4">
 
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-stone-700">
-                        Ghi chú bổ sung
-                    </label>
-                    <textarea
-                        value={note}
-                        onChange={e => setNote(e.target.value)}
-                        placeholder="Nhập ghi chú hoặc thông tin bổ sung"
-                        className="
-                            w-full rounded-lg border border-stone-300
-                            px-3 py-2 text-sm
-                            focus:outline-none focus:ring-2
-                            focus:ring-green-500
-                        "
-                        rows={3}
-                    />
-                </div>
+                <h2 className="text-lg font-semibold">
+                    Chỉnh sửa yêu cầu #{request?.id}
+                </h2>
+
+                <select
+                    value={reason}
+                    onChange={e => setReason(e.target.value)}
+                    disabled={!isEditable}
+                    className="w-full border p-2 rounded"
+                >
+                    <option value="DAMAGED">Hàng bị hỏng</option>
+                    <option value="WRONG_ITEM">Sai sản phẩm</option>
+                    <option value="UNHEALTHY">Không đạt chất lượng</option>
+                    <option value="OTHER">Khác</option>
+                </select>
+
+                <textarea
+                    value={note}
+                    onChange={e => setNote(e.target.value)}
+                    disabled={!isEditable}
+                    className="w-full border p-2 rounded"
+                    rows={3}
+                />
 
                 <EvidenceUploader
                     ref={evidenceUploaderRef}
                     value={evidenceImages}
                     onChange={setEvidenceImages}
+                    disabled={!isEditable}
                 />
 
-                {error && (
-                    <p className="text-sm text-red-500">
-                        {error}
-                    </p>
-                )}
+                {error && <p className="text-red-500">{error}</p>}
 
-                <div className="flex justify-end gap-3 pt-2">
+                <div className="flex gap-3">
                     <button
-                        type="button"
-                        onClick={handleClose}
-                        className="
-                            px-4 py-2 rounded-lg
-                            border border-stone-300
-                            text-stone-600 hover:bg-stone-50
-                        "
-                    >
-                        Hủy
-                    </button>
-                    <button
-                        type="button"
                         onClick={handleSubmit}
-                        disabled={submitting}
-                        className="
-                            px-4 py-2 rounded-lg
-                            bg-green-500 text-white
-                            hover:bg-green-600
-                            disabled:opacity-50
-                        "
+                        disabled={submitting || !isEditable}
+                        className="px-4 py-2 bg-green-500 text-white rounded"
                     >
-                        {submitting ? "Đang gửi..." : "Gửi"}
+                        {submitting ? "Đang gửi..." : "Cập nhật"}
+                    </button>
+
+                    <button onClick={handleClose} className="border px-4 py-2 rounded">
+                        Hủy
                     </button>
                 </div>
             </div>

@@ -94,15 +94,15 @@ public class NotificationTemplate {
                 "Sản phẩm yêu thích đã có hàng",
                 "Sản phẩm \"%s\" trong danh sách yêu thích của bạn đã có hàng trở lại.");
 
-        // ================= RETURN (NEW) =================
+        // ================= RETURN =================
 
         register("RETURN_REQUEST_CREATED_MANAGER",
                 "Yêu cầu trả hàng mới",
                 "Có yêu cầu trả hàng #%s từ khách hàng.");
 
         register("RETURN_REQUEST_APPROVED_CUSTOMER",
-                "Yêu cầu trả hàng được duyệt",
-                "Yêu cầu #%s đã được duyệt. Vui lòng gửi hàng về.");
+                "Yêu cầu được duyệt",
+                "Yêu cầu #%s đã được duyệt.");
 
         register("RETURN_REQUEST_REJECTED_CUSTOMER",
                 "Yêu cầu bị từ chối",
@@ -112,13 +112,41 @@ public class NotificationTemplate {
                 "Cần bổ sung thông tin",
                 "Yêu cầu #%s cần thêm thông tin. Vui lòng cập nhật.");
 
+        register("RETURN_CUSTOMER_INFO_UPDATED_MANAGER",
+                "Khách hàng đã bổ sung thông tin",
+                "Khách hàng đã cập nhật thêm thông tin cho yêu cầu trả hàng #%s.");
+
+        register("RETURN_SHIPPING_CUSTOMER",
+                "Gửi hàng hoàn trả",
+                "Yêu cầu #%s đã được duyệt. Vui lòng gửi hàng về cho cửa hàng.");
+
+        register("RETURN_RECEIVED_CUSTOMER",
+                "Đã nhận hàng hoàn",
+                "Cửa hàng đã nhận được sản phẩm từ yêu cầu #%s.");
+
+        register("RETURN_BANK_INFO_CUSTOMER",
+                "Cần thông tin ngân hàng",
+                "Yêu cầu #%s cần thông tin ngân hàng để hoàn tiền.");
+
+        register("RETURN_BANK_INFO_SUBMITTED_MANAGER",
+                "Đã nhận thông tin ngân hàng",
+                "Khách hàng đã gửi thông tin ngân hàng cho yêu cầu hoàn tiền #%s.");
+
         register("RETURN_REFUND_CUSTOMER",
                 "Hoàn tiền",
-                "Yêu cầu #%s đã được hoàn tiền.");
+                "Khoản hoàn tiền cho yêu cầu #%s đang được xử lý.");
 
         register("RETURN_ADDITIONAL_PAYMENT_CUSTOMER",
                 "Cần thanh toán thêm",
                 "Yêu cầu #%s cần thanh toán thêm %s.");
+
+        register("RETURN_COMPLETED_CUSTOMER",
+                "Hoàn tất yêu cầu",
+                "Yêu cầu #%s đã được hoàn tất.");
+
+        register("RETURN_ITEM_RECEIVED_CUSTOMER",
+                "Đã nhận hàng hoàn",
+                "Cửa hàng đã nhận được sản phẩm từ yêu cầu #%s.");
     }
 
     private static void register(String key, String subject, String bodyTemplate) {

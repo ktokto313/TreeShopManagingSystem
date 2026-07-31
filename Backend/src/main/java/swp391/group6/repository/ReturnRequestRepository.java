@@ -13,10 +13,14 @@ public interface ReturnRequestRepository
         extends JpaRepository<ReturnRequest, String> {
 
 
-    List<ReturnRequest> findByStatus(ReturnStatus status);
+    List<ReturnRequest> findByStatus(
+            ReturnStatus status
+    );
 
 
-    List<ReturnRequest> findByCustomer_Id(Long customerId);
+    List<ReturnRequest> findByCustomer_Id(
+            Long customerId
+    );
 
 
     List<ReturnRequest> findByCustomer_IdAndStatus(
@@ -24,14 +28,61 @@ public interface ReturnRequestRepository
             ReturnStatus status
     );
 
+
     List<ReturnRequest> findByStatusIn(
             List<ReturnStatus> statuses
     );
 
 
-    long countByStatus(ReturnStatus status);
+    long countByStatus(
+            ReturnStatus status
+    );
 
-    boolean existsByOrder_IdAndStatusNotIn(Long orderId, List<ReturnStatus> statuses);
+    boolean existsByOrder_IdAndStatusNotIn(
+            Long orderId,
+            List<ReturnStatus> statuses
+    );
+
+    @Query("""
+        SELECT COUNT(i) > 0
+        FROM ReturnRequestItem i
+        JOIN i.returnRequest r
+        WHERE r.order.id = :orderId
+        AND i.orderDetail.id.productId = :productId
+        AND r.status = swp391.group6.model.ReturnStatus.COMPLETED
+    """)
+    boolean existsCompletedReturnForProduct(
+            @Param("orderId") Long orderId,
+            @Param("productId") Long productId
+    );
+
+    @Query("""
+        SELECT COALESCE(SUM(i.quantity),0)
+        FROM ReturnRequestItem i
+        JOIN i.returnRequest r
+        WHERE r.order.id = :orderId
+        AND i.orderDetail.id.productId = :productId
+        AND r.status = swp391.group6.model.ReturnStatus.COMPLETED
+    """)
+    Integer sumCompletedReturnQuantity(
+            @Param("orderId") Long orderId,
+            @Param("productId") Long productId
+    );
+
+    @Query("""
+        SELECT COUNT(i) > 0
+        FROM ReturnRequestItem i
+        JOIN i.returnRequest r
+        WHERE r.order.id = :orderId
+        AND i.orderDetail.id.productId = :productId
+        AND r.status NOT IN :statuses
+    """)
+    boolean existsActiveReturnForProduct(
+            @Param("orderId") Long orderId,
+            @Param("productId") Long productId,
+            @Param("statuses") List<ReturnStatus> statuses
+    );
+
 
     @Query("""
         SELECT COALESCE(SUM(r.refundAmount), 0)
@@ -51,4 +102,5 @@ public interface ReturnRequestRepository
     BigDecimal sumAdditionalPaymentByStatus(
             @Param("status") ReturnStatus status
     );
+
 }

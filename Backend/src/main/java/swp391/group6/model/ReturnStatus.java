@@ -10,6 +10,7 @@ package swp391.group6.model;
 
 public enum ReturnStatus {
     PENDING,
+    WAITING_CUSTOMER_INFO,
     APPROVED,
     REJECTED,
     RETURNING,

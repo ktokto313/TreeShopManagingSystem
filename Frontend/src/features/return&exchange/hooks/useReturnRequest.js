@@ -6,14 +6,15 @@ import {
     getAvailableProducts,
     getPendingRequests,
     getRequestDetail,
-    requestMoreInfo,
+    requestMoreInfo as requestMoreInfoApi,
     updateRequestInfo,
     decideRequest,
     markReturning,
     confirmReturn,
     completePayment,
-    confirmAdditionalPayment,
+    confirmAdditionalPayment as confirmAdditionalPaymentApi,
     getApprovedReturnRequests,
+    getMyReturnRequests,
     cancelRequest,
     submitRefundInfo,
     completeByManager,
@@ -39,7 +40,8 @@ export function useReturnRequest() {
         } catch (err) {
 
             setError(
-                err.message || "Có lỗi xảy ra"
+                err?.message ||
+                "Có lỗi xảy ra"
             );
 
             throw err;
@@ -49,144 +51,161 @@ export function useReturnRequest() {
         }
     };
 
-    return {
+    return {loading, error,
 
-        loading,
-        error,
+        // ================= CUSTOMER CREATE REQUEST =================
 
-        // Customer gets orders available for return/exchange
         fetchAvailableOrders: (customerId) =>
             execute(() =>
                 getAvailableOrders(customerId)
             ),
 
-        // Customer creates return/exchange request
-        createRequest: (customerId, data) =>
-            execute(() =>
-                createReturnRequest(customerId, data)
-            ),
 
-        // Customer gets order items
         fetchOrderItems: (orderId) =>
             execute(() =>
                 getOrderItems(orderId)
             ),
 
-        // Customer selects exchange product
         fetchExchangeProducts: () =>
             execute(() =>
                 getAvailableProducts()
             ),
 
-        // Manager gets pending requests
-        fetchPendingRequests: () =>
+        createRequest: (customerId, data) =>
             execute(() =>
-                getPendingRequests()
+                createReturnRequest(
+                    customerId,
+                    data
+                )
             ),
 
-        // Get request detail
+        // ================= REQUEST DETAIL =================
+
         fetchRequestDetail: (id) =>
             execute(() =>
                 getRequestDetail(id)
             ),
 
-        // Manager requests more information
-        sendMoreInfoRequest: (id) =>
-            execute(() =>
-                requestMoreInfo(id)
-            ),
 
-        // Customer updates additional information
+        // ================= CUSTOMER UPDATE =================
         updateInfo: (id, data) =>
             execute(() =>
-                updateRequestInfo(id, data)
+                updateRequestInfo(
+                    id,
+                    data
+                )
             ),
 
-        // Manager approves request
-        approveRequest: (id) =>
-            execute(() =>
-                decideRequest(id, "APPROVE")
-            ),
-
-        // Manager rejects request
-        rejectRequest: (id, reason) =>
-            execute(() =>
-                decideRequest(id, "DECLINE", reason)
-            ),
-
-        // Customer confirms shipping return item
-        markItemReturning: (id) =>
-            execute(() =>
-                markReturning(id)
-            ),
-
-        // Manager confirms received return item
-        confirmReceivedReturn: (id) =>
-            execute(() =>
-                confirmReturn(id)
-            ),
-
-        // Manager processes refund/payment
-        finishPayment: (id) =>
-            execute(() =>
-                completePayment(id)
-            ),
-
-        // Customer confirms additional payment
-        confirmPayment: (id) =>
-            execute(() =>
-                confirmAdditionalPayment(id)
-            ),
-
-        // Customer gets approved requests
-        fetchApprovedRequests: (customerId) =>
-            execute(() =>
-                getApprovedReturnRequests(customerId)
-            ),
-
-        // Customer cancels pending request
         cancelPendingRequest: (id) =>
             execute(() =>
                 cancelRequest(id)
             ),
 
-        // Customer submits refund bank information
-        submitRefundInformation: (id, data) =>
+        // ================= CUSTOMER HISTORY =================
+
+        fetchMyRequests: (customerId) =>
             execute(() =>
-                submitRefundInfo(id, data)
+                getMyReturnRequests(customerId)
             ),
 
-        // Manager completes request
-        completeRequestByManager: (id) =>
+        fetchApprovedRequests: (customerId) =>
             execute(() =>
-                completeByManager(id)
+                getApprovedReturnRequests(customerId)
             ),
 
-        // Manager report
-        fetchReturnReport: () =>
+        // ================= MANAGER REVIEW =================
+        fetchPendingRequests: () =>
             execute(() =>
-                getReturnReport()
+                getPendingRequests()
             ),
 
-        // Manager active requests
         fetchManagerRequests: () =>
             execute(() =>
                 getManagerRequests()
             ),
 
-        // Get all requests
-        fetchAllReturnRequests: () =>
+        approveRequest: (id) =>
             execute(() =>
-                getAllReturnRequests()
+                decideRequest(
+                    id,
+                    "APPROVE"
+                )
             ),
 
-        // Calculate exchange price difference
+        rejectRequest: (id, reason) =>
+            execute(() =>
+                decideRequest(
+                    id,
+                    "DECLINE",
+                    reason
+                )
+            ),
+
+        requestMoreInfo: (id) =>
+            execute(() =>
+                requestMoreInfoApi(id)
+            ),
+
+        // ================= RETURN SHIPPING =================
+
+        markItemReturning: (id) =>
+            execute(() =>
+                markReturning(id)
+            ),
+
+        confirmReceivedReturn: (id) =>
+            execute(() =>
+                confirmReturn(id)
+            ),
+
+        // ================= FINANCIAL FLOW =================
+        // RECEIVED -> xử lý tài chính
+        processPayment: (id) =>
+            execute(() =>
+                completePayment(id)
+            ),
+
+        // WAITING_PAYMENT -> customer xác nhận thanh toán thêm
+
+        confirmAdditionalPayment: (id) =>
+            execute(() =>
+                confirmAdditionalPaymentApi(id)
+            ),
+        // WAITING_BANK_INFO -> customer gửi thông tin ngân hàng
+        submitRefundInformation: (id, data) =>
+            execute(() =>
+                submitRefundInfo(
+                    id,
+                    data
+                )
+            ),
+
+        // PROCESSING -> COMPLETED
+
+        completeRequestByManager: (id) =>
+            execute(() =>
+                completeByManager(id)
+            ),
+
+        // ================= EXCHANGE =================
         fetchPriceDifference: (id) =>
             execute(() =>
                 getPriceDifference(id)
             ),
 
-        // Upload evidence image
+        // ================= REPORT =================
+
+        fetchReturnReport: () =>
+            execute(() =>
+                getReturnReport()
+            ),
+
+        fetchAllReturnRequests: () =>
+            execute(() =>
+                getAllReturnRequests()
+            ),
+
+        // ================= IMAGE =================
         uploadEvidence: (file) =>
             execute(() =>
                 uploadEvidenceImage(file)

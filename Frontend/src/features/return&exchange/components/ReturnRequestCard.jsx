@@ -15,28 +15,24 @@ export default function ReturnRequestCard({
     const isReturn = request.returnType === "RETURN";
 
     return (
-        <div className="bg-white rounded-xl border p-5 shadow-sm">
+        <div className="bg-white rounded-xl border p-5 shadow-sm space-y-2">
 
             <h3 className="font-semibold text-green-800">
                 Request #{request.id}
             </h3>
 
-            <p>
-                Customer: {request.customer?.fullName}
-            </p>
+            <p>Customer: {request.customer?.fullName}</p>
+            <p>Loại: {request.returnType}</p>
+            <p>Lý do: {request.reason}</p>
 
             <p>
-                Loại: {request.returnType}
+                Trạng thái:{" "}
+                <span className="font-medium">
+                    {request.status}
+                </span>
             </p>
 
-            <p>
-                Lý do: {request.reason}
-            </p>
-
-            <p>
-                Trạng thái: {request.status}
-            </p>
-
+            {/* ACTIONS */}
             <div className="flex gap-3 mt-3 flex-wrap">
 
                 {/* VIEW */}
@@ -49,7 +45,7 @@ export default function ReturnRequestCard({
 
                 {/* ================= CUSTOMER ================= */}
 
-                {/* Edit request*/}
+                {/* PENDING → edit / cancel */}
                 {request.status === "PENDING" && onEdit && (
                     <button
                         onClick={() => onEdit(request)}
@@ -59,7 +55,6 @@ export default function ReturnRequestCard({
                     </button>
                 )}
 
-                {/* PENDING to Cancel request*/}
                 {request.status === "PENDING" && onCancel && (
                     <button
                         onClick={() => onCancel(request)}
@@ -69,7 +64,7 @@ export default function ReturnRequestCard({
                     </button>
                 )}
 
-                {/* APPROVED → Trả hàng */}
+                {/* APPROVED → gửi hàng */}
                 {request.status === "APPROVED" && onReturn && (
                     <button
                         onClick={() => onReturn(request)}
@@ -79,8 +74,8 @@ export default function ReturnRequestCard({
                     </button>
                 )}
 
-                {/* RECEIVED + EXCHANGE → Thanh toán thêm */}
-                {request.status === "PROCESSING" &&
+                {/* WAITING_PAYMENT → thanh toán thêm */}
+                {request.status === "WAITING_PAYMENT" &&
                     isExchange &&
                     request.additionalPayment > 0 &&
                     onPay && (
@@ -92,10 +87,9 @@ export default function ReturnRequestCard({
                         </button>
                     )}
 
-                {/* RECEIVED + RETURN → Nhập thông tin ngân hàng */}
-                {request.status === "PROCESSING" &&
+                {/* WAITING_BANK_INFO → nhập bank */}
+                {request.status === "WAITING_BANK_INFO" &&
                     isReturn &&
-                    !request.bankName &&
                     onRefundInfo && (
                         <button
                             onClick={() => onRefundInfo(request)}
@@ -107,7 +101,7 @@ export default function ReturnRequestCard({
 
                 {/* ================= MANAGER ================= */}
 
-                {/* RETURNING → Đã nhận hàng */}
+                {/* RETURNING → đã nhận hàng */}
                 {request.status === "RETURNING" && onConfirmReceived && (
                     <button
                         onClick={() => onConfirmReceived(request)}
@@ -117,7 +111,7 @@ export default function ReturnRequestCard({
                     </button>
                 )}
 
-                {/* RECEIVED → Xử lý thanh toán (tính additionalPayment/refundAmount, chuyển sang PROCESSING) */}
+                {/* RECEIVED → xử lý tài chính */}
                 {request.status === "RECEIVED" && onProcessPayment && (
                     <button
                         onClick={() => onProcessPayment(request)}
@@ -127,7 +121,14 @@ export default function ReturnRequestCard({
                     </button>
                 )}
 
-                {/* PROCESSING → Hoàn tất */}
+                {/* PROCESSING → đang xử lý */}
+                {request.status === "PROCESSING" && (
+                    <span className="px-4 py-2 rounded-lg bg-blue-100 text-blue-600">
+                        Đang xử lý
+                    </span>
+                )}
+
+                {/* PROCESSING → manager hoàn tất */}
                 {request.status === "PROCESSING" && onComplete && (
                     <button
                         onClick={() => onComplete(request)}
@@ -135,6 +136,13 @@ export default function ReturnRequestCard({
                     >
                         Hoàn tất
                     </button>
+                )}
+
+                {/* COMPLETED */}
+                {request.status === "COMPLETED" && (
+                    <span className="px-4 py-2 rounded-lg bg-green-100 text-green-700">
+                        Đã hoàn tất
+                    </span>
                 )}
 
             </div>
