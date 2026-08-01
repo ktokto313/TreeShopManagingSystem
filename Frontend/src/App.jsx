@@ -11,6 +11,7 @@ import CartPage from "./pages/CartPage";
 import CatalogPage from "./pages/CatalogPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import CheckoutSuccessPage from "./pages/CheckoutSuccessPage";
+import ReviewCheckoutPage from "./pages/ReviewCheckoutPage";
 import HomePage from "./pages/HomePage";
 import ManagementPage from "./pages/ManagementPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
@@ -107,6 +108,15 @@ function AppRoutes() {
 					<ProtectedRoute
 						roles={["CUSTOMER"]}
 						element={<CheckoutSuccessPage />}
+					/>
+				}
+			/>
+			<Route
+				path="/checkout/review"
+				element={
+					<ProtectedRoute
+						roles={["CUSTOMER"]}
+						element={<ReviewCheckoutPage />}
 					/>
 				}
 			/>

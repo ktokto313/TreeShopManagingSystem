@@ -30,6 +30,7 @@ import { resolveProductImages } from "../features/products/utils/productImageRes
 import ReviewSection from "../features/review/components/ReviewSection";
 import RecommendationSection from "../features/recommendations/components/RecommendationSection";
 import { addWishlistProduct, checkWishlistProduct } from "../features/wishlist/wishlistApi";
+import ToastNotification from "../components/ToastNotification";
 
 function summarizeDescription(value) {
 	if (!value) {
@@ -224,6 +225,7 @@ export default function ProductDetailPage() {
 	const [activeImageSource, setActiveImageSource] = useState("");
 	const [isWishlisted, setIsWishlisted] = useState(false);
 	const [addingToCart, setAddingToCart] = useState(false);
+	const [showToast, setShowToast] = useState(false);
 
 	async function loadProductDetail() {
 		setLoading(true);
@@ -342,7 +344,7 @@ export default function ProductDetailPage() {
 		try {
 			await addCartItem(Number(product.id), 1);
 			window.dispatchEvent(new Event("cart-updated"));
-			setNotice(`${product.name} đã được thêm vào giỏ hàng.`);
+			setShowToast(true);
 		} catch (error) {
 			if (error?.status === 401 && isAuthenticated) {
 				logout();
@@ -646,6 +648,16 @@ export default function ProductDetailPage() {
 					<Card className="p-6 text-sm text-green-800">Không tìm thấy sản phẩm phù hợp.</Card>
 				) : null}
 			</Container>
+
+			{showToast && (
+				<ToastNotification
+					message={`Thêm mặt hàng "${product?.name}" vào giỏ hàng thành công`}
+					actionText="Xem giỏ hàng"
+					actionOnClick={() => navigate("/cart")}
+					onClose={() => setShowToast(false)}
+					showCartIcon
+				/>
+			)}
 		</main>
 	);
 }

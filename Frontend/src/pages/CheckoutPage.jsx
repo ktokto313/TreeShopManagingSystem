@@ -14,6 +14,7 @@ const DEFAULT_SHIPPING_FEE = 30000
 const PRODUCT_WEIGHT_GRAMS = 500
 
 const CHECKOUT_FORM_KEY = 'checkoutForm'
+const CHECKOUT_DRAFT_KEY = 'checkoutDraft'
 
 const initialForm = {
   fullName: '',
@@ -196,20 +197,15 @@ export default function CheckoutPage() {
     setSubmitting(true)
     setError('')
     try {
-      const response = await submitCheckout({
+      const checkoutDraft = {
         ...form,
         weightGrams,
         totalOrderValue,
         itemCount: totalItemQuantity,
-      })
-      window.sessionStorage.setItem(`checkout:${response.orderId}`, JSON.stringify(response))
-      window.sessionStorage.setItem('lastOrderId', response.orderId)
-      try {
-        localStorage.removeItem(CHECKOUT_FORM_KEY)
-      } catch {
-        // ignore
+        shippingFee,
       }
-      navigate(`/checkout/success/${response.orderId}`, { state: { checkout: response } })
+      window.sessionStorage.setItem(CHECKOUT_DRAFT_KEY, JSON.stringify(checkoutDraft))
+      navigate('/checkout/review')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -299,7 +295,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
               <Button type="submit" className="w-full" disabled={submitting || !items.length}>
-                {submitting ? 'Đang xử lý...' : 'Đặt hàng ngay'}
+                {submitting ? 'Đang xử lý...' : 'Tiếp tục'}
               </Button>
               <Link to="/cart" className="block text-center text-sm text-interactive hover:underline">
                 Quay lại giỏ hàng
