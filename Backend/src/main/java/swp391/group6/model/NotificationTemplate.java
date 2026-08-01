@@ -77,6 +77,10 @@ public class NotificationTemplate {
                 "Yêu cầu hỗ trợ",
                 "Phiếu yêu cầu hỗ trợ \"%s\" tạo bởi %s.");
 
+        register("TICKET_CREATED_CUSTOMER",
+                "Tạo yêu cầu thành công",
+                "Phiếu yêu cầu hỗ trợ \"%s\" của bạn đã được tạo thành công.");
+
         register("TICKET_RESOLVED_CUSTOMER",
                 "Hoàn thành yêu cầu",
                 "Phiếu yêu cầu hỗ trợ \"%s\" của bạn đã được xử lý.");
@@ -88,6 +92,26 @@ public class NotificationTemplate {
         register("TICKET_REOPENED_AGENT",
                 "Phiếu yêu cầu được mở lại",
                 "Khách hàng yêu cầu xem xét thêm cho phiếu yêu cầu hỗ trợ \"%s\".");
+
+        register("TICKET_AUTOCLOSED_CUSTOMER",
+                "Phiếu yêu cầu đóng tự động",
+                "Phiếu yêu cầu hỗ trợ \"%s\" đã tự động đóng do không có phản hồi.");
+
+        register("TICKET_COMMENT_AGENT",
+                "Bình luận mới",
+                "Khách hàng đã bình luận trên phiếu yêu cầu hỗ trợ \"%s\".");
+
+        register("TICKET_COMMENT_CUSTOMER",
+                "Bình luận mới",
+                "Agent đã bình luận trên phiếu yêu cầu hỗ trợ \"%s\".");
+
+        register("TICKET_CLOSED_CUSTOMER",
+                "Đóng phiếu yêu cầu",
+                "Phiếu yêu cầu hỗ trợ \"%s\" đã bị đóng/từ chối bởi Agent.");
+
+        register("TICKET_CLOSED_AGENT",
+                "Phiếu yêu cầu đã đóng",
+                "Khách hàng đã xác nhận và đóng phiếu yêu cầu hỗ trợ \"%s\".");
 
         //WISHLIST
         register("WISHLIST_PRODUCT_BACK_IN_STOCK",

@@ -36,14 +36,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
             @Param("priority") Priority priority,
             Pageable pageable);
 
-    @Query("SELECT t FROM Ticket t WHERE (:search IS NULL OR :search = '' OR LOWER(t.title) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(t.detail) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-            "AND (:state IS NULL OR t.ticketState = :state) " +
-            "AND (:priority IS NULL OR t.priority = :priority)")
-    Page<Ticket> findAllWithFilters(
-            @Param("search") String search,
-            @Param("state") TicketState state,
-            @Param("priority") Priority priority,
-            Pageable pageable);
 
     @Query("SELECT t FROM Ticket t WHERE (:search IS NULL OR :search = '' OR LOWER(t.title) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(t.detail) LIKE LOWER(CONCAT('%', :search, '%'))) " +
             "AND (:state IS NULL OR t.ticketState = :state) " +

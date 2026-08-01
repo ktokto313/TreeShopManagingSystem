@@ -13,14 +13,20 @@ export const updateTicketStatus = async (id, newState, agentEmail = null) => {
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 	const response = await fetch(url, { method: "PUT", credentials: "include" });
-	if (!response.ok) throw new Error("Failed to update status");
+	if (!response.ok) {
+		const errorMessage = await response.text();
+		throw new Error(errorMessage || "Failed to update status");
+	}
 	return response.json();
 };
 
 export const fetchComments = async (ticketId) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 	const response = await fetch(`/api/tickets/${ticketId}/comments`, {credentials: "include"});
-	if (!response.ok) throw new Error("Failed to fetch comments");
+	if (!response.ok) {
+		const errorMessage = await response.text();
+		throw new Error(errorMessage || "Failed to fetch comments");
+	}
 	return response.json();
 };
 
@@ -32,7 +38,10 @@ export const createComment = async (ticketId, detail) => {
 		body: JSON.stringify(detail),
 		credentials: "include",
 	});
-	if (!response.ok) throw new Error("Failed to post comment");
+	if (!response.ok) {
+		const errorMessage = await response.text();
+		throw new Error(errorMessage || "Failed to post comment");
+	}
 	return response.json();
 };
 
@@ -66,6 +75,9 @@ export const createTicket = async (ticket) => {
 		credentials: "include",
 	});
 
-	if (!response.ok) throw new Error("Failed to create ticket");
+	if (!response.ok) {
+		const errorMessage = await response.text();
+		throw new Error(errorMessage || "Failed to create ticket");
+	}
 	return response.json();
 };

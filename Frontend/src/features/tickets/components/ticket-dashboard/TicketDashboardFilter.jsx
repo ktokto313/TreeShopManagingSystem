@@ -72,13 +72,6 @@ export const CreateTicketButton = ({
 						}
 					}}
 				>
-					{isCreateTicketSuccess && (
-						<span className="flex items-center gap-2 py-2 px-4 rounded-xl bg-bg-success text-white">
-							<FaCheck className="text-xl" />
-							<p>Phiếu hỗ trợ đã được tạo thành công!</p>
-						</span>
-					)}
-
 					{localValidationError && (
 						<span className="flex gap-2 py-2 px-4 rounded-xl bg-red-500 text-white">
 							<MdBlock className="text-2xl" />
@@ -88,8 +81,8 @@ export const CreateTicketButton = ({
 
 					{ticketCreateError && (
 						<span className="flex items-center gap-2 py-2 px-4 rounded-xl bg-red-500 text-white">
-							<MdBlock className="text-xl" />
-							<p>Lỗi khi tạo phiếu hỗ trợ, vui lòng thử lại sau.</p>
+							<MdBlock className="text-xl shrink-0" />
+							<p>{ticketCreateError.message || "Lỗi khi tạo phiếu hỗ trợ, vui lòng thử lại sau."}</p>
 						</span>
 					)}
 

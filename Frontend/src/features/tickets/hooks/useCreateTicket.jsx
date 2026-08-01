@@ -45,20 +45,6 @@ const useCreateTicket = () => {
         const detail = formData.get("detail");
         const priority = formData.get("priority");
 
-        if (!title || title.trim() === "") {
-            setLocalValidationError("Tiêu đề không được để trống!");
-            return false;
-        }
-
-        if (detail.length < 20) {
-            setLocalValidationError("Chi tiết phải có ít nhất 20 ký tự!");
-            return false; 
-        }
-
-        if (priority === "") {
-            setLocalValidationError("Phải chọn mức ưu tiên!");
-            return false; 
-        }
 
         return await executeCreateTicket({
             title,

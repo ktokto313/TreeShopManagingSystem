@@ -5,22 +5,32 @@ import { Button } from "../../../../components/ui/Button";
 import TicketDetailHeader from './TicketDetailHeader';
 import TicketDetailStatusWrapper from './TicketDetailStatusWrapper';
 import TicketDetailCommentSection from './TicketDetailCommentSection';
+import { IoReload } from "react-icons/io5";
+import { cn } from "../../../../utils/cn";
 
 const TicketDetail = ({detailState}) => {
 	const navigate = useNavigate();
 
-	const { isFetchDetailLoading } = detailState;
+	const { isFetchDetailLoading, loadData } = detailState;
 
-	if (isFetchDetailLoading) return <LoadingScreen></LoadingScreen>;
+	if (isFetchDetailLoading && !detailState.ticket) return <LoadingScreen></LoadingScreen>;
 
 	return (
 		<Container className="max-w-4xl mx-auto mt-10 p-5 flex flex-col gap-6">
-			<Button
-				onClick={() => navigate("/tickets/")}
-				className="w-fit mb-1 py-2 hover:bg-green-400 pr-6 text-xl"
-			>
-				← Quay Lại
-			</Button>
+			<div className="flex gap-2 mb-1">
+				<Button
+					onClick={() => navigate("/tickets/")}
+					className="w-fit py-2 hover:bg-green-400 pr-6 text-xl"
+				>
+					← Quay Lại
+				</Button>
+				<Button
+					onClick={loadData}
+					className="w-fit py-2 hover:bg-green-400 px-4"
+				>
+					<IoReload className={cn("text-xl", { "animate-spin": isFetchDetailLoading })} />
+				</Button>
+			</div>
 
 			<TicketDetailHeader detailState={detailState}></TicketDetailHeader>
 			<TicketDetailStatusWrapper

@@ -46,7 +46,6 @@ public class TicketController {
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Ticket> createTicket(@RequestBody TicketRequest ticketRequest, HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);
         Ticket ticket = ticketService.createTicket(ticketRequest, currentUser.getEmail());
@@ -57,7 +56,6 @@ public class TicketController {
     }
 
     @GetMapping("/")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<Ticket>> getAuthorizedTickets(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String status,
@@ -76,13 +74,15 @@ public class TicketController {
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Ticket> getTicketById(@PathVariable long id) {
-        Optional<Ticket> ticket = ticketService.getTicketById(id);
-        if (ticket.isPresent()) {
-            return ResponseEntity.ok(ticket.get());
-        } else {
+    public ResponseEntity<Ticket> getTicketById(@PathVariable long id, HttpServletRequest request) {
+        LoginResponse currentUser = JWTUtil.getUser(request);
+        Optional<Ticket> ticketOpt = ticketService.getTicketById(id, currentUser);
+
+        if (ticketOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        return ResponseEntity.ok(ticketOpt.get());
     }
 
     @PutMapping("/{id}/status")

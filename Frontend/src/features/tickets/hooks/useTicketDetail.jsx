@@ -117,107 +117,19 @@ export const useTicketDetail = (ticketId) => {
 		const agentEmail = isAgent ? user.email : null;
 
 		try {
-			const valid = validateTicketState(newState);
-			if (valid) {
-				const updatedTicket = await updateTicketStatus(ticketId, newState, agentEmail);
-				dispatch({ type: "STATUS_UPDATE_SUCCESS", payload: updatedTicket });
-			}
-		} catch {
+			const updatedTicket = await updateTicketStatus(ticketId, newState, agentEmail);
+			dispatch({ type: "STATUS_UPDATE_SUCCESS", payload: updatedTicket });
+		} catch (error) {
 			dispatch({
 				type: "STATUS_UPDATE_ERROR",
-				payload: "Không thể cập nhật trạng thái",
+				payload: error.message || "Không thể cập nhật trạng thái",
 			});
+			loadData();
 		}
-	};
-
-	const validateTicketState = (newState) => {
-		const currentTicketState = state.ticket?.ticketState?.toUpperCase();
-		const targetState = newState?.toUpperCase();
-
-		// Role Authorization Check
-		if (!isAgent && !isCreator) {
-			dispatch({
-				type: "STATUS_UPDATE_ERROR",
-				payload: "Bạn không phải là người tạo Phiếu Hỗ Trợ hay Agent",
-			});
-			return false;
-		}
-
-		// Global State Validation
-		if (targetState === "CREATED") {
-			dispatch({
-				type: "STATUS_UPDATE_ERROR",
-				payload: "Phiếu hỗ trợ không thể trở lại trạng thái đã khởi tạo",
-			});
-			return false;
-		}
-
-		if (currentTicketState === "DONE") {
-			dispatch({
-				type: "STATUS_UPDATE_ERROR",
-				payload: "Phiếu hỗ trợ đã hoàn thành, không thể chỉnh sửa",
-			});
-			return false;
-		}
-
-		// Independent validation matrix for Support Agents
-		if (isAgent) {
-			if (currentTicketState === "CREATED" && targetState !== "PROCESSING") {
-				dispatch({
-					type: "STATUS_UPDATE_ERROR",
-					payload:
-						"Agent chỉ có thể chuyển từ trạng thái khởi tạo sang đang xử lý",
-				});
-				return false;
-			}
-			if (
-				currentTicketState === "PROCESSING" &&
-				targetState !== "RESOLVED" &&
-				targetState !== "DONE"
-			) {
-				dispatch({
-					type: "STATUS_UPDATE_ERROR",
-					payload:
-						"Agent chỉ có thể chuyển đổi sang trạng thái Giải quyết hoặc Xong",
-				});
-				return false;
-			}
-			if (currentTicketState === "RESOLVED") {
-				dispatch({
-					type: "STATUS_UPDATE_ERROR",
-					payload:
-						"Agent không thể sửa đổi phiếu hỗ trợ đang chờ khách hàng xác nhận",
-				});
-				return false;
-			}
-		}
-
-		// Independent validation matrix for Ticket Creators (Customers)
-		if (isCreator && !isAgent) {
-			if (currentTicketState !== "RESOLVED") {
-				dispatch({
-					type: "STATUS_UPDATE_ERROR",
-					payload:
-						"Khách hàng chỉ có thể cập nhật trạng thái khi phiếu hỗ trợ ở trạng thái đã xử lí",
-				});
-				return false;
-			}
-			if (targetState !== "DONE" && targetState !== "PROCESSING") {
-				dispatch({
-					type: "STATUS_UPDATE_ERROR",
-					payload:
-						"Khách hàng chỉ có quyền xác nhận Đồng ý hoặc Từ chối giải quyết",
-				});
-				return false;
-			}
-		}
-
-		return true;
 	};
 
 	const handleCommentSubmit = async (e, closeModal) => {
 		e.preventDefault();
-		if (!state.newCommentDetail.trim()) return;
 
 		dispatch({ type: "COMMENT_SUBMIT_START" });
 		try {
@@ -231,8 +143,9 @@ export const useTicketDetail = (ticketId) => {
 			console.log(error);
 			dispatch({
 				type: "COMMENT_SUBMIT_ERROR",
-				payload: "Lỗi khi gửi bình luận",
+				payload: error.message || "Lỗi khi gửi bình luận",
 			});
+			loadData();
 		}
 	};
 
@@ -249,5 +162,6 @@ export const useTicketDetail = (ticketId) => {
 		handleStatusChange,
 		handleCommentSubmit,
 		setNewCommentDetail,
+		loadData,
 	};
 };

@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { Container } from "../../../../components/global/Container";
 import { Button } from "../../../../components/ui/Button";
 import sadPlant from "../../assets/images/sadPlant.gif";
@@ -7,6 +8,13 @@ const TicketDetailLoadError = ({ detailState }) => {
 	const navigate = useNavigate();
 
 	const { isFetchDetailLoadingError } = detailState;
+
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			navigate("/tickets/");
+		}, 3000);
+		return () => clearTimeout(timer);
+	}, [navigate]);
 
 	return (
 		<Container className="mt-10 font-semibold text-5xl">
