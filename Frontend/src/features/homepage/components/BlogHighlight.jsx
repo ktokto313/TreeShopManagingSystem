@@ -9,12 +9,16 @@ export default function BlogHighlight() {
 
     const recentBlogs = blogs?.slice(0, 4) || [];
 
+    if (!loading && (error || recentBlogs.length === 0)) {
+        return null;
+    }
+
     return (
         <section className="py-16 bg-green-200/30 overflow-hidden" ref={ref}>
             <Container>
                 {loading ? (
                     <div className="h-64 bg-stone-100 animate-pulse rounded-3xl w-full"></div>
-                ) : error || recentBlogs.length === 0 ? null : (
+                ) : (
                     <>
                         <div 
                             className={`flex flex-col md:flex-row justify-between items-end mb-12 transition-all duration-700 transform ${
