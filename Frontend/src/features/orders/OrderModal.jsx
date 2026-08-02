@@ -42,7 +42,7 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
 
   const { user } = useContext(AuthContext);
   const { changeOrderStatus, isLoading: isChangingStatus, error: changeOrderError } = useChangeOrderStatus();
-  const { updateAddress, isLoading: isUpdatingAddress } = useUpdateOrderAddress();
+  const { updateAddress, isLoading: isUpdatingAddress, error: changeAddrError } = useUpdateOrderAddress();
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [editingAddressValue, setEditingAddressValue] = useState('');
   const [selectedShipperId, setSelectedShipperId] = useState(null);
@@ -199,6 +199,10 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
             </div>
           </div>
           
+          {changeAddrError &&
+                <p className="text-red-500 text-sm mt-1">{changeAddrError}</p>
+              }
+
           {/* Shipper Information */}
           {!!selectedOrder.shipperId && (
           <>
@@ -272,7 +276,7 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
           )}
           
           {(updateError || changeOrderError) && (
-                <p className="text-red-500 text-xs mt-1">{updateError ?? changeOrderError}</p>
+                <p className="text-red-500 text-sm mt-1">{updateError ?? changeOrderError}</p>
               )}
 
           {/* Close / Actions */}
@@ -300,6 +304,24 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
                 }}
               >
                 Cập nhật Shipper
+              </Button>
+            )}
+
+            {(selectedOrder.status === "PROCESSING" || selectedOrder.status === "RETURN_PROCESSING") 
+            && selectedOrderId !== null && user?.role === "MANAGER" && (
+              <Button
+                variant="primary"
+                className="px-4 py-2"
+                disabled={isChangingStatus}
+                onClick={async () => {
+                  const success = await changeOrderStatus(selectedOrder.id, "PENDING");
+                  if (success) {
+                    fetchOrderDetail(selectedOrderId);
+                    onOrderChange?.();
+                  }
+                }}
+              >
+                Duyệt đơn hàng
               </Button>
             )}
 

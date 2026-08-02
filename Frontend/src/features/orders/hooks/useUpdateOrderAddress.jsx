@@ -28,6 +28,9 @@ export default function useUpdateOrderAddress() {
                 if (response.status === 401 || response.status === 403) {
                     throw new Error("UNAUTHORIZED");
                 }
+                if (response.status === 400) {
+                    throw new Error("Không thể thay đổi địa chỉ nhận hàng, vui lòng kiểm tra lại trạng thái đơn hàng");
+                }
                 throw new Error(`Failed to update address (Status: ${response.status})`);
             }
             return true;

@@ -154,7 +154,7 @@ public class OrderService {
             throw new InvalidStateTransitionException(
                     "Không thể chuyển trạng thái đơn hàng từ " + currentStatus + " sang " + targetStatus
                             + " với quyền truy cập " + roleName);
-        } else if ((targetStatus != OrderStatus.RETURN_PROCESSING || targetStatus == OrderStatus.FAILED) && order.getShipper() == null) {
+        } else if (targetStatus != OrderStatus.RETURN_PROCESSING && targetStatus != OrderStatus.FAILED && order.getShipper() == null) {
             throw new InvalidStateTransitionException(
                     "Không thể chuyển trạng thái đơn hàng từ mà không có shipper");
         }

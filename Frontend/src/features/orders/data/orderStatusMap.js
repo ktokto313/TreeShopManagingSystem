@@ -3,12 +3,12 @@ const makeStyle = (color) =>
 
 /** @type {Record<string, { bg: string, label: string }>} */
 const ORDER_STATUS_MAP = {
-  PROCESSING:     { bg: makeStyle('blue'),   label: 'Chờ xử lý' },
+  PROCESSING:     { bg: makeStyle('blue'),   label: 'Đang xử lý' },
   PENDING:        { bg: makeStyle('yellow'), label: 'Chờ lấy hàng' },
   DELIVERING:     { bg: makeStyle('cyan'),   label: 'Đang giao' },
   ARRIVED:        { bg: makeStyle('emerald'),label: 'Đã đến nơi' },
   RECEIVED:       { bg: makeStyle('green'),  label: 'Đã nhận' },
-  RETURN_PROCESSING: { bg: makeStyle('orange'), label: 'Chờ xử lí hoàn trả' },
+  RETURN_PROCESSING: { bg: makeStyle('orange'), label: 'Đang xử lí hoàn trả' },
   RETURN_PENDING: { bg: makeStyle('orange'), label: 'Chờ hoàn trả' },
   RETURNING:      { bg: makeStyle('purple'), label: 'Đang hoàn trả' },
   FAILED:         { bg: makeStyle('red'),    label: 'Thất bại/Đã hủy' },
