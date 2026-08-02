@@ -40,7 +40,7 @@ export const usePolicy = (id = null) => {
 				setTotalElements(0);
 				setCurrentPage(1);
 			}
-		} catch (error) {
+		} catch {
 			setPolicies([]);
 			setTotalPages(1);
 			setTotalElements(0);
@@ -109,7 +109,7 @@ export const usePolicy = (id = null) => {
 				try {
 					const data = await fetchPolicyById(id);
 					setPolicy(data);
-				} catch (error) {
+				} catch {
 					setPolicy(null);
 				} finally {
 					setLoading(false);

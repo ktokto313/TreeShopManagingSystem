@@ -1,5 +1,5 @@
 /*
- * Created By: MinhLTHE200133
+ * Created By: AnhLV
  * Created At: 2026-06-25
  * Last Modified: 2026-07-15
  */
@@ -27,7 +27,7 @@ export const useProductReview = (productId, onSuccess) => {
 	const [totalElements, setTotalElements] = useState(0);
 	const [ratingFilter, setRatingFilter] = useState(null);
 	
-	const { user, canManage } = useContext(AuthContext);
+	const { canManage } = useContext(AuthContext);
 
 	const loadReviews = useCallback(
 		async (page = 1) => {
@@ -62,7 +62,7 @@ export const useProductReview = (productId, onSuccess) => {
 					setTotalElements(0);
 					setCurrentPage(1);
 				}
-			} catch (error) {
+			} catch {
 				setReviews([]);
 				setTotalPages(1);
 				setTotalElements(0);

@@ -6,7 +6,7 @@ import { Button } from "../../../../components/ui/Button";
 import ModalButton from "../../../../components/ui/ModalButton";
 import { Form } from "../../../../components/ui/Form";
 import { Input } from "../../../../components/ui/Input";
-import { FaFilter, FaPlus, FaCheck } from "react-icons/fa";
+import { FaFilter, FaPlus } from "react-icons/fa";
 import { TbFilterSpark } from "react-icons/tb";
 import { IoReload } from "react-icons/io5";
 import { MdBlock } from "react-icons/md";
@@ -20,7 +20,6 @@ export const CreateTicketButton = ({
 	const {
 		isAgent,
 		isCreateTicketLoading,
-		isCreateTicketSuccess,
 		handleCreateTicketSubmit,
 		localValidationError,
 		ticketCreateError,
