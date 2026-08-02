@@ -88,9 +88,7 @@ function createDetailMarkdownContent(product, categoryName) {
 		sample.push("");
 	}
 
-	sample.push("### Ghi chú");
-	sample.push("");
-	sample.push("Sản phẩm này được hiển thị theo nội dung markdown để hỗ trợ thêm ảnh, tiêu đề và các đoạn mô tả chi tiết.");
+	
 
 	return sample.join("\n");
 }
