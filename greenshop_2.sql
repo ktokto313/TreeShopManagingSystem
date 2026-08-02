@@ -621,6 +621,8 @@ VALUES (5, 'admin@greenshop.vn', '$2a$10$zUuzRUvsOH8nimZ/6lsPjulnRHrSvOzYJBTTi4o
         '0901000003', TRUE),
        (4, 'support@greenshop.vn', '$2a$10$WD9TzMIoFF2HeQ2i8mg9COIf8o7MY.jlAo3mR58q1ASMduxLxwIoe', 'Phạm Thị Support',
         '0901000004', TRUE),
+       (4, 'support2@greenshop.vn', '$2a$10$WD9TzMIoFF2HeQ2i8mg9COIf8o7MY.jlAo3mR58q1ASMduxLxwIoe', 'Nguyễn Support 2',
+        '0901000007', TRUE),
        (1, 'khach1@gmail.com', '$2a$10$bYepmqDIFtLHufQ39FhQxuX2dhPeUtzDcvf0868FSOgyGpCf0lhmi', 'Hoàng Minh Tuấn',
         '0912345601', TRUE),
        (1, 'khach2@gmail.com', '$2a$10$uSQpjK3zgkNtvaCz4daxt.jlbT7p05zWykHz2qqtCff4tfIjKw5dm', 'Nguyễn Thị Lan',
