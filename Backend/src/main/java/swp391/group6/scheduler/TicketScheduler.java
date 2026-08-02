@@ -1,3 +1,12 @@
+/*
+ * Author: AnhLV
+ * Created Date: 2026-07-15
+ * Name: TicketScheduler.java
+ * Description: Scheduler handling scheduled operations.
+ * Last Change Author: AnhLV
+ * Last Change Date: 2026-08-01
+ */
+
 package swp391.group6.scheduler;
 
 import jakarta.transaction.Transactional;
@@ -26,8 +35,10 @@ public class TicketScheduler {
     @Transactional
     public void autoCloseResolvedTickets() {
         List<Ticket> resolvedTickets = ticketRepository.findByTicketState(TicketState.RESOLVED);
-        // long threeDaysInMillis = TimeUnit.DAYS.toMillis(3);
-        long threeDaysInMillis = TimeUnit.SECONDS.toMillis(15);
+         long threeDaysInMillis = TimeUnit.DAYS.toMillis(3);
+
+         // FOR TESTING:
+         // long threeDaysInMillis = TimeUnit.SECONDS.toMillis(15);
         long currentTime = System.currentTimeMillis();
         
         for (Ticket ticket : resolvedTickets) {
