@@ -29,8 +29,8 @@ const useFetchAllTickets = (initialTickets = []) => {
 				setFetchedTickets(content);
 				setTotalPages(totalPagesCount);
 				setTotalElements(totalElementsCount);
-			} catch {
-				const errorMessage = "Đã xảy ra lỗi khi tải dữ liệu."; // Hardcoded message
+			} catch (error) {
+				const errorMessage = error.message || "Đã xảy ra lỗi khi tải dữ liệu."; 
 
 				setFetchAllTicketsError(errorMessage);
 			} finally {

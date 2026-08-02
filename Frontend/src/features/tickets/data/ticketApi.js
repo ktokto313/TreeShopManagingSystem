@@ -3,7 +3,10 @@ export const fetchTicketById = async (id) => {
 	const response = await fetch(`/api/tickets/${id}`, {
 		credentials: "include",
 	});
-	if (!response.ok) throw new Error("Failed to fetch ticket");
+	if (!response.ok) {
+		const errorMessage = await response.text();
+		throw new Error(errorMessage || "Failed to fetch ticket");
+	}
 	return response.json();
 };
 
@@ -63,7 +66,10 @@ export const fetchAllTickets = async (search, status, priority, sort, page = 0, 
 		credentials: "include",
 	});
 
-	if (!response.ok) throw new Error("Failed to fetch all tickets");
+	if (!response.ok) {
+		const errorMessage = await response.text();
+		throw new Error(errorMessage || "Failed to fetch all tickets");
+	}
 	return response.json();
 };
 
