@@ -72,7 +72,7 @@ public class TicketService {
             throw new IllegalArgumentException("Tiêu đề không được để trống!");
         }
 
-        if (request.getDetail() == null || request.getDetail().isBlank() || request.getDetail().length() < 20) {
+        if (request.getDetail() == null || request.getDetail().trim().length()  < 20) {
             throw new IllegalArgumentException("Chi tiết phải có ít nhất 20 ký tự!");
         }
 
@@ -95,8 +95,8 @@ public class TicketService {
         }
 
         Ticket ticket = new Ticket();
-        ticket.setTitle(request.getTitle());
-        ticket.setDetail(request.getDetail());
+        ticket.setTitle(request.getTitle().trim());
+        ticket.setDetail(request.getDetail().trim());
         ticket.setPriority(priority);
 
         // Default values for a brand new ticket
@@ -130,17 +130,17 @@ public class TicketService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
 
-        String searchKeyword = (search != null && !search.isBlank()) ? search.trim() : null;
+        String searchKeyword = (search != null && !search.trim().isEmpty()) ? search.trim() : null;
 
         // Safely convert strings to Enums, leaving them as null if the frontend didn't send them
-        TicketState state = (statusStr != null && !statusStr.isBlank())
+        TicketState state = (statusStr != null && !statusStr.trim().isEmpty())
                 ? TicketState.valueOf(statusStr.toUpperCase()) : null;
 
-        Priority priority = (priorityStr != null && !priorityStr.isBlank())
+        Priority priority = (priorityStr != null && !priorityStr.trim().isEmpty())
                 ? Priority.valueOf(priorityStr.toUpperCase()) : null;
 
         // Pass everything to the repository
-        Page<Ticket> ticketsResult = null;
+        Page<Ticket> ticketsResult;
         String roleName = (user.getRole() != null && user.getRole().getName() != null) ? user.getRole().getName() : "";
 
         if ("CUSTOMER".equalsIgnoreCase(roleName)) {

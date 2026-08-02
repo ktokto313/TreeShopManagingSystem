@@ -66,7 +66,7 @@ public class CommentService {
         Comment newComment = new Comment();
         newComment.setCommentCreator(commentCreator);
         newComment.setTicket(ticket);
-        newComment.setDetail(commentDetail);
+        newComment.setDetail(commentDetail.trim());
         newComment.setTimeCreated(new Timestamp(System.currentTimeMillis()));
 
         commentRepository.save(newComment);
