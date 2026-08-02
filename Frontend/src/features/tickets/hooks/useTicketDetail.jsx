@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useContext } from "react";
+import { useReducer, useEffect, useContext, useCallback } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import {
 	createComment,
@@ -84,31 +84,31 @@ export const useTicketDetail = (ticketId) => {
 	const isCreator = user?.email === state.ticket?.ticketCreator?.email;
 	const isResolved = state.ticket?.ticketState?.toLowerCase() === "resolved";
 
+	const loadData = useCallback(async () => {
+		dispatch({ type: "FETCH_START" });
+		try {
+			const [ticketData, commentsData] = await Promise.all([
+				fetchTicketById(ticketId),
+				fetchComments(ticketId),
+			]);
+			dispatch({
+				type: "FETCH_SUCCESS",
+				payload: { ticket: ticketData, comments: commentsData },
+			});
+		} catch (error) {
+			console.error(error);
+			dispatch({ type: "FETCH_ERROR" });
+		}
+	}, [ticketId]);
+
 	useEffect(() => {
 		if (!ticketId) {
 			dispatch({ type: "FETCH_ERROR" });
 			return;
 		}
 
-		const loadData = async () => {
-			dispatch({ type: "FETCH_START" });
-			try {
-				const [ticketData, commentsData] = await Promise.all([
-					fetchTicketById(ticketId),
-					fetchComments(ticketId),
-				]);
-				dispatch({
-					type: "FETCH_SUCCESS",
-					payload: { ticket: ticketData, comments: commentsData },
-				});
-			} catch (error) {
-				console.error(error);
-				dispatch({ type: "FETCH_ERROR" });
-			}
-		};
-
 		loadData();
-	}, [ticketId]);
+	}, [ticketId, loadData]);
 
 	const handleStatusChange = async (newState) => {
 		dispatch({ type: "STATUS_UPDATE_START" });
