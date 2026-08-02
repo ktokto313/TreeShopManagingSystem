@@ -12,13 +12,16 @@ import { IoWarning, IoReload } from "react-icons/io5";
 import { MdBlock } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 
-const PolicyDetails = ({ policy, onUpdate, onCreate, isCreate = false, updateLoading, policyError, setPolicyError }) => {
+const PolicyDetails = ({ policyState, isCreate = false }) => {
+	const { policy, handleUpdatePolicy, handleCreatePolicy, updateLoading, policyError, setPolicyError } = policyState;
+
 	const [editDesc, setEditDesc] = useState(policy?.description || "");
 	const [editTitle, setEditTitle] = useState(policy?.title || "");
 
 	const { canManage } = useContext(AuthContext);
 	const navigate = useNavigate();
 
+	// Have isCreate so that this component can both be the edit and the create page at the same time
 	const [isEdit, setIsEdit] = useState(isCreate);
 
 	useEffect(() => {
@@ -36,29 +39,25 @@ const PolicyDetails = ({ policy, onUpdate, onCreate, isCreate = false, updateLoa
 	const updatedAt = policy?.updatedAt;
 	const description = policy?.description || "";
 	const status = policy?.status || "DRAFT";
-    
+
 	const hasChanged = editDesc !== description || editTitle !== title;
 
+	// handleSave handles the saving action if it's in create mode or edit mode
 	const handleSave = async (newStatus) => {
-		if (!editTitle || !editTitle.trim()) {
-			if (setPolicyError) setPolicyError("Tiêu đề chính sách không được để trống.");
-			return;
-		}
-		if (!editDesc || !editDesc.trim()) {
-			if (setPolicyError) setPolicyError("Nội dung chính sách không được để trống.");
-			return;
-		}
 		if (isCreate) {
-			const newPolicy = await onCreate({ title: editTitle.trim(), description: editDesc.trim(), status: newStatus });
+			const newPolicy = await handleCreatePolicy({ title: editTitle?.trim() || "", description: editDesc?.trim() || "", status: newStatus });
 			if (newPolicy && newPolicy.id) {
 				navigate(`/policy`);
 			}
 		} else {
-			await onUpdate(id, { title: editTitle.trim(), description: editDesc.trim(), status: newStatus });
-			setIsEdit(false);
+			const updatedPolicy = await handleUpdatePolicy(id, { title: editTitle?.trim() || "", description: editDesc?.trim() || "", status: newStatus });
+			if (updatedPolicy) {
+				setIsEdit(false);
+			}
 		}
 	};
 
+	// handleDiscard handles the discarding action if it's in create mode or edit mode
 	const handleDiscard = () => {
 		if (isCreate) {
 			navigate(-1);
@@ -66,18 +65,18 @@ const PolicyDetails = ({ policy, onUpdate, onCreate, isCreate = false, updateLoa
 			setEditDesc(description);
 			setEditTitle(title);
 			setIsEdit(false);
-            if (setPolicyError) setPolicyError("");
+			if (setPolicyError) setPolicyError("");
 		}
 	};
 
 	return (
 		<>
-            {policyError && (
-                <div className="flex items-center gap-2 py-3 px-4 rounded-xl bg-red-500 text-white mb-4">
-                    <MdBlock className="text-xl shrink-0" />
-                    <p>{policyError}</p>
-                </div>
-            )}
+			{policyError && (
+				<div className="flex items-center gap-2 py-3 px-4 rounded-xl bg-red-500 text-white mb-4">
+					<MdBlock className="text-xl shrink-0" />
+					<p>{policyError}</p>
+				</div>
+			)}
 			{canManage && (
 				<div className="flex gap-2 flex-wrap mb-3">
 					{!isEdit && (
@@ -162,7 +161,7 @@ const PolicyDetails = ({ policy, onUpdate, onCreate, isCreate = false, updateLoa
 					)}
 				</div>
 			)}
-			
+
 			{canManage && isEdit ? (
 				<>
 					<h3 className="my-1">Tiêu đề:</h3>
@@ -170,9 +169,9 @@ const PolicyDetails = ({ policy, onUpdate, onCreate, isCreate = false, updateLoa
 						placeholder={"Chỉnh sửa tiêu đề..."}
 						type="text"
 						onChange={(e) => {
-                            setEditTitle(e.target.value);
-                            if (setPolicyError) setPolicyError("");
-                        }}
+							setEditTitle(e.target.value);
+							if (setPolicyError) setPolicyError("");
+						}}
 						defaultValue={editTitle}
 					></Input>
 
@@ -202,11 +201,11 @@ const PolicyDetails = ({ policy, onUpdate, onCreate, isCreate = false, updateLoa
 					</div>
 
 					<div className="prose max-w-none w-full rounded-lg mt-6	mb-15">
-						<Markdown 
-							components={{ 
+						<Markdown
+							components={{
 								hr: () => <hr className="my-6 border-t-2 border-gray-300" />,
-								h1: ({...props}) => <h1 className="border-b border-gray-300 pb-2" {...props} />,
-								h2: ({...props}) => <h2 className="border-b border-gray-300 pb-2" {...props} />
+								h1: ({ ...props }) => <h1 className="border-b border-gray-300 pb-2" {...props} />,
+								h2: ({ ...props }) => <h2 className="border-b border-gray-300 pb-2" {...props} />
 							}}
 						>
 							{editDesc}

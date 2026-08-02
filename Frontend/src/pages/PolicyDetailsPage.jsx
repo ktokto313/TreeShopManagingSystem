@@ -5,21 +5,17 @@ import LoadingScreen from "./LoadingScreen";
 
 const PolicyDetailsPage = () => {
 	const { id } = useParams();
-	const { policy, loading, handleUpdatePolicy, updateLoading, policyError, setPolicyError } = usePolicy(id);
+
+	const state = usePolicy(id);
+	const { loading } = state;
 
 	if (loading) {
-		return <LoadingScreen className={"h-[75vh]"}></LoadingScreen>
+		return <LoadingScreen className={"h-[75vh]"}></LoadingScreen>;
 	}
 
 	return (
 		<div className="mx-auto mt-8 w-[90%] sm:w-[80%] max-w-230">
-			<PolicyDetails 
-				policy={policy}
-				onUpdate={handleUpdatePolicy}
-				updateLoading={updateLoading}
-                policyError={policyError}
-                setPolicyError={setPolicyError}
-			></PolicyDetails>
+			<PolicyDetails policyState={state}></PolicyDetails>
 		</div>
 	);
 };

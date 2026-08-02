@@ -20,7 +20,6 @@ import swp391.group6.service.PolicyService;
 import jakarta.servlet.http.HttpServletRequest;
 import swp391.group6.dto.LoginResponse;
 import swp391.group6.util.JWTUtil;
-import org.springframework.http.HttpStatus;
 @RestController
 @RequestMapping("/api/policy")
 public class PolicyController {
@@ -38,24 +37,14 @@ public class PolicyController {
             HttpServletRequest request) {
             
         LoginResponse currentUser = JWTUtil.getUser(request);
-        boolean isAdmin = currentUser != null && 
-                          ("MANAGER".equals(currentUser.getRole()) || "SYSTEM_ADMIN".equals(currentUser.getRole()));
-
-        if (!isAdmin) {
-            status = PolicyStatus.PUBLISHED;
-        }
-
-        Page<Policy> policies = policyService.getAllPolicy(title, status, pageable);
+        Page<Policy> policies = policyService.getAllPolicy(title, status, pageable, currentUser);
         return ResponseEntity.ok(policies);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Policy> getPolicyById(@PathVariable Long id, HttpServletRequest request) {
         LoginResponse currentUser = JWTUtil.getUser(request);
-        boolean isManagerOrAdmin = currentUser != null && 
-                          ("MANAGER".equals(currentUser.getRole()) || "SYSTEM_ADMIN".equals(currentUser.getRole()));
-
-        Policy policy = policyService.getPolicyById(id, isManagerOrAdmin);
+        Policy policy = policyService.getPolicyById(id, currentUser);
         
         return ResponseEntity.ok(policy);
     }

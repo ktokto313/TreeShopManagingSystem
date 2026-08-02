@@ -11,6 +11,7 @@ package swp391.group6.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import swp391.group6.dto.LoginResponse;
 import swp391.group6.model.Policy;
 import swp391.group6.model.PolicyStatus;
 import swp391.group6.repository.PolicyRepository;
@@ -23,7 +24,14 @@ public class PolicyService {
         this.policyRepository = policyRepository;
     }
 
-    public Page<Policy> getAllPolicy(String title, PolicyStatus status, Pageable pageable) {
+    public Page<Policy> getAllPolicy(String title, PolicyStatus status, Pageable pageable, LoginResponse currentUser) {
+        boolean isManagerOrAdmin = currentUser != null &&
+                ("MANAGER".equals(currentUser.getRole()) || "SYSTEM_ADMIN".equals(currentUser.getRole()));
+
+        if (!isManagerOrAdmin) {
+            status = PolicyStatus.PUBLISHED;
+        }
+
         if (status == null) {
             if (title == null || title.trim().isEmpty()) {
                 return policyRepository.findAll(pageable);
@@ -37,16 +45,20 @@ public class PolicyService {
         }
     }
 
-    public Policy getPolicyById(Long id, boolean canViewHidden) {
+    public Policy getPolicyById(Long id, LoginResponse currentUser) {
+        boolean isManagerOrAdmin = currentUser != null &&
+                ("MANAGER".equals(currentUser.getRole()) || "SYSTEM_ADMIN".equals(currentUser.getRole()));
+
         Policy policy = policyRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chính sách."));
-        if (!canViewHidden && policy.getStatus() != PolicyStatus.PUBLISHED) {
+        if (!isManagerOrAdmin && policy.getStatus() != PolicyStatus.PUBLISHED) {
             throw new org.springframework.security.access.AccessDeniedException("Chính sách này không khả dụng.");
         }
         return policy;
     }
 
     public Policy createPolicy(Policy policy) {
+        // Assume manager/admin because of @PreAuthorize on controller
         if (policy.getTitle() == null || policy.getTitle().trim().isEmpty()) {
             throw new IllegalArgumentException("Tiêu đề chính sách không được để trống.");
         }
@@ -62,7 +74,9 @@ public class PolicyService {
     }
 
     public Policy updatePolicy(Long id, Policy policyDetails) {
-        Policy policy = getPolicyById(id, true);
+        // Assume manager/admin because of @PreAuthorize on controller
+        Policy policy = policyRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chính sách."));
 
         if (policyDetails.getTitle() != null) {
             if (policyDetails.getTitle().trim().isEmpty()) {

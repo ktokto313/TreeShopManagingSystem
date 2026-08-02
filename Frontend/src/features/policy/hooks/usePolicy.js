@@ -80,6 +80,7 @@ export const usePolicy = (id = null) => {
 				prevPolicies.map((p) => (p.id == targetId ? updatedPolicy : p)),
 			);
 			setPolicy(updatedPolicy);
+			return updatedPolicy;
 		} catch (error) {
 			setPolicyError(error.message);
 		} finally {
@@ -96,7 +97,6 @@ export const usePolicy = (id = null) => {
 			return newPolicy;
 		} catch (error) {
 			setPolicyError(error.message);
-			throw error;
 		} finally {
 			setUpdateLoading(false);
 		}
