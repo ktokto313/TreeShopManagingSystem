@@ -63,7 +63,6 @@ export const useProductReview = (productId, onSuccess) => {
 					setCurrentPage(1);
 				}
 			} catch (error) {
-				console.error("Lỗi tải đánh giá:", error);
 				setReviews([]);
 				setTotalPages(1);
 				setTotalElements(0);
@@ -88,14 +87,11 @@ export const useProductReview = (productId, onSuccess) => {
 		const rating = formData.get("rating");
 		const comment = formData.get("comment");
 
-		const isValid = handleReviewValidation({ rating, comment, user });
-		if (!isValid) return;
-
 		try {
 			setIsReviewSubmitLoading(true);
 
 			const payload = {
-				rating: parseInt(rating, 10),
+				rating: parseInt(rating, 10) || 0,
 				comment,
 			};
 
@@ -106,30 +102,10 @@ export const useProductReview = (productId, onSuccess) => {
 			setStarValue(null);
 			if (onSuccess) onSuccess();
 		} catch (error) {
-			let errorMsg = error.message;
-			if (errorMsg && errorMsg.includes("For input string")) {
-				errorMsg = "Dữ liệu gửi lên không hợp lệ. Vui lòng tải lại trang và thử lại.";
-			}
-			setReviewValidationError(
-				errorMsg || "Có lỗi xảy ra khi gửi đánh giá.",
-			);
+			setReviewValidationError(error.message);
 		} finally {
 			setIsReviewSubmitLoading(false);
 		}
-	};
-
-	const handleReviewValidation = ({ rating, user }) => {
-		if (!user) {
-			setReviewValidationError("Bạn cần đăng nhập để được đánh giá sản phẩm.");
-			return false;
-		}
-
-		if (!rating) {
-			setReviewValidationError("Vui lòng chọn số sao để gửi đánh giá.");
-			return false;
-		}
-
-		return true;
 	};
 
 	const toggleReviewHide = async (reviewId) => {
@@ -144,7 +120,6 @@ export const useProductReview = (productId, onSuccess) => {
 				return r;
 			}));
 		} catch (err) {
-			console.error('Lỗi ẩn đánh giá:', err);
 			alert(err.response?.data?.message || err.message || 'Có lỗi xảy ra khi ẩn đánh giá.');
 		}
 	};
@@ -154,14 +129,12 @@ export const useProductReview = (productId, onSuccess) => {
 			await toggleReviewCurateApi(reviewId);
 			setReviews(reviews.map(r => r.id === reviewId ? { ...r, curated: !r.curated } : r));
 		} catch (err) {
-			console.error('Lỗi curate đánh giá:', err);
 			alert(err.response?.data?.message || err.message || 'Có lỗi xảy ra khi chọn tiêu biểu đánh giá.');
 		}
 	};
 
 	return {
 		handleReviewForm,
-		handleReviewValidation,
 		handleStarOnClick,
 		setIsReviewSubmitLoading,
 		loadReviews,

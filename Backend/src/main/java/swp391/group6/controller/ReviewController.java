@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletRequest;
 import swp391.group6.dto.LoginResponse;
+import swp391.group6.model.Review;
 import swp391.group6.service.OrderService;
 import swp391.group6.util.JWTUtil;
 
@@ -46,7 +47,6 @@ public class ReviewController {
             @PathVariable Long productId,
             @RequestParam(required = false) Short rating,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        System.out.println(rating);
         Page<swp391.group6.model.Review> reviews = orderService.getProductReviews(productId, rating, pageable);
         return ResponseEntity.ok(reviews);
     }
@@ -61,19 +61,15 @@ public class ReviewController {
     }
 
     @PostMapping("/order/{orderId}/product/{productId}")
-    public ResponseEntity<?> createProductReview(
+    public ResponseEntity<Review> createProductReview(
             HttpServletRequest request,
             @PathVariable Long orderId,
             @PathVariable Long productId,
             @RequestBody swp391.group6.dto.ReviewRequest reviewRequest) {
         
         LoginResponse loggedInUser = JWTUtil.getUser(request);
-        try {
-            swp391.group6.model.Review review = orderService.createProductReview(orderId, productId, reviewRequest, loggedInUser);
-            return ResponseEntity.ok(review);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage() != null ? e.getMessage() : "Unknown error"));
-        }
+        swp391.group6.model.Review review = orderService.createProductReview(orderId, productId, reviewRequest, loggedInUser);
+        return ResponseEntity.ok(review);
     }
 
     @GetMapping("/curated")
@@ -85,19 +81,15 @@ public class ReviewController {
     @PreAuthorize("hasAnyRole('MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<Void> toggleReviewCurated(
             @PathVariable Long reviewId) {
-        if (orderService.toggleReviewCurated(reviewId)) {
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
+        orderService.toggleReviewCurated(reviewId);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{reviewId}/hide")
     @PreAuthorize("hasAnyRole('MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<Void> toggleReviewHidden(
             @PathVariable Long reviewId) {
-        if (orderService.toggleReviewHidden(reviewId)) {
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
+        orderService.toggleReviewHidden(reviewId);
+        return ResponseEntity.ok().build();
     }
 }

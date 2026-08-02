@@ -41,7 +41,6 @@ export const usePolicy = (id = null) => {
 				setCurrentPage(1);
 			}
 		} catch (error) {
-			console.error("Failed to fetch policies:", error);
 			setPolicies([]);
 			setTotalPages(1);
 			setTotalElements(0);
@@ -82,12 +81,7 @@ export const usePolicy = (id = null) => {
 			);
 			setPolicy(updatedPolicy);
 		} catch (error) {
-			console.error("Failed to update policy", error);
-			if (error.payload) {
-				setPolicyError(error.payload);
-			} else {
-				setPolicyError(error.message || "Đã xảy ra lỗi khi cập nhật chính sách.");
-			}
+			setPolicyError(error.message);
 		} finally {
 			setUpdateLoading(false);
 		}
@@ -101,12 +95,7 @@ export const usePolicy = (id = null) => {
 			setPolicies((prevPolicies) => [...prevPolicies, newPolicy]);
 			return newPolicy;
 		} catch (error) {
-			console.error("Failed to create policy", error);
-			if (error.payload) {
-				setPolicyError(error.payload);
-			} else {
-				setPolicyError(error.message || "Đã xảy ra lỗi khi tạo chính sách.");
-			}
+			setPolicyError(error.message);
 			throw error;
 		} finally {
 			setUpdateLoading(false);
@@ -121,7 +110,6 @@ export const usePolicy = (id = null) => {
 					const data = await fetchPolicyById(id);
 					setPolicy(data);
 				} catch (error) {
-					console.error("Failed to fetch policy by id:", error);
 					setPolicy(null);
 				} finally {
 					setLoading(false);

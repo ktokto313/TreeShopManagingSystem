@@ -39,9 +39,9 @@ public class PolicyService {
 
     public Policy getPolicyById(Long id, boolean canViewHidden) {
         Policy policy = policyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Policy not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chính sách."));
         if (!canViewHidden && policy.getStatus() != PolicyStatus.PUBLISHED) {
-            throw new RuntimeException("Policy is not available");
+            throw new org.springframework.security.access.AccessDeniedException("Chính sách này không khả dụng.");
         }
         return policy;
     }

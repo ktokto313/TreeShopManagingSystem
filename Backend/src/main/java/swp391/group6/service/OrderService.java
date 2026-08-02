@@ -8,6 +8,7 @@
  */
 package swp391.group6.service;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -263,11 +264,9 @@ public class OrderService {
     }
     
     @PreAuthorize("hasAnyRole('MANAGER')")
-    public boolean toggleReviewHidden(long reviewId) {
-        Review review = reviewRepository.findById(reviewId).orElse(null);
-        if (review == null) {
-            return false;
-        }
+    public void toggleReviewHidden(long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đánh giá."));
 
         boolean newHiddenState = !review.isHidden();
         review.setHidden(newHiddenState);
@@ -278,40 +277,44 @@ public class OrderService {
         }
 
         reviewRepository.save(review);
-        return true;
     }
 
     public Review createProductReview(long orderId, long productId, ReviewRequest request, LoginResponse loginResponse) {
         User user = userRepository.findByEmail(loginResponse.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng."));
 
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng với ID: " + orderId));
 
         if (order.getUser().getId() != user.getId()) {
-            throw new RuntimeException("Bạn chỉ có thể đánh giá sản phẩm của đơn hàng của mình");
+            throw new AccessDeniedException("Bạn chỉ có thể đánh giá sản phẩm của đơn hàng của mình.");
         }
 
         if (order.getStatus() != OrderStatus.RECEIVED) {
-            throw new RuntimeException("Order must be RECEIVED to review");
+            throw new IllegalArgumentException("Đơn hàng phải ở trạng thái đã nhận (RECEIVED) để đánh giá.");
         }
 
         OrderDetail targetDetail = order.getOrderDetailList().stream()
                 .filter(od -> od.getProduct().getId() == productId)
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Order Detail not found for product ID: " + productId));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chi tiết đơn hàng cho sản phẩm ID: " + productId));
 
         // Check if this specific order detail already has a review
         boolean alreadyReviewed = reviewRepository.existsByOrderDetail_Order_IdAndOrderDetail_Product_Id(orderId, productId);
 
         if (alreadyReviewed) {
-            throw new RuntimeException("You have already reviewed this item in this order.");
+            throw new IllegalArgumentException("Bạn đã đánh giá sản phẩm này trong đơn hàng này rồi.");
+        }
+
+        // Add validation for empty rating/comment as it's now pushed to backend
+        if (request.getRating() < 1 || request.getRating() > 5) {
+            throw new IllegalArgumentException("Vui lòng chọn số sao để gửi đánh giá.");
         }
 
         Review review = new Review();
         review.setUser(user);
         review.setOrderDetail(targetDetail);
-        review.setComment(request.getComment());
+        review.setComment(request.getComment() != null ? request.getComment().trim() : null);
         review.setRating((short) request.getRating());
         review.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
         review.setCurated(false);
@@ -324,19 +327,16 @@ public class OrderService {
     }
 
     @PreAuthorize("hasAnyRole('MANAGER')")
-    public boolean toggleReviewCurated(long reviewId) {
-        Review review = reviewRepository.findById(reviewId).orElse(null);
-        if (review == null) {
-            return false;
-        }
+    public void toggleReviewCurated(long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đánh giá."));
 
         // Mutual exclusivity: A review cannot be curated if it is hidden.
         if (!review.isCurated() && review.isHidden()) {
-            throw new IllegalStateException("Cannot curate a hidden review. Please unhide it first.");
+            throw new IllegalArgumentException("Không thể chọn tiêu biểu đánh giá đang bị ẩn. Vui lòng bỏ ẩn trước.");
         }
 
         review.setCurated(!review.isCurated());
         reviewRepository.save(review);
-        return true;
     }
 }
