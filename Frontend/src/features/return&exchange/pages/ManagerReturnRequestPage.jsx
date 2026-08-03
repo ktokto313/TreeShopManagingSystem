@@ -385,6 +385,10 @@ export default function ManagerReturnRequestPage() {
                                     openDetail
                                 }
 
+                                onApprove={() =>
+                                    openDetail(request)
+                                }
+
                                 onConfirmReceived={
                                     handleConfirmReceived
                                 }
@@ -396,14 +400,12 @@ export default function ManagerReturnRequestPage() {
                                 onComplete={
                                     handleComplete
                                 }
-
                             />
 
                         ))
                     }
 
                 </div>
-
 
                 {
                     !loading &&
@@ -421,7 +423,6 @@ export default function ManagerReturnRequestPage() {
                 }
 
             </div>
-
 
             {
                 selected && (

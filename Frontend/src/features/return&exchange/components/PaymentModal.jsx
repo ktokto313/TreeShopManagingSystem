@@ -1,11 +1,18 @@
 import { useState } from "react";
 import { confirmAdditionalPayment } from "../api/returnRequestApi";
 
-export default function PaymentModal({ request, onClose, onSuccess }) {
+export default function PaymentModal({
+                                         request,
+                                         onClose,
+                                         onSuccess
+                                     }) {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
+    const returnedValue = calculateReturnedValue();
+    const exchangeValue = calculateExchangeValue();
+    const additionalPayment =
+        Math.max(exchangeValue - returnedValue, 0);
     const isPayable =
         request?.status === "WAITING_PAYMENT";
 
@@ -15,6 +22,45 @@ export default function PaymentModal({ request, onClose, onSuccess }) {
         return new Intl.NumberFormat("en-US")
             .format(Number(amount || 0));
 
+    }
+
+    function calculateReturnedValue() {
+
+        return request?.items?.reduce(
+            (total, item) => {
+
+                const price =
+                    Number(
+                        item.orderDetail?.product?.price || 0
+                    );
+
+                return total +
+                    price *
+                    Number(item.quantity || 0) *
+                    0.85;
+
+            },
+            0
+        ) || 0;
+    }
+
+    function calculateExchangeValue() {
+
+        return request?.exchangeProducts?.reduce(
+            (total, item) => {
+
+                const price =
+                    Number(
+                        item.product?.price || 0
+                    );
+
+                return total +
+                    price *
+                    Number(item.quantity || 0);
+
+            },
+            0
+        ) || 0;
     }
 
     async function handlePay() {
@@ -31,7 +77,6 @@ export default function PaymentModal({ request, onClose, onSuccess }) {
         try {
             setLoading(true);
             setError("");
-
 
             await confirmAdditionalPayment(
                 request.id
@@ -88,7 +133,7 @@ export default function PaymentModal({ request, onClose, onSuccess }) {
                 ">
 
                     <div className="
-                        flex justify-between
+                            flex justify-between
                     ">
 
                         <span>
@@ -96,14 +141,13 @@ export default function PaymentModal({ request, onClose, onSuccess }) {
                         </span>
 
                         <span className="
-                            text-green-600
+                                text-green-600
                         ">
-                            - {
-                            formatCurrency(
-                                request?.refundAmount
-                            )
+                        {
+                        formatCurrency(
+                            returnedValue
+                        )
                         } VND
-
                         </span>
 
                     </div>
@@ -117,20 +161,12 @@ export default function PaymentModal({ request, onClose, onSuccess }) {
                         </span>
 
                         <span>
-
-                            {
-                                formatCurrency(
-                                    Number(
-                                        request?.refundAmount || 0
-                                    )
-                                    +
-                                    Number(
-                                        request?.additionalPayment || 0
-                                    )
-                                )
-                            } VND
-
-                        </span>
+                    {
+                        formatCurrency(
+                            exchangeValue
+                        )
+                    } VND
+                    </span>
 
                     </div>
 
@@ -152,7 +188,7 @@ export default function PaymentModal({ request, onClose, onSuccess }) {
 
                             {
                                 formatCurrency(
-                                    request?.additionalPayment
+                                    additionalPayment
                                 )
                             } VND
                         </span>
@@ -170,7 +206,6 @@ export default function PaymentModal({ request, onClose, onSuccess }) {
 
                     )
                 }
-
 
                 <div className="
                     flex gap-3
@@ -191,8 +226,10 @@ export default function PaymentModal({ request, onClose, onSuccess }) {
                     >
                         {
                             loading
-                                ? "Đang xử lý..."
-                                : "Thanh toán"
+                                ?
+                                "Đang xử lý..."
+                                :
+                                "Thanh toán"
                         }
 
                     </button>

@@ -4,7 +4,7 @@
  * Name: ReturnRequestService.java
  * Description:
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-07-27
+ * Last Change Date: 2026-08-03
  */
 package swp391.group6.service;
 
@@ -28,9 +28,8 @@ import java.util.List;
 @Transactional
 public class ReturnRequestService {
 
-    private static final BigDecimal ITEM_VALUE_RATE =
-            new BigDecimal("0.85");
-
+    private static final BigDecimal CUSTOMER_FAULT_REFUND_RATE = new BigDecimal("0.85");
+    private static final BigDecimal SHOP_FAULT_REFUND_RATE = BigDecimal.ONE;
     private static final int MIN_DAMAGED_EVIDENCE_COUNT = 2;
 
     private static final List<ReturnStatus> TERMINAL_STATUSES = List.of(
@@ -44,13 +43,11 @@ public class ReturnRequestService {
     private final ReturnRequestRepository returnRequestRepository;
     private final NotificationService notificationService;
 
-    public ReturnRequestService(
-            OrderRepository orderRepository,
-            ReturnRequestOrderRepository returnOrderRepository,
-            ProductRepository productRepository,
-            ReturnRequestRepository returnRequestRepository,
-            NotificationService notificationService
-    ) {
+    public ReturnRequestService(OrderRepository orderRepository,
+                                ReturnRequestOrderRepository returnOrderRepository,
+                                ProductRepository productRepository,
+                                ReturnRequestRepository returnRequestRepository,
+                                NotificationService notificationService) {
         this.orderRepository = orderRepository;
         this.returnOrderRepository = returnOrderRepository;
         this.productRepository = productRepository;
@@ -59,53 +56,39 @@ public class ReturnRequestService {
     }
 
     public List<Order> getAvailableOrders(String customerId) {
-
-        return returnOrderRepository.findAvailableOrders(
-                Long.parseLong(customerId)
-        );
+        return returnOrderRepository.findAvailableOrders(Long.parseLong(customerId));
     }
 
     public List<OrderDetail> getOrderItems(String orderId) {
-
-        Order order = orderRepository.findById(
-                Long.parseLong(orderId)
-        ).orElseThrow(
-                () -> new IllegalArgumentException(
-                        "Không thấy đơn hàng"
-                )
-        );
+        Order order = orderRepository.findById(Long.parseLong(orderId))
+                .orElseThrow(() -> new IllegalArgumentException("Không thấy đơn hàng"));
 
         return order.getOrderDetailList();
     }
 
     public List<Product> getAvailableProducts() {
-
         return productRepository.findAll()
                 .stream()
                 .filter(Product::isStatus)
                 .toList();
     }
 
+    private boolean isShopResponsibleReason(ReturnReason reason) {
+        return reason == ReturnReason.DAMAGED
+                || reason == ReturnReason.WRONG_ITEM;
+    }
+
     //CREATE REQUEST
-    public ReturnRequest submitRequest(
-            String customerId,
-            ReturnRequestDTO dto
-    ) {
+    public ReturnRequest submitRequest(String customerId, ReturnRequestDTO dto) {
 
         validateBasic(dto);
-        Order order = getValidOrder(
-                customerId,
-                dto.getOrderId()
-        );
 
-        boolean hasActiveRequest =
-                returnRequestRepository
-                        .existsByOrder_IdAndStatusNotIn(
-                                order.getId(),
-                                TERMINAL_STATUSES
-                        );
+        Order order = getValidOrder(customerId, dto.getOrderId());
 
-        if (hasActiveRequest) {
+        if (returnRequestRepository.existsByOrder_IdAndStatusNotIn(
+                order.getId(),
+                TERMINAL_STATUSES
+        )) {
             throw new IllegalStateException(
                     "Đơn hàng này đã có yêu cầu đổi trả đang xử lý"
             );
@@ -113,9 +96,8 @@ public class ReturnRequestService {
 
         validateEvidence(dto);
 
+        ReturnRequest request = new ReturnRequest();
 
-        ReturnRequest request =
-                new ReturnRequest();
         request.setOrder(order);
         request.setCustomer(order.getUser());
         request.setReason(dto.getReason());
@@ -126,71 +108,52 @@ public class ReturnRequestService {
         request.setEvidences(new ArrayList<>());
         request.setExchangeProducts(new ArrayList<>());
 
-        buildReturnItems(
-                request,
-                order,
-                dto
-        );
-
+        buildReturnItems(request, order, dto);
 
         if (dto.getReturnType() == ReturnType.EXCHANGE) {
-
-            buildExchangeProducts(
-                    request,
-                    dto
-            );
+            buildExchangeProducts(request, dto);
         }
 
+        buildEvidence(request, dto);
 
-        buildEvidence(
-                request,
-                dto
-        );
+        BigDecimal returnedValue = calculateReturnedValue(request);
 
+        if (dto.getReturnType() == ReturnType.RETURN) {
 
-        BigDecimal returnedValue =
-                calculateReturnedValue(
-                        request.getItems()
-                );
+            request.setRefundAmount(returnedValue);
+            request.setExpectedFee(returnedValue);
 
+            request.setPriceDifference(BigDecimal.ZERO);
+            request.setAdditionalPayment(BigDecimal.ZERO);
 
-        BigDecimal exchangeValue =
-                calculateExchangeValue(
-                        request.getExchangeProducts()
-                );
+        }
+        // EXCHANGE
+        else {
+            BigDecimal exchangeValue =
+                    calculateExchangeValue(request.getExchangeProducts());
 
+            BigDecimal difference =
+                    exchangeValue.subtract(returnedValue)
+                            .setScale(2, RoundingMode.HALF_UP);
 
-        BigDecimal difference =
-                exchangeValue.subtract(
-                        returnedValue
-                );
+            request.setRefundAmount(
+                    difference.compareTo(BigDecimal.ZERO) < 0
+                            ? difference.abs()
+                            : BigDecimal.ZERO
+            );
 
+            request.setPriceDifference(difference);
 
-        request.setRefundAmount(
-                returnedValue
-        );
+            request.setAdditionalPayment(
+                    difference.compareTo(BigDecimal.ZERO) > 0
+                            ? difference
+                            : BigDecimal.ZERO
+            );
 
+            request.setExpectedFee(difference);
+        }
 
-        request.setPriceDifference(
-                difference
-        );
-
-
-        request.setAdditionalPayment(
-                difference.compareTo(BigDecimal.ZERO) > 0
-                        ? difference
-                        : BigDecimal.ZERO
-        );
-
-
-        request.setExpectedFee(
-                difference
-        );
-
-
-        ReturnRequest saved =
-                returnRequestRepository.save(request);
-
+        ReturnRequest saved = returnRequestRepository.save(request);
 
         notificationService.notifyRoleByTemplate(
                 "MANAGER",
@@ -198,291 +161,160 @@ public class ReturnRequestService {
                 "RETURN_REQUEST_CREATED_MANAGER",
                 saved.getId()
         );
-
-
         return saved;
     }
 
     //VALIDATION
-    private void validateBasic(
-            ReturnRequestDTO dto
-    ) {
+    private void validateBasic(ReturnRequestDTO dto) {
+
         if (dto.getOrderId() == null) {
-            throw new IllegalArgumentException(
-                    "Mã đơn hàng là bắt buộc"
-            );
+            throw new IllegalArgumentException("Mã đơn hàng là bắt buộc");
         }
 
         if (dto.getReason() == null) {
-            throw new IllegalArgumentException(
-                    "Lý do trả hàng là bắt buộc"
-            );
+            throw new IllegalArgumentException("Lý do trả hàng là bắt buộc");
         }
 
         if (dto.getReturnType() == null) {
-            throw new IllegalArgumentException(
-                    "Loại yêu cầu trả hàng là bắt buộc"
-            );
+            throw new IllegalArgumentException("Loại yêu cầu trả hàng là bắt buộc");
         }
 
-        if (dto.getItems() == null ||
-                dto.getItems().isEmpty()) {
-
-            throw new IllegalArgumentException(
-                    "Phải chọn ít nhất một sản phẩm"
-            );
+        if (dto.getItems() == null || dto.getItems().isEmpty()) {
+            throw new IllegalArgumentException("Phải chọn ít nhất một sản phẩm");
         }
 
-        if (dto.getReturnType() == ReturnType.EXCHANGE
-                &&
-                (dto.getExchangeProducts() == null
-                        ||
-                        dto.getExchangeProducts().isEmpty())) {
-
-            throw new IllegalArgumentException(
-                    "Phải chọn sản phẩm đổi hàng"
-            );
+        if (dto.getReturnType() == ReturnType.EXCHANGE &&
+                (dto.getExchangeProducts() == null || dto.getExchangeProducts().isEmpty())) {
+            throw new IllegalArgumentException("Phải chọn sản phẩm đổi hàng");
         }
     }
 
-    private Order getValidOrder(
-            String customerId,
-            String orderId
-    ) {
+    private Order getValidOrder(String customerId, String orderId) {
 
-        Order order = orderRepository.findById(
-                Long.parseLong(orderId)
-        ).orElseThrow(
-                () -> new IllegalArgumentException(
-                        "Không tìm thấy đơn hàng"
-                )
-        );
+        Order order = orderRepository.findById(Long.parseLong(orderId))
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng"));
 
-        if (order.getUser() == null
-                ||
-                order.getUser().getId()
-                        != Long.parseLong(customerId)) {
-
-            throw new IllegalArgumentException(
-                    "Đơn hàng không thuộc về khách hàng này"
-            );
+        if (order.getUser() == null || order.getUser().getId() != Long.parseLong(customerId)) {
+            throw new IllegalArgumentException("Đơn hàng không thuộc về khách hàng này");
         }
 
-        if (order.getStatus()
-                != OrderStatus.RECEIVED) {
-
+        if (order.getStatus() != OrderStatus.RECEIVED) {
             throw new IllegalStateException(
                     "Chỉ có thể tạo yêu cầu trả hàng khi khách hàng đã nhận hàng"
             );
         }
 
-        if (order.getDeliveryDate() == null
-                ||
-                order.getDeliveryDate()
-                        .before(
-                                Timestamp.valueOf(
-                                        LocalDateTime.now()
-                                                .minusDays(7)
-                                )
-                        )) {
-
+        if (order.getDeliveryDate() == null ||
+                order.getDeliveryDate().before(
+                        Timestamp.valueOf(LocalDateTime.now().minusDays(7))
+                )) {
             throw new IllegalStateException(
                     "Chỉ có thể trả hàng trong vòng 7 ngày kể từ khi nhận hàng"
             );
         }
+
         return order;
     }
 
-    private void validateEvidence(
-            ReturnRequestDTO dto
-    ) {
-
-        if (dto.getReason()
-                == ReturnReason.DAMAGED) {
-
-
+    private void validateEvidence(ReturnRequestDTO dto) {
+        if (isShopResponsibleReason(dto.getReason())) {
             int count =
                     dto.getEvidenceImageUrls() == null
                             ? 0
-                            :
-                            dto.getEvidenceImageUrls()
-                                    .size();
-
-
+                            : dto.getEvidenceImageUrls().size();
             if (count < MIN_DAMAGED_EVIDENCE_COUNT) {
-
                 throw new IllegalArgumentException(
-                        "Lý do sản phẩm bị hư hỏng yêu cầu ít nhất 2 hình ảnh bằng chứng"
+                        "Lý do sản phẩm lỗi yêu cầu ít nhất 2 hình ảnh bằng chứng"
                 );
             }
         }
     }
 
     //BUILD ITEMS
-    private void buildReturnItems(
-            ReturnRequest request,
-            Order order,
-            ReturnRequestDTO dto
-    ) {
+    private void buildReturnItems(ReturnRequest request, Order order, ReturnRequestDTO dto) {
 
-        for (ReturnRequestDTO.OrderDetailQuantityDTO itemDto
-                : dto.getItems()) {
+        for (ReturnRequestDTO.OrderDetailQuantityDTO itemDto : dto.getItems()) {
 
+            OrderDetail detail = order.getOrderDetailList()
+                    .stream()
+                    .filter(d -> String.valueOf(d.getId().getProductId())
+                            .equals(String.valueOf(itemDto.getProductId())))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Không tìm thấy sản phẩm trong đơn hàng"
+                    ));
 
-            OrderDetail detail =
-                    order.getOrderDetailList()
-                            .stream()
-                            .filter(d ->
-                                    String.valueOf(
-                                                    d.getId()
-                                                            .getProductId()
-                                            )
-                                            .equals(
-                                                    String.valueOf(
-                                                            itemDto.getProductId()
-                                                    )
-                                            )
-                            )
-                            .findFirst()
-                            .orElseThrow(
-                                    () ->
-                                            new IllegalArgumentException(
-                                                    "Không tìm thấy sản phẩm trong đơn hàng"
-                                            )
-                            );
+            Long productId = detail.getId().getProductId();
 
-
-            Long productId =
-                    detail.getId()
-                            .getProductId();
-
-            boolean activeRequest =
-                    returnRequestRepository
-                            .existsActiveReturnForProduct(
-                                    order.getId(),
-                                    productId,
-                                    TERMINAL_STATUSES
-                            );
-
+            boolean activeRequest = returnRequestRepository.existsActiveReturnForProduct(
+                    order.getId(),
+                    productId,
+                    TERMINAL_STATUSES
+            );
 
             if (activeRequest) {
-
                 throw new IllegalStateException(
                         "Sản phẩm này đang có yêu cầu đổi trả chưa hoàn thành"
                 );
             }
 
-            Integer completedQuantity =
-                    returnRequestRepository
-                            .sumCompletedReturnQuantity(
-                                    order.getId(),
-                                    productId
-                            );
-
+            Integer completedQuantity = returnRequestRepository.sumCompletedReturnQuantity(
+                    order.getId(),
+                    productId
+            );
 
             if (completedQuantity == null) {
                 completedQuantity = 0;
             }
 
+            int availableQuantity = detail.getQuantity() - completedQuantity;
 
-            int availableQuantity =
-                    detail.getQuantity()
-                            - completedQuantity;
-
-
-            if (itemDto.getQuantity() <= 0
-                    ||
-                    itemDto.getQuantity()
-                            > availableQuantity) {
-
-
+            if (itemDto.getQuantity() <= 0 || itemDto.getQuantity() > availableQuantity) {
                 throw new IllegalArgumentException(
                         "Số lượng sản phẩm trả vượt quá số lượng còn lại"
                 );
             }
 
+            ReturnRequestItem item = new ReturnRequestItem();
+            item.setReturnRequest(request);
+            item.setOrderDetail(detail);
+            item.setQuantity(itemDto.getQuantity());
 
-
-            ReturnRequestItem item =
-                    new ReturnRequestItem();
-
-
-            item.setReturnRequest(
-                    request
-            );
-
-
-            item.setOrderDetail(
-                    detail
-            );
-
-
-            item.setQuantity(
-                    itemDto.getQuantity()
-            );
-
-
-            request.getItems()
-                    .add(item);
+            request.getItems().add(item);
         }
     }
 
     // BUILD EXCHANGE PRODUCTS
-    private void buildExchangeProducts(
-            ReturnRequest request,
-            ReturnRequestDTO dto
-    ) {
+    private void buildExchangeProducts(ReturnRequest request, ReturnRequestDTO dto) {
 
+        int returnQuantity = request.getItems()
+                .stream()
+                .mapToInt(ReturnRequestItem::getQuantity)
+                .sum();
 
-        int returnQuantity =
-                request.getItems()
-                        .stream()
-                        .mapToInt(
-                                ReturnRequestItem::getQuantity
-                        )
-                        .sum();
-
-
-        int exchangeQuantity =
-                dto.getExchangeProducts()
-                        .stream()
-                        .mapToInt(
-                                ReturnRequestDTO.ExchangeProductDTO::getQuantity
-                        )
-                        .sum();
-
+        int exchangeQuantity = dto.getExchangeProducts()
+                .stream()
+                .mapToInt(ReturnRequestDTO.ExchangeProductDTO::getQuantity)
+                .sum();
 
         if (returnQuantity != exchangeQuantity) {
-
             throw new IllegalArgumentException(
                     "Tổng số lượng sản phẩm đổi phải bằng tổng số lượng sản phẩm trả"
             );
         }
 
-
-
-        for (ReturnRequestDTO.ExchangeProductDTO item
-                : dto.getExchangeProducts()) {
-
+        for (ReturnRequestDTO.ExchangeProductDTO item : dto.getExchangeProducts()) {
 
             if (item.getQuantity() <= 0) {
-
                 throw new IllegalArgumentException(
                         "Số lượng sản phẩm đổi không hợp lệ"
                 );
             }
 
-
-            Product product =
-                    productRepository.findById(
-                                    Long.parseLong(item.getProductId())
-                            )
-                            .orElseThrow(
-                                    () -> new IllegalArgumentException(
-                                            "Không tìm thấy sản phẩm đổi"
-                                    )
-                            );
-
+            Product product = productRepository.findById(Long.parseLong(item.getProductId()))
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Không tìm thấy sản phẩm đổi"
+                    ));
 
             if (!product.isStatus()) {
                 throw new IllegalArgumentException(
@@ -490,150 +322,82 @@ public class ReturnRequestService {
                 );
             }
 
+            ReturnExchangeProduct exchange = new ReturnExchangeProduct();
+            exchange.setReturnRequest(request);
+            exchange.setProduct(product);
+            exchange.setQuantity(item.getQuantity());
 
-            ReturnExchangeProduct exchange =
-                    new ReturnExchangeProduct();
-
-
-            exchange.setReturnRequest(
-                    request
-            );
-
-
-            exchange.setProduct(
-                    product
-            );
-
-
-            exchange.setQuantity(
-                    item.getQuantity()
-            );
-
-
-            request.getExchangeProducts()
-                    .add(exchange);
+            request.getExchangeProducts().add(exchange);
         }
     }
 
-    private void buildEvidence(
-            ReturnRequest request,
-            ReturnRequestDTO dto
-    ) {
+    private void buildEvidence(ReturnRequest request, ReturnRequestDTO dto) {
 
         if (dto.getEvidenceImageUrls() == null) {
             return;
         }
 
-        dto.getEvidenceImageUrls()
-                .forEach(url -> {
+        dto.getEvidenceImageUrls().forEach(url -> {
 
-                    ReturnEvidence evidence =
-                            new ReturnEvidence();
+            ReturnEvidence evidence = new ReturnEvidence();
+            evidence.setReturnRequest(request);
+            evidence.setImageUrl(url);
 
-                    evidence.setReturnRequest(request);
-                    evidence.setImageUrl(url);
-
-                    request.getEvidences()
-                            .add(evidence);
-                });
+            request.getEvidences().add(evidence);
+        });
     }
-
 
     //CALCULATE FEE
-    private BigDecimal calculateExpectedFee(
-            List<ReturnRequestItem> items,
-            List<ReturnExchangeProduct> exchangeProducts
-    ) {
+    private BigDecimal calculateReturnedValue(ReturnRequest request) {
 
-        BigDecimal returnedValue =
-                calculateReturnedValue(items);
+        BigDecimal total = BigDecimal.ZERO;
 
+        BigDecimal refundRate =
+                isShopResponsibleReason(request.getReason())
+                        ? SHOP_FAULT_REFUND_RATE
+                        : CUSTOMER_FAULT_REFUND_RATE;
 
-        BigDecimal exchangeValue =
-                calculateExchangeValue(exchangeProducts);
+        for (ReturnRequestItem item : request.getItems()) {
 
-
-        return exchangeValue
-                .subtract(returnedValue)
-                .setScale(
-                        2,
-                        RoundingMode.HALF_UP
-                );
-    }
-
-    private BigDecimal calculateReturnedValue(
-            List<ReturnRequestItem> items
-    ) {
-
-        BigDecimal total =
-                BigDecimal.ZERO;
-
-        for (ReturnRequestItem item : items) {
-
-            BigDecimal value =
+            BigDecimal productValue =
                     item.getOrderDetail()
                             .getProduct()
                             .getPrice()
+                            .multiply(refundRate)
                             .multiply(
-                                    ITEM_VALUE_RATE
-                            )
-                            .multiply(
-                                    BigDecimal.valueOf(
-                                            item.getQuantity()
-                                    )
+                                    BigDecimal.valueOf(item.getQuantity())
                             );
 
-            total =
-                    total.add(value);
+            total = total.add(productValue);
         }
 
-        return total.setScale(
-                2,
-                RoundingMode.HALF_UP
-        );
+        return total.setScale(2, RoundingMode.HALF_UP);
     }
 
-    private BigDecimal calculateExchangeValue(
-            List<ReturnExchangeProduct> products
-    ) {
+    private BigDecimal calculateExchangeValue(List<ReturnExchangeProduct> products) {
 
-        BigDecimal total =
-                BigDecimal.ZERO;
+        BigDecimal total = BigDecimal.ZERO;
 
-        if (products == null
-                ||
-                products.isEmpty()) {
-
+        if (products == null || products.isEmpty()) {
             return total;
         }
 
         for (ReturnExchangeProduct item : products) {
 
-            BigDecimal value =
-                    item.getProduct()
-                            .getPrice()
-                            .multiply(
-                                    BigDecimal.valueOf(
-                                            item.getQuantity()
-                                    )
-                            );
-            total =
-                    total.add(value);
+            BigDecimal value = item.getProduct()
+                    .getPrice()
+                    .multiply(BigDecimal.valueOf(item.getQuantity()));
+
+            total = total.add(value);
         }
-        return total.setScale(
-                2,
-                RoundingMode.HALF_UP
-        );
+
+        return total.setScale(2, RoundingMode.HALF_UP);
     }
 
     //MANAGER FLOW
     // Returns all requests waiting for Manager review.
     public List<ReturnRequest> getPendingRequests() {
-
-        return returnRequestRepository
-                .findByStatus(
-                        ReturnStatus.PENDING
-                );
+        return returnRequestRepository.findByStatus(ReturnStatus.PENDING);
     }
 
     // Returns all requests that Manager needs to process.
@@ -645,47 +409,52 @@ public class ReturnRequestService {
                         ReturnStatus.APPROVED,
                         ReturnStatus.RETURNING,
                         ReturnStatus.RECEIVED,
-                        ReturnStatus.PROCESSING
+                        ReturnStatus.PROCESSING,
+                        ReturnStatus.WAITING_CUSTOMER_INFO,
+                        ReturnStatus.WAITING_PAYMENT,
+                        ReturnStatus.WAITING_BANK_INFO
                 )
         );
     }
 
     // Returns a single request by id.
-    public ReturnRequest getRequestDetail(
-            String id
-    ) {
-
-        return returnRequestRepository
-                .findById(id)
-                .orElseThrow(
-                        () -> new IllegalArgumentException(
-                                "Không tìm thấy yêu cầu trả hàng"
-                        )
+    public ReturnRequest getRequestDetail(String id) {
+        ReturnRequest request =
+                returnRequestRepository.findDetailById(id)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Không tìm thấy yêu cầu trả hàng"
+                                )
+                        );
+        request.getItems()
+                .forEach(item ->
+                        item.getOrderDetail()
+                                .getProduct()
+                                .getPrice()
                 );
+
+        request.getExchangeProducts()
+                .forEach(item ->
+                        item.getProduct()
+                                .getPrice()
+                );
+        return request;
     }
 
     // Manager approves pending request.
     public ReturnRequest approveRequest(String id) {
 
-        ReturnRequest request =
-                getRequestDetail(id);
+        ReturnRequest request = getRequestDetail(id);
 
-
-        if (request.getStatus()
-                != ReturnStatus.PENDING
-                &&
-                request.getStatus()
-                        != ReturnStatus.WAITING_CUSTOMER_INFO) {
-
+        if (request.getStatus() != ReturnStatus.PENDING &&
+                request.getStatus() != ReturnStatus.WAITING_CUSTOMER_INFO) {
 
             throw new IllegalStateException(
                     "Yêu cầu không thể được duyệt"
             );
         }
 
-        request.setStatus(
-                ReturnStatus.APPROVED
-        );
+        request.setStatus(ReturnStatus.APPROVED);
 
         notificationService.notifyUserByTemplate(
                 request.getCustomer().getId(),
@@ -699,28 +468,19 @@ public class ReturnRequestService {
 
     // Manager rejects request.
     public ReturnRequest rejectRequest(String id, String reason) {
-        ReturnRequest request =
-                getRequestDetail(id);
 
-        if (request.getStatus()
-                != ReturnStatus.PENDING
-                &&
-                request.getStatus()
-                        != ReturnStatus.WAITING_CUSTOMER_INFO) {
+        ReturnRequest request = getRequestDetail(id);
 
+        if (request.getStatus() != ReturnStatus.PENDING &&
+                request.getStatus() != ReturnStatus.RECEIVED) {
 
             throw new IllegalStateException(
-                    "Yêu cầu không thể bị từ chối"
+                    "Chỉ có thể từ chối khi đang chờ duyệt hoặc sau khi nhận hàng"
             );
         }
 
-        request.setStatus(
-                ReturnStatus.REJECTED
-        );
-
-        request.setManagerNote(
-                reason
-        );
+        request.setStatus(ReturnStatus.REJECTED);
+        request.setManagerNote(reason);
 
         notificationService.notifyUserByTemplate(
                 request.getCustomer().getId(),
@@ -729,48 +489,39 @@ public class ReturnRequestService {
                 request.getId(),
                 reason
         );
+
         return request;
     }
 
     // Customer cancels pending request.
     public ReturnRequest cancelRequest(String id) {
 
-        ReturnRequest request =
-                getRequestDetail(id);
+        ReturnRequest request = getRequestDetail(id);
 
-        if (request.getStatus()
-                != ReturnStatus.PENDING) {
-
+        if (request.getStatus() != ReturnStatus.PENDING) {
             throw new IllegalStateException(
                     "Chỉ yêu cầu đang chờ xử lý mới có thể được hủy"
             );
         }
 
-        request.setStatus(
-                ReturnStatus.REJECTED
-        );
-        request.setManagerNote(
-                "Người dùng hủy yêu cầu"
-        );
+        request.setStatus(ReturnStatus.REJECTED);
+        request.setManagerNote("Người dùng hủy yêu cầu");
+
         return request;
     }
 
     // Manager requests more information from customer.
     public ReturnRequest requestMoreInfo(String id) {
 
-        ReturnRequest request =
-                getRequestDetail(id);
+        ReturnRequest request = getRequestDetail(id);
 
-        if (request.getStatus()
-                != ReturnStatus.PENDING) {
+        if (request.getStatus() != ReturnStatus.PENDING) {
 
             throw new IllegalStateException(
                     "Chỉ yêu cầu đang chờ xử lý mới có thể yêu cầu bổ sung thông tin"
             );
         }
-        request.setStatus(
-                ReturnStatus.WAITING_CUSTOMER_INFO
-        );
+        request.setStatus(ReturnStatus.WAITING_CUSTOMER_INFO);
         notificationService.notifyUserByTemplate(
                 request.getCustomer().getId(),
                 NotificationType.RETURN_MORE_INFO_REQUIRED,
@@ -778,66 +529,45 @@ public class ReturnRequestService {
                 request.getId()
         );
 
-
         return request;
     }
 
-    // Customer updates information after manager request.
-    public ReturnRequest updateRequestInfo(
-            String id,
-            ReturnRequestUpdateDTO dto
-    ) {
+    // Customer updates request before manager approval
+    public ReturnRequest updateRequestInfo(String id, ReturnRequestUpdateDTO dto) {
 
-        ReturnRequest request =
-                getRequestDetail(id);
+        ReturnRequest request = getRequestDetail(id);
 
-
-        if (request.getStatus()
-                != ReturnStatus.WAITING_CUSTOMER_INFO) {
+        if (request.getStatus() != ReturnStatus.PENDING &&
+                request.getStatus() != ReturnStatus.WAITING_CUSTOMER_INFO) {
 
             throw new IllegalStateException(
-                    "Chỉ có thể bổ sung thông tin khi hệ thống yêu cầu"
+                    "Chỉ có thể cập nhật khi yêu cầu chưa được duyệt"
             );
         }
 
+        request.setManagerNote(dto.getNote());
 
-        request.setManagerNote(
-                dto.getNote()
-        );
-
-
-        if (dto.getAdditionalImageUrls()
-                != null) {
-
+        if (dto.getAdditionalImageUrls() != null) {
             dto.getAdditionalImageUrls()
                     .forEach(url -> {
-
-                        ReturnEvidence evidence =
-                                new ReturnEvidence();
-
-                        evidence.setReturnRequest(
-                                request
-                        );
-
-                        evidence.setImageUrl(
-                                url
-                        );
+                        ReturnEvidence evidence = new ReturnEvidence();
+                        evidence.setReturnRequest(request);
+                        evidence.setImageUrl(url);
 
                         request.getEvidences()
                                 .add(evidence);
                     });
         }
-        request.setStatus(
-                ReturnStatus.PENDING
-        );
 
-        notificationService.notifyRoleByTemplate(
-                "MANAGER",
-                NotificationType.RETURN_CUSTOMER_INFO_UPDATED,
-                "RETURN_CUSTOMER_INFO_UPDATED_MANAGER",
-                request.getId()
-        );
-
+        if (request.getStatus() == ReturnStatus.WAITING_CUSTOMER_INFO) {
+            request.setStatus(ReturnStatus.PENDING);
+            notificationService.notifyRoleByTemplate(
+                    "MANAGER",
+                    NotificationType.RETURN_CUSTOMER_INFO_UPDATED,
+                    "RETURN_CUSTOMER_INFO_UPDATED_MANAGER",
+                    request.getId()
+            );
+        }
         return request;
     }
 
@@ -845,18 +575,16 @@ public class ReturnRequestService {
     // Customer confirms item has been shipped back.
     public ReturnRequest markReturning(String id) {
 
-        ReturnRequest request =
-                getRequestDetail(id);
+        ReturnRequest request = getRequestDetail(id);
 
-        if (request.getStatus()
-                != ReturnStatus.APPROVED) {
+        if (request.getStatus() != ReturnStatus.APPROVED) {
             throw new IllegalStateException(
                     "Chỉ yêu cầu đã duyệt mới được gửi trả"
             );
         }
-        request.setStatus(
-                ReturnStatus.RETURNING
-        );
+
+        request.setStatus(ReturnStatus.RETURNING);
+
         notificationService.notifyRoleByTemplate(
                 "MANAGER",
                 NotificationType.RETURN_ITEM_RETURNING,
@@ -870,20 +598,15 @@ public class ReturnRequestService {
     // Manager confirms returned item arrived.
     public ReturnRequest confirmReturn(String id) {
 
-        ReturnRequest request =
-                getRequestDetail(id);
+        ReturnRequest request = getRequestDetail(id);
 
-        if (request.getStatus()
-                != ReturnStatus.RETURNING) {
-
+        if (request.getStatus() != ReturnStatus.RETURNING) {
             throw new IllegalStateException(
                     "Yêu cầu chưa ở trạng thái đang hoàn trả"
             );
         }
 
-        request.setStatus(
-                ReturnStatus.RECEIVED
-        );
+        request.setStatus(ReturnStatus.RECEIVED);
 
         notificationService.notifyUserByTemplate(
                 request.getCustomer().getId(),
@@ -891,108 +614,48 @@ public class ReturnRequestService {
                 "RETURN_RECEIVED_CUSTOMER",
                 request.getId()
         );
+
         return request;
     }
 
     // Calculates exchange price difference.
-    public BigDecimal calculatePriceDifference(
-            String id
-    ) {
+    public BigDecimal calculatePriceDifference(String id) {
 
-        ReturnRequest request =
-                getRequestDetail(id);
+        ReturnRequest request = getRequestDetail(id);
 
-        if (request.getReturnType()
-                != ReturnType.EXCHANGE) {
+        if (request.getReturnType() != ReturnType.EXCHANGE) {
+
             throw new IllegalStateException(
                     "Chỉ yêu cầu đổi hàng mới có chênh lệch giá"
             );
         }
 
         BigDecimal returnedValue =
-                BigDecimal.ZERO;
-
-        // Calculate returned product value after depreciation
-        for (ReturnRequestItem item : request.getItems()) {
-            BigDecimal value =
-                    item.getOrderDetail()
-                            .getProduct()
-                            .getPrice()
-                            .multiply(ITEM_VALUE_RATE)
-                            .multiply(
-                                    BigDecimal.valueOf(
-                                            item.getQuantity()
-                                    )
-                            );
-
-            returnedValue =
-                    returnedValue.add(value);
-        }
-
-        returnedValue =
-                returnedValue.setScale(
-                        2,
-                        RoundingMode.HALF_UP
-                );
+                calculateReturnedValue(request);
 
         BigDecimal exchangeValue =
-                BigDecimal.ZERO;
-
-        // Calculate exchange product value
-        for (ReturnExchangeProduct exchange
-                : request.getExchangeProducts()) {
-            BigDecimal value =
-                    exchange.getProduct()
-                            .getPrice()
-                            .multiply(
-                                    BigDecimal.valueOf(
-                                            exchange.getQuantity()
-                                    )
-                            );
-
-            exchangeValue =
-                    exchangeValue.add(value);
-        }
-
-        exchangeValue =
-                exchangeValue.setScale(
-                        2,
-                        RoundingMode.HALF_UP
+                calculateExchangeValue(
+                        request.getExchangeProducts()
                 );
 
         BigDecimal difference =
-                exchangeValue.subtract(
-                        returnedValue
-                );
+                exchangeValue.subtract(returnedValue)
+                        .setScale(2, RoundingMode.HALF_UP);
 
-        difference =
-                difference.setScale(
-                        2,
-                        RoundingMode.HALF_UP
-                );
 
-        // Save detail for frontend display
+        request.setPriceDifference(difference);
+
         request.setRefundAmount(
-                returnedValue
+                difference.compareTo(BigDecimal.ZERO) < 0
+                        ? difference.abs()
+                        : BigDecimal.ZERO
         );
 
-        request.setPriceDifference(
-                difference
+        request.setAdditionalPayment(
+                difference.compareTo(BigDecimal.ZERO) > 0
+                        ? difference
+                        : BigDecimal.ZERO
         );
-
-        if (difference.compareTo(BigDecimal.ZERO) > 0) {
-
-            request.setAdditionalPayment(
-                    difference
-            );
-
-        } else {
-
-            request.setAdditionalPayment(
-                    BigDecimal.ZERO
-            );
-        }
-
 
         return difference;
     }
@@ -1000,55 +663,32 @@ public class ReturnRequestService {
     //PAYMENT
     // Process financial requirement after returned item is received.
     public void completePayment(String id) {
+        ReturnRequest request = getRequestDetail(id);
 
-        ReturnRequest request =
-                getRequestDetail(id);
-
-
-        if (request.getStatus()
-                != ReturnStatus.RECEIVED) {
-
+        if (request.getStatus() != ReturnStatus.RECEIVED) {
             throw new IllegalStateException(
                     "Yêu cầu phải ở trạng thái đã nhận hàng trước khi xử lý tài chính"
             );
         }
 
-
         // ===== EXCHANGE =====
-        if (request.getReturnType()
-                == ReturnType.EXCHANGE) {
+        if (request.getReturnType() == ReturnType.EXCHANGE) {
 
-
-            BigDecimal diff =
-                    calculatePriceDifference(id);
-
+            BigDecimal diff = calculatePriceDifference(id);
 
             // Customer needs to pay more
             if (diff.compareTo(BigDecimal.ZERO) > 0) {
 
-
-                request.setAdditionalPayment(
-                        diff
-                );
-
-
-                request.setStatus(
-                        ReturnStatus.WAITING_PAYMENT
-                );
-
+                request.setAdditionalPayment(diff);
+                request.setStatus(ReturnStatus.WAITING_PAYMENT);
 
                 notificationService.notifyUserByTemplate(
                         request.getCustomer().getId(),
-
                         NotificationType.RETURN_ADDITIONAL_PAYMENT_REQUIRED,
-
                         "RETURN_ADDITIONAL_PAYMENT_CUSTOMER",
-
                         request.getId(),
-
                         diff
                 );
-
 
                 return;
             }
@@ -1057,71 +697,34 @@ public class ReturnRequestService {
             // Shop needs to refund customer
             if (diff.compareTo(BigDecimal.ZERO) < 0) {
 
-
-                request.setRefundAmount(
-                        diff.abs()
-                );
-
-
-                request.setStatus(
-                        ReturnStatus.WAITING_BANK_INFO
-                );
-
+                request.setRefundAmount(diff.abs());
+                request.setStatus(ReturnStatus.WAITING_BANK_INFO);
 
                 notificationService.notifyUserByTemplate(
                         request.getCustomer().getId(),
-
                         NotificationType.RETURN_BANK_INFO_REQUIRED,
-
                         "RETURN_BANK_INFO_CUSTOMER",
-
                         request.getId()
                 );
-
 
                 return;
             }
 
 
             // No price difference
-            request.setFinancialProcessed(
-                    true
-            );
-
-
-            createExchangeOrder(
-                    request
-            );
-
-
-            request.setStatus(
-                    ReturnStatus.PROCESSING
-            );
-
+            request.setFinancialProcessed(true);
+            request.setStatus(ReturnStatus.PROCESSING);
 
             return;
         }
 
         // ===== NORMAL RETURN =====
+        if (request.getRefundAmount() == null) {
+            request.setRefundAmount(BigDecimal.ZERO);
+        }
 
-        BigDecimal refund =
-                request.getExpectedFee()
-                        .abs();
-
-        request.setRefundAmount(
-                refund
-        );
-
-
-        request.setFinancialProcessed(
-                false
-        );
-
-
-        request.setStatus(
-                ReturnStatus.WAITING_BANK_INFO
-        );
-
+        request.setFinancialProcessed(false);
+        request.setStatus(ReturnStatus.WAITING_BANK_INFO);
 
         notificationService.notifyUserByTemplate(
                 request.getCustomer().getId(),
@@ -1143,152 +746,89 @@ public class ReturnRequestService {
         }
 
         request.setFinancialProcessed(true);
-
-        createExchangeOrder(request);
-
         request.setStatus(ReturnStatus.PROCESSING);
 
         return request;
     }
 
     // Creates exchange order from all exchange products.
-    private void createExchangeOrder(
-            ReturnRequest request
-    ) {
+    private void createExchangeOrder(ReturnRequest request) {
 
         Order newOrder = new Order();
 
-        newOrder.setUser(
-                request.getCustomer()
-        );
+        newOrder.setUser(request.getCustomer());
+        newOrder.setShippingAddress(request.getOrder().getShippingAddress());
+        newOrder.setShippingFee(BigDecimal.ZERO);
+        newOrder.setDiscount(BigDecimal.ZERO);
+        newOrder.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        newOrder.setStatus(OrderStatus.PROCESSING);
 
-        newOrder.setShippingAddress(
-                request.getOrder()
-                        .getShippingAddress()
-        );
+        List<OrderDetail> details = new ArrayList<>();
 
-        newOrder.setShippingFee(
-                BigDecimal.ZERO
-        );
+        for (ReturnExchangeProduct exchange : request.getExchangeProducts()) {
 
-        newOrder.setDiscount(
-                BigDecimal.ZERO
-        );
+            OrderDetail detail = new OrderDetail();
 
-        newOrder.setCreatedAt(
-                new Timestamp(
-                        System.currentTimeMillis()
-                )
-        );
-
-        newOrder.setStatus(
-                OrderStatus.PROCESSING
-        );
-
-        List<OrderDetail> details =
-                new ArrayList<>();
-
-        for (ReturnExchangeProduct exchange
-                : request.getExchangeProducts()) {
-
-            OrderDetail detail =
-                    new OrderDetail();
-
-            detail.setOrder(
-                    newOrder
-            );
-
-            detail.setProduct(
-                    exchange.getProduct()
-            );
-
-            detail.setQuantity(
-                    exchange.getQuantity()
-            );
-
-            detail.setPricePaid(
-                    exchange.getProduct()
-                            .getPrice()
-            );
-
+            detail.setOrder(newOrder);
+            detail.setProduct(exchange.getProduct());
+            detail.setQuantity(exchange.getQuantity());
+            detail.setPricePaid(exchange.getProduct().getPrice());
 
             details.add(detail);
         }
 
-        newOrder.setOrderDetailList(
-                details
-        );
+        newOrder.setOrderDetailList(details);
 
-        orderRepository.save(
-                newOrder
-        );
+        orderRepository.save(newOrder);
     }
 
     //CUSTOMER REQUEST HISTORY
-    public List<ReturnRequest> getCustomerRequests(
-            String customerId
-    ) {
+    public List<ReturnRequest> getCustomerRequests(String customerId) {
 
-        return returnRequestRepository
-                .findByCustomer_Id(
-                        Long.parseLong(customerId)
-                );
+        return returnRequestRepository.findByCustomer_Id(
+                Long.parseLong(customerId)
+        );
     }
 
-    public List<ReturnRequest> getApprovedRequests(
-            String customerId
-    ) {
+    public List<ReturnRequest> getApprovedRequests(String customerId) {
 
-        return returnRequestRepository
-                .findByCustomer_Id(
+        return returnRequestRepository.findByCustomer_Id(
                         Long.parseLong(customerId)
                 )
                 .stream()
-                .filter(r ->
-                        r.getStatus() != ReturnStatus.REJECTED
-                                &&
-                                r.getStatus() != ReturnStatus.COMPLETED
-                )
+                .filter(r -> r.getStatus() != ReturnStatus.REJECTED &&
+                        r.getStatus() != ReturnStatus.COMPLETED)
                 .toList();
     }
-    //MANAGER REPORT
 
+    //MANAGER REPORT
     public ReturnReportDTO getReturnReport() {
 
-        long totalRequests =
-                returnRequestRepository.count();
+        long totalRequests = returnRequestRepository.count();
 
-        long completedReturns =
-                returnRequestRepository.countByStatus(
+        long completedReturns = returnRequestRepository.countByStatus(
+                ReturnStatus.COMPLETED
+        );
+
+        BigDecimal refundAmount =
+                returnRequestRepository.sumRefundAmountByStatus(
                         ReturnStatus.COMPLETED
                 );
 
-        BigDecimal refundAmount =
-                returnRequestRepository
-                        .sumRefundAmountByStatus(
-                                ReturnStatus.COMPLETED
-                        );
-
         BigDecimal additionalPayment =
-                returnRequestRepository
-                        .sumAdditionalPaymentByStatus(
-                                ReturnStatus.COMPLETED
-                        );
+                returnRequestRepository.sumAdditionalPaymentByStatus(
+                        ReturnStatus.COMPLETED
+                );
 
         if (refundAmount == null) {
-            refundAmount =
-                    BigDecimal.ZERO;
+            refundAmount = BigDecimal.ZERO;
         }
 
         if (additionalPayment == null) {
-            additionalPayment =
-                    BigDecimal.ZERO;
+            additionalPayment = BigDecimal.ZERO;
         }
 
-        BigDecimal revenueImpact =
-                additionalPayment.subtract(
-                        refundAmount
-                );
+        BigDecimal revenueImpact = additionalPayment.subtract(refundAmount);
 
         return new ReturnReportDTO(
                 totalRequests,
@@ -1303,46 +843,22 @@ public class ReturnRequestService {
         return returnRequestRepository.findAll();
     }
 
+
     //REFUND INFORMATION
-    public ReturnRequest submitBankInfo(
-            String id,
-            RefundInfoDTO dto
-    ) {
+    public ReturnRequest submitBankInfo(String id, RefundInfoDTO dto) {
 
-        ReturnRequest request =
-                getRequestDetail(id);
+        ReturnRequest request = getRequestDetail(id);
 
-
-        if (request.getStatus()
-                != ReturnStatus.WAITING_BANK_INFO) {
-
-
+        if (request.getStatus() != ReturnStatus.WAITING_BANK_INFO) {
             throw new IllegalStateException(
                     "Yêu cầu không ở trạng thái chờ thông tin ngân hàng"
             );
         }
+        request.setBankName(dto.getBankName());
+        request.setAccountNumber(dto.getAccountNumber());
+        request.setAccountHolder(dto.getAccountHolder());
 
-
-        request.setBankName(
-                dto.getBankName()
-        );
-
-
-        request.setAccountNumber(
-                dto.getAccountNumber()
-        );
-
-
-        request.setAccountHolder(
-                dto.getAccountHolder()
-        );
-
-
-        request.setStatus(
-                ReturnStatus.PROCESSING
-        );
-
-
+        request.setStatus(ReturnStatus.PROCESSING);
         notificationService.notifyRoleByTemplate(
                 "MANAGER",
                 NotificationType.RETURN_BANK_INFO_SUBMITTED,
@@ -1350,51 +866,40 @@ public class ReturnRequestService {
                 request.getId()
         );
 
-        return request;
+        return returnRequestRepository.save(request);
     }
+
 
     // Manager completes request.
     public void completeByManager(String id) {
 
-        ReturnRequest request =
-                getRequestDetail(id);
+        ReturnRequest request = getRequestDetail(id);
 
-
-        if (request.getStatus()
-                != ReturnStatus.PROCESSING) {
-
-
+        if (request.getStatus() != ReturnStatus.PROCESSING) {
             throw new IllegalStateException(
                     "Chỉ có thể hoàn tất khi đang xử lý"
             );
         }
 
         if (request.getRefundAmount() == null) {
-
-            request.setRefundAmount(
-                    BigDecimal.ZERO
-            );
+            request.setRefundAmount(BigDecimal.ZERO);
         }
 
         if (request.getAdditionalPayment() == null) {
-
-            request.setAdditionalPayment(
-                    BigDecimal.ZERO
-            );
+            request.setAdditionalPayment(BigDecimal.ZERO);
         }
 
-        request.setFinancialProcessed(
-                true
-        );
 
-        request.setStatus(
-                ReturnStatus.COMPLETED
-        );
+        // Create exchange order only after Manager confirms completion.
+        if (request.getReturnType() == ReturnType.EXCHANGE) {
+
+            createExchangeOrder(request);
+        }
 
 
-        request.setCompletedAt(
-                LocalDateTime.now()
-        );
+        request.setFinancialProcessed(true);
+        request.setStatus(ReturnStatus.COMPLETED);
+        request.setCompletedAt(LocalDateTime.now());
 
         notificationService.notifyUserByTemplate(
                 request.getCustomer().getId(),

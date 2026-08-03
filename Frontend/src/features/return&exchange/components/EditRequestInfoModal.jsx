@@ -13,13 +13,18 @@ export default function EditRequestInfoModal({
         request?.managerNote ?? ""
     );
 
-    const [evidenceImages, setEvidenceImages] = useState([]);
+    const [evidenceImages, setEvidenceImages] = useState(
+        request?.evidences?.map(
+            e => e.imageUrl
+        ) ?? []
+    );
+
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
     const evidenceUploaderRef = useRef(null);
     const isEditable =
+        request?.status === "PENDING" ||
         request?.status === "WAITING_CUSTOMER_INFO";
-
 
 
     function handleClose() {
@@ -32,7 +37,7 @@ export default function EditRequestInfoModal({
         if (!isEditable) {
 
             setError(
-                "Chỉ có thể bổ sung thông tin khi Manager yêu cầu"
+                "Yêu cầu đã được duyệt nên không thể chỉnh sửa"
             );
 
             return;
@@ -49,7 +54,6 @@ export default function EditRequestInfoModal({
                 [];
 
 
-
             await updateRequestInfo(
                 request.id,
                 {
@@ -58,29 +62,26 @@ export default function EditRequestInfoModal({
                 }
             );
 
-
-
             alert(
-                "Đã gửi bổ sung thông tin"
+                "Đã cập nhật yêu cầu"
             );
-
 
             onSuccess?.();
 
         } catch(err) {
-
-
             setError(
                 err?.message
                 ||
-                "Không thể cập nhật thông tin"
+                "Không thể cập nhật yêu cầu"
             );
-
 
         } finally {
             setSubmitting(false);
         }
     }
+
+    const isWaitingInfo =
+        request?.status === "WAITING_CUSTOMER_INFO";
 
     return (
 
@@ -88,6 +89,7 @@ export default function EditRequestInfoModal({
             fixed inset-0
             bg-black/40
             flex items-center justify-center
+            z-50
         ">
 
 
@@ -101,29 +103,68 @@ export default function EditRequestInfoModal({
 
 
                 <h2 className="
-                    text-lg font-semibold
+                    text-lg
+                    font-semibold
                 ">
-                    Bổ sung thông tin yêu cầu #{request?.id}
+
+                    {
+                        isWaitingInfo
+                            ?
+                            "Bổ sung thông tin yêu cầu"
+                            :
+                            "Chỉnh sửa yêu cầu"
+                    }
+
+                    {" "}
+                    #{request?.id}
+
                 </h2>
 
+                {
+                    isWaitingInfo && (
 
+                        <p className="
+                            text-sm
+                            text-blue-600
+                        ">
+                            Manager yêu cầu bổ sung thêm thông tin.
+                        </p>
+
+                    )
+                }
+                {
+                    request?.status === "PENDING" && (
+
+                        <p className="
+                            text-sm
+                            text-green-600
+                        ">
+                            Bạn có thể chỉnh sửa yêu cầu trước khi Manager duyệt.
+                        </p>
+
+                    )
+                }
 
                 <textarea
                     value={note}
 
                     onChange={
-                        e => setNote(e.target.value)
+                        e =>
+                            setNote(
+                                e.target.value
+                            )
                     }
 
                     disabled={!isEditable}
 
                     placeholder="
-                        Nhập thông tin bổ sung
+                        Nhập ghi chú hoặc thông tin bổ sung
                     "
-
                     className="
-                        w-full border
-                        p-2 rounded
+                        w-full
+                        border
+                        p-2
+                        rounded
                     "
 
                     rows={4}
@@ -138,19 +179,21 @@ export default function EditRequestInfoModal({
                 />
 
                 {
-                    error &&
-                    <p className="
-                        text-red-500
-                    ">
-                        {error}
-                    </p>
+                    error && (
+
+                        <p className="
+                            text-red-500
+                            text-sm
+                        ">
+                            {error}
+                        </p>
+                    )
                 }
-
-
                 <div className="
-                    flex gap-3
+                    flex
+                    gap-3
+                    justify-end
                 ">
-
 
                     <button
                         onClick={handleSubmit}
@@ -162,29 +205,34 @@ export default function EditRequestInfoModal({
                         }
 
                         className="
-                            px-4 py-2
+                            px-4
+                            py-2
                             bg-green-500
                             text-white
                             rounded
+                            disabled:opacity-50
                         "
                     >
                         {
                             submitting
                                 ?
-                                "Đang gửi..."
+                                "Đang lưu..."
                                 :
-                                "Gửi bổ sung"
+                                isWaitingInfo
+                                    ?
+                                    "Gửi bổ sung"
+                                    :
+                                    "Lưu thay đổi"
                         }
-
                     </button>
-
                     <button
 
                         onClick={handleClose}
 
                         className="
                             border
-                            px-4 py-2
+                            px-4
+                            py-2
                             rounded
                         "
                     >

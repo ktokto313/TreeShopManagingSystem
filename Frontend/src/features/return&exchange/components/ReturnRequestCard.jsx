@@ -1,149 +1,235 @@
 export default function ReturnRequestCard({
                                               request,
                                               onView,
-                                              onEdit,
-                                              onCancel,
-                                              onReturn,
+                                              onApprove,
                                               onConfirmReceived,
                                               onProcessPayment,
-                                              onPay,
-                                              onRefundInfo,
                                               onComplete
                                           }) {
 
-    const isExchange = request.returnType === "EXCHANGE";
-    const isReturn = request.returnType === "RETURN";
+    const isExchange =
+        request.returnType === "EXCHANGE";
+
+    const isReturn =
+        request.returnType === "RETURN";
+
+    function formatCurrency(amount) {
+
+        return new Intl.NumberFormat("en-US")
+            .format(Number(amount || 0));
+
+    }
 
     return (
-        <div className="bg-white rounded-xl border p-5 shadow-sm space-y-2">
 
-            <h3 className="font-semibold text-green-800">
-                Request #{request.id}
-            </h3>
+        <div className="
+            bg-white
+            rounded-xl
+            border
+            p-5
+            shadow-sm
+            space-y-3
+        ">
 
-            <p>Customer: {request.customer?.fullName}</p>
-            <p>Loại: {request.returnType}</p>
-            <p>Lý do: {request.reason}</p>
+            <div>
 
-            <p>
-                Trạng thái:{" "}
-                <span className="font-medium">
+                <h3 className="
+                    font-semibold
+                    text-green-800
+                ">
+                    Request #{request.id}
+                </h3>
+
+                <p>
+                    Customer:
+                    {" "}
+                    {request.customer?.fullName}
+                </p>
+
+                <p>
+                    Loại:
+                    {" "}
+                    {isReturn
+                        ? "Hoàn trả"
+                        : "Đổi sản phẩm"
+                    }
+                </p>
+
+                <p>
+                    Lý do:
+                    {" "}
+                    {request.reason}
+                </p>
+
+                {
+                    Number(request.refundAmount) > 0
+                    &&
+                    (
+                        <p>
+                            Hoàn tiền:
+                            {" "}
+                            {
+                                formatCurrency(
+                                    request.refundAmount
+                                )
+                            }
+                            {" "}VND
+                        </p>
+                    )
+                }
+
+                {
+                    Number(request.additionalPayment) > 0
+                    &&
+                    (
+                        <p>
+                            Cần thanh toán thêm:
+                            {" "}
+                            {
+                                formatCurrency(
+                                    request.additionalPayment
+                                )
+                            }
+                            {" "}VND
+                        </p>
+                    )
+                }
+
+            </div>
+            <div>
+
+                <span className="
+                    inline-block
+                    px-3
+                    py-1
+                    rounded-full
+                    bg-green-100
+                    text-green-700
+                    text-sm
+                ">
                     {request.status}
                 </span>
-            </p>
 
-            {/* ACTIONS */}
-            <div className="flex gap-3 mt-3 flex-wrap">
+            </div>
+
+            <div className="
+                flex
+                gap-3
+                flex-wrap
+                mt-3
+            ">
 
                 {/* VIEW */}
                 <button
-                    onClick={() => onView(request)}
-                    className="px-4 py-2 rounded-lg bg-green-500 text-white"
+                    onClick={() =>
+                        onView(request)
+                    }
+                    className="
+                        px-4
+                        py-2
+                        rounded-lg
+                        bg-green-500
+                        text-white
+                    "
                 >
                     Xem chi tiết
                 </button>
 
-                {/* ================= CUSTOMER ================= */}
-
-                {/* PENDING → edit / cancel */}
-                {request.status === "PENDING" && onEdit && (
-                    <button
-                        onClick={() => onEdit(request)}
-                        className="px-4 py-2 rounded-lg bg-teal-500 text-white"
-                    >
-                        Chỉnh sửa
-                    </button>
-                )}
-
-                {request.status === "PENDING" && onCancel && (
-                    <button
-                        onClick={() => onCancel(request)}
-                        className="px-4 py-2 rounded-lg bg-gray-500 text-white"
-                    >
-                        Hủy yêu cầu
-                    </button>
-                )}
-
-                {/* APPROVED → gửi hàng */}
-                {request.status === "APPROVED" && onReturn && (
-                    <button
-                        onClick={() => onReturn(request)}
-                        className="px-4 py-2 rounded-lg bg-blue-500 text-white"
-                    >
-                        Trả hàng
-                    </button>
-                )}
-
-                {/* WAITING_PAYMENT → thanh toán thêm */}
-                {request.status === "WAITING_PAYMENT" &&
-                    isExchange &&
-                    request.additionalPayment > 0 &&
-                    onPay && (
+                {/* MANAGER APPROVE */}
+                {
+                    request.status === "PENDING"
+                    &&
+                    onApprove
+                    &&
+                    (
                         <button
-                            onClick={() => onPay(request)}
-                            className="px-4 py-2 rounded-lg bg-yellow-500 text-white"
+                            onClick={() =>
+                                onApprove(request)
+                            }
+                            className="
+                                px-4
+                                py-2
+                                rounded-lg
+                                bg-emerald-600
+                                text-white
+                            "
                         >
-                            Thanh toán thêm
+                            Duyệt yêu cầu
                         </button>
-                    )}
+                    )
+                }
 
-                {/* WAITING_BANK_INFO → nhập bank */}
-                {request.status === "WAITING_BANK_INFO" &&
-                    isReturn &&
-                    onRefundInfo && (
+                {/* RETURNING */}
+                {
+                    request.status === "RETURNING"
+                    &&
+                    onConfirmReceived
+                    &&
+                    (
                         <button
-                            onClick={() => onRefundInfo(request)}
-                            className="px-4 py-2 rounded-lg bg-orange-500 text-white"
+                            onClick={() =>
+                                onConfirmReceived(request)
+                            }
+                            className="
+                                px-4
+                                py-2
+                                rounded-lg
+                                bg-purple-500
+                                text-white
+                            "
                         >
-                            Nhập thông tin nhận tiền
+                            Đã nhận hàng
                         </button>
-                    )}
+                    )
+                }
 
-                {/* ================= MANAGER ================= */}
+                {/* RECEIVED */}
+                {
+                    request.status === "RECEIVED"
+                    &&
+                    onProcessPayment
+                    &&
+                    (
+                        <button
+                            onClick={() =>
+                                onProcessPayment(request)
+                            }
+                            className="
+                                px-4
+                                py-2
+                                rounded-lg
+                                bg-indigo-500
+                                text-white
+                            "
+                        >
+                            Xử lý thanh toán
+                        </button>
+                    )
+                }
 
-                {/* RETURNING → đã nhận hàng */}
-                {request.status === "RETURNING" && onConfirmReceived && (
-                    <button
-                        onClick={() => onConfirmReceived(request)}
-                        className="px-4 py-2 rounded-lg bg-purple-500 text-white"
-                    >
-                        Đã nhận hàng
-                    </button>
-                )}
-
-                {/* RECEIVED → xử lý tài chính */}
-                {request.status === "RECEIVED" && onProcessPayment && (
-                    <button
-                        onClick={() => onProcessPayment(request)}
-                        className="px-4 py-2 rounded-lg bg-indigo-500 text-white"
-                    >
-                        Xử lý thanh toán
-                    </button>
-                )}
-
-                {/* PROCESSING → đang xử lý */}
-                {request.status === "PROCESSING" && (
-                    <span className="px-4 py-2 rounded-lg bg-blue-100 text-blue-600">
-                        Đang xử lý
-                    </span>
-                )}
-
-                {/* PROCESSING → manager hoàn tất */}
-                {request.status === "PROCESSING" && onComplete && (
-                    <button
-                        onClick={() => onComplete(request)}
-                        className="px-4 py-2 rounded-lg bg-red-500 text-white"
-                    >
-                        Hoàn tất
-                    </button>
-                )}
-
-                {/* COMPLETED */}
-                {request.status === "COMPLETED" && (
-                    <span className="px-4 py-2 rounded-lg bg-green-100 text-green-700">
-                        Đã hoàn tất
-                    </span>
-                )}
+                {/* PROCESSING */}
+                {
+                    request.status === "PROCESSING"
+                    &&
+                    onComplete
+                    &&
+                    (
+                        <button
+                            onClick={() =>
+                                onComplete(request)
+                            }
+                            className="
+                                px-4
+                                py-2
+                                rounded-lg
+                                bg-red-500
+                                text-white
+                            "
+                        >
+                            Hoàn tất
+                        </button>
+                    )
+                }
 
             </div>
         </div>

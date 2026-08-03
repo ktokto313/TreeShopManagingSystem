@@ -8,6 +8,7 @@ import swp391.group6.model.ReturnStatus;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 public interface ReturnRequestRepository
         extends JpaRepository<ReturnRequest, String> {
@@ -103,4 +104,17 @@ public interface ReturnRequestRepository
             @Param("status") ReturnStatus status
     );
 
+    @Query("""
+    SELECT DISTINCT r
+    FROM ReturnRequest r
+    LEFT JOIN FETCH r.items i
+    LEFT JOIN FETCH i.orderDetail od
+    LEFT JOIN FETCH od.product
+    LEFT JOIN FETCH r.order
+    LEFT JOIN FETCH r.customer
+    WHERE r.id = :id
+""")
+    Optional<ReturnRequest> findDetailById(
+            @Param("id") String id
+    );
 }
