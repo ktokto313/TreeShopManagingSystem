@@ -41,7 +41,7 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
   } = useUpdateShipper();
 
   const { user } = useContext(AuthContext);
-  const { changeOrderStatus, isLoading: isChangingStatus, error: changeOrderError } = useChangeOrderStatus();
+  const { changeOrderStatus, isLoading: isChangingStatus, error: changeOrderError, setError: setChangeOrderError } = useChangeOrderStatus();
   const { updateAddress, isLoading: isUpdatingAddress, error: changeAddrError } = useUpdateOrderAddress();
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [editingAddressValue, setEditingAddressValue] = useState('');
@@ -300,6 +300,7 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
                     fetchOrderDetail(selectedOrderId);
                     onOrderChange?.();
                     setSelectedShipperId(null);
+                    setChangeOrderError(null);
                   }
                 }}
               >
@@ -308,7 +309,7 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
             )}
 
             {(selectedOrder.status === "PROCESSING" || selectedOrder.status === "RETURN_PROCESSING") 
-            && selectedOrderId !== null && user?.role === "MANAGER" && (
+            && selectedOrder.shipperId !== null && user?.role === "MANAGER" && (
               <Button
                 variant="primary"
                 className="px-4 py-2"

@@ -42,5 +42,6 @@ export default function useChangeOrderStatus() {
         changeOrderStatus,
         isLoading,
         error,
+        setError
     };
 }
