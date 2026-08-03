@@ -6,10 +6,6 @@ export default function ReturnRequestCard({
                                               onProcessPayment,
                                               onComplete
                                           }) {
-
-    const isExchange =
-        request.returnType === "EXCHANGE";
-
     const isReturn =
         request.returnType === "RETURN";
 

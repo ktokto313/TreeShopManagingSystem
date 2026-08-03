@@ -37,7 +37,7 @@ export default function RefundInfoModal({ request, onClose, onSuccess }) {
             alert("Đã gửi thông tin");
             onSuccess?.();
 
-        } catch (e) {
+        } catch {
             setError("Gửi thất bại");
         } finally {
             setLoading(false);

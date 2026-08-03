@@ -56,17 +56,6 @@ export default function ManagerReturnRequestPage() {
 
         }
     }
-    function getReasonLabel(reason) {
-
-        const map = {
-            DAMAGED: "Sản phẩm bị hỏng",
-            WRONG_ITEM: "Giao sai sản phẩm",
-            UNHEALTHY: "Sản phẩm không đạt chất lượng",
-            OTHER: "Lý do khác"
-        };
-
-        return map[reason] ?? reason;
-    }
 
     async function openDetail(request) {
         try {
@@ -242,7 +231,6 @@ export default function ManagerReturnRequestPage() {
                 request.id
             );
 
-
             alert(
                 "Đã xử lý bước tài chính"
             );
@@ -256,7 +244,6 @@ export default function ManagerReturnRequestPage() {
                 "PAYMENT ERROR:",
                 error
             );
-
             alert(
                 "Không thể xử lý thanh toán"
             );
@@ -282,7 +269,6 @@ export default function ManagerReturnRequestPage() {
                 "COMPLETE ERROR:",
                 error
             );
-
 
             alert(
                 "Không thể hoàn tất yêu cầu"
