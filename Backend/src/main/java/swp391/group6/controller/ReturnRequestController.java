@@ -4,7 +4,7 @@
  * Name: ReturnRequestController.java
  * Description: Full return/exchange flow controller
  * Last Change Author: HungDLM
- * Last Change Date: 2026-07-29
+ * Last Change Date: 2026-07-31
  */
 package swp391.group6.controller;
 
@@ -34,7 +34,6 @@ public class ReturnRequestController {
     @Autowired
     private BlogImageRepository blogImageRepository;
 
-    // ================= EXCEPTION HANDLER =================
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, String>> handleIllegalState(
             IllegalStateException ex
@@ -62,7 +61,7 @@ public class ReturnRequestController {
                 ));
     }
 
-    // ================= CUSTOMER =================
+
     @GetMapping("/orders")
     public ResponseEntity<List<Order>> getAvailableOrders(
             @RequestParam String customerId
@@ -108,6 +107,7 @@ public class ReturnRequestController {
         );
     }
 
+
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<ReturnRequest>> getCustomerRequests(
             @PathVariable String customerId
@@ -118,6 +118,7 @@ public class ReturnRequestController {
         );
     }
 
+
     @GetMapping("/customer/{customerId}/approved")
     public ResponseEntity<List<ReturnRequest>> getApprovedRequests(
             @PathVariable String customerId
@@ -127,6 +128,7 @@ public class ReturnRequestController {
                 returnRequestService.getApprovedRequests(customerId)
         );
     }
+
 
     @PostMapping("/{id}/cancel")
     public ResponseEntity<ReturnRequest> cancelRequest(
@@ -149,6 +151,7 @@ public class ReturnRequestController {
         );
     }
 
+
     @PutMapping("/{id}/info")
     public ResponseEntity<ReturnRequest> updateRequestInfo(
             @PathVariable String id,
@@ -162,6 +165,7 @@ public class ReturnRequestController {
                 )
         );
     }
+
 
     @PutMapping("/{id}/refund-info")
     public ResponseEntity<ReturnRequest> submitRefundInfo(
@@ -187,7 +191,7 @@ public class ReturnRequestController {
         );
     }
 
-    // ================= MANAGER =================
+
     @GetMapping("/pending")
     public ResponseEntity<List<ReturnRequest>> getPendingRequests() {
 
@@ -205,16 +209,14 @@ public class ReturnRequestController {
         );
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ReturnRequest> getRequestDetail(
-            @PathVariable String id
-    ) {
+
+    @GetMapping("/manager/report")
+    public ResponseEntity<ReturnReportDTO> getReturnReport() {
 
         return ResponseEntity.ok(
-                returnRequestService.getRequestDetail(id)
+                returnRequestService.getReturnReport()
         );
     }
-
 
 
     @PostMapping("/{id}/request-more-info")
@@ -227,15 +229,15 @@ public class ReturnRequestController {
     }
 
 
-
     @PostMapping("/{id}/decision")
     public ResponseEntity<ReturnRequest> decideRequest(
             @PathVariable String id,
             @RequestBody FinalDecisionDTO decision
     ) {
 
-
-        if (decision.getDecision() == null) {
+        if (decision == null
+                ||
+                decision.getDecision() == null) {
 
             throw new IllegalArgumentException(
                     "Quyết định là bắt buộc"
@@ -260,13 +262,10 @@ public class ReturnRequestController {
         if (decision.getDecision()
                 == FinalDecisionDTO.Decision.APPROVE) {
 
-
             updated =
                     returnRequestService.approveRequest(id);
 
-
         } else {
-
 
             updated =
                     returnRequestService.rejectRequest(
@@ -315,23 +314,17 @@ public class ReturnRequestController {
         );
     }
 
-    @GetMapping("/manager/report")
-    public ResponseEntity<ReturnReportDTO> getReturnReport() {
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ReturnRequest> getRequestDetail(
+            @PathVariable String id
+    ) {
 
         return ResponseEntity.ok(
-                returnRequestService.getReturnReport()
+                returnRequestService.getRequestDetail(id)
         );
     }
 
-    @GetMapping
-    public ResponseEntity<List<ReturnRequest>> getAllRequests() {
-
-        return ResponseEntity.ok(
-                returnRequestService.getAllRequests()
-        );
-    }
-
-    // ================= UTIL =================
     @GetMapping("/{id}/price-difference")
     public ResponseEntity<BigDecimal> calculatePriceDifference(
             @PathVariable String id
@@ -342,6 +335,14 @@ public class ReturnRequestController {
         );
     }
 
+
+    @GetMapping
+    public ResponseEntity<List<ReturnRequest>> getAllRequests() {
+
+        return ResponseEntity.ok(
+                returnRequestService.getAllRequests()
+        );
+    }
 
 
     @PostMapping("/images/upload")
@@ -368,10 +369,18 @@ public class ReturnRequestController {
             );
         }
         BlogImage img = new BlogImage();
-        img.setImageData(file.getBytes());
-        img.setFileName(file.getOriginalFilename());
 
-        img.setContentType(contentType);
+        img.setImageData(
+                file.getBytes()
+        );
+
+        img.setFileName(
+                file.getOriginalFilename()
+        );
+
+        img.setContentType(
+                contentType
+        );
 
         img.setImageUrl("");
         BlogImage saved =
@@ -380,6 +389,11 @@ public class ReturnRequestController {
                 "/api/blogs/images/" + saved.getId();
         saved.setImageUrl(url);
         blogImageRepository.save(saved);
-        return ResponseEntity.ok(Map.of("url", url));
+        return ResponseEntity.ok(
+                Map.of(
+                        "url",
+                        url
+                )
+        );
     }
 }

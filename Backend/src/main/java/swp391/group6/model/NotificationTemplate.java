@@ -171,6 +171,9 @@ public class NotificationTemplate {
         register("RETURN_ITEM_RECEIVED_CUSTOMER",
                 "Đã nhận hàng hoàn",
                 "Cửa hàng đã nhận được sản phẩm từ yêu cầu #%s.");
+        register("RETURN_ITEM_RETURNING_MANAGER",
+                "Khách hàng đã gửi hàng hoàn trả",
+                "Khách hàng đã xác nhận gửi hàng cho yêu cầu trả hàng #%s. Vui lòng kiểm tra sản phẩm khi nhận được.");
     }
 
     private static void register(String key, String subject, String bodyTemplate) {

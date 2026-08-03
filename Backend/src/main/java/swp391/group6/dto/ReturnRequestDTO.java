@@ -2,13 +2,14 @@
  * Author: HungDLM
  * Created Date: 2026-07-25
  * Last Change Author: Hung Dao
- * Last Change Date: 2026-07-28
+ * Last Change Date: 2026-07-31
  */
 package swp391.group6.dto;
 
 import swp391.group6.model.ReturnReason;
 import swp391.group6.model.ReturnType;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class ReturnRequestDTO {
@@ -26,7 +27,29 @@ public class ReturnRequestDTO {
     private List<ExchangeProductDTO> exchangeProducts;
 
 
-    public ReturnRequestDTO() {}
+
+    private BigDecimal returnedValue;
+
+    private BigDecimal exchangeValue;
+
+    private BigDecimal additionalPayment;
+
+
+    public ReturnRequestDTO() {
+    }
+
+
+    public ReturnRequestDTO(
+            BigDecimal returnedValue,
+            BigDecimal exchangeValue,
+            BigDecimal additionalPayment
+    ) {
+        this.returnedValue = returnedValue;
+        this.exchangeValue = exchangeValue;
+        this.additionalPayment = additionalPayment;
+    }
+
+
 
 
     public String getOrderId() {
@@ -78,10 +101,35 @@ public class ReturnRequestDTO {
         return exchangeProducts;
     }
 
-    public void setExchangeProducts(List<ExchangeProductDTO> exchangeProducts) {
+    public void setExchangeProducts(
+            List<ExchangeProductDTO> exchangeProducts
+    ) {
         this.exchangeProducts = exchangeProducts;
     }
 
+    public BigDecimal getReturnedValue() {
+        return returnedValue;
+    }
+
+    public void setReturnedValue(BigDecimal returnedValue) {
+        this.returnedValue = returnedValue;
+    }
+
+    public BigDecimal getExchangeValue() {
+        return exchangeValue;
+    }
+
+    public void setExchangeValue(BigDecimal exchangeValue) {
+        this.exchangeValue = exchangeValue;
+    }
+
+    public BigDecimal getAdditionalPayment() {
+        return additionalPayment;
+    }
+
+    public void setAdditionalPayment(BigDecimal additionalPayment) {
+        this.additionalPayment = additionalPayment;
+    }
 
     public static class OrderDetailQuantityDTO {
 
@@ -107,7 +155,6 @@ public class ReturnRequestDTO {
             this.quantity = quantity;
         }
     }
-
 
     public static class ExchangeProductDTO {
 

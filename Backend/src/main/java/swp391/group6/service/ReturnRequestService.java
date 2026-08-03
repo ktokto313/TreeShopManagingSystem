@@ -148,11 +148,43 @@ public class ReturnRequestService {
         );
 
 
-        request.setExpectedFee(
-                calculateExpectedFee(
-                        request.getItems(),
+        BigDecimal returnedValue =
+                calculateReturnedValue(
+                        request.getItems()
+                );
+
+
+        BigDecimal exchangeValue =
+                calculateExchangeValue(
                         request.getExchangeProducts()
-                )
+                );
+
+
+        BigDecimal difference =
+                exchangeValue.subtract(
+                        returnedValue
+                );
+
+
+        request.setRefundAmount(
+                returnedValue
+        );
+
+
+        request.setPriceDifference(
+                difference
+        );
+
+
+        request.setAdditionalPayment(
+                difference.compareTo(BigDecimal.ZERO) > 0
+                        ? difference
+                        : BigDecimal.ZERO
+        );
+
+
+        request.setExpectedFee(
+                difference
         );
 
 
@@ -514,6 +546,26 @@ public class ReturnRequestService {
     ) {
 
         BigDecimal returnedValue =
+                calculateReturnedValue(items);
+
+
+        BigDecimal exchangeValue =
+                calculateExchangeValue(exchangeProducts);
+
+
+        return exchangeValue
+                .subtract(returnedValue)
+                .setScale(
+                        2,
+                        RoundingMode.HALF_UP
+                );
+    }
+
+    private BigDecimal calculateReturnedValue(
+            List<ReturnRequestItem> items
+    ) {
+
+        BigDecimal total =
                 BigDecimal.ZERO;
 
         for (ReturnRequestItem item : items) {
@@ -531,48 +583,47 @@ public class ReturnRequestService {
                                     )
                             );
 
-            returnedValue =
-                    returnedValue.add(value);
+            total =
+                    total.add(value);
         }
 
-        returnedValue =
-                returnedValue.setScale(
-                        2,
-                        RoundingMode.HALF_UP
-                );
+        return total.setScale(
+                2,
+                RoundingMode.HALF_UP
+        );
+    }
 
-        if (exchangeProducts == null
-                ||
-                exchangeProducts.isEmpty()) {
+    private BigDecimal calculateExchangeValue(
+            List<ReturnExchangeProduct> products
+    ) {
 
-            return returnedValue.negate();
-        }
-
-        BigDecimal exchangeValue =
+        BigDecimal total =
                 BigDecimal.ZERO;
 
+        if (products == null
+                ||
+                products.isEmpty()) {
 
-        for (ReturnExchangeProduct exchange
-                : exchangeProducts) {
-
-            exchangeValue =
-                    exchangeValue.add(
-                            exchange.getProduct()
-                                    .getPrice()
-                                    .multiply(
-                                            BigDecimal.valueOf(
-                                                    exchange.getQuantity()
-                                            )
-                                    )
-                    );
+            return total;
         }
 
-        return exchangeValue
-                .subtract(returnedValue)
-                .setScale(
-                        2,
-                        RoundingMode.HALF_UP
-                );
+        for (ReturnExchangeProduct item : products) {
+
+            BigDecimal value =
+                    item.getProduct()
+                            .getPrice()
+                            .multiply(
+                                    BigDecimal.valueOf(
+                                            item.getQuantity()
+                                    )
+                            );
+            total =
+                    total.add(value);
+        }
+        return total.setScale(
+                2,
+                RoundingMode.HALF_UP
+        );
     }
 
     //MANAGER FLOW
@@ -858,83 +909,204 @@ public class ReturnRequestService {
             );
         }
 
-        BigDecimal difference =
-                calculateExpectedFee(
-                        request.getItems(),
-                        request.getExchangeProducts()
+        BigDecimal returnedValue =
+                BigDecimal.ZERO;
+
+        // Calculate returned product value after depreciation
+        for (ReturnRequestItem item : request.getItems()) {
+            BigDecimal value =
+                    item.getOrderDetail()
+                            .getProduct()
+                            .getPrice()
+                            .multiply(ITEM_VALUE_RATE)
+                            .multiply(
+                                    BigDecimal.valueOf(
+                                            item.getQuantity()
+                                    )
+                            );
+
+            returnedValue =
+                    returnedValue.add(value);
+        }
+
+        returnedValue =
+                returnedValue.setScale(
+                        2,
+                        RoundingMode.HALF_UP
                 );
+
+        BigDecimal exchangeValue =
+                BigDecimal.ZERO;
+
+        // Calculate exchange product value
+        for (ReturnExchangeProduct exchange
+                : request.getExchangeProducts()) {
+            BigDecimal value =
+                    exchange.getProduct()
+                            .getPrice()
+                            .multiply(
+                                    BigDecimal.valueOf(
+                                            exchange.getQuantity()
+                                    )
+                            );
+
+            exchangeValue =
+                    exchangeValue.add(value);
+        }
+
+        exchangeValue =
+                exchangeValue.setScale(
+                        2,
+                        RoundingMode.HALF_UP
+                );
+
+        BigDecimal difference =
+                exchangeValue.subtract(
+                        returnedValue
+                );
+
+        difference =
+                difference.setScale(
+                        2,
+                        RoundingMode.HALF_UP
+                );
+
+        // Save detail for frontend display
+        request.setRefundAmount(
+                returnedValue
+        );
+
         request.setPriceDifference(
                 difference
         );
+
+        if (difference.compareTo(BigDecimal.ZERO) > 0) {
+
+            request.setAdditionalPayment(
+                    difference
+            );
+
+        } else {
+
+            request.setAdditionalPayment(
+                    BigDecimal.ZERO
+            );
+        }
+
 
         return difference;
     }
 
     //PAYMENT
+    // Process financial requirement after returned item is received.
     public void completePayment(String id) {
 
-        ReturnRequest request = getRequestDetail(id);
+        ReturnRequest request =
+                getRequestDetail(id);
 
-        if (request.getStatus() != ReturnStatus.RECEIVED) {
+
+        if (request.getStatus()
+                != ReturnStatus.RECEIVED) {
+
             throw new IllegalStateException(
                     "Yêu cầu phải ở trạng thái đã nhận hàng trước khi xử lý tài chính"
             );
         }
 
+
         // ===== EXCHANGE =====
-        if (request.getReturnType() == ReturnType.EXCHANGE) {
+        if (request.getReturnType()
+                == ReturnType.EXCHANGE) {
 
-            if (request.getPriceDifference() == null) {
-                calculatePriceDifference(id);
-            }
 
-            BigDecimal diff = request.getPriceDifference();
+            BigDecimal diff =
+                    calculatePriceDifference(id);
 
-            // Khách phải trả thêm tiền
+
+            // Customer needs to pay more
             if (diff.compareTo(BigDecimal.ZERO) > 0) {
 
-                request.setAdditionalPayment(diff);
-                request.setStatus(ReturnStatus.WAITING_PAYMENT);
 
-                notificationService.notifyUserByTemplate(
-                        request.getCustomer().getId(),
-                        NotificationType.RETURN_ADDITIONAL_PAYMENT_REQUIRED,
-                        "RETURN_ADDITIONAL_PAYMENT_CUSTOMER",
-                        request.getId(),
+                request.setAdditionalPayment(
                         diff
                 );
 
-                return;
-            }
 
-            // Shop phải refund
-            if (diff.compareTo(BigDecimal.ZERO) < 0) {
+                request.setStatus(
+                        ReturnStatus.WAITING_PAYMENT
+                );
 
-                request.setRefundAmount(diff.abs());
-                request.setStatus(ReturnStatus.WAITING_BANK_INFO);
 
                 notificationService.notifyUserByTemplate(
                         request.getCustomer().getId(),
-                        NotificationType.RETURN_BANK_INFO_REQUIRED,
-                        "RETURN_BANK_INFO_CUSTOMER",
-                        request.getId()
+
+                        NotificationType.RETURN_ADDITIONAL_PAYMENT_REQUIRED,
+
+                        "RETURN_ADDITIONAL_PAYMENT_CUSTOMER",
+
+                        request.getId(),
+
+                        diff
                 );
+
 
                 return;
             }
 
-            // Không chênh lệch
-            request.setFinancialProcessed(true);
-            createExchangeOrder(request);
-            request.setStatus(ReturnStatus.PROCESSING);
+
+            // Shop needs to refund customer
+            if (diff.compareTo(BigDecimal.ZERO) < 0) {
+
+
+                request.setRefundAmount(
+                        diff.abs()
+                );
+
+
+                request.setStatus(
+                        ReturnStatus.WAITING_BANK_INFO
+                );
+
+
+                notificationService.notifyUserByTemplate(
+                        request.getCustomer().getId(),
+
+                        NotificationType.RETURN_BANK_INFO_REQUIRED,
+
+                        "RETURN_BANK_INFO_CUSTOMER",
+
+                        request.getId()
+                );
+
+
+                return;
+            }
+
+
+            // No price difference
+            request.setFinancialProcessed(
+                    true
+            );
+
+
+            createExchangeOrder(
+                    request
+            );
+
+
+            request.setStatus(
+                    ReturnStatus.PROCESSING
+            );
+
+
             return;
         }
 
-        // ===== RETURN =====
+        // ===== NORMAL RETURN =====
+
         BigDecimal refund =
                 request.getExpectedFee()
                         .abs();
-
 
         request.setRefundAmount(
                 refund

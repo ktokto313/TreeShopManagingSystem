@@ -6,17 +6,25 @@ export default function PaymentModal({ request, onClose, onSuccess }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const isPayable = request?.status === "WAITING_PAYMENT";
+    const isPayable =
+        request?.status === "WAITING_PAYMENT";
+
 
     function formatCurrency(amount) {
-        if (!amount) return "0";
-        return new Intl.NumberFormat("en-US").format(amount);
+
+        return new Intl.NumberFormat("en-US")
+            .format(Number(amount || 0));
+
     }
 
     async function handlePay() {
 
         if (!isPayable) {
-            setError("Không đúng trạng thái thanh toán");
+
+            setError(
+                "Không đúng trạng thái thanh toán"
+            );
+
             return;
         }
 
@@ -24,43 +32,179 @@ export default function PaymentModal({ request, onClose, onSuccess }) {
             setLoading(true);
             setError("");
 
-            await confirmAdditionalPayment(request.id);
 
-            alert("Thanh toán thành công");
+            await confirmAdditionalPayment(
+                request.id
+            );
+
+
+            alert(
+                "Thanh toán thành công"
+            );
+
+
             onSuccess?.();
 
         } catch (e) {
-            setError("Thanh toán thất bại");
+
+            setError(
+                e?.message ||
+                "Thanh toán thất bại"
+            );
+
+
         } finally {
             setLoading(false);
         }
     }
 
     return (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-xl w-[400px] space-y-4">
+        <div className="
+            fixed inset-0
+            bg-black/40
+            flex items-center justify-center
+        ">
 
-                <h2 className="text-lg font-semibold">Thanh toán</h2>
+            <div className="
+                bg-white
+                p-6
+                rounded-xl
+                w-[420px]
+                space-y-4
+            ">
 
-                <p>
-                    Số tiền:
-                    <strong className="ml-2 text-red-500">
-                        {formatCurrency(request?.additionalPayment)} VND
-                    </strong>
-                </p>
+                <h2 className="
+                    text-lg
+                    font-semibold
+                ">
+                    Thanh toán chênh lệch đổi hàng
+                </h2>
 
-                {error && <p className="text-red-500">{error}</p>}
+                <div className="
+                    bg-gray-50
+                    rounded-lg
+                    p-4
+                    space-y-3
+                ">
 
-                <div className="flex gap-3">
+                    <div className="
+                        flex justify-between
+                    ">
+
+                        <span>
+                            Giá trị sản phẩm trả lại
+                        </span>
+
+                        <span className="
+                            text-green-600
+                        ">
+                            - {
+                            formatCurrency(
+                                request?.refundAmount
+                            )
+                        } VND
+
+                        </span>
+
+                    </div>
+
+                    <div className="
+                        flex justify-between
+                    ">
+
+                        <span>
+                            Giá trị sản phẩm đổi
+                        </span>
+
+                        <span>
+
+                            {
+                                formatCurrency(
+                                    Number(
+                                        request?.refundAmount || 0
+                                    )
+                                    +
+                                    Number(
+                                        request?.additionalPayment || 0
+                                    )
+                                )
+                            } VND
+
+                        </span>
+
+                    </div>
+
+                    <hr />
+
+                    <div className="
+                        flex justify-between
+                        font-semibold
+                    ">
+
+                        <span>
+                            Cần thanh toán thêm
+                        </span>
+
+
+                        <span className="
+                            text-red-500
+                        ">
+
+                            {
+                                formatCurrency(
+                                    request?.additionalPayment
+                                )
+                            } VND
+                        </span>
+                    </div>
+                </div>
+
+                {
+                    error && (
+
+                        <p className="
+                            text-red-500
+                        ">
+                            {error}
+                        </p>
+
+                    )
+                }
+
+
+                <div className="
+                    flex gap-3
+                ">
+
                     <button
                         onClick={handlePay}
-                        disabled={loading || !isPayable}
-                        className="px-4 py-2 bg-green-500 text-white rounded"
+                        disabled={
+                            loading ||
+                            !isPayable
+                        }
+                        className="
+                            px-4 py-2
+                            bg-green-500
+                            text-white
+                            rounded
+                        "
                     >
-                        {loading ? "Đang xử lý..." : "Thanh toán"}
+                        {
+                            loading
+                                ? "Đang xử lý..."
+                                : "Thanh toán"
+                        }
+
                     </button>
 
-                    <button onClick={onClose} className="border px-4 py-2 rounded">
+                    <button
+                        onClick={onClose}
+                        className="
+                            border
+                            px-4 py-2
+                            rounded
+                        "
+                    >
                         Hủy
                     </button>
                 </div>

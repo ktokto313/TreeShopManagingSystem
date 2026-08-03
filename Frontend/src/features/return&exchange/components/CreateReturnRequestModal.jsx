@@ -46,8 +46,8 @@ export default function CreateReturnRequestModal({
         setReason("");
         setEvidenceImages([]);
         setReturnType("");
-        setError("");
         setExchangeProducts([]);
+        setError("");
 
         onClose?.();
     }
@@ -56,22 +56,24 @@ export default function CreateReturnRequestModal({
         if (!selectedOrder) {
             return "Vui lòng chọn đơn hàng.";
         }
+
         if (selectedItems.length === 0) {
-            return "Vui lòng chọn ít nhất 1 sản phẩm để trả/đổi.";
+            return "Vui lòng chọn ít nhất một sản phẩm.";
         }
+
         if (!reason) {
             return "Vui lòng chọn lý do.";
         }
 
         if (
             reason === "DAMAGED"
-            && evidenceImages.length < MIN_DAMAGED_EVIDENCE
+            &&
+            evidenceImages.length < MIN_DAMAGED_EVIDENCE
         ) {
-            return `Lý do "Sản phẩm bị hỏng" cần tối thiểu ${MIN_DAMAGED_EVIDENCE} hình ảnh bằng chứng.`;
+            return `Lý do sản phẩm hư hỏng cần tối thiểu ${MIN_DAMAGED_EVIDENCE} ảnh bằng chứng.`;
         }
-
         if (!returnType) {
-            return "Vui lòng chọn phương thức xử lý (Trả hàng / Đổi hàng).";
+            return "Vui lòng chọn phương thức xử lý.";
         }
 
         if (
@@ -81,6 +83,7 @@ export default function CreateReturnRequestModal({
         ) {
             return "Vui lòng chọn sản phẩm muốn đổi.";
         }
+
         return "";
     }
 
@@ -100,24 +103,41 @@ export default function CreateReturnRequestModal({
             if (reason === "DAMAGED") {
 
                 finalEvidenceUrls =
-                    await evidenceUploaderRef.current.uploadPending();
+                    await evidenceUploaderRef.current
+                        ?.uploadPending()
+                    || [];
             }
 
             const dto = {
                 orderId: selectedOrder.id,
-                items: selectedItems.map(item => ({
-                    productId: item.productId,
-                    quantity: item.quantity
-                })),
+
+
+                items:
+                    selectedItems.map(item => ({
+                        productId: item.productId,
+                        quantity: item.quantity
+                    })),
+
+
                 reason,
-                evidenceImageUrls: finalEvidenceUrls,
+
+
+                evidenceImageUrls:
+                finalEvidenceUrls,
+
+
                 returnType,
 
 
                 exchangeProducts:
                     returnType === "EXCHANGE"
-                        ? exchangeProducts
-                        : []
+                        ?
+                        exchangeProducts.map(item => ({
+                            productId: item.productId,
+                            quantity: item.quantity
+                        }))
+                        :
+                        null
             };
 
 
@@ -136,16 +156,15 @@ export default function CreateReturnRequestModal({
         } catch (err) {
 
             setError(
-                err?.message ||
-                "Không thể gửi yêu cầu, vui lòng thử lại."
+                err?.message
+                ||
+                "Không thể tạo yêu cầu đổi trả."
             );
-
         } finally {
 
             setSubmitting(false);
         }
     }
-
     return (
         <div className="
             fixed inset-0 z-50
@@ -189,15 +208,12 @@ export default function CreateReturnRequestModal({
 
 
                 {
-                    selectedOrder && (
-
-                        <ReturnItemSelector
-                            order={selectedOrder}
-                            selectedItems={selectedItems}
-                            setSelectedItems={setSelectedItems}
-                        />
-
-                    )
+                    selectedOrder &&
+                    <ReturnItemSelector
+                        order={selectedOrder}
+                        selectedItems={selectedItems}
+                        setSelectedItems={setSelectedItems}
+                    />
                 }
 
                 <ReturnReasonSelector
@@ -205,17 +221,16 @@ export default function CreateReturnRequestModal({
                     setReason={setReason}
                 />
 
+
                 {
-                    reason === "DAMAGED" && (
-
-                        <EvidenceUploader
-                            ref={evidenceUploaderRef}
-                            value={evidenceImages}
-                            onChange={setEvidenceImages}
-                        />
-
-                    )
+                    reason === "DAMAGED" &&
+                    <EvidenceUploader
+                        ref={evidenceUploaderRef}
+                        value={evidenceImages}
+                        onChange={setEvidenceImages}
+                    />
                 }
+
 
                 <div className="space-y-2">
 
@@ -226,12 +241,19 @@ export default function CreateReturnRequestModal({
                     </label>
                     <select
                         value={returnType}
-                        onChange={(e) =>
-                            setReturnType(e.target.value)
-                        }
+                        onChange={(e)=>{
+
+                            setReturnType(
+                                e.target.value
+                            );
+
+                            if(e.target.value !== "EXCHANGE"){
+                                setExchangeProducts([]);
+                            }
+                        }}
                         className="
                             w-full rounded-lg border
-                            border-stone-300 px-3 py-2 text-sm
+                            border-stone-300 px-3 py-2
                         "
                     >
                         <option value="">
@@ -250,30 +272,23 @@ export default function CreateReturnRequestModal({
                 </div>
 
 
-                {
-                    returnType === "EXCHANGE" && (
-
-                        <ExchangeProductSelector
-                            products={exchangeProducts}
-                            setProducts={setExchangeProducts}
-                        />
-
-                    )
-                }
-
 
                 {
-                    error && (
-
-                        <p className="
-                            text-sm text-red-500
-                        ">
-                            {error}
-                        </p>
-
-                    )
+                    returnType === "EXCHANGE" &&
+                    <ExchangeProductSelector
+                        products={exchangeProducts}
+                        setProducts={setExchangeProducts}
+                    />
                 }
 
+                {
+                    error &&
+                    <p className="
+                        text-sm text-red-500
+                    ">
+                        {error}
+                    </p>
+                }
 
                 <div className="
                     flex justify-end gap-3 pt-2
@@ -291,7 +306,6 @@ export default function CreateReturnRequestModal({
                         Hủy
                     </button>
 
-
                     <button
                         type="button"
                         onClick={handleSubmit}
@@ -304,8 +318,10 @@ export default function CreateReturnRequestModal({
                     >
                         {
                             submitting
-                                ? "Đang gửi..."
-                                : "Gửi yêu cầu"
+                                ?
+                                "Đang gửi..."
+                                :
+                                "Gửi yêu cầu"
                         }
                     </button>
                 </div>

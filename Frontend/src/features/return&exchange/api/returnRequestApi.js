@@ -2,36 +2,75 @@ import { requestJson } from "../../../utils/api";
 
 const BASE_URL = "/api/return-requests";
 
+
 export function getAvailableOrders(customerId) {
+
     return requestJson(
         `${BASE_URL}/orders?customerId=${customerId}`
     );
 }
 
+
 export function getOrderItems(orderId) {
+
     return requestJson(
         `${BASE_URL}/orders/${orderId}/items`
     );
 }
 
+
 export function getAvailableProducts() {
+
     return requestJson(
         `${BASE_URL}/products`
     );
 }
 
-export function createReturnRequest(customerId, data) {
+
+export function createReturnRequest(
+    customerId,
+    data
+) {
+
     return requestJson(
         `${BASE_URL}?customerId=${customerId}`,
         {
-            method: "POST",
-            body: data
+            method:"POST",
+            body:data
         }
     );
 }
 
-// ================= MANAGER REVIEW =================
+
+export function getMyReturnRequests(customerId) {
+
+    return requestJson(
+        `${BASE_URL}/customer/${customerId}`
+    );
+}
+
+
+export function getApprovedReturnRequests(customerId) {
+
+    return requestJson(
+        `${BASE_URL}/customer/${customerId}/approved`
+    );
+}
+
+
+export function cancelRequest(id) {
+
+    return requestJson(
+        `${BASE_URL}/${id}/cancel`,
+        {
+            method:"POST"
+        }
+    );
+}
+
+
 export function getPendingRequests() {
+
     return requestJson(
         `${BASE_URL}/pending`
     );
@@ -39,12 +78,20 @@ export function getPendingRequests() {
 
 
 export function getManagerRequests() {
+
     return requestJson(
         `${BASE_URL}/manager/active`
     );
 }
 
+export function getAllReturnRequests() {
+
+    return requestJson(
+        BASE_URL
+    );
+}
 export function getRequestDetail(id) {
+
     return requestJson(
         `${BASE_URL}/${id}`
     );
@@ -59,7 +106,12 @@ export function requestMoreInfo(id) {
     );
 }
 
-export function updateRequestInfo(id,data) {
+
+export function updateRequestInfo(
+    id,
+    data
+) {
+
     return requestJson(
         `${BASE_URL}/${id}/info`,
         {
@@ -69,7 +121,13 @@ export function updateRequestInfo(id,data) {
     );
 }
 
-export function decideRequest(id,decision,reason="") {
+
+export function decideRequest(
+    id,
+    decision,
+    reason = ""
+) {
+
     return requestJson(
         `${BASE_URL}/${id}/decision`,
         {
@@ -82,8 +140,9 @@ export function decideRequest(id,decision,reason="") {
     );
 }
 
-// ================= RETURN SHIPPING =================
+
 export function markReturning(id) {
+
     return requestJson(
         `${BASE_URL}/${id}/mark-returning`,
         {
@@ -94,6 +153,7 @@ export function markReturning(id) {
 
 
 export function confirmReturn(id) {
+
     return requestJson(
         `${BASE_URL}/${id}/confirm-return`,
         {
@@ -102,8 +162,9 @@ export function confirmReturn(id) {
     );
 }
 
-// ================= FINANCIAL =================
+
 export function completePayment(id) {
+
     return requestJson(
         `${BASE_URL}/${id}/complete-payment`,
         {
@@ -112,8 +173,9 @@ export function completePayment(id) {
     );
 }
 
-// WAITING_PAYMENT -> customer xác nhận trả thêm tiền
+
 export function confirmAdditionalPayment(id) {
+
     return requestJson(
         `${BASE_URL}/${id}/confirm-payment`,
         {
@@ -123,8 +185,11 @@ export function confirmAdditionalPayment(id) {
 }
 
 
-// WAITING_BANK_INFO -> customer gửi thông tin ngân hàng
-export function submitRefundInfo(id,data) {
+export function submitRefundInfo(
+    id,
+    data
+) {
+
     return requestJson(
         `${BASE_URL}/${id}/refund-info`,
         {
@@ -134,8 +199,9 @@ export function submitRefundInfo(id,data) {
     );
 }
 
-// PROCESSING -> COMPLETED
+
 export function completeByManager(id) {
+
     return requestJson(
         `${BASE_URL}/${id}/complete-by-manager`,
         {
@@ -144,51 +210,16 @@ export function completeByManager(id) {
     );
 }
 
-// ================= CUSTOMER =================
-export function getMyReturnRequests(customerId) {
-    return requestJson(
-        `${BASE_URL}/customer/${customerId}`
-    );
-}
 
-export function getApprovedReturnRequests(customerId) {
-    return requestJson(
-        `${BASE_URL}/customer/${customerId}/approved`
-    );
-}
-
-export function cancelRequest(id) {
-    return requestJson(
-        `${BASE_URL}/${id}/cancel`,
-        {
-            method:"POST"
-        }
-    );
-}
-
-// ================= EXCHANGE =================
 export function getPriceDifference(id) {
+
     return requestJson(
         `${BASE_URL}/${id}/price-difference`
     );
 }
 
-// ================= REPORT =================
-export function getReturnReport() {
-    return requestJson(
-        `${BASE_URL}/manager/report`
-    );
-}
 
-
-export function getAllReturnRequests() {
-    return requestJson(
-        `${BASE_URL}`
-    );
-}
-// ================= IMAGE =================
-
-export function uploadEvidenceImage(file) {
+export async function uploadEvidenceImage(file) {
 
     const formData = new FormData();
 
@@ -197,11 +228,22 @@ export function uploadEvidenceImage(file) {
         file
     );
 
-    return requestJson(
+    const response = await fetch(
         `${BASE_URL}/images/upload`,
         {
             method:"POST",
             body:formData
         }
     );
+    if (!response.ok) {
+
+        const error =
+            await response.json();
+
+        throw new Error(
+            error.message ||
+            "Upload ảnh thất bại"
+        );
+    }
+    return response.json();
 }
