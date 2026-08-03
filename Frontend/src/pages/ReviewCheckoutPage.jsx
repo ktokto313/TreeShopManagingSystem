@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Container } from '../components/global/Container';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -37,7 +37,7 @@ function InfoItem({ label, value }) {
 
 export default function ReviewCheckoutPage() {
   const navigate = useNavigate();
-  const [draft, setDraft] = useState(() => loadCheckoutDraft());
+  const [draft] = useState(() => loadCheckoutDraft());
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);

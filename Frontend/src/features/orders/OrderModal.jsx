@@ -10,6 +10,8 @@ import { AuthContext } from "../../context/AuthContext";
 import useChangeOrderStatus from "./hooks/useChangeOrderStatus";
 import useUpdateOrderAddress from "./hooks/useUpdateOrderAddress";
 import ReviewModal from "../review/components/ReviewModal";
+import OrderDocument from "./OrderDocument";
+import { getOrderDocumentInfo } from "./utils/orderDocumentUtils";
 
 function buildVietQrUrl(orderId, amount) {
   const bankId = import.meta.env.VITE_CHECKOUT_BANK_ID || 'MB';
@@ -47,6 +49,30 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
   const [editingAddressValue, setEditingAddressValue] = useState('');
   const [selectedShipperId, setSelectedShipperId] = useState(null);
 
+  // Print handler
+  const handlePrintOrderDocument = () => {
+    const printContent = document.getElementById('printable-order-document');
+    if (!printContent) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>In Đơn Hàng #ORD-${selectedOrder?.id}</title>
+          <style>
+            body { font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 20px; }
+          </style>
+        </head>
+        <body>${printContent.innerHTML}</body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
   useEffect(() => {
     setSelectedShipperId(null);
     fetchOrderDetail(selectedOrderId);
@@ -83,6 +109,9 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
 
       {!isDetailLoading && !detailError && selectedOrder && (
         <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
+          {/* Hidden document for printing */}
+          <OrderDocument order={selectedOrder} status={selectedOrder.status} />
+
           {/* Status Banner */}
           <div className="rounded-lg bg-interactive/10 p-3 flex items-center justify-between border border-interactive/20">
             <div className="flex gap-2 items-center">
@@ -281,6 +310,16 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
 
           {/* Close / Actions */}
           <div className="flex justify-end gap-3 mt-2">
+            {/* Print button - visible for all statuses except FAILED */}
+            {selectedOrder.status !== "FAILED" && (
+              <Button
+                variant="secondary"
+                className="px-4 py-2"
+                onClick={handlePrintOrderDocument}
+              >
+                {getOrderDocumentInfo(selectedOrder.status).actionLabel}
+              </Button>
+            )}
             <Button variant="secondary" className="px-4 py-2 bg-red-500 hover:bg-red-400 text-white" onClick={onClose}>
               Đóng
             </Button>
@@ -374,18 +413,6 @@ export default function OrderModal({ selectedOrderId, onClose, onOrderChange }) 
                 }}
               >
                 Xác nhận đã nhận hàng hoàn trả
-              </Button>
-            )}
-
-            {selectedOrder.status === "RECEIVED" && user?.role === "MANAGER" && (
-              <Button
-                variant="primary"
-                className="px-4 py-2"
-                onClick={() => {
-                  alert(`Hóa đơn cho Đơn hàng #ORD-${selectedOrder.id} đã được gửi đến máy in!`);
-                }}
-              >
-                In hóa đơn
               </Button>
             )}
 
