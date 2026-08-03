@@ -396,4 +396,13 @@ public class ReturnRequestController {
                 )
         );
     }
+
+    @GetMapping("/{id}/payment-info")
+    public ResponseEntity<?> getPaymentInfo(
+            @PathVariable String id
+    ) {
+        return ResponseEntity.ok(
+                returnRequestService.getPaymentInfo(id)
+        );
+    }
 }

@@ -24,16 +24,6 @@ export default function ManagerReturnRequestPage() {
 
     useEffect(() => {
         load();
-
-        const interval =
-            setInterval(
-                load,
-                5000
-            );
-
-        return () =>
-            clearInterval(interval);
-
     }, []);
 
     async function load() {
@@ -65,6 +55,17 @@ export default function ManagerReturnRequestPage() {
             setLoading(false);
 
         }
+    }
+    function getReasonLabel(reason) {
+
+        const map = {
+            DAMAGED: "Sản phẩm bị hỏng",
+            WRONG_ITEM: "Giao sai sản phẩm",
+            UNHEALTHY: "Sản phẩm không đạt chất lượng",
+            OTHER: "Lý do khác"
+        };
+
+        return map[reason] ?? reason;
     }
 
     async function openDetail(request) {
@@ -184,7 +185,6 @@ export default function ManagerReturnRequestPage() {
                 selected.id
             );
 
-
             alert(
                 "Đã yêu cầu khách hàng bổ sung thông tin"
             );
@@ -192,7 +192,6 @@ export default function ManagerReturnRequestPage() {
             closeDetail();
 
             await load();
-
 
         } catch (error) {
 
@@ -218,7 +217,6 @@ export default function ManagerReturnRequestPage() {
             alert(
                 "Đã xác nhận nhận hàng hoàn trả"
             );
-
 
             await load();
 
@@ -249,7 +247,6 @@ export default function ManagerReturnRequestPage() {
                 "Đã xử lý bước tài chính"
             );
 
-
             await load();
 
 
@@ -259,7 +256,6 @@ export default function ManagerReturnRequestPage() {
                 "PAYMENT ERROR:",
                 error
             );
-
 
             alert(
                 "Không thể xử lý thanh toán"
@@ -274,14 +270,11 @@ export default function ManagerReturnRequestPage() {
                 request.id
             );
 
-
             alert(
                 "Đã hoàn tất yêu cầu"
             );
 
-
             await load();
-
 
         } catch (error) {
 
@@ -346,7 +339,6 @@ export default function ManagerReturnRequestPage() {
                     </button>
                 </div>
 
-
                 {
                     (loadingDetail || loading) && (
 
@@ -360,7 +352,6 @@ export default function ManagerReturnRequestPage() {
 
                     )
                 }
-
 
                 <div className="
                     grid

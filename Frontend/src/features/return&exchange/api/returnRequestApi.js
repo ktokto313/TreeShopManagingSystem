@@ -10,7 +10,6 @@ export function getAvailableOrders(customerId) {
     );
 }
 
-
 export function getOrderItems(orderId) {
 
     return requestJson(
@@ -18,14 +17,12 @@ export function getOrderItems(orderId) {
     );
 }
 
-
 export function getAvailableProducts() {
 
     return requestJson(
         `${BASE_URL}/products`
     );
 }
-
 
 export function createReturnRequest(
     customerId,
@@ -41,7 +38,6 @@ export function createReturnRequest(
     );
 }
 
-
 export function getMyReturnRequests(customerId) {
 
     return requestJson(
@@ -49,14 +45,12 @@ export function getMyReturnRequests(customerId) {
     );
 }
 
-
 export function getApprovedReturnRequests(customerId) {
 
     return requestJson(
         `${BASE_URL}/customer/${customerId}/approved`
     );
 }
-
 
 export function cancelRequest(id) {
 
@@ -68,14 +62,12 @@ export function cancelRequest(id) {
     );
 }
 
-
 export function getPendingRequests() {
 
     return requestJson(
         `${BASE_URL}/pending`
     );
 }
-
 
 export function getManagerRequests() {
 
@@ -90,6 +82,7 @@ export function getAllReturnRequests() {
         BASE_URL
     );
 }
+
 export function getRequestDetail(id) {
 
     return requestJson(
@@ -106,7 +99,6 @@ export function requestMoreInfo(id) {
     );
 }
 
-
 export function updateRequestInfo(
     id,
     data
@@ -120,7 +112,6 @@ export function updateRequestInfo(
         }
     );
 }
-
 
 export function decideRequest(
     id,
@@ -140,7 +131,6 @@ export function decideRequest(
     );
 }
 
-
 export function markReturning(id) {
 
     return requestJson(
@@ -150,7 +140,6 @@ export function markReturning(id) {
         }
     );
 }
-
 
 export function confirmReturn(id) {
 
@@ -162,7 +151,6 @@ export function confirmReturn(id) {
     );
 }
 
-
 export function completePayment(id) {
 
     return requestJson(
@@ -173,7 +161,6 @@ export function completePayment(id) {
     );
 }
 
-
 export function confirmAdditionalPayment(id) {
 
     return requestJson(
@@ -183,7 +170,6 @@ export function confirmAdditionalPayment(id) {
         }
     );
 }
-
 
 export function submitRefundInfo(
     id,
@@ -199,7 +185,6 @@ export function submitRefundInfo(
     );
 }
 
-
 export function completeByManager(id) {
 
     return requestJson(
@@ -210,14 +195,12 @@ export function completeByManager(id) {
     );
 }
 
-
 export function getPriceDifference(id) {
 
     return requestJson(
         `${BASE_URL}/${id}/price-difference`
     );
 }
-
 
 export async function uploadEvidenceImage(file) {
 
@@ -246,4 +229,11 @@ export async function uploadEvidenceImage(file) {
         );
     }
     return response.json();
+}
+
+export function getPaymentInfo(requestId) {
+
+    return requestJson(
+        `${BASE_URL}/${requestId}/payment-info`
+    );
 }

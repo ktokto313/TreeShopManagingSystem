@@ -20,6 +20,59 @@ export default function ReturnRequestCard({
 
     }
 
+    function getReasonLabel(reason) {
+
+        const map = {
+            DAMAGED: "Sản phẩm bị hỏng",
+            WRONG_ITEM: "Giao sai sản phẩm",
+            UNHEALTHY: "Sản phẩm không đạt chất lượng",
+            OTHER: "Lý do khác"
+        };
+
+        return map[reason] ?? reason;
+    }
+
+    function getStatusLabel(status){
+
+        const map = {
+
+            PENDING:
+                "Chờ duyệt",
+
+            WAITING_CUSTOMER_INFO:
+                "Chờ khách hàng bổ sung thông tin",
+
+            APPROVED:
+                "Đã duyệt - Chờ khách gửi hàng",
+
+            REJECTED:
+                "Từ chối",
+
+            RETURNING:
+                "Đang vận chuyển hàng trả",
+
+            RECEIVED:
+                "Shop đã nhận hàng",
+
+            PROCESSING:
+                "Đang xử lý",
+
+            WAITING_PAYMENT:
+                "Chờ khách thanh toán thêm",
+
+            WAITING_BANK_INFO:
+                "Chờ khách cung cấp thông tin ngân hàng",
+
+            COMPLETED:
+                "Hoàn thành",
+
+            FAILED:
+                "Thất bại"
+        };
+
+        return map[status] ?? status;
+    }
+
     return (
 
         <div className="
@@ -56,9 +109,7 @@ export default function ReturnRequestCard({
                 </p>
 
                 <p>
-                    Lý do:
-                    {" "}
-                    {request.reason}
+                    Lý do: {getReasonLabel(request.reason)}
                 </p>
 
                 {
@@ -107,7 +158,7 @@ export default function ReturnRequestCard({
                     text-green-700
                     text-sm
                 ">
-                    {request.status}
+                    {getStatusLabel(request.status)}
                 </span>
 
             </div>

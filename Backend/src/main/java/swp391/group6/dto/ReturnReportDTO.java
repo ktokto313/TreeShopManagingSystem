@@ -8,29 +8,35 @@ public class ReturnReportDTO {
 
     private long completedReturns;
 
+    private long rejectedRequests;
+
     private BigDecimal totalRefundAmount;
 
     private BigDecimal totalAdditionalPayment;
 
     private BigDecimal revenueImpact;
 
+
     public ReturnReportDTO() {
     }
+
+
     public ReturnReportDTO(
             long totalRequests,
             long completedReturns,
+            long rejectedRequests,
             BigDecimal totalRefundAmount,
             BigDecimal totalAdditionalPayment,
             BigDecimal revenueImpact
-    )
-    {
+    ) {
         this.totalRequests = totalRequests;
         this.completedReturns = completedReturns;
+        this.rejectedRequests = rejectedRequests;
         this.totalRefundAmount = totalRefundAmount;
         this.totalAdditionalPayment = totalAdditionalPayment;
         this.revenueImpact = revenueImpact;
-
     }
+
 
     public long getTotalRequests() {
         return totalRequests;
@@ -40,6 +46,7 @@ public class ReturnReportDTO {
         this.totalRequests = totalRequests;
     }
 
+
     public long getCompletedReturns() {
         return completedReturns;
     }
@@ -47,6 +54,16 @@ public class ReturnReportDTO {
     public void setCompletedReturns(long completedReturns) {
         this.completedReturns = completedReturns;
     }
+
+
+    public long getRejectedRequests() {
+        return rejectedRequests;
+    }
+
+    public void setRejectedRequests(long rejectedRequests) {
+        this.rejectedRequests = rejectedRequests;
+    }
+
 
     public BigDecimal getTotalRefundAmount() {
         return totalRefundAmount;
@@ -56,6 +73,7 @@ public class ReturnReportDTO {
         this.totalRefundAmount = totalRefundAmount;
     }
 
+
     public BigDecimal getTotalAdditionalPayment() {
         return totalAdditionalPayment;
     }
@@ -63,6 +81,7 @@ public class ReturnReportDTO {
     public void setTotalAdditionalPayment(BigDecimal totalAdditionalPayment) {
         this.totalAdditionalPayment = totalAdditionalPayment;
     }
+
 
     public BigDecimal getRevenueImpact() {
         return revenueImpact;

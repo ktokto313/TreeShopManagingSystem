@@ -16,13 +16,17 @@ import swp391.group6.dto.ReturnRequestDTO;
 import swp391.group6.dto.ReturnRequestUpdateDTO;
 import swp391.group6.model.*;
 import swp391.group6.repository.*;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -42,6 +46,14 @@ public class ReturnRequestService {
     private final ProductRepository productRepository;
     private final ReturnRequestRepository returnRequestRepository;
     private final NotificationService notificationService;
+    @Value("${checkout.bank-id:${CHECKOUT_BANK_ID:}}")
+    private String bankId;
+    @Value("${checkout.bank-account-no:${CHECKOUT_BANK_ACCOUNT_NO:}}")
+    private String bankAccountNo;
+    @Value("${checkout.bank-account-name:${CHECKOUT_BANK_ACCOUNT_NAME:}}")
+    private String bankAccountName;
+    @Value("${checkout.qr-template:${CHECKOUT_QR_TEMPLATE:compact2}}")
+    private String qrTemplate;
 
     public ReturnRequestService(OrderRepository orderRepository,
                                 ReturnRequestOrderRepository returnOrderRepository,
@@ -78,26 +90,17 @@ public class ReturnRequestService {
                 || reason == ReturnReason.WRONG_ITEM;
     }
 
+    private boolean requiresEvidence(ReturnReason reason) {
+        return reason == ReturnReason.DAMAGED;
+    }
+
     //CREATE REQUEST
     public ReturnRequest submitRequest(String customerId, ReturnRequestDTO dto) {
-
         validateBasic(dto);
 
         Order order = getValidOrder(customerId, dto.getOrderId());
 
-        if (returnRequestRepository.existsByOrder_IdAndStatusNotIn(
-                order.getId(),
-                TERMINAL_STATUSES
-        )) {
-            throw new IllegalStateException(
-                    "Đơn hàng này đã có yêu cầu đổi trả đang xử lý"
-            );
-        }
-
-        validateEvidence(dto);
-
         ReturnRequest request = new ReturnRequest();
-
         request.setOrder(order);
         request.setCustomer(order.getUser());
         request.setReason(dto.getReason());
@@ -105,8 +108,8 @@ public class ReturnRequestService {
         request.setStatus(ReturnStatus.PENDING);
 
         request.setItems(new ArrayList<>());
-        request.setEvidences(new ArrayList<>());
         request.setExchangeProducts(new ArrayList<>());
+        request.setEvidences(new ArrayList<>());
 
         buildReturnItems(request, order, dto);
 
@@ -115,6 +118,8 @@ public class ReturnRequestService {
         }
 
         buildEvidence(request, dto);
+
+        validateEvidence(request);
 
         BigDecimal returnedValue = calculateReturnedValue(request);
 
@@ -126,9 +131,9 @@ public class ReturnRequestService {
             request.setPriceDifference(BigDecimal.ZERO);
             request.setAdditionalPayment(BigDecimal.ZERO);
 
-        }
-        // EXCHANGE
-        else {
+        } else {
+            // EXCHANGE
+
             BigDecimal exchangeValue =
                     calculateExchangeValue(request.getExchangeProducts());
 
@@ -216,15 +221,16 @@ public class ReturnRequestService {
         return order;
     }
 
-    private void validateEvidence(ReturnRequestDTO dto) {
-        if (isShopResponsibleReason(dto.getReason())) {
-            int count =
-                    dto.getEvidenceImageUrls() == null
-                            ? 0
-                            : dto.getEvidenceImageUrls().size();
+    private void validateEvidence(ReturnRequest request) {
+        if (requiresEvidence(request.getReason())) {
+
+            int count = request.getEvidences() == null
+                    ? 0
+                    : request.getEvidences().size();
+
             if (count < MIN_DAMAGED_EVIDENCE_COUNT) {
                 throw new IllegalArgumentException(
-                        "Lý do sản phẩm lỗi yêu cầu ít nhất 2 hình ảnh bằng chứng"
+                        "Lý do này yêu cầu ít nhất 2 hình ảnh bằng chứng"
                 );
             }
         }
@@ -782,23 +788,21 @@ public class ReturnRequestService {
         orderRepository.save(newOrder);
     }
 
-    //CUSTOMER REQUEST HISTORY
     public List<ReturnRequest> getCustomerRequests(String customerId) {
-
-        return returnRequestRepository.findByCustomer_Id(
-                Long.parseLong(customerId)
-        );
+        return returnRequestRepository
+                .findByCustomer_IdOrderByCreatedAtDesc(Long.parseLong(customerId));
     }
 
     public List<ReturnRequest> getApprovedRequests(String customerId) {
 
-        return returnRequestRepository.findByCustomer_Id(
-                        Long.parseLong(customerId)
-                )
-                .stream()
-                .filter(r -> r.getStatus() != ReturnStatus.REJECTED &&
-                        r.getStatus() != ReturnStatus.COMPLETED)
-                .toList();
+        return returnRequestRepository
+                .findByCustomer_IdAndStatusNotInOrderByCreatedAtDesc(
+                        Long.parseLong(customerId),
+                        List.of(
+                                ReturnStatus.REJECTED,
+                                ReturnStatus.COMPLETED
+                        )
+                );
     }
 
     //MANAGER REPORT
@@ -808,6 +812,10 @@ public class ReturnRequestService {
 
         long completedReturns = returnRequestRepository.countByStatus(
                 ReturnStatus.COMPLETED
+        );
+
+        long rejectedRequests = returnRequestRepository.countByStatus(
+                ReturnStatus.REJECTED
         );
 
         BigDecimal refundAmount =
@@ -833,6 +841,7 @@ public class ReturnRequestService {
         return new ReturnReportDTO(
                 totalRequests,
                 completedReturns,
+                rejectedRequests,
                 refundAmount,
                 additionalPayment,
                 revenueImpact
@@ -907,5 +916,91 @@ public class ReturnRequestService {
                 "RETURN_COMPLETED_CUSTOMER",
                 request.getId()
         );
+    }
+    private String buildPaymentQrUrl(
+            BigDecimal amount,
+            String transferContent
+    ) {
+
+        String money = amount
+                .stripTrailingZeros()
+                .toPlainString();
+
+        return "https://img.vietqr.io/image/"
+                + encodePath(bankId.trim())
+                + "-"
+                + encodePath(bankAccountNo.trim())
+                + "-"
+                + encodePath(qrTemplate.trim())
+                + ".png?amount="
+                + encodeQuery(money)
+                + "&addInfo="
+                + encodeQuery(transferContent)
+                + "&accountName="
+                + encodeQuery(bankAccountName.trim());
+    }
+    private String encodeQuery(String value) {
+        return URLEncoder.encode(
+                value,
+                StandardCharsets.UTF_8
+        );
+    }
+
+
+    private String encodePath(String value) {
+        return encodeQuery(value)
+                .replace("+", "%20");
+    }
+
+    public Map<String, Object> getPaymentInfo(String requestId) {
+
+        ReturnRequest request = returnRequestRepository.findById(requestId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Return request not found"
+                        )
+                );
+
+        BigDecimal amount = request.getAdditionalPayment();
+
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException(
+                    "No additional payment required."
+            );
+        }
+
+        String transferContent = "TS_RETURN_" + request.getId();
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put(
+                "additionalPayment",
+                amount
+        );
+
+        response.put(
+                "qrImageUrl",
+                buildPaymentQrUrl(
+                        amount,
+                        transferContent
+                )
+        );
+
+        response.put(
+                "bankAccountNumber",
+                bankAccountNo
+        );
+
+        response.put(
+                "bankAccountName",
+                bankAccountName
+        );
+
+        response.put(
+                "transferContent",
+                transferContent
+        );
+
+        return response;
     }
 }

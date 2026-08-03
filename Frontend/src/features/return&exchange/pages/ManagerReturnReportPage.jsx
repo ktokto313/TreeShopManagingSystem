@@ -82,28 +82,34 @@ export default function ManagerReturnReportPage() {
             </section>
             <Container
                 className="
-                    py-10
-                    grid
-                    grid-cols-1
-                    md:grid-cols-3
-                    gap-5
-                "
+        py-10
+        grid
+        grid-cols-1
+        md:grid-cols-3
+        gap-5
+    "
             >
                 <ReportCard
                     title="Tổng yêu cầu"
-
                     value={
                         report?.totalRequests
                     }
-
                 />
+
                 <ReportCard
                     title="Đã hoàn thành"
                     value={
                         report?.completedReturns
                     }
-
                 />
+
+                <ReportCard
+                    title="Đã từ chối"
+                    value={
+                        report?.rejectedRequests
+                    }
+                />
+
                 <ReportCard
                     title="Tổng tiền hoàn khách"
                     value={
@@ -111,8 +117,8 @@ export default function ManagerReturnReportPage() {
                             report?.totalRefundAmount
                         )
                     }
-
                 />
+
                 <ReportCard
                     title="Khách trả thêm"
                     value={
@@ -121,6 +127,7 @@ export default function ManagerReturnReportPage() {
                         )
                     }
                 />
+
                 <ReportCard
                     title="Ảnh hưởng doanh thu"
                     value={
@@ -128,7 +135,6 @@ export default function ManagerReturnReportPage() {
                             report?.revenueImpact
                         )
                     }
-
                 />
             </Container>
         </main>

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { confirmAdditionalPayment } from "../api/returnRequestApi";
+import { useEffect, useState } from "react";
+import {confirmAdditionalPayment, getPaymentInfo } from "../api/returnRequestApi";
 
 export default function PaymentModal({
                                          request,
@@ -9,13 +9,14 @@ export default function PaymentModal({
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [paymentInfo, setPaymentInfo] = useState(null);
+    const [loadingInfo, setLoadingInfo] = useState(true);
     const returnedValue = calculateReturnedValue();
     const exchangeValue = calculateExchangeValue();
     const additionalPayment =
-        Math.max(exchangeValue - returnedValue, 0);
+        Number(request?.additionalPayment || 0);
     const isPayable =
         request?.status === "WAITING_PAYMENT";
-
 
     function formatCurrency(amount) {
 
@@ -25,6 +26,12 @@ export default function PaymentModal({
     }
 
     function calculateReturnedValue() {
+
+        const rate =
+            request?.reason === "DAMAGED" ||
+            request?.reason === "WRONG_ITEM"
+                ? 1
+                : 0.85;
 
         return request?.items?.reduce(
             (total, item) => {
@@ -37,7 +44,7 @@ export default function PaymentModal({
                 return total +
                     price *
                     Number(item.quantity || 0) *
-                    0.85;
+                    rate;
 
             },
             0
@@ -62,6 +69,42 @@ export default function PaymentModal({
             0
         ) || 0;
     }
+
+    useEffect(() => {
+
+        const loadPaymentInfo = async () => {
+
+            try {
+
+                setLoadingInfo(true);
+                setPaymentInfo(null);
+                setError("");
+
+                const data =
+                    await getPaymentInfo(request.id);
+
+                setPaymentInfo(data);
+
+            } catch (error) {
+
+                console.error(error);
+
+                setError(
+                    "Không thể tải thông tin thanh toán"
+                );
+
+            } finally {
+
+                setLoadingInfo(false);
+
+            }
+        };
+
+        if (request?.id) {
+            loadPaymentInfo();
+        }
+
+    }, [request?.id]);
 
     async function handlePay() {
 
@@ -114,7 +157,9 @@ export default function PaymentModal({
                 bg-white
                 p-6
                 rounded-xl
-                w-[420px]
+                w-[480px]
+                max-h-[75vh]
+                overflow-y-auto
                 space-y-4
             ">
 
@@ -133,7 +178,7 @@ export default function PaymentModal({
                 ">
 
                     <div className="
-                            flex justify-between
+                        flex justify-between
                     ">
 
                         <span>
@@ -141,13 +186,13 @@ export default function PaymentModal({
                         </span>
 
                         <span className="
-                                text-green-600
+                            text-green-600
                         ">
-                        {
-                        formatCurrency(
-                            returnedValue
-                        )
-                        } VND
+                            - {
+                                formatCurrency(
+                                    returnedValue
+                                )
+                            } VND
                         </span>
 
                     </div>
@@ -161,12 +206,12 @@ export default function PaymentModal({
                         </span>
 
                         <span>
-                    {
-                        formatCurrency(
-                            exchangeValue
-                        )
-                    } VND
-                    </span>
+                            {
+                                formatCurrency(
+                                    exchangeValue
+                                )
+                            } VND
+                        </span>
 
                     </div>
 
@@ -185,7 +230,6 @@ export default function PaymentModal({
                         <span className="
                             text-red-500
                         ">
-
                             {
                                 formatCurrency(
                                     additionalPayment
@@ -194,6 +238,71 @@ export default function PaymentModal({
                         </span>
                     </div>
                 </div>
+
+                {
+                    loadingInfo ? (
+
+                        <p className="
+                            text-center
+                        ">
+                            Đang tải QR thanh toán...
+                        </p>
+
+                    ) : paymentInfo?.qrImageUrl && (
+
+                        <div className="
+                            bg-gray-50
+                            rounded-lg
+                            p-4
+                            space-y-3
+                            text-center
+                        ">
+                            <p className="
+                                font-semibold
+                            ">
+                                Quét QR để thanh toán
+                            </p>
+
+                            <img
+                                src={paymentInfo.qrImageUrl}
+                                alt="Payment QR"
+                                className="
+                                    w-52
+                                    h-52
+                                    mx-auto
+                                "
+                            />
+                            <p>
+                                Tên tài khoản
+                                <b>
+                                    {" "}
+                                    {
+                                        paymentInfo.bankAccountName
+                                    }
+                                </b>
+                            </p>
+                            <p>
+                                Số tài khoản:
+                                <b>
+                                    {" "}
+                                    {
+                                        paymentInfo.bankAccountNumber
+                                    }
+                                </b>
+                            </p>
+
+                            <p>
+                                Nội dung:
+                                <b>
+                                    {" "}
+                                    {
+                                        paymentInfo.transferContent
+                                    }
+                                </b>
+                            </p>
+                        </div>
+                    )
+                }
 
                 {
                     error && (
@@ -245,7 +354,6 @@ export default function PaymentModal({
                         Hủy
                     </button>
                 </div>
-
             </div>
         </div>
     );

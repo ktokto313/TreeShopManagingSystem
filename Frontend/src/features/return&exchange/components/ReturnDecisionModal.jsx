@@ -24,6 +24,18 @@ export default function ReturnDecisionModal({
             .format(Number(amount || 0));
     }
 
+    function getReasonLabel(reason) {
+
+        const map = {
+            DAMAGED: "Sản phẩm bị hỏng",
+            WRONG_ITEM: "Giao sai sản phẩm",
+            UNHEALTHY: "Sản phẩm không đạt chất lượng",
+            OTHER: "Lý do khác"
+        };
+
+        return map[reason] ?? reason;
+    }
+
     function handleReject() {
         const trimmed = reason.trim();
         if (!trimmed) {
@@ -119,9 +131,7 @@ export default function ReturnDecisionModal({
 
 
                     <p>
-                        Lý do:
-                        {" "}
-                        {request?.reason}
+                        Lý do: {getReasonLabel(request.reason)}
                     </p>
 
 

@@ -13,49 +13,27 @@ import java.util.Optional;
 public interface ReturnRequestRepository
         extends JpaRepository<ReturnRequest, String> {
 
+    List<ReturnRequest> findByCustomer_IdOrderByCreatedAtDesc(
+            Long customerId
+    );
+
+    List<ReturnRequest> findByCustomer_IdAndStatusNotInOrderByCreatedAtDesc(
+            Long customerId,
+            List<ReturnStatus> statuses
+    );
 
     List<ReturnRequest> findByStatus(
             ReturnStatus status
     );
 
-
-    List<ReturnRequest> findByCustomer_Id(
-            Long customerId
-    );
-
-
-    List<ReturnRequest> findByCustomer_IdAndStatus(
-            Long customerId,
-            ReturnStatus status
-    );
-
-
     List<ReturnRequest> findByStatusIn(
             List<ReturnStatus> statuses
     );
-
 
     long countByStatus(
             ReturnStatus status
     );
 
-    boolean existsByOrder_IdAndStatusNotIn(
-            Long orderId,
-            List<ReturnStatus> statuses
-    );
-
-    @Query("""
-        SELECT COUNT(i) > 0
-        FROM ReturnRequestItem i
-        JOIN i.returnRequest r
-        WHERE r.order.id = :orderId
-        AND i.orderDetail.id.productId = :productId
-        AND r.status = swp391.group6.model.ReturnStatus.COMPLETED
-    """)
-    boolean existsCompletedReturnForProduct(
-            @Param("orderId") Long orderId,
-            @Param("productId") Long productId
-    );
 
     @Query("""
         SELECT COALESCE(SUM(i.quantity),0)
@@ -84,7 +62,6 @@ public interface ReturnRequestRepository
             @Param("statuses") List<ReturnStatus> statuses
     );
 
-
     @Query("""
         SELECT COALESCE(SUM(r.refundAmount), 0)
         FROM ReturnRequest r
@@ -93,7 +70,6 @@ public interface ReturnRequestRepository
     BigDecimal sumRefundAmountByStatus(
             @Param("status") ReturnStatus status
     );
-
 
     @Query("""
         SELECT COALESCE(SUM(r.additionalPayment), 0)
@@ -105,15 +81,15 @@ public interface ReturnRequestRepository
     );
 
     @Query("""
-    SELECT DISTINCT r
-    FROM ReturnRequest r
-    LEFT JOIN FETCH r.items i
-    LEFT JOIN FETCH i.orderDetail od
-    LEFT JOIN FETCH od.product
-    LEFT JOIN FETCH r.order
-    LEFT JOIN FETCH r.customer
-    WHERE r.id = :id
-""")
+        SELECT DISTINCT r
+        FROM ReturnRequest r
+        LEFT JOIN FETCH r.items i
+        LEFT JOIN FETCH i.orderDetail od
+        LEFT JOIN FETCH od.product
+        LEFT JOIN FETCH r.order
+        LEFT JOIN FETCH r.customer
+        WHERE r.id = :id
+    """)
     Optional<ReturnRequest> findDetailById(
             @Param("id") String id
     );
