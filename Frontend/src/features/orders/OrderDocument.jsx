@@ -1,4 +1,3 @@
-import React from 'react';
 import { formatCurrency, formatDate, normalizeOrderDocument, getOrderDocumentInfo } from './utils/orderDocumentUtils';
 
 // CSS cho in ấn - chỉ hiện #printable-order-document
