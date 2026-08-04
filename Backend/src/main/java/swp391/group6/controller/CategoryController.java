@@ -64,7 +64,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'MANAGER')")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         boolean result = categoryService.deleteCategory(id);
         if (!result) {
