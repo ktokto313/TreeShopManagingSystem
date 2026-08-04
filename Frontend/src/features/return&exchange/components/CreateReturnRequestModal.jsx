@@ -78,10 +78,21 @@ export default function CreateReturnRequestModal({
 
         if (
             returnType === "EXCHANGE"
-            &&
-            exchangeProducts.length === 0
         ) {
-            return "Vui lòng chọn sản phẩm muốn đổi.";
+
+            if (exchangeProducts.length === 0) {
+                return "Vui lòng chọn sản phẩm muốn đổi.";
+            }
+
+            if (
+                exchangeProducts.some(
+                    item =>
+                        !item.productId ||
+                        item.quantity <= 0
+                )
+            ) {
+                return "Vui lòng chọn đầy đủ sản phẩm đổi.";
+            }
         }
 
         return "";

@@ -23,7 +23,10 @@ export default function ExchangeProductSelector({
         setProducts([
             ...products,
             {
-                productId: "",
+                productId:
+                    availableProducts.length > 0
+                        ? String(availableProducts[0].id)
+                        : "",
                 quantity: 1
             }
         ]);
@@ -94,7 +97,6 @@ export default function ExchangeProductSelector({
                             "
                         >
 
-
                             <select
 
                                 value={item.productId}
@@ -124,7 +126,7 @@ export default function ExchangeProductSelector({
 
                                             <option
                                                 key={product.id}
-                                                value={product.id}
+                                                value={String(product.id)}
                                             >
                                                 {
                                                     product.name
@@ -177,13 +179,13 @@ export default function ExchangeProductSelector({
                     type="button"
                     onClick={addProduct}
                     className="
-            px-4 py-2
-            rounded-lg
-            bg-green-500
-            text-white
-            hover:bg-green-600
-            transition
-        "
+                        px-4 py-2
+                        rounded-lg
+                        bg-green-500
+                        text-white
+                        hover:bg-green-600
+                        transition
+                    "
                 >
                     + Thêm sản phẩm đổi
                 </button>
